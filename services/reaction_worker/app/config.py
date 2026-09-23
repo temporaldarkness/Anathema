@@ -1,0 +1,12 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+
+KAFKA_GROUP_REACTION_WORKER = os.getenv("KAFKA_GROUP_REACTION_WORKER")
+
+KAFKA_TOPIC_RAW_MESSAGES = os.getenv("KAFKA_TOPIC_RAW_MESSAGES")
+
+MEMORY_SERVICE_URL = os.getenv("MEMORY_SERVICE_URL")
