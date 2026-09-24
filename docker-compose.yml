@@ -7,6 +7,8 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes
     restart: unless-stopped
+    networks:
+      - anathema_network
   
   postgres:
     image: postgres:15-alpine
@@ -19,6 +21,8 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - anathema_network
   
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -27,27 +31,41 @@ services:
     ports:
       - "9092:9092"
       - "9093:9093"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     environment:
         KAFKA_NODE_ID: 1
         KAFKA_PROCESS_ROLES: broker,controller
+        CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
         KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+        
         KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-        KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
         KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+        KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+        
         KAFKA_LOG_DIRS: /var/lib/kafka/data
+        
         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
         KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+        KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+        KAFKA_MIN_INSYNC_REPLICAS: 1
+        
         KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-        CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
     volumes:
       - kafka_data:/var/lib/kafka/data
     restart: unless-stopped
+    networks:
+      - anathema_network
   
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
@@ -62,9 +80,11 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - anathema_network
 
   minio-init:
-    image: minio/mc:latest
+    image: quay.io/minio/mc:latest
     depends_on:
       - minio
     entrypoint: >
@@ -78,6 +98,213 @@ services:
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    networks:
+      - anathema_network
+
+  memory_service:
+    build: ./services/memory_service
+    container_name: memory_service
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_TOPIC_CACHE_INVALIDATION: ${KAFKA_TOPIC_CACHE_INVALIDATION}
+      MEMORY_CACHE_TTL_SECONDS: ${MEMORY_CACHE_TTL_SECONDS}
+      REDIS_URL: ${REDIS_URL}
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  message_history:
+    build: ./services/message_history
+    container_name: message_history
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      REDIS_URL: ${REDIS_URL}
+      HISTORY_CACHE_LIMIT: ${HISTORY_CACHE_LIMIT}
+      REDIS_HISTORY_PREFIX: ${REDIS_HISTORY_PREFIX}
+      KAFKA_GROUP_MESSAGE_HISTORY: ${KAFKA_GROUP_MESSAGE_HISTORY}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_TOPIC_RAW_MESSAGES: ${KAFKA_TOPIC_RAW_MESSAGES}
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  storage_service:
+    build: ./services/storage_service
+    container_name: storage_service
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_SECURE: ${MINIO_SECURE}
+      MINIO_HOST: ${MINIO_HOST}
+      MINIO_PORT: ${MINIO_PORT}
+    depends_on:
+      minio:
+        condition: service_started
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  security_service:
+    build: ./services/security_service
+    container_name: security_service
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      SUPERUSER_ID: ${SUPERUSER_ID}
+      REDIS_URL: ${REDIS_URL}
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  ai_worker:
+    build: ./services/ai_worker
+    container_name: ai_worker
+    environment:
+      PROXY_API_KEY: ${PROXY_API_KEY}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_GROUP_AI_WORKER: ${KAFKA_GROUP_AI_WORKER}
+      KAFKA_TOPIC_AI_REQUESTS: ${KAFKA_TOPIC_AI_REQUESTS}
+      KAFKA_TOPIC_AI_RESPONSES: ${KAFKA_TOPIC_AI_RESPONSES}
+      MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
+      MESSAGE_HISTORY_SERVICE_URL: ${MESSAGE_HISTORY_SERVICE_URL}
+    depends_on:
+      memory_service:
+        condition: service_started
+      message_history:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  image_worker:
+    build: ./services/image_worker
+    container_name: image_worker
+    environment:
+      PROXY_API_KEY: ${PROXY_API_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_SECURE: ${MINIO_SECURE}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_GROUP_IMAGE_WORKER: ${KAFKA_GROUP_IMAGE_WORKER}
+      KAFKA_TOPIC_IMAGE_RESPONSES: ${KAFKA_TOPIC_IMAGE_RESPONSES}
+      KAFKA_TOPIC_IMAGE_REQUESTS: ${KAFKA_TOPIC_IMAGE_REQUESTS}
+      STORAGE_SERVICE_URL: ${STORAGE_SERVICE_URL}
+    depends_on:
+      storage_service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  reaction_worker:
+    build: ./services/reaction_worker
+    container_name: reaction_worker
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_GROUP_REACTION_WORKER: ${KAFKA_GROUP_REACTION_WORKER}
+      KAFKA_TOPIC_RAW_MESSAGES: ${KAFKA_TOPIC_RAW_MESSAGES}
+      MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
+    depends_on:
+      memory_service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  admin_service:
+    build: ./services/admin_service
+    container_name: admin_service
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_TOPIC_ADMIN_COMMANDS: ${KAFKA_TOPIC_ADMIN_COMMANDS}
+      KAFKA_TOPIC_ADMIN_RESPONSES: ${KAFKA_TOPIC_ADMIN_RESPONSES}
+      KAFKA_GROUP_ADMIN_SERVICE: ${KAFKA_GROUP_ADMIN_SERVICE}
+      MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
+      SECURITY_SERVICE_URL: ${SECURITY_SERVICE_URL}
+    depends_on:
+      memory_service:
+        condition: service_started
+      security_service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  gateway:
+    build: ./services/gateway
+    container_name: gateway
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      REDIS_URL: ${REDIS_URL}
+      REDIS_PENDING_AI_PREFIX: ${REDIS_PENDING_AI_PREFIX}
+      REDIS_PENDING_IMAGE_PREFIX: ${REDIS_PENDING_IMAGE_PREFIX}
+      REDIS_PENDING_ADMIN_PREFIX: ${REDIS_PENDING_ADMIN_PREFIX}
+      PENDING_TTL_SECONDS: ${PENDING_TTL_SECONDS}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_GROUP_GATEWAY: ${KAFKA_GROUP_GATEWAY}
+      KAFKA_TOPIC_AI_REQUESTS: ${KAFKA_TOPIC_AI_REQUESTS}
+      KAFKA_TOPIC_AI_RESPONSES: ${KAFKA_TOPIC_AI_RESPONSES}
+      KAFKA_TOPIC_IMAGE_REQUESTS: ${KAFKA_TOPIC_IMAGE_REQUESTS}
+      KAFKA_TOPIC_IMAGE_RESPONSES: ${KAFKA_TOPIC_IMAGE_RESPONSES}
+      KAFKA_TOPIC_ADMIN_COMMANDS: ${KAFKA_TOPIC_ADMIN_COMMANDS}
+      KAFKA_TOPIC_ADMIN_RESPONSES: ${KAFKA_TOPIC_ADMIN_RESPONSES}
+      KAFKA_TOPIC_RAW_MESSAGES: ${KAFKA_TOPIC_RAW_MESSAGES}
+      KAFKA_TOPIC_REACTION_COMMANDS: ${KAFKA_TOPIC_REACTION_COMMANDS}
+      STORAGE_SERVICE_URL: ${STORAGE_SERVICE_URL}
+      MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
+    depends_on:
+      memory_service:
+        condition: service_started
+      storage_service:
+        condition: service_started
+      security_service:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+networks:
+  anathema_network:
+    driver: bridge
 
 volumes:
   redis_data:
