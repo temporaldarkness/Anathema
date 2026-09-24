@@ -1,11 +1,14 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
 from fastapi.responses import Response
 from .storage import save_file, get_file, delete_file
+from .auth import verify_api_key
 import logging
+from .middleware import AuthAndLogMiddleware
 
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Anathema Storage Service")
+app.add_middleware(AuthAndLogMiddleware)
 
 @app.post("/upload")
 async def upload_file_endpoint(file: UploadFile = File(...)):

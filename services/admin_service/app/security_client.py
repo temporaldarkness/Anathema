@@ -1,12 +1,16 @@
 import httpx
 import logging
-from .config import SECURITY_SERVICE_URL
+from .config import SECURITY_SERVICE_URL, ADMIN_SECURITY_CLIENT_KEY
 
 logger = logging.getLogger(__name__)
 
 class SecurityClient:
     def __init__(self):
-        self.client = httpx.AsyncClient(timeout=5.0, base_url=SECURITY_SERVICE_URL)
+        self.client = httpx.AsyncClient(
+            timeout=5.0, 
+            base_url=SECURITY_SERVICE_URL,
+            headers={"X-API-Key": ADMIN_SECURITY_CLIENT_KEY}
+        )
     
     async def check_permission(self, guild_id: int, user_id: int, user_uid: str, permission: str) -> bool:
         resp = await self.client.post("/check", json={

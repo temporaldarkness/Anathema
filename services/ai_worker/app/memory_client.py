@@ -1,9 +1,13 @@
 import httpx
-from .config import MEMORY_SERVICE_URL
+from .config import MEMORY_SERVICE_URL, AIWORKER_MEMORY_CLIENT_KEY
 
 class MemoryClient:
     def __init__(self):
-        self.client = httpx.AsyncClient(timeout=10.0, base_url=MEMORY_SERVICE_URL)
+        self.client = httpx.AsyncClient(
+            timeout=10.0, 
+            base_url=MEMORY_SERVICE_URL,
+            headers={"X-API-Key": AIWORKER_MEMORY_CLIENT_KEY}
+        )
     
     async def add_ltm_fact(self, fact: str):
         resp = await self.client.post("/ltm", json={"fact": fact})

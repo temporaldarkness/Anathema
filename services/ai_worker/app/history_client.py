@@ -1,12 +1,16 @@
 import httpx
 import logging
-from .config import MESSAGE_HISTORY_SERVICE_URL
+from .config import MESSAGE_HISTORY_SERVICE_URL, AIWORKER_HISTORY_CLIENT_KEY
 
 logger = logging.getLogger(__name__)
 
 class HistoryClient:
     def __init__(self):
-        self.client = httpx.AsyncClient(timeout=10.0, base_url=MESSAGE_HISTORY_SERVICE_URL)
+        self.client = httpx.AsyncClient(
+            timeout=10.0, 
+            base_url=MESSAGE_HISTORY_SERVICE_URL,
+            headers={"X-API-Key": AIWORKER_HISTORY_CLIENT_KEY}
+        )
     
     async def get_channel_history(self, channel_id: int, limit: int = 50):
         try:

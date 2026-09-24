@@ -5,6 +5,7 @@ from .db import init_db, close_db
 from .redis_client import close_redis
 from .kafka_consumer import start_consumer, stop_consumer
 from .api import router
+from .middleware import AuthAndLogMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,6 +18,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Anathema Message History Service", lifespan=lifespan)
 app.include_router(router)
+app.add_middleware(AuthAndLogMiddleware)
 
 @app.get("/health")
 async def health():

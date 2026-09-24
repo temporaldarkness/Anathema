@@ -1,12 +1,16 @@
 import httpx
 import logging
-from .config import MEMORY_SERVICE_URL
+from .config import MEMORY_SERVICE_URL, ADMIN_MEMORY_CLIENT_KEY
 
 logger = logging.getLogger(__name__)
 
 class MemoryClient:
     def __init__(self):
-        self.client = httpx.AsyncClient(timeout=10.0, base_url=MEMORY_SERVICE_URL)
+        self.client = httpx.AsyncClient(
+            timeout=10.0, 
+            base_url=MEMORY_SERVICE_URL, 
+            headers={"X-API-Key": ADMIN_MEMORY_CLIENT_KEY}
+        )
     
     async def get_setting(self, key: str):
         resp = await self.client.get(f"/settings/{key}")

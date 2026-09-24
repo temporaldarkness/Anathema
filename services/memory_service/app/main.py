@@ -12,6 +12,8 @@ from .crud_settings import get_settings, get_setting, upsert_setting, delete_set
 from .crud_user_reactions import get_user_reactions, add_user_reaction, delete_user_reaction
 from .crud_users import get_users, get_user, get_user_discord, upsert_user, delete_user
 from .config import DEFAULT_SETTINGS, MEMORY_CACHE_TTL_SECONDS
+from .auth import verify_api_key
+from .middleware import AuthAndLogMiddleware
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -21,6 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Anathema Memory Service")
+app.add_middleware(AuthAndLogMiddleware)
 
 @app.on_event("startup")
 async def startup():

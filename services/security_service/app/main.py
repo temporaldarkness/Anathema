@@ -1,8 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from .security import check_permission, close
+from .auth import verify_api_key
+from .middleware import AuthAndLogMiddleware
 
 app = FastAPI(title="Anathema Security Service")
+app.add_middleware(AuthAndLogMiddleware)
 
 class PermissionRequest(BaseModel):
     guild_id: int

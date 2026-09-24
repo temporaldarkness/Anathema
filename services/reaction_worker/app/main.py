@@ -1,5 +1,4 @@
 import asyncio
-import httpx
 import logging
 from .memory_client import MemoryClient
 from .reaction_checker import ReactionChecker
@@ -24,21 +23,13 @@ async def handle_message(data):
     content = data.get("content", "")
     username = data.get("username", "")
     
-    user_uid = await get_user_uid_by_discord_id(user_id)
+    user_uid = await memory.get_user_uid_by_discord_id(user_id)
     if not user_uid:
         return
     
     reactions = checker.check_message(content, user_uid)
     for emoji_source, emoji_uid in reactions:
         await producer.send_add_reaction(channel_id, int(message_id), emoji_source)
-
-async def get_user_uid_by_discord_id(discord_id: int):
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{memory.client.base_url}/users/discord/{discord_id}")
-        if resp.status_code == 200:
-            user = resp.json()
-            return user.get("uid")
-    return None
 
 async def main():
     await memory.start()
