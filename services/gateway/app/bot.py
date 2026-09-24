@@ -169,7 +169,7 @@ class DiscordBot(commands.Bot):
         user_data = await self.memory.get_user_by_discord_id(interaction.user.id)
         channel_data = await self.memory.get_channel_by_discord_id(interaction.channel_id)
         
-        await self.redis.setex(f"{REDIS_PENDING_IMAGE_PREFIX}{correlation_id}", PENDING_TTL_SECONDS, f"{followup.id}:{followup.token}")
+        await self.redis.setex(f"{REDIS_PENDING_AI_PREFIX}{correlation_id}", PENDING_TTL_SECONDS, f"{followup.id}:{followup.token}")
         
         await self.producer.send_ai_request(
             correlation_id=correlation_id,
