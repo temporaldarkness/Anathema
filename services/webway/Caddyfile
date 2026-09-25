@@ -1,0 +1,15 @@
+:80 {
+    handle /auth/* {
+        reverse_proxy webway_backend:8000
+    }
+
+    handle /api/* {
+        reverse_proxy webway_backend:8000
+    }
+
+    handle {
+        reverse_proxy webway_frontend:3000
+    }
+
+    encode gzip
+}

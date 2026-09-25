@@ -58,7 +58,7 @@ async def edit_image(prompt: str, images_bytes: list[bytes], n: int = 2, size: s
     
     async with httpx.AsyncClient(timeout=httpx.Timeout(600.0, connect=10.0)) as client:
         try:
-            logger.info(f'Sending edit request: {size=} {n=}, {len(prompt)=}')
+            logger.info(f'Sending edit request: {size=} {n=} {quality=}, {len(prompt)=}')
             resp = await client.post(
                 f"https://api.proxyapi.ru/openai/v1/images/edits",
                 data = data,

@@ -1,7 +1,7 @@
 import httpx
 import asyncio
 import logging
-from .config import MEMORY_SERVICE_URL, REACTIONWORKER_MEMORY_CLIENT_KEY
+from .config import MEMORY_SERVICE_URL, REACTIONWORKER_MEMORY_CLIENT_KEY, REACTIONWORKER_AUTOUPDATE_INTERVAL
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class MemoryClient:
         self.keywords = []
         self.user_reactions = []
         self.emotes = {}
-        self.update_interval = 60
+        self.update_interval = REACTIONWORKER_AUTOUPDATE_INTERVAL
         self._update_task = None
         self.users_by_discord = {}
     
@@ -35,7 +35,15 @@ class MemoryClient:
         resp = await self.client.get("/emotes")
         resp.raise_for_status()
         data = resp.json()
-        self.emotes = {item['uid']: item['source'] for item in data}
+        if not isinstance(data, list):
+            logger.warning(f"Unexpected /emotes response: {data}")
+            self.emotes = {}
+            return
+        self.emotes = {
+            item["uid"]: item["source"]
+            for item in data
+            if isinstance(item, dict) and "uid" in item and "source" in item
+        }
     
     async def update_cache(self):
         await self.fetch_keywords()

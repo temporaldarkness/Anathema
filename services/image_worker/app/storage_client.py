@@ -1,5 +1,6 @@
 import httpx
 from .config import STORAGE_SERVICE_URL, IMAGEWORKER_STORAGE_CLIENT_KEY
+import json
 
 class StorageClient:
     def __init__(self):
@@ -9,10 +10,12 @@ class StorageClient:
             headers={"X-API-Key": IMAGEWORKER_STORAGE_CLIENT_KEY}
         )
     
-    
-    async def upload_file(self, data: bytes, content_type: str = "image/png") -> str:
+    async def upload_file(self, data: bytes, content_type: str = "image/png", metadata: dict | None = None) -> str:
         files = {"file": ("image.png", data, content_type)}
-        resp = await self.client.post(f"/upload", files=files)
+        form = {}
+        if metadata:
+            form["metadata"] = json.dumps(metadata)
+        resp = await self.client.post("/upload", files=files, data=form)
         resp.raise_for_status()
         return resp.json()["file_id"]
     

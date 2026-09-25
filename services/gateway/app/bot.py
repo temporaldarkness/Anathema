@@ -4,6 +4,7 @@ import io
 from discord.ext import commands
 from discord import app_commands
 import asyncio
+from datetime import datetime, timezone
 from .memory_client import MemoryClient
 from .storage_client import StorageClient
 from .kafka_producer import KafkaProducer
@@ -37,6 +38,10 @@ class DiscordBot(commands.Bot):
     
     async def setup_hook(self):
         self.redis = await redis.from_url(REDIS_URL, decode_responses=True)
+        await self.redis.set(
+            "bot:boot_time",
+            datetime.now(timezone.utc).isoformat(),
+        )
         await self.producer.start()
         await self.ai_response_consumer.start()
         await self.reaction_command_consumer.start()
@@ -55,6 +60,16 @@ class DiscordBot(commands.Bot):
         async def revelation(interaction: discord.Interaction, вопрос: str):
             await self._revelation(interaction, вопрос)
         
+        @app_commands.choices(качество=[
+            app_commands.Choice(name="Низкое", value="low"),
+            app_commands.Choice(name="Среднее", value="medium"),
+            app_commands.Choice(name="Высокое", value="high"),
+        ])
+        @app_commands.choices(разрешение=[
+            app_commands.Choice(name="Авто", value="auto"),
+            app_commands.Choice(name="Квадрат 1:1", value="1024x1024"),
+            app_commands.Choice(name="Портрет 9:16", value="1080x1920"),
+        ])
         @self.tree.command(name="image", description="Сгенерировать изображение по тексту")
         async def generate_image(interaction: discord.Interaction, 
             промт: str,
@@ -70,6 +85,16 @@ class DiscordBot(commands.Bot):
                 разрешение=разрешение
             )
         
+        @app_commands.choices(качество=[
+            app_commands.Choice(name="Низкое", value="low"),
+            app_commands.Choice(name="Среднее", value="medium"),
+            app_commands.Choice(name="Высокое", value="high"),
+        ])
+        @app_commands.choices(разрешение=[
+            app_commands.Choice(name="Авто", value="auto"),
+            app_commands.Choice(name="Квадрат 1:1", value="1024x1024"),
+            app_commands.Choice(name="Портрет 9:16", value="1080x1920"),
+        ])
         @self.tree.command(name="edit", description="Редактировать изображение")
         async def edit_image(interaction: discord.Interaction, 
             промт: str, 
@@ -220,45 +245,65 @@ class DiscordBot(commands.Bot):
         await self.redis.setex(f"{REDIS_PENDING_IMAGE_PREFIX}{correlation_id}", PENDING_TTL_SECONDS, f"{followup.id}:{followup.token}")
         
         await self.producer.send_image_request(
-            correlation_id, 
-            "generate", 
-            промт, 
-            image_file_ids=[], 
+            correlation_id,
+            "generate",
+            промт,
+            image_file_ids=[],
             n=количество,
             quality=качество,
-            size=разрешение
-            )
+            size=разрешение,
+            user_id=interaction.user.id,
+        )
     
-    async def _edit_image(self, interaction: discord.Interaction, 
-        промт: str, 
-        изображение1: discord.Attachment, 
-        изображение2: discord.Attachment = None, 
+    async def _edit_image(
+        self,
+        interaction: discord.Interaction,
+        промт: str,
+        изображение1: discord.Attachment,
+        изображение2: discord.Attachment = None,
         изображение3: discord.Attachment = None,
         количество: int = 2,
         качество: str = "low",
-        разрешение: str = "auto"
+        разрешение: str = "auto",
     ):
         await interaction.response.defer()
         followup = interaction.followup
         correlation_id = f"edit_{interaction.id}"
-        
+
         file_ids = []
         for img in [изображение1, изображение2, изображение3]:
-            if img:
-                img_bytes = await img.read()
-                file_id = await self.storage.upload_file(img_bytes, img.content_type or "image/png")
-                file_ids.append(file_id)
-        
-        await self.redis.setex(f"{REDIS_PENDING_IMAGE_PREFIX}{correlation_id}", PENDING_TTL_SECONDS, f"{followup.id}:{followup.token}")
-        
+            if not img:
+                continue
+            img_bytes = await img.read()
+            file_id = await self.storage.upload_file(
+                img_bytes,
+                content_type=img.content_type or "image/png",
+                metadata={
+                    "source": "gateway",
+                    "command": "edit_input",
+                    "user_id": str(interaction.user.id),
+                    "username": interaction.user.name,
+                    "correlation_id": correlation_id,
+                    "filename": img.filename,
+                },
+            )
+            file_ids.append(file_id)
+
+        await self.redis.setex(
+            f"{REDIS_PENDING_IMAGE_PREFIX}{correlation_id}",
+            PENDING_TTL_SECONDS,
+            f"{followup.id}:{followup.token}",
+        )
+
         await self.producer.send_image_request(
-            correlation_id, 
-            "edit", 
-            промт, 
-            image_file_ids=file_ids, 
+            correlation_id,
+            "edit",
+            промт,
+            image_file_ids=file_ids,
             n=количество,
             quality=качество,
-            size=разрешение
+            size=разрешение,
+            user_id=interaction.user.id,
         )
     
     async def _maintenance(self, interaction: discord.Interaction, параметр: str, значение: bool):
@@ -299,62 +344,78 @@ class DiscordBot(commands.Bot):
         if not pending:
             logger.info(f"Orphaned response for {correlation_id}")
             return
-        parts = pending.split(":")
-        logger.info(f"{mode=}")
-        if mode == "chat":
-            channel_id, message_id = int(parts[0]), int(parts[1])
-            channel = self.get_channel(channel_id)
-            if channel:
-                try:
-                    original_msg = await channel.fetch_message(message_id)
-                    await original_msg.reply(response_text)
-                    await original_msg.remove_reaction("⏳", self.user)
-                except Exception as e:
-                    await channel.send(response_text)
-        else:
-            webhook_id, webhook_token = parts[0], parts[1]
-            webhook = discord.Webhook.partial(webhook_id, webhook_token, client=self)
-            await webhook.send(content=response_text, wait=True)
-        await self.redis.delete(key)
+        try:
+            parts = pending.split(":")
+            logger.info(f"{mode=}")
+            if mode == "chat":
+                channel_id, message_id = int(parts[0]), int(parts[1])
+                channel = self.get_channel(channel_id)
+                if channel:
+                    try:
+                        original_msg = await channel.fetch_message(message_id)
+                        await original_msg.reply(response_text)
+                        await original_msg.remove_reaction("⏳", self.user)
+                    except Exception as e:
+                        await channel.send(response_text)
+            else:
+                webhook_id, webhook_token = parts[0], parts[1]
+                webhook = discord.Webhook.partial(webhook_id, webhook_token, client=self)
+                await webhook.send(content=response_text, wait=True)
+        finally:
+            await self.redis.delete(key)
     
     async def on_image_response(self, correlation_id, image_keys, error):
-        key = f"{REDIS_PENDING_IMAGE_PREFIX}{correlation_id}"
-        pending = await self.redis.get(key)
+        redis_key = f"{REDIS_PENDING_IMAGE_PREFIX}{correlation_id}"
+        pending = await self.redis.get(redis_key)
         if not pending:
             logger.info(f"Orphaned response for {correlation_id}")
             return
         logger.info(f"Responding to {correlation_id}")
+
         webhook_id, webhook_token = pending.split(":")
         webhook = discord.Webhook.partial(webhook_id, webhook_token, client=self)
+
         if error:
             await webhook.send(f"Ошибка генерации: {error}")
+            await self.redis.delete(redis_key)
             return
-            
+
         files = []
-        for key in image_keys:
+        for file_id in image_keys:
             try:
-                data = await self.storage.download_file(key)
-                files.append(discord.File(io.BytesIO(data), filename=f"{key}.png"))
-                await self.storage.delete_file(key)
+                data = await self.storage.download_file(file_id)
+                files.append(discord.File(io.BytesIO(data), filename=f"{file_id}.png"))
             except Exception as e:
-                logger.warning(f"Failed to download {key}: {e}")
+                logger.warning(f"Failed to download {file_id}: {e}")
+
         if files:
             await webhook.send("Вот тебе, только не бей:", files=files)
+
+        await self.redis.delete(redis_key)
     
     async def on_admin_response(self, correlation_id, result, error):
-        key = f"{REDIS_PENDING_ADMIN_PREFIX}{correlation_id}"
-        pending = await self.redis.get(key)
+        redis_key = f"{REDIS_PENDING_ADMIN_PREFIX}{correlation_id}"
+        pending = await self.redis.get(redis_key)
         if not pending:
             logger.warning(f"Orphaned response for {correlation_id}")
             return
-        
-        webhook_id, webhook_token = pending.split(":")
-        webhook = discord.Webhook.partial(webhook_id, webhook_token, client=self)
-        await webhook.send(content=result if result else f"Ошибка: {error}", wait=True)
-        await self.redis.delete(key)
+        try:
+            webhook_id, webhook_token = pending.split(":")
+            webhook = discord.Webhook.partial(webhook_id, webhook_token, client=self)
+            await webhook.send(content=result if result else f"Ошибка: {error}", wait=True)
+        finally:
+            await self.redis.delete(redis_key)
     
     async def on_reaction_command(self, channel_id: int, message_id: int, emoji: str):
+        if isinstance(emoji, str) and emoji.isdigit():
+            em = self.get_emoji(int(emoji))
+            if em is None:
+                logger.warning(f"Emoji {emoji} not in bot cache, skip")
+                return
+            emoji = str(em)
+        
         channel = self.get_channel(channel_id)
+        
         if channel:
             try:
                 message = await channel.fetch_message(message_id)

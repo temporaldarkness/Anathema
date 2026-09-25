@@ -44,7 +44,17 @@ async def process_request(data):
         
         file_ids = []
         for img_bytes in images:
-            file_id = await storage.upload_file(img_bytes, "image/png")
+            meta = {
+                "source": "image_worker",
+                "command": command,
+                "prompt": (prompt or "")[:500],
+                "user_id": str(data.get("user_id", "")),
+                "correlation_id": corr_id,
+                "model": "gpt-image-2",
+                "quality": quality,
+                "size": size
+            }
+            file_id = await storage.upload_file(img_bytes, "image/png", meta)
             file_ids.append(file_id)
         
         logger.info(f"Sending response for {corr_id}")

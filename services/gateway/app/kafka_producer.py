@@ -32,7 +32,7 @@ class KafkaProducer:
         logger.debug(f"Sent AI request {correlation_id} with mode {mode}")
     
     async def send_image_request(self, correlation_id, command, prompt, image_file_ids: list[str] = [], 
-        n=2, quality="low", size="auto"):
+        n=2, quality="low", size="auto", user_id= None):
         task = {
             "correlation_id": correlation_id,
             "command": command,
@@ -40,7 +40,8 @@ class KafkaProducer:
             "image_file_ids": image_file_ids,
             "n": n,
             "quality": quality,
-            "size": size
+            "size": size,
+            "user_id": user_id
         }
         await self.producer.send(KAFKA_TOPIC_IMAGE_REQUESTS, task)
         logger.debug(f"Sent image {command} request {correlation_id}")

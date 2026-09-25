@@ -17,6 +17,7 @@ class UserBase(BaseModel):
     aliases: List[str] = []
     gender: Optional[int] = None
     orientation: Optional[int] = None
+    allowed: bool = False
 
 class UserCreate(UserBase):
     pass
@@ -45,9 +46,21 @@ class UserReactionCreate(BaseModel):
     user_uid: str
     emoji_uid: str
 
-class UserReaction(KeywordReactionCreate):
+class UserReaction(UserReactionCreate):
     id: int
 
 class Setting(BaseModel):
     key:str
     value:str
+
+class AuditEntry(BaseModel):
+    actor_id: Optional[int] = None
+    actor_username: Optional[str] = None
+    actor_type: str = "system"
+    action: str
+    entity_type: Optional[str] = None
+    entity_id: Optional[str] = None
+    details: dict[str, Any] = {}
+    success: bool = True
+    error: Optional[str] = None
+    ip: Optional[str] = None

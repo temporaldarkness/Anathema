@@ -4,6 +4,13 @@ from .db import get_pool
 from .models import UserBase
 from .redis_client import get_redis
 from .config import MEMORY_CACHE_TTL_SECONDS
+from asyncpg import UniqueViolationError
+
+class UserConflictError(Exception):
+    """Вызывается, когда user_id уже занят другим uid."""
+    def __init__(self, conflict_field: str):
+        self.conflict_field = conflict_field
+        super().__init__(f"Conflict on {conflict_field}")
 
 async def get_users():
     redis_client = await get_redis()
@@ -17,6 +24,7 @@ async def get_users():
     users = [dict(row) for row in rows]
     
     for u in users:
+        u['user_id'] = str(u['user_id'])
         u['aliases'] = json.loads(u['aliases']) if isinstance(u['aliases'], str) else u['aliases']
     await redis_client.setex(
         "users:all", 
@@ -37,6 +45,7 @@ async def get_user(uid: str):
     if not row:
         return None
     user = dict(row)
+    user['user_id'] = str(u['user_id'])
     user['aliases'] = json.loads(user['aliases']) if isinstance(user['aliases'], str) else user['aliases']
     
     await redis_client.setex(
@@ -58,6 +67,7 @@ async def get_user_discord(user_id: int):
     if not row:
         return None
     user = dict(row)
+    user['user_id'] = str(user['user_id']) 
     user['aliases'] = json.loads(user['aliases']) if isinstance(user['aliases'], str) else user['aliases']
     
     await redis_client.setex(
@@ -69,17 +79,21 @@ async def get_user_discord(user_id: int):
 
 async def upsert_user(user: UserBase):
     pool = await get_pool()
-    async with pool.acquire() as conn:
-        await conn.execute("""
-            INSERT INTO users (uid, username, user_id, aliases, gender, orientation)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            ON CONFLICT (uid) DO UPDATE SET
-                username = EXCLUDED.username,
-                user_id = EXCLUDED.user_id,
-                aliases = EXCLUDED.aliases,
-                gender = EXCLUDED.gender,
-                orientation = EXCLUDED.orientation
-        """, user.uid, user.username, user.user_id, json.dumps(user.aliases), user.gender, user.orientation)
+    try:
+        async with pool.acquire() as conn:
+            await conn.execute("""
+                INSERT INTO users (uid, username, user_id, aliases, gender, orientation, allowed)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                ON CONFLICT (uid) DO UPDATE SET
+                    username = EXCLUDED.username,
+                    user_id = EXCLUDED.user_id,
+                    aliases = EXCLUDED.aliases,
+                    gender = EXCLUDED.gender,
+                    orientation = EXCLUDED.orientation,
+                    allowed = EXCLUDED.allowed
+            """, user.uid, user.username, user.user_id, json.dumps(user.aliases), user.gender, user.orientation, user.allowed)
+    except UniqueViolationError as e:
+        raise UserConflictError(e.constraint_name or "unknown")
     
     redis_client = await get_redis()
     await redis_client.delete("users:all")

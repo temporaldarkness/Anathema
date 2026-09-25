@@ -118,6 +118,7 @@ services:
       ADMIN_MEMORY_CLIENT_KEY: ${ADMIN_MEMORY_CLIENT_KEY}
       AIWORKER_MEMORY_CLIENT_KEY: ${AIWORKER_MEMORY_CLIENT_KEY}
       REACTIONWORKER_MEMORY_CLIENT_KEY: ${REACTIONWORKER_MEMORY_CLIENT_KEY}
+      WEBWAY_MEMORY_CLIENT_KEY: ${WEBWAY_MEMORY_CLIENT_KEY}
     depends_on:
       postgres:
         condition: service_started
@@ -145,6 +146,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
       KAFKA_TOPIC_RAW_MESSAGES: ${KAFKA_TOPIC_RAW_MESSAGES}
       AIWORKER_HISTORY_CLIENT_KEY: ${AIWORKER_HISTORY_CLIENT_KEY}
+      WEBWAY_HISTORY_CLIENT_KEY: ${WEBWAY_HISTORY_CLIENT_KEY}
     depends_on:
       postgres:
         condition: service_started
@@ -168,6 +170,7 @@ services:
       MINIO_PORT: ${MINIO_PORT}
       GATEWAY_STORAGE_CLIENT_KEY: ${GATEWAY_STORAGE_CLIENT_KEY}
       IMAGEWORKER_STORAGE_CLIENT_KEY: ${IMAGEWORKER_STORAGE_CLIENT_KEY}
+      WEBWAY_STORAGE_CLIENT_KEY: ${WEBWAY_STORAGE_CLIENT_KEY}
     depends_on:
       minio:
         condition: service_started
@@ -183,6 +186,7 @@ services:
       SUPERUSER_ID: ${SUPERUSER_ID}
       REDIS_URL: ${REDIS_URL}
       ADMIN_SECURITY_CLIENT_KEY: ${ADMIN_SECURITY_CLIENT_KEY}
+      WEBWAY_SECURITY_CLIENT_KEY: ${WEBWAY_SECURITY_CLIENT_KEY}
     depends_on:
       redis:
         condition: service_started
@@ -245,8 +249,10 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
       KAFKA_GROUP_REACTION_WORKER: ${KAFKA_GROUP_REACTION_WORKER}
       KAFKA_TOPIC_RAW_MESSAGES: ${KAFKA_TOPIC_RAW_MESSAGES}
+      KAFKA_TOPIC_CACHE_INVALIDATION: ${KAFKA_TOPIC_CACHE_INVALIDATION}
       MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
       REACTIONWORKER_MEMORY_CLIENT_KEY: ${REACTIONWORKER_MEMORY_CLIENT_KEY}
+      REACTIONWORKER_AUTOUPDATE_INTERVAL: ${REACTIONWORKER_AUTOUPDATE_INTERVAL}
     depends_on:
       memory_service:
         condition: service_started
@@ -317,6 +323,61 @@ services:
     networks:
       - anathema_network
     restart: unless-stopped
+  
+  webway_backend:
+    build: ./services/webway
+    environment:
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+      DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      WEBWAY_MEMORY_CLIENT_KEY: ${WEBWAY_MEMORY_CLIENT_KEY}
+      WEBWAY_SECURITY_CLIENT_KEY: ${WEBWAY_SECURITY_CLIENT_KEY}
+      WEBWAY_HISTORY_CLIENT_KEY: ${WEBWAY_HISTORY_CLIENT_KEY}
+      WEBWAY_STORAGE_CLIENT_KEY: ${WEBWAY_STORAGE_CLIENT_KEY}
+      MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
+      SECURITY_SERVICE_URL: ${SECURITY_SERVICE_URL}
+      STORAGE_SERVICE_URL: ${STORAGE_SERVICE_URL}
+      MESSAGE_HISTORY_SERVICE_URL: ${MESSAGE_HISTORY_SERVICE_URL}
+      PROXY_API_KEY: ${PROXY_API_KEY}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+      BACKEND_URL: ${BACKEND_URL}
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      PROXY_API_BALANCE_URL: ${PROXY_API_BALANCE_URL}
+      REDIS_URL: ${REDIS_URL}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    networks:
+      - anathema_network
+
+  webway_frontend:
+    build: ./services/webway/frontend
+    environment:
+      ORIGIN: "http://localhost"
+      PORT: 3000
+      HOST: "0.0.0.0"
+      BACKEND_URL: ${BACKEND_URL}
+    networks:
+      - anathema_network
+    restart: unless-stopped
+  
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./services/webway/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - webway_frontend
+      - webway_backend
+    networks:
+      - anathema_network
+    restart: unless-stopped
 
 networks:
   anathema_network:
@@ -327,3 +388,5 @@ volumes:
   pg_data:
   kafka_data:
   minio_data:
+  caddy_data:
+  caddy_config:

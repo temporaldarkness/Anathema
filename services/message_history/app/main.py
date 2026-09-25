@@ -6,6 +6,9 @@ from .redis_client import close_redis
 from .kafka_consumer import start_consumer, stop_consumer
 from .api import router
 from .middleware import AuthAndLogMiddleware
+from datetime import datetime, timezone
+
+BOOT_TIME = datetime.now(timezone.utc)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,4 +25,7 @@ app.add_middleware(AuthAndLogMiddleware)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "uptime_seconds": int((datetime.now(timezone.utc) - BOOT_TIME).total_seconds()),
+    }

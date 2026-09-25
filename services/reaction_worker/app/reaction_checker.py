@@ -17,7 +17,7 @@ class ReactionChecker:
             if known_uid == user_uid:
                 emoji_source = self.memory.get_emoji_source(emoji_uid)
                 if emoji_source:
-                    reaction.add((emoji_source, emoji_uid))
+                    reactions.add((emoji_source, emoji_uid))
         
         for known_uid, emoji_uid in self.memory.user_reactions:
             if known_uid == user_uid:

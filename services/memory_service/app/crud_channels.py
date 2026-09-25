@@ -15,6 +15,8 @@ async def get_channels():
     async with pool.acquire() as conn:
         rows = await conn.fetch("SELECT * FROM channels ORDER BY uid")
     channels = [dict(row) for row in rows]
+    for c in channels:
+        c['channel_id'] = str(c['channel_id'])
     await redis_client.setex(
         "channels:all", 
         MEMORY_CACHE_TTL_SECONDS, 
@@ -34,6 +36,7 @@ async def get_channel(uid: str):
     if not row:
         return None
     channel = dict(row)
+    channel['channel_id'] = str(channel['channel_id'])
     
     await redis_client.setex(
         f"channel:{uid}", 
@@ -54,6 +57,7 @@ async def get_channel_discord(channel_id: int):
     if not row:
         return None
     channel = dict(row)
+    channel['channel_id'] = str(channel['channel_id']) 
     
     await redis_client.setex(
         f"channel:discord:{channel_id}", 

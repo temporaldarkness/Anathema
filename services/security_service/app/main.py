@@ -3,9 +3,12 @@ from pydantic import BaseModel
 from .security import check_permission, close
 from .auth import verify_api_key
 from .middleware import AuthAndLogMiddleware
+from datetime import datetime, timezone
 
 app = FastAPI(title="Anathema Security Service")
 app.add_middleware(AuthAndLogMiddleware)
+
+BOOT_TIME = datetime.now(timezone.utc)
 
 class PermissionRequest(BaseModel):
     guild_id: int
@@ -26,7 +29,9 @@ async def check(req: PermissionRequest):
 async def shutdown():
     await close()
 
-
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "uptime_seconds": int((datetime.now(timezone.utc) - BOOT_TIME).total_seconds()),
+    }

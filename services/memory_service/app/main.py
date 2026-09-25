@@ -1,19 +1,24 @@
 import logging
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from .db import init_db, close_db
 from .kafka_producer import close_producer, publish_cache_invalidation
 from .redis_client import close_redis
-from .models import ChannelBase, EmoteBase, KeywordReactionCreate, UserReactionCreate, Setting, UserBase, LTMItemCreate
+from .models import ChannelBase, EmoteBase, KeywordReactionCreate, UserReactionCreate, Setting, UserBase, LTMItemCreate, AuditEntry
 from .crud_channels import get_channels, get_channel, get_channel_discord, upsert_channel, delete_channel
 from .crud_emotes import get_emotes, get_emote, upsert_emote, delete_emote
 from .crud_keywords import get_keywords, add_keyword, delete_keyword
 from .crud_ltm import get_facts, add_fact, delete_fact
 from .crud_settings import get_settings, get_setting, upsert_setting, delete_setting
 from .crud_user_reactions import get_user_reactions, add_user_reaction, delete_user_reaction
-from .crud_users import get_users, get_user, get_user_discord, upsert_user, delete_user
+from .crud_users import get_users, get_user, get_user_discord, upsert_user, delete_user, UserConflictError
+from .crud_audit import write_audit, list_audit, get_audit_stats
 from .config import DEFAULT_SETTINGS, MEMORY_CACHE_TTL_SECONDS
 from .auth import verify_api_key
 from .middleware import AuthAndLogMiddleware
+from datetime import datetime, timezone
+from typing import Optional
+
+BOOT_TIME = datetime.now(timezone.utc)
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -24,6 +29,13 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Anathema Memory Service")
 app.add_middleware(AuthAndLogMiddleware)
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "uptime_seconds": int((datetime.now(timezone.utc) - BOOT_TIME).total_seconds()),
+    }
 
 @app.on_event("startup")
 async def startup():
@@ -174,7 +186,7 @@ async def list_user_reactions():
 @app.post("/user_reactions")
 async def update_user_reaction(user_reaction: UserReactionCreate):
     new_user_reaction = await add_user_reaction(user_reaction)
-    await publish_cache_invalidation("user_reaction", "update", new_user_reaction.reaction_id)
+    await publish_cache_invalidation("user_reaction", "update", new_user_reaction.id)
     return new_user_reaction
 
 @app.delete("/user_reactions/{reaction_id}")
@@ -206,7 +218,17 @@ async def fetch_user_discord(channel_id: int):
 
 @app.post("/users")
 async def update_user(user: UserBase):
-    new_user = await upsert_user(user)
+    try:
+        new_user = await upsert_user(user)
+    except UserConflictError as e:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "unique_violation",
+                "field": e.conflict_field,
+                "message": "Discord ID уже привязан к другому uid",
+            },
+        )
     await publish_cache_invalidation("user", "update", new_user.uid)
     return new_user
 

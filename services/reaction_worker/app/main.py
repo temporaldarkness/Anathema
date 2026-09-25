@@ -2,7 +2,7 @@ import asyncio
 import logging
 from .memory_client import MemoryClient
 from .reaction_checker import ReactionChecker
-from .kafka_consumer import RawMessageConsumer
+from .kafka_consumer import RawMessageConsumer, InvalidationConsumer
 from .kafka_producer import ReactionCommandProducer
 
 logging.basicConfig(
@@ -31,6 +31,12 @@ async def handle_message(data):
     for emoji_source, emoji_uid in reactions:
         await producer.send_add_reaction(channel_id, int(message_id), emoji_source)
 
+async def handle_invalidation(event: dict):
+    entity_type = event.get("entity_type")
+    if entity_type in ("keyword", "user_reaction", "emote"):
+        logger.info(f"Cache invalidation for {entity_type}, refreshing...")
+        await memory.update_cache()
+
 async def main():
     await memory.start()
     await producer.start()
@@ -38,11 +44,18 @@ async def main():
     consumer = RawMessageConsumer(handle_message)
     await consumer.start()
     
+    invalidation_consumer = InvalidationConsumer(handle_invalidation)
+    await invalidation_consumer.start()
+    
+    raw_task = asyncio.create_task(consumer.consume())
+    inval_task = asyncio.create_task(invalidation_consumer.consume())
+
     logger.info("Reaction Worker running...")
     try:
-        await consumer.consume()
+        await asyncio.gather(raw_task, inval_task)
     finally:
         await consumer.stop()
+        await invalidation_consumer.stop()
         await producer.stop()
         await memory.close()
 
