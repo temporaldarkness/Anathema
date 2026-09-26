@@ -35,7 +35,6 @@
 		const valueStr =
 			typeof newValue === 'boolean' ? (newValue ? 'true' : 'false') : String(newValue);
 
-		// Не дёргаем бэкенд, если значение не изменилось
 		if (values[key] === valueStr && data.values[key] === valueStr) {
 			values[key] = valueStr;
 			return;

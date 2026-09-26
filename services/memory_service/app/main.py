@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Query
 from .db import init_db, close_db
 from .kafka_producer import close_producer, publish_cache_invalidation
 from .redis_client import close_redis
-from .models import ChannelBase, EmoteBase, KeywordReactionCreate, UserReactionCreate, Setting, UserBase, LTMItemCreate, AuditEntry
+from .models import ChannelBase, EmoteBase, KeywordReactionCreate, UserReactionCreate, Setting, UserBase, LTMItemCreate
 from .crud_channels import get_channels, get_channel, get_channel_discord, upsert_channel, delete_channel
 from .crud_emotes import get_emotes, get_emote, upsert_emote, delete_emote
 from .crud_keywords import get_keywords, add_keyword, delete_keyword
@@ -11,7 +11,6 @@ from .crud_ltm import get_facts, add_fact, delete_fact
 from .crud_settings import get_settings, get_setting, upsert_setting, delete_setting
 from .crud_user_reactions import get_user_reactions, add_user_reaction, delete_user_reaction
 from .crud_users import get_users, get_user, get_user_discord, upsert_user, delete_user, UserConflictError
-from .crud_audit import write_audit, list_audit, get_audit_stats
 from .config import DEFAULT_SETTINGS, MEMORY_CACHE_TTL_SECONDS
 from .auth import verify_api_key
 from .middleware import AuthAndLogMiddleware

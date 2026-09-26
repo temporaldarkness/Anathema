@@ -3,11 +3,13 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import ServiceStatus from '$lib/components/ui/servicestatus';
+	import ActivityChart from '$lib/components/ui/activitychart';
+	import TopList from '$lib/components/ui/toplist';
 	import { formatNumber, formatUptime } from '$lib/utils/format';
 	import {
 		Brain, Users, Hash, Smile, Zap, MessageSquare,
 		Wallet, Cpu, Activity, ShieldCheck, ShieldAlert,
-		Lock, Unlock, Eye, EyeOff, Image as ImageIcon, Power, Clock, Boxes
+		Lock, Unlock, Eye, EyeOff, Image as ImageIcon, Power, Clock, Boxes, TrendingUp
 	} from 'lucide-svelte';
 
 	let { data } = $props();
@@ -27,7 +29,8 @@
 		{ key: 'memory', name: 'Memory Service' },
 		{ key: 'history', name: 'History Service' },
 		{ key: 'security', name: 'Security Service' },
-		{ key: 'storage', name: 'Storage Service' }
+		{ key: 'storage', name: 'Storage Service' },
+		{ key: 'audit', name: 'Audit Service' }
 	]);
 
 	function formatBalance(b: number | null | undefined): string {
@@ -242,8 +245,8 @@
 
 			{#if !ov.kafka.ok}
 				<Card>
-					<CardContent class="py-8 text-center text-sm text-destructive">
-						Не удалось получить метрики Kafka: {ov.kafka.error}
+					<CardContent class="py-8 text-center text-sm text-muted-foreground">
+						Метрики Kafka не настроены.
 					</CardContent>
 				</Card>
 			{:else}
@@ -343,5 +346,103 @@
 				</CardContent>
 			</Card>
 		</div>
+	</div>
+	<div class="space-y-4">
+		<h2 class="text-sm font-medium text-muted-foreground flex items-center gap-2">
+			<TrendingUp class="h-4 w-4" />
+			Аналитика активности
+		</h2>
+
+		<!-- Summary cards -->
+		{#if data.analytics?.summary}
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<Card>
+					<CardHeader class="pb-2">
+						<CardTitle class="text-xs font-medium text-muted-foreground">Всего сообщений</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div class="text-2xl font-bold">{data.analytics.summary.total}</div>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader class="pb-2">
+						<CardTitle class="text-xs font-medium text-muted-foreground">За 24 часа</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div class="text-2xl font-bold text-blue-400">{data.analytics.summary.today}</div>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader class="pb-2">
+						<CardTitle class="text-xs font-medium text-muted-foreground">За 7 дней</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div class="text-2xl font-bold text-violet-400">{data.analytics.summary.week}</div>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader class="pb-2">
+						<CardTitle class="text-xs font-medium text-muted-foreground">
+							Уникальных юзеров (24ч)
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div class="text-2xl font-bold text-cyan-400">
+							{data.analytics.summary.unique_users_today}
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		{/if}
+
+		<!-- Timeline -->
+		<ActivityChart
+			title="Сообщения за последние 24 часа"
+			buckets={data.analytics?.timeline?.buckets ?? null}
+			hours={24}
+			loading={!data.analytics}
+		/>
+
+		<!-- Top lists -->
+		<div class="grid gap-4 lg:grid-cols-2">
+			<TopList
+				title="Активные пользователи (24ч)"
+				icon={Users}
+				items={(data.analytics?.top_users?.users ?? []).map((u: any) => ({
+					label: u.username,
+					sublabel: String(u.user_id),
+					count: u.count
+				}))}
+				loading={!data.analytics}
+			/>
+			<TopList
+				title="Активные каналы (24ч)"
+				icon={Hash}
+				items={(data.analytics?.top_channels?.channels ?? []).map((c: any) => {
+					const cid = String(c.channel_id);
+					const known = data.analytics?.channels_map?.[cid];
+					return {
+						label: known?.human_name ? `#${known.human_name}` : `#${cid}`,
+						sublabel: known?.human_name ? cid : undefined,
+						count: c.count
+					};
+				})}
+				loading={!data.analytics}
+			/>
+		</div>
+
+		<!-- Audit timeline -->
+		{#if data.analytics?.audit_timeline?.buckets}
+			<ActivityChart
+				title="Действия администраторов за 7 дней"
+				buckets={data.analytics.audit_timeline.buckets.map((b: any) => ({
+					bucket: b.bucket,
+					count: b.total
+				}))}
+				unit="действий"
+				hours={24 * 7}
+				loading={false}
+			/>
+		{/if}
 	</div>
 {/if}

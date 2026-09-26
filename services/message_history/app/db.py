@@ -38,6 +38,13 @@ async def init_db():
         await conn.execute("""CREATE INDEX IF NOT EXISTS idx_messages_user_id 
             ON messages (user_id)""")
         
+        await conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages (timestamp DESC)"
+        )
+        await conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_messages_user_ts ON messages (user_id, timestamp DESC)"
+        )
+        
         return _pool
 
 async def get_pool() -> Pool:

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Union
 
 import httpx
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, Response, Query
 from fastapi.responses import RedirectResponse
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field, field_validator
@@ -10,9 +10,11 @@ import asyncio
 from .memory_client import MemoryClient
 import time
 import redis.asyncio as redis
-from .kafka_metrics import get_kafka_metrics
+import uuid
+from .audit_transport import audit_transport
+from contextlib import asynccontextmanager
 
-from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, KAFKA_BOOTSTRAP_SERVERS, REDIS_URL
+from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS
 
 CHANNEL_TYPES = {
     0: "Текстовый",
@@ -24,13 +26,21 @@ CHANNEL_TYPES = {
     16: "Медиа",
 }
 
-app = FastAPI(title="Anathema Security Service")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await audit_transport.start()
+    yield
+    await audit_transport.stop()
+    await memory.close()
+
+app = FastAPI(title="Anathema Webway Backend Service", lifespan=lifespan)
 
 class UserSession(BaseModel):
     user_id: str
     username: str
     avatar_url: str | None = None
     is_admin: bool
+    expires_at: int | None = None
     
     @field_validator("user_id", mode="before")
     @classmethod
@@ -86,6 +96,35 @@ async def get_redis():
         _redis = await redis.from_url(REDIS_URL, decode_responses=True)
     return _redis
 
+async def get_kafka_metrics(bootstrap: str) -> dict:
+    return {"ok": None, "topics": [], "error": "disabled"}
+
+async def write_audit(
+    request: Request,
+    current_user: UserSession,
+    action: str,
+    entity_type: str | None = None,
+    entity_id: str | None = None,
+    details: dict | None = None,
+    success: bool = True,
+    error: str | None = None,
+):
+    event = {
+        "event_id": str(uuid.uuid4()),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "source_service": "webway",
+        "actor_id": current_user.user_id,
+        "actor_username": current_user.username,
+        "actor_type": "webway",
+        "action": action,
+        "entity_type": entity_type,
+        "entity_id": str(entity_id) if entity_id is not None else None,
+        "details": details or {},
+        "success": success,
+        "error": error,
+        "ip": request.client.host if request.client else None,
+    }
+    await audit_transport.send(event)
 
 async def get_bot_uptime() -> dict:
     try:
@@ -238,38 +277,72 @@ async def get_settings(current_user: UserSession = Depends(get_current_user)):
         resp.raise_for_status()
         return resp.json()
 
-@app.on_event("shutdown")
-async def shutdown():
-    await memory.close()
-
 @app.get("/api/ltm")
 async def list_ltm(current_user: UserSession = Depends(get_current_user)):
     return await memory.list_ltm()
 
 @app.post("/api/ltm")
-async def create_ltm(item: LTMItem, current_user: UserSession = Depends(get_current_user)):
+async def create_ltm(
+    item: LTMItem,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/ltm",
-            json={"fact": item.fact},
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY}
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/ltm",
+                json={"fact": item.fact},
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            resp.raise_for_status()
+            result = resp.json()
+
+        await write_audit(
+            request, current_user,
+            action="create", entity_type="ltm", entity_id=result.get("id"),
+            details={"fact": item.fact[:200]},
         )
-        resp.raise_for_status()
-        return resp.json()
+        return result
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="create", entity_type="ltm",
+            success=False, error=str(e),
+        )
+        raise
 
 @app.delete("/api/ltm/{fact_id}")
-async def delete_ltm(fact_id: int, current_user: UserSession = Depends(get_current_user)):
+async def delete_ltm(
+    fact_id: int,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.delete(
-            f"{MEMORY_SERVICE_URL}/ltm/{fact_id}",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY}
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.delete(
+                f"{MEMORY_SERVICE_URL}/ltm/{fact_id}",
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Not found")
+            resp.raise_for_status()
+
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="ltm", entity_id=fact_id,
         )
-        resp.raise_for_status()
         return {"ok": True}
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="ltm", entity_id=fact_id,
+            success=False, error=str(e),
+        )
+        raise
 
 class UserPayload(BaseModel):
     uid: str = Field(..., min_length=1, max_length=64)
@@ -292,49 +365,74 @@ async def list_users_api(current_user: UserSession = Depends(get_current_user)):
 @app.post("/api/users")
 async def create_or_update_user(
     payload: UserPayload,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    
-    aliases = payload.aliases or []
-    if not aliases:
-        aliases = [f"<@{payload.user_id}>", payload.username]
-    
-    body = payload.model_dump()
-    body["aliases"] = aliases
+    try:
+        aliases = payload.aliases or []
+        if not aliases:
+            aliases = [f"<@{payload.user_id}>", payload.username]
+        
+        body = payload.model_dump()
+        body["aliases"] = aliases
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/users",
-            json=body,
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/users",
+                json=body,
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+        
+        if resp.status_code == 409:
+            raise HTTPException(409, detail=resp.json().get("detail"))
+        if not resp.is_success:
+            raise HTTPException(resp.status_code, detail=resp.text)
+        
+        await write_audit(
+            request, current_user,
+            action="upsert", entity_type="user", entity_id=payload.uid,
+            details={"username": payload.username, "user_id": payload.user_id, "allowed": payload.allowed},
         )
-    
-    if resp.status_code == 409:
-        raise HTTPException(409, detail=resp.json().get("detail"))
-    if not resp.is_success:
-        raise HTTPException(resp.status_code, detail=resp.text)
-    
-    return resp.json()
+        return resp.json()
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="upsert", entity_type="user",
+            success=False, error=str(e),
+        )
+        raise
 
 @app.delete("/api/users/{uid}")
 async def delete_user_api(
     uid: str,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-
-    async with httpx.AsyncClient() as client:
-        resp = await client.delete(
-            f"{MEMORY_SERVICE_URL}/users/{uid}",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.delete(
+                f"{MEMORY_SERVICE_URL}/users/{uid}",
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "User not found")
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="delete", entity_type="user", entity_id=uid,
+            )
+            return {"ok": True}
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="user",
+            success=False, error=str(e),
         )
-        if resp.status_code == 404:
-            raise HTTPException(404, "User not found")
-        resp.raise_for_status()
-        return {"ok": True}
+        raise
 
 @app.get("/api/discord/user/{user_id}")
 async def fetch_discord_user(
@@ -343,28 +441,29 @@ async def fetch_discord_user(
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
+    try:
+        if not DISCORD_TOKEN:
+            raise HTTPException(500, "Discord token not configured")
 
-    token = DISCORD_TOKEN
-    if not token:
-        raise HTTPException(500, "Discord token not configured")
-
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"https://discord.com/api/v10/users/{user_id}",
-            headers={"Authorization": f"Bot {token}"},
-        )
-        if resp.status_code == 404:
-            raise HTTPException(404, "Discord user not found")
-        resp.raise_for_status()
-        data = resp.json()
-
-    return {
-        "id": str(data["id"]),
-        "username": data["username"],
-        "global_name": data.get("global_name"),
-        "display_name": data.get("global_name") or data["username"],
-        "avatar_url": build_avatar_url(data),
-    }
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"https://discord.com/api/v10/users/{user_id}",
+                headers={"Authorization": f"Bot {DISCORD_TOKEN}"},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Discord user not found")
+            resp.raise_for_status()
+            data = resp.json()
+            
+        return {
+            "id": str(data["id"]),
+            "username": data["username"],
+            "global_name": data.get("global_name"),
+            "display_name": data.get("global_name") or data["username"],
+            "avatar_url": build_avatar_url(data),
+        }
+    except Exception as e:
+        raise
 
 @app.get("/api/channels")
 async def list_channels_api(current_user: UserSession = Depends(get_current_user)):
@@ -373,37 +472,62 @@ async def list_channels_api(current_user: UserSession = Depends(get_current_user
 @app.post("/api/channels")
 async def upsert_channel_api(
     payload: ChannelPayload,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/channels",
-            json=payload.model_dump(),
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/channels",
+                json=payload.model_dump(),
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="upsert", entity_type="channel", entity_id=payload.uid,
+                details={"channel_id": payload.channel_id, "human_name": payload.human_name},
+            )
+            return resp.json()
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="upsert", entity_type="channel",
+            success=False, error=str(e),
         )
-        resp.raise_for_status()
-        return resp.json()
+        raise
 
 @app.delete("/api/channels/{uid}")
 async def delete_channel_api(
     uid: str,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-
-    async with httpx.AsyncClient() as client:
-        resp = await client.delete(
-            f"{MEMORY_SERVICE_URL}/channels/{uid}",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.delete(
+                f"{MEMORY_SERVICE_URL}/channels/{uid}",
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Channel not found")
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="delete", entity_type="channel", entity_id=uid,
+            )
+            return {"ok": True}
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="channel",
+            success=False, error=str(e),
         )
-        if resp.status_code == 404:
-            raise HTTPException(404, "Channel not found")
-        resp.raise_for_status()
-        return {"ok": True}
+        raise
 
 @app.get("/api/discord/channel/{channel_id}")
 async def fetch_discord_channel(
@@ -443,36 +567,63 @@ async def list_emotes_api(current_user: UserSession = Depends(get_current_user))
 @app.post("/api/emotes")
 async def upsert_emote_api(
     payload: EmotePayload,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/emotes",
-            json=payload.model_dump(),
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/emotes",
+                json=payload.model_dump(),
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="upsert", entity_type="emote", entity_id=payload.uid,
+                details={"source": payload.source, "human_code": payload.human_code},
+            )
+            return resp.json()
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="upsert", entity_type="emote",
+            success=False, error=str(e),
         )
-        resp.raise_for_status()
-        return resp.json()
+        raise
 
 
 @app.delete("/api/emotes/{uid}")
 async def delete_emote_api(
     uid: str,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.delete(
-            f"{MEMORY_SERVICE_URL}/emotes/{uid}",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.delete(
+                f"{MEMORY_SERVICE_URL}/emotes/{uid}",
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Emote not found")
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="delete", entity_type="emote", entity_id=uid,
+            )
+            return {"ok": True}
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="emote",
+            success=False, error=str(e),
         )
-        if resp.status_code == 404:
-            raise HTTPException(404, "Emote not found")
-        resp.raise_for_status()
-        return {"ok": True}
+        raise
 
 @app.get("/api/emotes/{uid}/usage")
 async def emote_usage(
@@ -509,36 +660,65 @@ async def list_keywords_api(current_user: UserSession = Depends(get_current_user
 @app.post("/api/keywords")
 async def add_keyword_api(
     payload: KeywordPayload,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/keywords",
-            json={"keyword": payload.keyword, "emoji_uid": payload.emoji_uid},
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/keywords",
+                json={"keyword": payload.keyword, "emoji_uid": payload.emoji_uid},
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            resp.raise_for_status()
+            result = resp.json()
+
+            await write_audit(
+                request, current_user,
+                action="create", entity_type="keyword", entity_id=result.get("id"),
+                details={"keyword": payload.keyword, "emoji_uid": payload.emoji_uid},
+            )
+            return result
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="create", entity_type="keyword",
+            success=False, error=str(e),
         )
-        resp.raise_for_status()
-        return resp.json()
+        raise
 
 
 @app.delete("/api/keywords/{keyword_id}")
 async def delete_keyword_api(
     keyword_id: str,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.delete(
-            f"{MEMORY_SERVICE_URL}/keywords/{keyword_id}",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.delete(
+                f"{MEMORY_SERVICE_URL}/keywords/{keyword_id}",
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Keyword not found")
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="delete", entity_type="keyword", entity_id=keyword_id,
+            )
+            return {"ok": True}
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="keyword",
+            success=False, error=str(e),
         )
-        if resp.status_code == 404:
-            raise HTTPException(404, "Keyword not found")
-        resp.raise_for_status()
-        return {"ok": True}
+        raise
 
 
 @app.get("/api/user_reactions")
@@ -551,40 +731,67 @@ async def list_user_reactions_api(current_user: UserSession = Depends(get_curren
         resp.raise_for_status()
         return resp.json()
 
-
 @app.post("/api/user_reactions")
 async def add_user_reaction_api(
     payload: UserReactionPayload,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/user_reactions",
-            json={"user_uid": payload.user_uid, "emoji_uid": payload.emoji_uid},
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/user_reactions",
+                json={"user_uid": payload.user_uid, "emoji_uid": payload.emoji_uid},
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            resp.raise_for_status()
+            result = resp.json()
+            await write_audit(
+                request, current_user,
+                action="create", entity_type="user_reaction", entity_id=result.get("id"),
+                details={"user_uid": payload.user_uid, "emoji_uid": payload.emoji_uid},
+            )
+            return result
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="create", entity_type="user_reaction",
+            success=False, error=str(e),
         )
-        resp.raise_for_status()
-        return resp.json()
+        raise
 
 
 @app.delete("/api/user_reactions/{reaction_id}")
 async def delete_user_reaction_api(
     reaction_id: str,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.delete(
-            f"{MEMORY_SERVICE_URL}/user_reactions/{reaction_id}",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.delete(
+                f"{MEMORY_SERVICE_URL}/user_reactions/{reaction_id}",
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Reaction not found")
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="delete", entity_type="user_reaction", entity_id=reaction_id,
+            )
+            return {"ok": True}
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="user_reaction",
+            success=False, error=str(e),
         )
-        if resp.status_code == 404:
-            raise HTTPException(404, "Reaction not found")
-        resp.raise_for_status()
-        return {"ok": True}
+        raise
 
 async def ping_service(client: httpx.AsyncClient, url: str, headers: dict | None = None):
     start = time.perf_counter()
@@ -631,12 +838,9 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
 
     async with httpx.AsyncClient(timeout=5.0) as client:
         (
-            # Списки из Memory Service
             ltm_res, users_res, channels_res, emotes_res,
             kw_res, ur_res, settings_res,
-            # Health-check'и сервисов
-            mem_h, hist_h, sec_h, st_h,
-            # Прочее
+            mem_h, hist_h, sec_h, st_h, au_h,
             balance,
             kafka_data,
             bot_uptime,
@@ -668,6 +872,11 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
                 STORAGE_SERVICE_URL,
                 {"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY},
             ) if STORAGE_SERVICE_URL else _skip(),
+            ping_service(
+                client,
+                AUDIT_SERVICE_URL,
+                {"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY},
+            ) if AUDIT_SERVICE_URL else _skip(),
             get_proxy_balance(),
             get_kafka_metrics(KAFKA_BOOTSTRAP_SERVERS),
             get_bot_uptime(),
@@ -703,6 +912,7 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
             "history": hist_h,
             "security": sec_h,
             "storage": st_h,
+            "audit": au_h,
         },
         "balance": balance,
         "kafka": kafka_data,
@@ -734,50 +944,67 @@ async def _skip():
         "uptime_seconds": None,
     }
 
-@app.get("/api/settings")
-async def list_settings_api(current_user: UserSession = Depends(get_current_user)):
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{MEMORY_SERVICE_URL}/settings",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
-        )
-        resp.raise_for_status()
-        return resp.json()
-
 
 @app.post("/api/settings")
 async def update_setting_api(
     payload: SettingPayload,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/settings",
-            json=payload.model_dump(),
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/settings",
+                json=payload.model_dump(),
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="update", entity_type="setting", entity_id=payload.key,
+                details={"value": payload.value},
+            )
+            return resp.json()
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="update", entity_type="setting",
+            success=False, error=str(e),
         )
-        resp.raise_for_status()
-        return resp.json()
+        raise
 
 
 @app.post("/api/settings/{key}/reset")
 async def reset_setting_api(
     key: str,
+    request: Request,
     current_user: UserSession = Depends(get_current_user),
 ):
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{MEMORY_SERVICE_URL}/settings/{key}/reset",
-            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{MEMORY_SERVICE_URL}/settings/{key}/reset",
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Setting not found")
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="reset", entity_type="setting", entity_id=key,
+            )
+            return resp.json()
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="reset", entity_type="setting",
+            success=False, error=str(e),
         )
-        if resp.status_code == 404:
-            raise HTTPException(404, "Setting not found")
-        resp.raise_for_status()
-        return resp.json()
+        raise
 
 @app.get("/api/gallery")
 async def gallery_list(
@@ -794,20 +1021,170 @@ async def gallery_list(
         resp.raise_for_status()
         return resp.json()
 
-
-@app.delete("/api/gallery/{file_id}")
-async def gallery_delete(
+@app.get("/api/gallery/file/{file_id}")
+async def gallery_file(
     file_id: str,
-    current_user: UserSession = Depends(get_current_user),
+    request: Request,
 ):
-    if not current_user.is_admin:
-        raise HTTPException(403, "Admin privileges required")
-    async with httpx.AsyncClient() as client:
-        resp = await client.delete(
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(401, "Not authenticated")
+    try:
+        jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+    except JWTError:
+        raise HTTPException(401, "Invalid token")
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.get(
             f"{STORAGE_SERVICE_URL}/file/{file_id}",
-            headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY},
+            headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY}
         )
         if resp.status_code == 404:
             raise HTTPException(404, "File not found")
         resp.raise_for_status()
-        return {"ok": True}
+        return Response(
+            content=resp.content,
+            media_type=resp.headers.get("content-type", "image/png"),
+        )
+
+@app.delete("/api/gallery/{file_id}")
+async def gallery_delete(
+    file_id: str,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.delete(
+                f"{STORAGE_SERVICE_URL}/file/{file_id}",
+                headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "File not found")
+            resp.raise_for_status()
+            await write_audit(
+                request, current_user,
+                action="delete", entity_type="file", entity_id=file_id,
+            )
+            return {"ok": True}
+    except Exception as e:
+        await write_audit(
+            request, current_user,
+            action="delete", entity_type="file",
+            success=False, error=str(e),
+        )
+        raise
+
+@app.get("/api/audit")
+async def list_audit_api(
+    limit: int = 50,
+    offset: int = 0,
+    actor_id: int | None = None,
+    entity_type: str | None = None,
+    entity_id: str | None = None,
+    action: str | None = None,
+    success: bool | None = None,
+    source_service: str | None = None,
+    search: str | None = None,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    params = {"limit": limit, "offset": offset}
+    if actor_id is not None: params["actor_id"] = actor_id
+    if entity_type: params["entity_type"] = entity_type
+    if entity_id: params["entity_id"] = entity_id
+    if action: params["action"] = action
+    if success is not None: params["success"] = success
+    if source_service: params["source_service"] = source_service
+    if search: params["search"] = search
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{AUDIT_SERVICE_URL}/audit",
+            params=params,
+            headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY},
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+@app.get("/api/audit/stats")
+async def audit_stats_api(current_user: UserSession = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{AUDIT_SERVICE_URL}/audit/stats",
+            headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY},
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+@app.get("/api/dashboard/analytics")
+async def dashboard_analytics(
+    hours: int = Query(24, ge=1, le=168),
+    days: int = Query(7, ge=1, le=30),
+    current_user: UserSession = Depends(get_current_user),
+):
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        (
+            summary, timeline, top_users, top_channels,
+            audit_timeline,
+            all_channels,
+        ) = await asyncio.gather(
+            client.get(f"{MESSAGE_HISTORY_SERVICE_URL}/stats/summary", headers={"X-API-Key": WEBWAY_HISTORY_CLIENT_KEY}),
+            client.get(
+                f"{MESSAGE_HISTORY_SERVICE_URL}/stats/timeline",
+                params={"hours": hours},
+                headers={"X-API-Key": WEBWAY_HISTORY_CLIENT_KEY},
+            ),
+            client.get(
+                f"{MESSAGE_HISTORY_SERVICE_URL}/stats/top-users",
+                params={"hours": hours, "limit": 10},
+                headers={"X-API-Key": WEBWAY_HISTORY_CLIENT_KEY},
+            ),
+            client.get(
+                f"{MESSAGE_HISTORY_SERVICE_URL}/stats/top-channels",
+                params={"hours": hours, "limit": 10},
+                headers={"X-API-Key": WEBWAY_HISTORY_CLIENT_KEY},
+            ),
+            client.get(
+                f"{AUDIT_SERVICE_URL}/audit/stats/timeline",
+                params={"days": days},
+                headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY},
+            ),
+            memory.list_channels(),
+            return_exceptions=True,
+        )
+
+    def _safe(resp):
+        if isinstance(resp, Exception):
+            return None
+        if resp.status_code != 200:
+            return None
+        return resp.json()
+    
+    channels_map: dict[str, dict] = {}
+    if isinstance(all_channels, list):
+        for ch in all_channels:
+            cid = str(ch.get("channel_id"))
+            channels_map[cid] = {
+                "human_name": ch.get("human_name"),
+                "uid": ch.get("uid"),
+            }
+    
+    return {
+        "hours": hours,
+        "days": days,
+        "summary": _safe(summary),
+        "timeline": _safe(timeline),
+        "top_users": _safe(top_users),
+        "top_channels": _safe(top_channels),
+        "audit_timeline": _safe(audit_timeline),
+        "channels_map": channels_map,
+    }

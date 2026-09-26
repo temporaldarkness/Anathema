@@ -22,6 +22,7 @@
 		"@tailwindcss/vite": "^4.3.0",
 		"bits-ui": "^2.19.3",
 		"cn": "^0.4.0",
+		"layerchart": "^2.5.0",
 		"lucide-svelte": "^1.0.1",
 		"mode-watcher": "^1.1.0",
 		"shadcn-svelte": "^1.7.0",

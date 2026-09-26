@@ -1,0 +1,2 @@
+CREATE DATABASE audit_db;
+GRANT ALL PRIVILEGES ON DATABASE audit_db TO anathema;

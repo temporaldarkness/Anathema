@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -52,15 +52,3 @@ class UserReaction(UserReactionCreate):
 class Setting(BaseModel):
     key:str
     value:str
-
-class AuditEntry(BaseModel):
-    actor_id: Optional[int] = None
-    actor_username: Optional[str] = None
-    actor_type: str = "system"
-    action: str
-    entity_type: Optional[str] = None
-    entity_id: Optional[str] = None
-    details: dict[str, Any] = {}
-    success: bool = True
-    error: Optional[str] = None
-    ip: Optional[str] = None

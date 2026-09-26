@@ -20,6 +20,7 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./infra/postgres/init-audit-db.sql:/docker-entrypoint-initdb.d/init-audit-db.sql:ro
     restart: unless-stopped
     networks:
       - anathema_network
@@ -338,6 +339,7 @@ services:
       WEBWAY_SECURITY_CLIENT_KEY: ${WEBWAY_SECURITY_CLIENT_KEY}
       WEBWAY_HISTORY_CLIENT_KEY: ${WEBWAY_HISTORY_CLIENT_KEY}
       WEBWAY_STORAGE_CLIENT_KEY: ${WEBWAY_STORAGE_CLIENT_KEY}
+      WEBWAY_AUDIT_CLIENT_KEY: ${WEBWAY_AUDIT_CLIENT_KEY}
       MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
       SECURITY_SERVICE_URL: ${SECURITY_SERVICE_URL}
       STORAGE_SERVICE_URL: ${STORAGE_SERVICE_URL}
@@ -348,7 +350,14 @@ services:
       DISCORD_TOKEN: ${DISCORD_TOKEN}
       PROXY_API_BALANCE_URL: ${PROXY_API_BALANCE_URL}
       REDIS_URL: ${REDIS_URL}
+      AUDIT_STREAM_MAXLEN: ${AUDIT_STREAM_MAXLEN}
+      AUDIT_STREAM_KEY: ${AUDIT_STREAM_KEY}
+      AUDIT_SERVICE_URL: ${AUDIT_SERVICE_URL}
+      AUDIT_FALLBACK_PATH: ${AUDIT_FALLBACK_PATH}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    depends_on:
+      redis:
+        condition: service_started
     networks:
       - anathema_network
 
@@ -375,6 +384,31 @@ services:
     depends_on:
       - webway_frontend
       - webway_backend
+    networks:
+      - anathema_network
+    restart: unless-stopped
+    
+  audit_service:
+    build: ./services/audit_service
+    container_name: audit_service
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      AUDIT_DB: ${AUDIT_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_GROUP_AUDIT_SERVICE: ${KAFKA_GROUP_AUDIT_SERVICE}
+      KAFKA_TOPIC_AUDIT_EVENTS: ${KAFKA_TOPIC_AUDIT_EVENTS}
+      WEBWAY_AUDIT_CLIENT_KEY: ${WEBWAY_AUDIT_CLIENT_KEY}
+      AUDIT_CONSUMER_NAME: ${AUDIT_CONSUMER_NAME}
+      AUDIT_CONSUMER_GROUP: ${AUDIT_CONSUMER_GROUP}
+      AUDIT_STREAM_KEY: ${AUDIT_STREAM_KEY}
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
     networks:
       - anathema_network
     restart: unless-stopped

@@ -6,6 +6,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { ThemeToggle } from '$lib/components/ui/themetoggle';
+	import { ProfileDialog } from '$lib/components/ui/profiledialog';
 	import {
 		LayoutDashboard,
 		Brain,
@@ -23,6 +24,8 @@
 	import { fade } from 'svelte/transition';
 
 	let { data, children } = $props();
+	
+	let profileOpen = $state(false);
 
 	const navGroups = [
 		{
@@ -185,13 +188,9 @@
 
 							<DropdownMenu.Separator class="my-1" />
 
-							<DropdownMenu.Item class="cursor-pointer gap-2">
+							<DropdownMenu.Item class="cursor-pointer gap-2" onclick={() => (profileOpen = true)}>
 								<User class="h-4 w-4 text-muted-foreground" />
 								Профиль
-							</DropdownMenu.Item>
-							<DropdownMenu.Item class="cursor-pointer gap-2">
-								<Settings class="h-4 w-4 text-muted-foreground" />
-								Настройки
 							</DropdownMenu.Item>
 
 							<DropdownMenu.Separator class="my-1" />
@@ -222,6 +221,7 @@
 			</main>
 		</div>
 	</div>
+	<ProfileDialog bind:open={profileOpen} user={data.user} />
 {:else}
 	<!-- Скелетон layout -->
 	<div class="flex min-h-screen bg-background">
