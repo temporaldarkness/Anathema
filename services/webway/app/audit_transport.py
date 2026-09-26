@@ -1,10 +1,8 @@
 import asyncio
 import json
 import logging
-import os
-from pathlib import Path
 import redis.asyncio as redis
-from .config import AUDIT_FALLBACK_PATH, AUDIT_STREAM_KEY, AUDIT_STREAM_MAXLEN
+from .config import AUDIT_FALLBACK_PATH, AUDIT_STREAM_KEY, AUDIT_STREAM_MAXLEN, REDIS_URL
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +21,7 @@ class AuditTransport:
     async def _try_connect(self):
         try:
             self.redis = await redis.from_url(
-                os.getenv("REDIS_URL", "redis://redis:6379"),
+                REDIS_URL,
                 decode_responses=True,
             )
             await self.redis.ping()

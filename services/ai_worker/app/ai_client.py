@@ -41,11 +41,21 @@ async def call_gemini(instruction: str, user_message: str, temperature: float = 
             logger.error(f"Gemini API error: {resp.status_code} - {resp.text}")
             resp.raise_for_status()
         data = resp.json()
-        return data["candidates"][0]["content"]["parts"][-1]["text"]
+        usage = data.get("usage", {}) or {}
+        text = data["candidates"][0]["content"]["parts"][-1]["text"]
+        return text, {
+            "model": data.get("model", payload["model"]),
+            "tokens_in": usage.get("prompt_tokens", 0),
+            "tokens_out": usage.get("completion_tokens", 0),
+        }
 
 async def call_ai(instruction: str, user_message: str, model: str = None, temperature: float = 1.0, thinking: bool = False):
-    if model == "Gemini":
-        return await call_gemini(instruction, user_message, temperature, thinking)
-    else:
-        logger.warning(f"Model {model} unsupported, fallback to Gemini")
-        return await call_gemini(instruction, user_message, temperature, thinking)
+    try:
+        if model == "Gemini":
+            text, usage = await call_gemini(instruction, user_message, temperature, thinking)
+        else:
+            logger.warning(f"Model {model} unsupported, fallback to Gemini")
+            text, usage = await call_gemini(instruction, user_message, temperature, thinking)
+        return text, usage
+    except Exception as e:
+        return None, {"error": str(e), "model": model}

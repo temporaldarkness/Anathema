@@ -10,6 +10,7 @@ from .ai_client import call_ai
 from .prompt_builder import PromptBuilder
 from .config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC_AI_RESPONSES, KAFKA_GROUP_AI_WORKER, KAFKA_TOPIC_AI_REQUESTS
 from .exceptions import InsufficientFundsError
+from .pricing import compute_token_cost
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,7 +45,21 @@ async def handle_request_chat(msg):
     )
     
     try:
-        ai_response = await call_ai("", full_prompt, model, temperature, thinking)
+        ai_response, usage = await call_ai("", full_prompt, model, temperature, thinking)
+        tokens_in = usage.get("tokens_in", 0)
+        tokens_out = usage.get("tokens_out", 0)
+        cost = compute_token_cost(usage.get("model", model), tokens_in, tokens_out)
+        await usage_producer.emit(
+            source="ai_worker",
+            model=usage.get("model", model),
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            cost_usd=cost,
+            correlation_id=corr_id,
+            user_id=user_id,
+            success=text is not None,
+            error=usage.get("error"),
+        )
     except InsufficientFundsError as e:
         logger.warning(f"AI balance low: {e}")
         ai_response = "Казна нищает, милорд =("
@@ -176,6 +191,7 @@ async def main():
         await producer.stop()
         await memory.close()
         await history.close()
+        await usage_producer.stop()
 
 if __name__ == "__main__":
     asyncio.run(main())

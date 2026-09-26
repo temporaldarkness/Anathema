@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
-from .crud import get_history, get_top_channels, get_top_users, get_messages_timeline
+from .crud import get_history, get_top_channels, get_top_users, get_messages_timeline, get_messages_summary
 from .auth import verify_api_key
 
 router = APIRouter()

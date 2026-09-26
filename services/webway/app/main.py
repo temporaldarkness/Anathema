@@ -1188,3 +1188,34 @@ async def dashboard_analytics(
         "audit_timeline": _safe(audit_timeline),
         "channels_map": channels_map,
     }
+
+@app.get("/api/dashboard/spending")
+async def dashboard_spending(
+    days: int = Query(7, ge=1, le=90),
+    current_user: UserSession = Depends(get_current_user),
+):
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        results = await asyncio.gather(
+            client.get(f"{AUDIT_SERVICE_URL}/usage/summary", params={"days": days}, headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY}),
+            client.get(f"{AUDIT_SERVICE_URL}/usage/by-model", params={"days": days}, headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY}),
+            client.get(f"{AUDIT_SERVICE_URL}/usage/by-source", params={"days": days}, headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY}),
+            client.get(f"{AUDIT_SERVICE_URL}/usage/timeline", params={"days": days}, headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY}),
+            client.get(f"{AUDIT_SERVICE_URL}/usage/top-users", params={"days": days, "limit": 10}, headers={"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY}),
+            return_exceptions=True,
+        )
+
+    def _safe(resp):
+        if isinstance(resp, Exception) or resp.status_code != 200:
+            return None
+        return resp.json()
+
+    summary, by_model, by_source, timeline, top_users = results
+    return {
+        "days": days,
+        "summary": _safe(summary),
+        "by_model": _safe(by_model),
+        "by_source": _safe(by_source),
+        "timeline": _safe(timeline),
+        "top_users": _safe(top_users),
+    }

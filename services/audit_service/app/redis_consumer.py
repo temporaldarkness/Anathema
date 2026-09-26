@@ -7,7 +7,7 @@ import redis.asyncio as redis
 
 from .models import AuditEvent
 from .crud import insert_event
-from .config import AUDIT_STREAM_KEY, AUDIT_CONSUMER_GROUP, AUDIT_CONSUMER_NAME
+from .config import AUDIT_STREAM_KEY, AUDIT_CONSUMER_GROUP, AUDIT_CONSUMER_NAME, REDIS_URL
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class RedisAuditConsumer:
 
     async def start(self):
         self.redis = await redis.from_url(
-            os.getenv("REDIS_URL", "redis://redis:6379"),
+            REDIS_URL,
             decode_responses=True,
         )
         await self.redis.ping()

@@ -9,6 +9,7 @@ from .api import router
 from .middleware import AuthAndLogMiddleware
 from .logging_config import setup_logging
 from datetime import datetime, timezone
+from .kafka_consumer import UsageConsumer
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -20,11 +21,15 @@ BOOT_TIME = datetime.now(timezone.utc)
 async def lifespan(app: FastAPI):
     await init_db()
     consumer = RedisAuditConsumer()
+    usage_consumer = UsageConsumer()
     await consumer.start()
+    await usage_consumer.start()
     app.state.consumer = consumer
+    app.state.usage_consumer  = usage_consumer 
     logger.info("Audit Service started")
     yield
     await consumer.stop()
+    await usage_consumer.stop()
     await close_db()
     logger.info("Audit Service stopped")
 

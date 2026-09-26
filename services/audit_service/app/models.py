@@ -35,3 +35,16 @@ class AuditEntryOut(BaseModel):
     success: bool
     error: Optional[str]
     ip: Optional[str]
+
+class UsageEvent(BaseModel):
+    event_id: str
+    timestamp: str
+    source: str
+    model: str
+    tokens_in: int = 0
+    tokens_out: int = 0
+    cost_usd: float = 0.0
+    correlation_id: Optional[str] = None
+    user_id: Optional[int] = None
+    success: bool = True
+    error: Optional[str] = None

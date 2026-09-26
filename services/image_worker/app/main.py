@@ -2,9 +2,10 @@ import asyncio
 import logging
 import httpx
 from .kafka_consumer import ImageRequestConsumer
-from .kafka_producer import ImageResponseProducer
+from .kafka_producer import ImageResponseProducer, UsageProducer
 from .ai_client import generate_image, edit_image
 from .storage_client import StorageClient
+from .pricing import compute_flat_cost
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ logging.basicConfig(
 
 producer = ImageResponseProducer()
 storage = StorageClient()
+usage_producer = UsageProducer()
 
 async def process_request(data):
     corr_id = data.get("correlation_id")
@@ -41,6 +43,19 @@ async def process_request(data):
         else:
             raise ValueError(f"Unknown command: {command}")
         logger.info(f"Image bytes received")
+        
+        n_images = len(images_bytes)
+        cost = compute_flat_cost("gpt-image-2", n_images)
+        await usage_producer.emit(
+            source="image_worker",
+            model="gpt-image-2",
+            tokens_in=0,
+            tokens_out=0,
+            cost_usd=cost,
+            correlation_id=corr_id,
+            user_id=user_id,
+            success=True,
+        )
         
         file_ids = []
         for img_bytes in images:
