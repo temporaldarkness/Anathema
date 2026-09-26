@@ -13,8 +13,9 @@ import redis.asyncio as redis
 import uuid
 from .audit_transport import audit_transport
 from contextlib import asynccontextmanager
+from .discord_client import DiscordClient
 
-from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS
+from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID
 
 CHANNEL_TYPES = {
     0: "Текстовый",
@@ -25,11 +26,16 @@ CHANNEL_TYPES = {
     15: "Форум",
     16: "Медиа",
 }
+TEXT_CHANNEL_TYPES = {0, 5, 15, 16}
+CATEGORY_TYPE = 4
+
+discord_client = DiscordClient()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await audit_transport.start()
     yield
+    await discord_client.close()
     await audit_transport.stop()
     await memory.close()
 
@@ -1219,3 +1225,135 @@ async def dashboard_spending(
         "timeline": _safe(timeline),
         "top_users": _safe(top_users),
     }
+
+@app.get("/api/eyes/channels")
+async def eyes_channels(current_user: UserSession = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    if not DISCORD_GUILD_ID:
+        raise HTTPException(500, "DISCORD_GUILD_ID is not configured")
+
+    try:
+        raw = await discord_client.list_guild_channels(DISCORD_GUILD_ID)
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(e.response.status_code, f"Discord error: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(502, f"Discord unavailable: {e}")
+
+    categories = {c["id"]: c for c in raw if c.get("type") == CATEGORY_TYPE}
+    channels = []
+
+    for c in raw:
+        if c.get("type") not in TEXT_CHANNEL_TYPES:
+            continue
+        parent = categories.get(c.get("parent_id"), {}) if c.get("parent_id") else {}
+        channels.append({
+            "id": c["id"],
+            "name": c.get("name"),
+            "topic": c.get("topic"),
+            "type": c.get("type"),
+            "parent_id": c.get("parent_id"),
+            "parent_name": parent.get("name"),
+            "parent_position": parent.get("position", 999),
+            "position": c.get("position", 0),
+            "nsfw": c.get("nsfw", False),
+        })
+
+    channels.sort(key=lambda x: (x["parent_position"] if x["parent_id"] else -1, x["position"]))
+
+    return {"guild_id": DISCORD_GUILD_ID, "channels": channels}
+
+
+@app.get("/api/eyes/channels/{channel_id}/messages")
+async def eyes_messages(
+    channel_id: int,
+    limit: int = 50,
+    before: Optional[str] = None,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    try:
+        raw = await discord_client.get_channel_messages(channel_id, limit=limit, before=before)
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(e.response.status_code, f"Discord error: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(502, f"Discord unavailable: {e}")
+
+    messages = []
+    for m in raw:
+        author = m.get("author", {})
+        messages.append({
+            "id": m["id"],
+            "content": m.get("content", ""),
+            "timestamp": m.get("timestamp"),
+            "author": {
+                "id": author.get("id"),
+                "username": author.get("username"),
+                "global_name": author.get("global_name"),
+                "bot": author.get("bot", False),
+                "avatar": author.get("avatar"),
+            },
+            "attachments": [
+                {
+                    "url": a["url"],
+                    "filename": a.get("filename"),
+                    "content_type": a.get("content_type"),
+                    "size": a.get("size"),
+                }
+                for a in m.get("attachments", [])
+            ],
+            "embeds": m.get("embeds", []),
+            "referenced_message": (
+                {
+                    "id": m["referenced_message"]["id"],
+                    "content": m["referenced_message"].get("content", "")[:200],
+                    "author_username": m["referenced_message"].get("author", {}).get("username"),
+                }
+                if m.get("referenced_message")
+                else None
+            ),
+        })
+
+    return {"channel_id": channel_id, "messages": messages}
+
+
+class SendMessagePayload(BaseModel):
+    content: str = Field(..., min_length=1, max_length=2000)
+
+
+@app.post("/api/eyes/channels/{channel_id}/send")
+async def eyes_send(
+    channel_id: int,
+    payload: SendMessagePayload,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    try:
+        result = await discord_client.send_message(channel_id, payload.content)
+    except httpx.HTTPStatusError as e:
+        await write_audit(
+            request, current_user,
+            action="send_message", entity_type="channel",
+            entity_id=str(channel_id), success=False,
+            error=f"Discord {e.response.status_code}",
+            details={"content_preview": payload.content[:100]},
+        )
+        raise HTTPException(e.response.status_code, f"Discord error: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(502, f"Discord unavailable: {e}")
+
+    await write_audit(
+        request, current_user,
+        action="send_message", entity_type="channel",
+        entity_id=str(channel_id),
+        details={
+            "content_preview": payload.content[:100],
+            "message_id": result.get("id"),
+        },
+    )
+    return {"ok": True, "message_id": result.get("id")}

@@ -19,7 +19,8 @@
 		ScrollText,
 		LogOut,
 		User,
-		ChevronDown
+		ChevronDown,
+		Eye
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -53,6 +54,12 @@
 			items: [
 				{ href: '/settings', label: 'Настройки', icon: Settings },
 				{ href: '/audit', label: 'Аудит', icon: ScrollText }
+			]
+		},
+		{
+			label: 'Наблюдение',
+			items: [
+				{ href: '/eyes', label: 'Discord глазами', icon: Eye }
 			]
 		}
 	];
