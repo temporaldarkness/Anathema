@@ -23,6 +23,7 @@ MINIO_HOST = os.getenv("MINIO_HOST", "minio")
 MINIO_PORT = os.getenv("MINIO_PORT", "9000")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
 MINIO_RADIO_BUCKET = os.getenv("MINIO_RADIO_BUCKET", "radio-songs")
+RADIO_QUEUE_KEY = os.getenv("RADIO_QUEUE_KEY", "radio:queue")
 
 CACHE_DIR = os.getenv("RADIO_CACHE_DIR", "/var/cache/radio")
 

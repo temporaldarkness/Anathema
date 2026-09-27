@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import { Music, SkipForward, Volume2, Loader2 } from 'lucide-svelte';
-	import { formatDateTime } from '$lib/utils/format';
+	import { Music, SkipForward, Loader2, ArrowRight } from 'lucide-svelte';
 
 	let {
 		now,
@@ -16,16 +15,6 @@
 		skipping?: boolean;
 	} = $props();
 
-	const progress = $derived.by(() => {
-		if (!now?.started_at || !now?.ends_at) return 0;
-		const start = new Date(now.started_at).getTime();
-		const end = new Date(now.ends_at).getTime();
-		const now_t = Date.now();
-		if (now_t <= start) return 0;
-		if (now_t >= end) return 100;
-		return Math.min(100, ((now_t - start) / (end - start)) * 100);
-	});
-
 	let progressTick = $state(0);
 	$effect(() => {
 		const id = setInterval(() => (progressTick = progressTick + 1), 1000);
@@ -37,10 +26,10 @@
 		if (!now?.started_at || !now?.ends_at) return 0;
 		const start = new Date(now.started_at).getTime();
 		const end = new Date(now.ends_at).getTime();
-		const now_t = Date.now();
-		if (now_t <= start) return 0;
-		if (now_t >= end) return 100;
-		return Math.min(100, ((now_t - start) / (end - start)) * 100);
+		const t = Date.now();
+		if (t <= start) return 0;
+		if (t >= end) return 100;
+		return Math.min(100, ((t - start) / (end - start)) * 100);
 	});
 
 	const timeLeft = $derived.by(() => {
@@ -112,6 +101,27 @@
 					class="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-1000 ease-linear"
 					style="width: {liveProgress}%"
 				></div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Далее -->
+	{#if now?.next}
+		<div class="flex items-center gap-2.5 rounded-md border border-dashed bg-muted/30 px-3 py-2">
+			<ArrowRight class="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+			<div class="flex-1 min-w-0">
+				<div class="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+					Далее
+					{#if now.next.from_queue}
+						<span class="text-violet-400 normal-case tracking-normal">· из очереди</span>
+					{/if}
+				</div>
+				<div class="text-sm truncate">
+					<span class="font-medium">{now.next.title}</span>
+					{#if now.next.artist}
+						<span class="text-muted-foreground"> · {now.next.artist}</span>
+					{/if}
+				</div>
 			</div>
 		</div>
 	{/if}

@@ -1696,3 +1696,65 @@ async def radio_normalize_all(
         action="normalize_all", entity_type="radio",
     )
     return {"ok": True}
+
+@app.get("/api/radio/queue")
+async def radio_queue_list(current_user: UserSession = Depends(get_current_user)):
+    return await radio.queue_list()
+
+
+@app.post("/api/radio/queue/{song_id}")
+async def radio_queue_add(
+    song_id: int,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    ok = await radio.queue_add(song_id)
+    if not ok:
+        raise HTTPException(404, "Song not found")
+
+    song = await radio.get_song(song_id)
+    await write_audit(
+        request, current_user,
+        action="queue_add", entity_type="radio_song", entity_id=str(song_id),
+        details={"title": song.get("title") if song else None},
+    )
+    return {"ok": True}
+
+
+@app.delete("/api/radio/queue/{song_id}")
+async def radio_queue_remove(
+    song_id: int,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    ok = await radio.queue_remove(song_id)
+    if not ok:
+        raise HTTPException(404, "Not in queue")
+
+    await write_audit(
+        request, current_user,
+        action="queue_remove", entity_type="radio_song", entity_id=str(song_id),
+    )
+    return {"ok": True}
+
+
+@app.delete("/api/radio/queue")
+async def radio_queue_clear(
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    result = await radio.queue_clear()
+    await write_audit(
+        request, current_user,
+        action="queue_clear", entity_type="radio",
+        details={"removed": result.get("removed", 0)},
+    )
+    return result

@@ -3,9 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, 
 from .auth import verify_api_key
 from .redis_client import get_redis
 from . import crud
-from .player import request_skip
+from .player import request_skip, player
 from .storage import upload_song, delete_song as delete_song_file
 from .utils import probe_duration_seconds, normalize_mp3
+from .queue import push_song, remove_song, clear_queue, list_queue
 import uuid
 import asyncio
 import logging
@@ -98,12 +99,14 @@ async def remove_song(song_id: int, caller: str = Depends(verify_api_key)):
 async def now_playing(caller: str = Depends(verify_api_key)):
     r = await get_redis()
     raw = await r.get("radio:now_playing")
-    if not raw:
-        return {"status": "idle"}
-    try:
-        return json.loads(raw)
-    except Exception:
-        return {"status": "idle"}
+    next_raw = await r.get("radio:next")
+    now = json.loads(raw) if raw else {"status": "idle"}
+    if next_raw:
+        try:
+            now["next"] = json.loads(next_raw)
+        except Exception:
+            pass
+    return now
 
 
 @router.post("/skip")
@@ -170,3 +173,30 @@ async def _normalize_all_bg():
             logger.info(f"Normalize progress: {done+failed}/{total}")
 
     logger.info(f"Normalization finished: {done} ok, {failed} failed")
+
+@router.get("/queue")
+async def get_queue(caller: str = Depends(verify_api_key)):
+    return {"items": await list_queue()}
+
+
+@router.post("/queue/{song_id}")
+async def add_to_queue(song_id: int, caller: str = Depends(verify_api_key)):
+    if not await push_song(song_id):
+        raise HTTPException(404, "Song not found")
+    if player.current_song is None and player.next_song is None:
+        await player.refresh_next()
+    return {"ok": True}
+
+
+@router.delete("/queue/{song_id}")
+async def remove_from_queue(song_id: int, caller: str = Depends(verify_api_key)):
+    removed = await remove_song(song_id)
+    if not removed:
+        raise HTTPException(404, "Not in queue")
+    return {"ok": True}
+
+
+@router.delete("/queue")
+async def clear_queue_endpoint(caller: str = Depends(verify_api_key)):
+    n = await clear_queue()
+    return {"ok": True, "removed": n}

@@ -12,7 +12,7 @@
 	import { formatDateTime, formatBytes } from '$lib/utils/format';
 	import {
 		ArrowLeft, Upload, Trash2, Pencil, Search, Music, FileAudio,
-		Loader2, Clock, RefreshCw
+		Loader2, Clock, RefreshCw, ListPlus, ListX, X, PlayCircle
 	} from 'lucide-svelte';
 
 	let { data } = $props();
@@ -20,8 +20,59 @@
 	let search = $state('');
 	let uploading = $state(false);
 	let uploadProgress = $state(0);
-	
 	let normalizing = $state(false);
+
+	// Очередь
+	let queue = $state<any[]>(data.queue?.items ?? []);
+	let queueingId = $state<number | null>(null);
+	const queuedIds = $derived(new Set(queue.map((q: any) => q.song_id)));
+
+	async function refreshQueue() {
+		try {
+			const r = await fetch('/api/radio/queue');
+			if (r.ok) {
+				const body = await r.json();
+				queue = body.items ?? [];
+			}
+		} catch {}
+	}
+
+	async function addToQueue(song: any) {
+		if (queuedIds.has(song.id)) return;
+		queueingId = song.id;
+		try {
+			const resp = await fetch(`/api/radio/queue/${song.id}`, { method: 'POST' });
+			if (!resp.ok) throw new Error(await resp.text());
+			notify.success(`Следом: ${song.title}`);
+			await refreshQueue();
+		} catch (e: any) {
+			notify.error(e.message ?? 'Не удалось поставить');
+		} finally {
+			queueingId = null;
+		}
+	}
+
+	async function removeFromQueue(songId: number) {
+		try {
+			const resp = await fetch(`/api/radio/queue/${songId}`, { method: 'DELETE' });
+			if (!resp.ok) throw new Error(await resp.text());
+			await refreshQueue();
+		} catch (e: any) {
+			notify.error(e.message ?? 'Не удалось убрать');
+		}
+	}
+
+	async function clearQueue() {
+		if (!confirm('Очистить очередь?')) return;
+		try {
+			const resp = await fetch('/api/radio/queue', { method: 'DELETE' });
+			if (!resp.ok) throw new Error(await resp.text());
+			notify.success('Очередь очищена');
+			await refreshQueue();
+		} catch (e: any) {
+			notify.error(e.message ?? 'Ошибка');
+		}
+	}
 
 	async function normalizeAll() {
 		if (!confirm('Запустить перекодирование всех треков в фоне? Это может занять несколько минут.')) return;
@@ -134,11 +185,10 @@
 				description: ''
 			});
 		}
-		// Сброс input для повторного выбора
 		input.value = '';
 	}
 
-	function removeFromQueue(idx: number) {
+	function removeFileFromQueue(idx: number) {
 		filesToUpload.splice(idx, 1);
 	}
 
@@ -203,7 +253,6 @@
 			</p>
 		</div>
 
-		<!-- Правая часть: обе кнопки в одной группе -->
 		<div class="flex items-center gap-2">
 			<Button variant="outline" onclick={normalizeAll} disabled={normalizing} class="gap-2">
 				{#if normalizing}
@@ -219,6 +268,45 @@
 			</Button>
 		</div>
 	</div>
+
+	<!-- Очередь воспроизведения -->
+	{#if queue.length > 0}
+		<Card class="border-violet-500/30 bg-violet-500/5">
+			<CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0">
+				<CardTitle class="text-sm flex items-center gap-2">
+					<PlayCircle class="h-4 w-4 text-violet-400" />
+					Очередь воспроизведения
+					<Badge variant="outline" class="text-[10px]">{queue.length}</Badge>
+				</CardTitle>
+				<Button variant="ghost" size="sm" onclick={clearQueue} class="gap-1.5 text-xs h-7">
+					<X class="h-3 w-3" /> Очистить
+				</Button>
+			</CardHeader>
+			<CardContent class="pt-0">
+				<ol class="space-y-1">
+					{#each queue as q, i (q.song_id)}
+						<li class="flex items-center gap-2 rounded-md border bg-card px-3 py-1.5 text-sm">
+							<span class="font-mono text-xs text-muted-foreground w-5">{i + 1}.</span>
+							<div class="flex-1 min-w-0">
+								<div class="font-medium truncate">{q.title}</div>
+								{#if q.artist}
+									<div class="text-[11px] text-muted-foreground truncate">{q.artist}</div>
+								{/if}
+							</div>
+							<button
+								type="button"
+								onclick={() => removeFromQueue(q.song_id)}
+								class="text-muted-foreground hover:text-destructive shrink-0"
+								title="Убрать из очереди"
+							>
+								<X class="h-3.5 w-3.5" />
+							</button>
+						</li>
+					{/each}
+				</ol>
+			</CardContent>
+		</Card>
+	{/if}
 
 	<Card>
 		<CardHeader class="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -252,7 +340,7 @@
 							<Table.Head class="w-24">Размер</Table.Head>
 							<Table.Head class="w-20 text-center">Играло</Table.Head>
 							<Table.Head class="w-44">Загружено</Table.Head>
-							<Table.Head class="w-24 text-right">Действия</Table.Head>
+							<Table.Head class="w-28 text-right">Действия</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
@@ -293,6 +381,21 @@
 								</Table.Cell>
 								<Table.Cell class="text-right">
 									<div class="flex justify-end gap-1">
+										<Button
+											variant="ghost"
+											size="icon"
+											onclick={() => addToQueue(s)}
+											disabled={queueingId === s.id || queuedIds.has(s.id)}
+											title={queuedIds.has(s.id) ? 'Уже в очереди' : 'Играть следующим'}
+										>
+											{#if queueingId === s.id}
+												<Loader2 class="h-4 w-4 animate-spin" />
+											{:else if queuedIds.has(s.id)}
+												<ListX class="h-4 w-4 text-violet-400" />
+											{:else}
+												<ListPlus class="h-4 w-4" />
+											{/if}
+										</Button>
 										<Button variant="ghost" size="icon" onclick={() => openEdit(s)}>
 											<Pencil class="h-4 w-4" />
 										</Button>
@@ -315,9 +418,7 @@
 	<Dialog.Content class="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
 		<Dialog.Header>
 			<Dialog.Title>Загрузка треков</Dialog.Title>
-			<Dialog.Description>
-				Можно выбрать сразу несколько .mp3 файлов
-			</Dialog.Description>
+			<Dialog.Description>Можно выбрать сразу несколько .mp3 файлов</Dialog.Description>
 		</Dialog.Header>
 
 		<div class="space-y-4 py-2">
@@ -352,7 +453,7 @@
 								{#if !uploading}
 									<button
 										type="button"
-										onclick={() => removeFromQueue(i)}
+										onclick={() => removeFileFromQueue(i)}
 										class="text-muted-foreground hover:text-destructive"
 									>
 										<Trash2 class="h-3.5 w-3.5" />
@@ -372,10 +473,7 @@
 				<div>
 					<div class="text-xs text-muted-foreground mb-1">Загрузка: {uploadProgress}%</div>
 					<div class="h-1.5 rounded-full bg-muted overflow-hidden">
-						<div
-							class="h-full bg-violet-500 transition-all"
-							style="width: {uploadProgress}%"
-						></div>
+						<div class="h-full bg-violet-500 transition-all" style="width: {uploadProgress}%"></div>
 					</div>
 				</div>
 			{/if}
@@ -385,11 +483,7 @@
 			<Button variant="outline" onclick={() => (uploadDialogOpen = false)} disabled={uploading}>
 				Отмена
 			</Button>
-			<Button
-				onclick={uploadAll}
-				disabled={uploading || filesToUpload.length === 0}
-				class="gap-2"
-			>
+			<Button onclick={uploadAll} disabled={uploading || filesToUpload.length === 0} class="gap-2">
 				{#if uploading}
 					<Loader2 class="h-4 w-4 animate-spin" /> Загрузка...
 				{:else}

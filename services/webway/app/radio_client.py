@@ -69,6 +69,30 @@ class RadioClient:
         )
         resp.raise_for_status()
         return resp.json()
+    
+    async def queue_list(self):
+        resp = await self.client.get("/queue")
+        resp.raise_for_status()
+        return resp.json()
+
+    async def queue_add(self, song_id: int):
+        resp = await self.client.post(f"/queue/{song_id}")
+        if resp.status_code == 404:
+            return False
+        resp.raise_for_status()
+        return True
+
+    async def queue_remove(self, song_id: int):
+        resp = await self.client.delete(f"/queue/{song_id}")
+        if resp.status_code == 404:
+            return False
+        resp.raise_for_status()
+        return True
+
+    async def queue_clear(self):
+        resp = await self.client.delete("/queue")
+        resp.raise_for_status()
+        return resp.json()
 
 
 radio = RadioClient()

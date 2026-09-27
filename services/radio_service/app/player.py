@@ -10,8 +10,9 @@ from .redis_client import get_redis
 from .storage import download_song
 from .crud import (
     pick_random_song, log_history_start, log_history_end,
-    bump_play_count,
+    bump_play_count, get_song
 )
+from .queue import pop_next_song_id
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class ContinuousPlayer:
         self.skip_by: int | None = None
         self.skip_by_username: str | None = None
         self.stopping: bool = False
+        self.next_song: dict | None = None
 
     async def start_ffmpeg(self):
         """Запускает долгоживущий ffmpeg → Icecast."""
@@ -197,19 +199,63 @@ class ContinuousPlayer:
             await self.start_ffmpeg()
 
         return self.skip_requested, played
+    
+    async def _pick_next(self) -> dict | None:
+        queued_id = await pop_next_song_id()
+        while queued_id is not None:
+            song = await get_song(queued_id)
+            if song:
+                song["_from_queue"] = True
+                return song
+            queued_id = await pop_next_song_id()
+
+        song = await pick_random_song(exclude_ids=[])
+        if song:
+            song["_from_queue"] = False
+        return song
+
+
+    async def _publish_next(self, song: dict | None):
+        r = await get_redis()
+        if not song:
+            await r.delete("radio:next")
+            return
+        await r.set("radio:next", json.dumps({
+            "song_id": song["id"],
+            "title": song["title"],
+            "artist": song.get("artist") or "",
+            "duration_sec": song.get("duration_sec"),
+            "from_queue": song.get("_from_queue", False),
+        }))
+
+
+    async def refresh_next(self):
+        self.next_song = await self._pick_next()
+        await self._publish_next(self.next_song)
 
     async def run(self):
         logger.info("Radio player loop starting...")
         await asyncio.sleep(2)
         await self.start_ffmpeg()
+        await self.refresh_next()
+
         while not self.stopping:
             try:
-                song = await pick_random_song(exclude_ids=[])
-                if not song:
+                song = self.next_song
+                if song is None:
+                    await self.refresh_next()
+                    song = self.next_song
+
+                if song is None:
                     logger.warning("No songs in library, waiting...")
                     await self._clear_now_playing()
+                    await self._publish_next(None)
                     await asyncio.sleep(15)
                     continue
+
+                self.next_song = None
+                await self.refresh_next()
+
                 await self._play_song(song)
             except asyncio.CancelledError:
                 raise
@@ -230,12 +276,17 @@ class ContinuousPlayer:
         await self.stop_ffmpeg()
 
 
-# Глобальный экземпляр
 player = ContinuousPlayer()
 
 
 async def player_loop():
-    await player.run()
+    try:
+        await player.run()
+    except asyncio.CancelledError:
+        raise
+    except Exception:
+        logger.exception("player_loop crashed")
+        raise
 
 
 async def skip_command_listener():

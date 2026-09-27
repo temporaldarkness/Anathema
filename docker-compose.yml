@@ -460,6 +460,7 @@ services:
       ICECAST_URL: ${ICECAST_URL}
       WEBWAY_RADIO_CLIENT_KEY: ${WEBWAY_RADIO_CLIENT_KEY}
       RADIO_CACHE_DIR: /var/cache/radio
+      RADIO_QUEUE_KEY: ${RADIO_QUEUE_KEY}
     volumes:
       - radio_cache:/var/cache/radio
     depends_on:

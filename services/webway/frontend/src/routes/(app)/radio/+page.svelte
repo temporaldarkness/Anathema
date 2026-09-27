@@ -83,6 +83,25 @@
 
 	<!-- Now playing (из стора) -->
 	<NowPlaying now={radio.now} onSkip={skip} canSkip={true} {skipping} />
+	{#if radio.now?.next}
+		<div class="rounded-xl border bg-card px-4 py-3 flex items-center gap-3">
+			<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+				<Music class="h-4 w-4 text-muted-foreground" />
+			</div>
+			<div class="flex-1 min-w-0">
+				<div class="text-[10px] uppercase tracking-wider text-muted-foreground">
+					Далее
+					{#if radio.now.next.from_queue}
+						<span class="text-violet-400 ml-1">· из очереди</span>
+					{/if}
+				</div>
+				<div class="text-sm font-medium truncate">{radio.now.next.title}</div>
+				{#if radio.now.next.artist}
+					<div class="text-xs text-muted-foreground truncate">{radio.now.next.artist}</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
 
 	<!-- Player (тоже из стора) -->
 	<div class="rounded-xl border bg-gradient-to-br from-card to-muted/20 p-5">
@@ -116,10 +135,16 @@
 						Нажми, чтобы слушать
 					{/if}
 				</div>
-				<div class="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
-					<ExternalLink class="h-3 w-3" />
+				<a
+					href={streamUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-xs text-muted-foreground hover:text-foreground flex items-center gap-2 mt-0.5 transition-colors group"
+					title="Открыть поток в новой вкладке (например, для VLC)"
+				>
+					<ExternalLink class="h-3 w-3 group-hover:text-violet-400 transition-colors" />
 					<span class="font-mono truncate">{streamUrl}</span>
-				</div>
+				</a>
 			</div>
 
 			<div class="flex items-center gap-2 shrink-0">
