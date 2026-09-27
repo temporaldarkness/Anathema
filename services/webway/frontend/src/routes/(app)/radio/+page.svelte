@@ -6,156 +6,38 @@
 	import NowPlaying from '$lib/components/ui/nowplaying';
 	import { notify } from '$lib/utils/toast';
 	import { formatDateTime } from '$lib/utils/format';
+	import { radio } from '$lib/radio.svelte';
 	import {
-		Radio as RadioIcon, Volume2, Music, ExternalLink, Library,
-		Loader2
+		Radio as RadioIcon, Volume2, Music, ExternalLink, Library, Loader2
 	} from 'lucide-svelte';
 
 	let { data } = $props();
 
-	let audioEl: HTMLAudioElement | null = $state(null);
-	let playing = $state(false);
-	let reconnecting = $state(false);
-	let volume = $state(0.7);
-	let skipping = $state(false);
-	let now = $state(data.now);
 	let history = $state(data.history);
+	let skipping = $state(false);
 
-	let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-	let lastCurrentTime = 0;
-	let lastProgressAt = Date.now();
+	// Локальный стейт для input[type=range] — синхронизируется со стором
+	let volume = $state(radio.volume);
 
-	const streamUrl = '/radio/stream';
+	// Плеер уже мог играть до захода на страницу — подтянем now
+	$effect(() => {
+		radio.refreshNow();
+	});
 
+	// Volume в стор
+	$effect(() => {
+		radio.setVolume(volume);
+	});
+
+	// История эфира — обновляем раз в 5 сек
 	$effect(() => {
 		const id = setInterval(async () => {
 			try {
-				const [nowRes, histRes] = await Promise.all([
-					fetch('/api/radio/now'),
-					fetch('/api/radio/history?limit=20')
-				]);
-				if (nowRes.ok) now = await nowRes.json();
+				const histRes = await fetch('/api/radio/history?limit=20');
 				if (histRes.ok) history = await histRes.json();
 			} catch {}
 		}, 5000);
 		return () => clearInterval(id);
-	});
-
-	$effect(() => {
-		if (audioEl) audioEl.volume = volume;
-	});
-
-	function buildStreamUrl() {
-		// Anti-cache: случайный суффикс, чтобы браузер гарантированно шёл за новым потоком
-		return `${streamUrl}?_=${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-	}
-
-	function cancelReconnect() {
-		if (reconnectTimer) {
-			clearTimeout(reconnectTimer);
-			reconnectTimer = null;
-		}
-	}
-
-	async function startStream() {
-		if (!audioEl) return;
-		cancelReconnect();
-		reconnecting = true;
-		try {
-			// Полностью сбрасываем элемент — иначе браузер может держать
-			// подвисшее TCP-соединение к Icecast
-			audioEl.pause();
-			audioEl.removeAttribute('src');
-			audioEl.load();
-			await new Promise((r) => setTimeout(r, 120));
-
-			audioEl.src = buildStreamUrl();
-			audioEl.load();
-			await audioEl.play();
-
-			playing = true;
-			lastProgressAt = Date.now();
-			lastCurrentTime = 0;
-		} catch (e) {
-			console.warn('stream start failed', e);
-			playing = false;
-		} finally {
-			reconnecting = false;
-		}
-	}
-
-	function stopStream() {
-		if (!audioEl) return;
-		cancelReconnect();
-		audioEl.pause();
-		audioEl.removeAttribute('src');
-		audioEl.load();
-		playing = false;
-	}
-
-	function scheduleReconnect(delay = 300) {
-		if (!playing) return;
-		if (reconnecting) return;
-		if (reconnectTimer) return;
-		reconnectTimer = setTimeout(() => {
-			reconnectTimer = null;
-			if (!playing) return;
-			startStream();
-		}, delay);
-	}
-
-	function togglePlay() {
-		if (playing) stopStream();
-		else startStream();
-	}
-
-	$effect(() => {
-		if (!playing || !audioEl) return;
-		const id = setInterval(() => {
-			if (!playing || !audioEl) return;
-			if (audioEl.paused) {
-				// Мы считаем что играем, но элемент на паузе — значит завис
-				scheduleReconnect(200);
-				return;
-			}
-			const t = audioEl.currentTime;
-			if (t > lastCurrentTime) {
-				lastCurrentTime = t;
-				lastProgressAt = Date.now();
-			} else if (Date.now() - lastProgressAt > 2500) {
-				// Не движется 2.5 сек — переподключаемся
-				scheduleReconnect(150);
-			}
-		}, 1200);
-		return () => clearInterval(id);
-	});
-
-	$effect(() => {
-		if (!audioEl) return;
-
-		const onEnded = () => scheduleReconnect(150);
-		const onError = () => scheduleReconnect(400);
-		const onStalled = () => scheduleReconnect(800);
-		const onPlaying = () => {
-			lastProgressAt = Date.now();
-		};
-		const onPause = () => {
-			// pause может быть вызван нашими же startStream — не считаем за зависание
-		};
-
-		audioEl.addEventListener('ended', onEnded);
-		audioEl.addEventListener('error', onError);
-		audioEl.addEventListener('stalled', onStalled);
-		audioEl.addEventListener('playing', onPlaying);
-		audioEl.addEventListener('pause', onPause);
-
-		return () => {
-			audioEl.removeEventListener('ended', onEnded);
-			audioEl.removeEventListener('error', onError);
-			audioEl.removeEventListener('stalled', onStalled);
-			audioEl.removeEventListener('playing', onPlaying);
-			audioEl.removeEventListener('pause', onPause);
-		};
 	});
 
 	async function skip() {
@@ -164,18 +46,15 @@
 			const resp = await fetch('/api/radio/skip', { method: 'POST' });
 			if (!resp.ok) throw new Error(await resp.text());
 			notify.success('Трек пропущен');
-			setTimeout(async () => {
-				try {
-					const r = await fetch('/api/radio/now');
-					if (r.ok) now = await r.json();
-				} catch {}
-			}, 500);
+			setTimeout(() => radio.refreshNow(), 500);
 		} catch (e: any) {
 			notify.error(e.message ?? 'Не удалось пропустить');
 		} finally {
 			skipping = false;
 		}
 	}
+
+	const streamUrl = '/radio/stream';
 </script>
 
 <svelte:head>
@@ -202,20 +81,20 @@
 		</a>
 	</div>
 
-	<!-- Now playing -->
-	<NowPlaying now={now} onSkip={skip} canSkip={true} {skipping} />
+	<!-- Now playing (из стора) -->
+	<NowPlaying now={radio.now} onSkip={skip} canSkip={true} {skipping} />
 
-	<!-- Player -->
+	<!-- Player (тоже из стора) -->
 	<div class="rounded-xl border bg-gradient-to-br from-card to-muted/20 p-5">
 		<div class="flex items-center gap-4">
 			<Button
-				onclick={togglePlay}
-				disabled={reconnecting}
+				onclick={() => radio.toggle()}
+				disabled={radio.reconnecting}
 				class="h-14 w-14 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 border-0"
 			>
-				{#if reconnecting}
+				{#if radio.reconnecting}
 					<Loader2 class="h-6 w-6 animate-spin text-white" />
-				{:else if playing}
+				{:else if radio.playing}
 					<svg class="h-6 w-6 fill-white" viewBox="0 0 24 24">
 						<rect x="6" y="5" width="4" height="14" rx="1" />
 						<rect x="14" y="5" width="4" height="14" rx="1" />
@@ -226,11 +105,12 @@
 					</svg>
 				{/if}
 			</Button>
+
 			<div class="flex-1 min-w-0">
 				<div class="text-sm font-medium">
-					{#if reconnecting}
+					{#if radio.reconnecting}
 						Переподключение…
-					{:else if playing}
+					{:else if radio.playing}
 						Слушаешь эфир
 					{:else}
 						Нажми, чтобы слушать
@@ -254,8 +134,6 @@
 				/>
 			</div>
 		</div>
-
-		<audio bind:this={audioEl} preload="none"></audio>
 	</div>
 
 	<!-- History -->

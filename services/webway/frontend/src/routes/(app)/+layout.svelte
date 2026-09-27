@@ -7,6 +7,9 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { ThemeToggle } from '$lib/components/ui/themetoggle';
 	import { ProfileDialog } from '$lib/components/ui/profiledialog';
+	import { onMount } from 'svelte';
+	import { radio } from '$lib/radio.svelte';
+	import MiniPlayer from '$lib/components/ui/miniplayer';
 	import {
 		LayoutDashboard,
 		Brain,
@@ -27,7 +30,20 @@
 
 	let { data, children } = $props();
 	
+	let audioEl: HTMLAudioElement | null = $state(null);
+	
 	let profileOpen = $state(false);
+	
+	$effect(() => {
+		if (!radio.playing) return;
+		const id = setInterval(() => radio.refreshNow(), 5000);
+		radio.refreshNow();
+		return () => clearInterval(id);
+	});
+	
+	$effect(() => {
+		if (audioEl) radio.attach(audioEl);
+	});
 
 	const navGroups = [
 		{
@@ -226,13 +242,15 @@
 			</header>
 
 			<!-- Content -->
-			<main class="flex-1 p-6">
+			<main class="flex-1 p-6 pb-24">
 				{#key page.url.pathname}
 					<div in:fade={{ duration: 150 }}>
 						{@render children()}
 					</div>
 				{/key}
 			</main>
+			<audio bind:this={audioEl} preload="none"></audio>
+			<MiniPlayer />
 		</div>
 	</div>
 	<ProfileDialog bind:open={profileOpen} user={data.user} />
