@@ -1,7 +1,7 @@
 import aioboto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
-from .config import MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET, MINIO_SECURE, MINIO_HOST, MINIO_PORT
+from .config import MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET, MINIO_SECURE, MINIO_HOST, MINIO_PORT, MINIO_FAVORITES_BUCKET
 import uuid
 import logging
 from datetime import datetime, timezone
@@ -138,6 +138,8 @@ async def list_files(limit: int = 60, offset: int = 0) -> dict:
 
         total = len(all_objects)
         page_items = all_objects[offset: offset + limit]
+        
+        favorite_keys = await list_favorite_keys()
 
         items = []
         for obj in page_items:
@@ -153,6 +155,7 @@ async def list_files(limit: int = 60, offset: int = 0) -> dict:
                 "content_type": head.get("ContentType"),
                 "last_modified": head["LastModified"].isoformat() if head.get("LastModified") else None,
                 "metadata": dict(head.get("Metadata", {})),
+                "is_favorite": key in favorite_keys,
             }
 
             try:
@@ -182,3 +185,91 @@ async def delete_file(file_id: str) -> bool:
         except ClientError:
             pass
         return True
+
+async def copy_to_favorites(file_id: str) -> bool:
+    async with session.client("s3", **_client_kwargs()) as s3:
+        try:
+            try:
+                await s3.head_bucket(Bucket=MINIO_FAVORITES_BUCKET)
+            except Exception:
+                await s3.create_bucket(
+                    Bucket=MINIO_FAVORITES_BUCKET,
+                    CreateBucketConfiguration={"LocationConstraint": ""},
+                )
+            await s3.copy_object(
+                Bucket=MINIO_FAVORITES_BUCKET,
+                Key=file_id,
+                CopySource={"Bucket": MINIO_BUCKET, "Key": file_id},
+            )
+            try:
+                await s3.copy_object(
+                    Bucket=MINIO_FAVORITES_BUCKET,
+                    Key=file_id,
+                    CopySource={"Bucket": MINIO_BUCKET, "Key": f"{file_id}.meta.json"},
+                )
+            except ClientError:
+                pass
+            return True
+        except Exception as e:
+            logger.error(f"copy_to_favorites({file_id}) failed: {e}")
+            return False
+
+
+async def remove_from_favorites(file_id: str) -> bool:
+    async with session.client("s3", **_client_kwargs()) as s3:
+        try:
+            await s3.delete_object(Bucket=MINIO_FAVORITES_BUCKET, Key=file_id)
+            try:
+                await s3.delete_object(Bucket=MINIO_FAVORITES_BUCKET, Key=f"{file_id}.meta.json")
+            except ClientError:
+                pass
+            return True
+        except Exception:
+            return False
+
+
+async def list_favorite_keys() -> set[str]:
+    keys: set[str] = set()
+    async with session.client("s3", **_client_kwargs()) as s3:
+        try:
+            paginator = s3.get_paginator("list_objects_v2")
+            async for page in paginator.paginate(Bucket=MINIO_FAVORITES_BUCKET):
+                for obj in page.get("Contents", []) or []:
+                    keys.add(obj["Key"])
+        except Exception:
+            pass
+    return keys
+
+
+async def list_favorites(limit: int = 60, offset: int = 0):
+    async with session.client("s3", **_client_kwargs()) as s3:
+        all_objects = []
+        paginator = s3.get_paginator("list_objects_v2")
+        async for page in paginator.paginate(Bucket=MINIO_FAVORITES_BUCKET):
+            for obj in page.get("Contents", []) or []:
+                all_objects.append(obj)
+
+        all_objects.sort(
+            key=lambda o: o.get("LastModified") or datetime.min.replace(tzinfo=timezone.utc),
+            reverse=True,
+        )
+        total = len(all_objects)
+        page_items = all_objects[offset: offset + limit]
+
+        items = []
+        for obj in page_items:
+            key = obj["Key"]
+            try:
+                head = await s3.head_object(Bucket=MINIO_FAVORITES_BUCKET, Key=key)
+                items.append({
+                    "file_id": key,
+                    "size": head.get("ContentLength"),
+                    "content_type": head.get("ContentType"),
+                    "last_modified": head.get("LastModified").isoformat() if head.get("LastModified") else None,
+                    "metadata": head.get("Metadata", {}),
+                    "is_favorite": True,
+                })
+            except Exception:
+                continue
+
+        return {"items": items, "total": total, "limit": limit, "offset": offset}

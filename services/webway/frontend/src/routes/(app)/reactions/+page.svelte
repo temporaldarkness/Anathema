@@ -14,10 +14,10 @@
 	import EmoteSelect from '$lib/components/ui/emoteselect';
 	import UserSelect from '$lib/components/ui/userselect';
 	import { Zap, Plus, Trash2, Search, Hash, User as UserIcon, Info } from 'lucide-svelte';
-
+	import { page } from '$app/state';
+	
 	let { data } = $props();
 
-	let activeTab = $state<'keywords' | 'users'>('keywords');
 	let refreshing = $state(false);
 
 	let kwSearch = $state('');
@@ -41,6 +41,10 @@
 	);
 	const usersByUid = $derived(
 		Object.fromEntries((data.users ?? []).map((u: any) => [u.uid, u]))
+	);
+	
+	let activeTab = $state<'keywords' | 'users'>(
+		(page.url.searchParams.get('tab') as 'keywords' | 'users') ?? 'keywords'
 	);
 
 	const filteredKeywords = $derived(

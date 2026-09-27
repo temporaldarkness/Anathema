@@ -12,11 +12,20 @@
 	import { notify } from '$lib/utils/toast';
 	import { extractError } from '$lib/utils/api';
 	import ChipInput from '$lib/components/ui/chipinput';
+	import UserTriviaDialog from '$lib/components/ui/usertriviadialog';
 	import * as Select from '$lib/components/ui/select';
 	import { GENDERS, ORIENTATIONS, labelForGender, labelForOrientation } from '$lib/constants/enums';
-	import { Users as UsersIcon, Plus, Trash2, Pencil, Search, Shield, AlertTriangle } from 'lucide-svelte';
+	import { Users as UsersIcon, Plus, Trash2, Pencil, Search, Shield, AlertTriangle, NotebookPen } from 'lucide-svelte';
 
 	let { data } = $props();
+	
+	let triviaUser = $state<any>(null);
+	let triviaOpen = $state(false);
+
+	function openTrivia(u: any) {
+		triviaUser = u;
+		triviaOpen = true;
+	}
 
 	let search = $state('');
 	let refreshing = $state(false);
@@ -28,8 +37,8 @@
 		username: '',
 		user_id: '',
 		aliases: [] as string[],
-		gender: '0',
-		orientation: '0',
+		gender: '',
+		orientation: '',
 		allowed: false
 	});
 	let submitting = $state(false);
@@ -321,6 +330,9 @@
 								</Table.Cell>
 								<Table.Cell class="text-right">
 									<div class="flex justify-end gap-1">
+										<Button variant="ghost" size="icon" onclick={() => openTrivia(u)} title="Заметки">
+											<NotebookPen class="h-4 w-4" />
+										</Button>
 										<Button variant="ghost" size="icon" onclick={() => openEdit(u)}>
 											<Pencil class="h-4 w-4" />
 										</Button>
@@ -342,6 +354,10 @@
 		</CardContent>
 	</Card>
 </div>
+
+{#if triviaUser}
+    <UserTriviaDialog bind:open={triviaOpen} user={triviaUser} canEdit={data.user?.is_admin} />
+{/if}
 
 <!-- Диалог создания/редактирования -->
 <Dialog.Root bind:open={editDialogOpen}>
@@ -439,13 +455,15 @@
 						<Select.Trigger id="f-gender-select" class="w-full" aria-label="Пол">
 							{labelForGender(form.gender)}
 						</Select.Trigger>
-						<Select.Content>
-							{#each GENDERS as g}
-								<Select.Item value={String(g.value)} label={g.label}>
-									{g.label}
-								</Select.Item>
-							{/each}
-						</Select.Content>
+						<Select.Portal>
+							<Select.Content>
+								{#each GENDERS as g}
+									<Select.Item value={String(g.value)} label={g.label}>
+										{g.label}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Portal>
 					</Select.Root>
 				</div>
 
@@ -493,7 +511,7 @@
 			<AlertDialog.Title>Удалить пользователя?</AlertDialog.Title>
 			<AlertDialog.Description>
 				Пользователь <span class="font-mono">{deleteTargetUid}</span> будет удалён вместе со
-				связанными реакциями.
+				связанными реакциями и фактами.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>

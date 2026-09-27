@@ -77,6 +77,19 @@ async def init_db():
             )
         """)
         
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_trivia (
+                id SERIAL PRIMARY KEY,
+                user_uid TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+                kind TEXT NOT NULL CHECK (kind IN ('fact', 'rule')),
+                content TEXT NOT NULL,
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        """)
+        await conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_trivia_user ON user_trivia (user_uid, kind)"
+        )
+        
         for key, default_value in DEFAULT_SETTINGS.items():
             exists = await conn.fetchval("SELECT 1 FROM settings WHERE key = $1", key)
             if not exists:

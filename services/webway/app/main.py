@@ -53,8 +53,14 @@ class UserSession(BaseModel):
     def coerce_user_id(cls, v):
         return str(v) if v is not None else v
 
+class BatchUsersPayload(BaseModel):
+    ids: list[int]
+
 class LTMItem(BaseModel):
     fact: str
+
+class LTMUpdatePayload(BaseModel):
+    fact: str = Field(..., min_length=1, max_length=2000)
 
 class ChannelPayload(BaseModel):
     uid: str = Field(..., min_length=1, max_length=64)
@@ -346,6 +352,42 @@ async def delete_ltm(
         await write_audit(
             request, current_user,
             action="delete", entity_type="ltm", entity_id=fact_id,
+            success=False, error=str(e),
+        )
+        raise
+
+@app.put("/api/ltm/{fact_id}")
+async def update_ltm_api(
+    fact_id: int,
+    payload: LTMUpdatePayload,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.put(
+                f"{MEMORY_SERVICE_URL}/ltm/{fact_id}",
+                json=payload.model_dump(),
+                headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+            )
+            if resp.status_code == 404:
+                raise HTTPException(404, "Fact not found")
+            resp.raise_for_status()
+            result = resp.json()
+        await write_audit(
+            request, current_user,
+            action="update", entity_type="ltm", entity_id=str(fact_id),
+            details={"preview": payload.fact[:100]},
+        )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        await write_audit(
+            request, current_user, action="update",
+            entity_type="ltm", entity_id=str(fact_id),
             success=False, error=str(e),
         )
         raise
@@ -1016,11 +1058,18 @@ async def reset_setting_api(
 async def gallery_list(
     limit: int = 60,
     offset: int = 0,
+    favorites_only: bool = False,
     current_user: UserSession = Depends(get_current_user),
 ):
+    url = (
+        f"{STORAGE_SERVICE_URL}/favorites"
+        if favorites_only
+        else f"{STORAGE_SERVICE_URL}/files"
+    )
+    
     async with httpx.AsyncClient() as client:
         resp = await client.get(
-            f"{STORAGE_SERVICE_URL}/files",
+            url,
             params={"limit": limit, "offset": offset},
             headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY},
         )
@@ -1318,9 +1367,9 @@ async def eyes_messages(
 
     return {"channel_id": channel_id, "messages": messages}
 
-
 class SendMessagePayload(BaseModel):
     content: str = Field(..., min_length=1, max_length=2000)
+    reply_to: str | None = None
 
 
 @app.post("/api/eyes/channels/{channel_id}/send")
@@ -1334,7 +1383,7 @@ async def eyes_send(
         raise HTTPException(403, "Admin privileges required")
 
     try:
-        result = await discord_client.send_message(channel_id, payload.content)
+        result = await discord_client.send_message(channel_id, payload.content, reply_to=payload.reply_to)
     except httpx.HTTPStatusError as e:
         await write_audit(
             request, current_user,
@@ -1357,3 +1406,135 @@ async def eyes_send(
         },
     )
     return {"ok": True, "message_id": result.get("id")}
+
+class TriviaCreatePayload(BaseModel):
+    kind: str = Field(..., pattern="^(fact|rule)$")
+    content: str = Field(..., min_length=1, max_length=1000)
+
+
+@app.get("/api/users/{uid}/trivia")
+async def get_trivia_proxy(uid: str, current_user: UserSession = Depends(get_current_user)):
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{MEMORY_SERVICE_URL}/users/{uid}/trivia",
+            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+@app.post("/api/users/{uid}/trivia")
+async def add_trivia_proxy(
+    uid: str,
+    payload: TriviaCreatePayload,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{MEMORY_SERVICE_URL}/users/{uid}/trivia",
+            json=payload.model_dump(),
+            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+        )
+        resp.raise_for_status()
+        result = resp.json()
+    await write_audit(
+        request, current_user,
+        action="create", entity_type="trivia", entity_id=str(result["id"]),
+        details={"user_uid": uid, "kind": payload.kind},
+    )
+    return result
+
+
+@app.delete("/api/trivia/{item_id}")
+async def delete_trivia_proxy(
+    item_id: int,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    async with httpx.AsyncClient() as client:
+        resp = await client.delete(
+            f"{MEMORY_SERVICE_URL}/trivia/{item_id}",
+            headers={"X-API-Key": WEBWAY_MEMORY_CLIENT_KEY},
+        )
+        if resp.status_code == 404:
+            raise HTTPException(404, "Item not found")
+        resp.raise_for_status()
+    await write_audit(
+        request, current_user,
+        action="delete", entity_type="trivia", entity_id=str(item_id),
+    )
+    return {"ok": True}
+
+@app.post("/api/gallery/{file_id}/favorite")
+async def gallery_favorite(
+    file_id: str,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{STORAGE_SERVICE_URL}/file/{file_id}/favorite",
+            headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY},
+        )
+        resp.raise_for_status()
+    await write_audit(
+        request, current_user,
+        action="favorite", entity_type="file", entity_id=file_id,
+    )
+    return {"ok": True}
+
+
+@app.delete("/api/gallery/{file_id}/favorite")
+async def gallery_unfavorite(
+    file_id: str,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    async with httpx.AsyncClient() as client:
+        resp = await client.delete(
+            f"{STORAGE_SERVICE_URL}/file/{file_id}/favorite",
+            headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY},
+        )
+        resp.raise_for_status()
+    await write_audit(
+        request, current_user,
+        action="unfavorite", entity_type="file", entity_id=file_id,
+    )
+    return {"ok": True}
+
+
+@app.post("/api/discord/users/batch")
+async def discord_users_batch(
+    payload: BatchUsersPayload,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    ids = payload.ids[:100]
+    if not ids:
+        return {"users": {}}
+    try:
+        users = await discord_client.batch_get_users(ids)
+    except Exception as e:
+        raise HTTPException(502, f"Discord unavailable: {e}")
+    return {
+        "users": {
+            str(uid): {
+                "id": u["id"],
+                "username": u["username"],
+                "global_name": u.get("global_name"),
+                "avatar": u.get("avatar"),
+                "bot": u.get("bot", False),
+            }
+            for uid, u in users.items()
+        }
+    }

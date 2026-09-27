@@ -93,6 +93,7 @@ services:
         sleep 5;
         mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
         mc mb --ignore-existing myminio/images;
+        mc mb --ignore-existing myminio/images-favorites;
         mc ilm rule add myminio/images --expire-days 1 || true;
       "
     restart: "no"
@@ -166,6 +167,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_FAVORITES_BUCKET: ${MINIO_FAVORITES_BUCKET}
       MINIO_SECURE: ${MINIO_SECURE}
       MINIO_HOST: ${MINIO_HOST}
       MINIO_PORT: ${MINIO_PORT}
@@ -228,6 +230,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_FAVORITES_BUCKET: ${MINIO_FAVORITES_BUCKET}
       MINIO_SECURE: ${MINIO_SECURE}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
       KAFKA_GROUP_IMAGE_WORKER: ${KAFKA_GROUP_IMAGE_WORKER}

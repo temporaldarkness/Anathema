@@ -3,14 +3,15 @@ from fastapi import FastAPI, HTTPException, Query
 from .db import init_db, close_db
 from .kafka_producer import close_producer, publish_cache_invalidation
 from .redis_client import close_redis
-from .models import ChannelBase, EmoteBase, KeywordReactionCreate, UserReactionCreate, Setting, UserBase, LTMItemCreate
+from .models import ChannelBase, EmoteBase, KeywordReactionCreate, UserReactionCreate, Setting, UserBase, LTMItemCreate, LTMItemUpdate, TriviaItemCreate, TriviaItemUpdate
 from .crud_channels import get_channels, get_channel, get_channel_discord, upsert_channel, delete_channel
 from .crud_emotes import get_emotes, get_emote, upsert_emote, delete_emote
 from .crud_keywords import get_keywords, add_keyword, delete_keyword
-from .crud_ltm import get_facts, add_fact, delete_fact
+from .crud_ltm import get_facts, add_fact, delete_fact, update_fact
 from .crud_settings import get_settings, get_setting, upsert_setting, delete_setting
 from .crud_user_reactions import get_user_reactions, add_user_reaction, delete_user_reaction
 from .crud_users import get_users, get_user, get_user_discord, upsert_user, delete_user, UserConflictError
+from .crud_trivia import get_user_trivia, add_trivia, update_trivia, delete_trivia
 from .config import DEFAULT_SETTINGS, MEMORY_CACHE_TTL_SECONDS
 from .auth import verify_api_key
 from .middleware import AuthAndLogMiddleware
@@ -130,18 +131,29 @@ async def list_facts():
     return await get_facts()
 
 @app.post("/ltm")
-async def update_fact(fact: LTMItemCreate):
+async def update_fact_endpoint(fact: LTMItemCreate):
     new_fact = await add_fact(fact)
     await publish_cache_invalidation("fact", "update", new_fact.id)
     return new_fact
 
 @app.delete("/ltm/{fact_id}")
-async def remove_fact(fact_id: int):
+async def remove_fact_endpoint(fact_id: int):
     deleted = await delete_fact(fact_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Fact not found")
     await publish_cache_invalidation("fact", "delete", fact_id)
     return {"ok": True}
+
+@app.put("/ltm/{fact_id}")
+async def update_ltm_endpoint(
+    fact_id: int,
+    payload: LTMItemUpdate,
+):
+    result = await update_fact(fact_id, payload.fact)
+    if not result:
+        raise HTTPException(404, "Fact not found")
+    await publish_cache_invalidation("fact", "update", fact_id)
+    return result
 
 
 @app.get("/settings")
@@ -237,4 +249,38 @@ async def remove_user(uid: str):
     if not deleted:
         raise HTTPException(status_code=404, detail="User not found")
     await publish_cache_invalidation("user", "delete", uid)
+    return {"ok": True}
+
+@app.get("/users/{uid}/trivia")
+async def user_trivia_list(uid: str):
+    return await get_user_trivia(uid)
+
+
+@app.post("/users/{uid}/trivia")
+async def user_trivia_add(
+    uid: str,
+    payload: TriviaItemCreate
+):
+    result = await add_trivia(uid, payload.kind, payload.content)
+    if not result:
+        raise HTTPException(404, "User not found")
+    await publish_cache_invalidation("trivia", "update", uid)
+    return result
+
+
+@app.put("/trivia/{item_id}")
+async def trivia_update(
+    item_id: int,
+    payload: TriviaItemUpdate
+):
+    result = await update_trivia(item_id, payload.content)
+    if not result:
+        raise HTTPException(404, "Item not found")
+    return result
+
+
+@app.delete("/trivia/{item_id}")
+async def trivia_delete(item_id: int):
+    if not await delete_trivia(item_id):
+        raise HTTPException(404, "Item not found")
     return {"ok": True}

@@ -1,5 +1,5 @@
 from typing import List, Optional, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 class LTMItem(BaseModel):
@@ -9,6 +9,18 @@ class LTMItem(BaseModel):
 
 class LTMItemCreate(BaseModel):
     fact: str
+
+class LTMItemUpdate(BaseModel):
+    fact: str = Field(..., min_length=1, max_length=2000)
+
+class TriviaItemCreate(BaseModel):
+    kind: str = Field(..., pattern="^(fact|rule)$")
+    content: str = Field(..., min_length=1, max_length=1000)
+
+
+class TriviaItemUpdate(BaseModel):
+    content: str = Field(..., min_length=1, max_length=1000)
+
 
 class UserBase(BaseModel):
     uid: str

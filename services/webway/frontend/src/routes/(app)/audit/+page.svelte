@@ -34,7 +34,7 @@
 	const ENTITY_OPTIONS = [
 		'all', 'user', 'channel', 'emote', 'ltm', 'setting', 'keyword', 'user_reaction', 'file'
 	];
-	const ACTION_OPTIONS = ['all', 'create', 'update', 'delete', 'reset', 'upsert'];
+	const ACTION_OPTIONS = ['all', 'create', 'update', 'delete', 'reset', 'upsert', 'favorite', 'unfavorite'];
 	const SOURCE_OPTIONS = ['all', 'webway', 'gateway', 'admin_service'];
 
 	function updateParam(key: string, value: string | null) {
@@ -79,6 +79,10 @@
 				return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
 			case 'upsert':
 				return 'bg-violet-500/15 text-violet-400 border-violet-500/30';
+			case 'favorite':
+				return 'bg-pink-500/15 text-pink-400 border-pink-500/30';
+			case 'unfavorite':
+				return 'bg-pink-500/15 text-pink-400 border-pink-500/30';
 			default:
 				return '';
 		}

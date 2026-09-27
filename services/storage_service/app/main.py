@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Query
 from fastapi.responses import Response
 
-from .storage import save_file, get_file, get_file_meta, list_files, delete_file
+from .storage import save_file, get_file, get_file_meta, list_files, delete_file, list_favorites, copy_to_favorites, remove_from_favorites
 from .middleware import AuthAndLogMiddleware
 
 logger = logging.getLogger(__name__)
@@ -75,3 +75,23 @@ async def health():
         "status": "ok",
         "uptime_seconds": int((datetime.now(timezone.utc) - BOOT_TIME).total_seconds()),
     }
+
+@app.post("/file/{file_id}/favorite")
+async def favorite_file_endpoint(file_id: str):
+    if not await copy_to_favorites(file_id):
+        raise HTTPException(500, "Failed to copy to favorites")
+    return {"ok": True}
+
+
+@app.delete("/file/{file_id}/favorite")
+async def unfavorite_file_endpoint(file_id: str):
+    await remove_from_favorites(file_id)
+    return {"ok": True}
+
+
+@app.get("/favorites")
+async def list_favorites_endpoint(
+    limit: int = Query(60, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    return await list_favorites(limit=limit, offset=offset)

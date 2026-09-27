@@ -49,3 +49,21 @@ async def delete_fact(fact_id: int) -> bool:
             await redis_client.delete('ltm:all')
             return True
     return False
+
+async def update_fact(fact_id: int, new_text: str):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "UPDATE long_term_memory SET fact = $1 WHERE id = $2 "
+            "RETURNING id, fact, created_at",
+            new_text, fact_id,
+        )
+    if not row:
+        return None
+    redis_client = await get_redis()
+    await redis_client.delete("ltm:all")
+    return {
+        "id": row["id"],
+        "fact": row["fact"],
+        "created_at": row["created_at"].isoformat(),
+    }

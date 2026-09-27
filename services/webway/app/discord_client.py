@@ -1,6 +1,7 @@
 import logging
 import httpx
 from .config import DISCORD_TOKEN
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +44,30 @@ class DiscordClient:
         resp.raise_for_status()
         return resp.json()
 
-    async def send_message(self, channel_id: int, content: str):
+    async def send_message(self, channel_id: int, content: str, reply_to: str | None = None):
+        payload: dict = {"content": content}
+        if reply_to:
+            payload["message_reference"] = {"message_id": reply_to}
+            
         resp = await self.client.post(
             f"/channels/{channel_id}/messages",
-            json={"content": content},
+            json=payload,
         )
         resp.raise_for_status()
         return resp.json()
 
     async def close(self):
         await self.client.aclose()
+    
+    async def batch_get_users(self, user_ids: list[int]):
+        async def one(uid):
+            try:
+                r = await self.client.get(f"/users/{uid}")
+                if r.status_code == 200:
+                    return uid, r.json()
+            except Exception:
+                pass
+            return uid, None
+
+        results = await asyncio.gather(*(one(u) for u in user_ids))
+        return {uid: data for uid, data in results if data}

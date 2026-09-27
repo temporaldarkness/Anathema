@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import { Textarea } from '$lib/components/ui/textarea';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -8,7 +9,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { invalidateAll } from '$app/navigation';
 	import { notify } from '$lib/utils/toast';
-	import { Brain, Plus, Trash2, Search } from 'lucide-svelte';
+	import { Brain, Plus, Trash2, Search, Pencil } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -16,8 +17,9 @@
 	let currentPage = $state(1);
 	const pageSize = 20;
 
-	let addDialogOpen = $state(false);
-	let newFact = $state('');
+	let dialogOpen = $state(false);
+	let editingId = $state<number | null>(null);
+	let factText = $state('');
 	let submitting = $state(false);
 
 	let deleteTargetId = $state<number | null>(null);
@@ -45,22 +47,35 @@
 		}
 	}
 
-	async function addFact() {
-		if (!newFact.trim()) return;
+	function openCreate() {
+		editingId = null;
+		factText = '';
+		dialogOpen = true;
+	}
+
+	function openEdit(item: any) {
+		editingId = item.id;
+		factText = item.fact;
+		dialogOpen = true;
+	}
+
+	async function submitForm() {
+		if (!factText.trim()) return;
 		submitting = true;
 		try {
-			const resp = await fetch('/api/ltm', {
-				method: 'POST',
+			const url = editingId ? `/api/ltm/${editingId}` : '/api/ltm';
+			const method = editingId ? 'PUT' : 'POST';
+			const resp = await fetch(url, {
+				method,
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ fact: newFact.trim() })
+				body: JSON.stringify({ fact: factText.trim() })
 			});
 			if (!resp.ok) throw new Error(await resp.text());
-			notify.success('Факт добавлен');
-			addDialogOpen = false;
-			newFact = '';
+			notify.success(editingId ? 'Факт обновлён' : 'Факт добавлен');
+			dialogOpen = false;
 			await reload();
 		} catch (e: any) {
-			notify.error(e.message ?? 'Не удалось добавить факт');
+			notify.error(e.message ?? 'Не удалось сохранить');
 		} finally {
 			submitting = false;
 		}
@@ -90,7 +105,7 @@
 				Факты, которые бот запоминает в долгосрочной памяти
 			</p>
 		</div>
-		<Button onclick={() => (addDialogOpen = true)} class="gap-2">
+		<Button onclick={openCreate} class="gap-2">
 			<Plus class="h-4 w-4" />
 			Добавить факт
 		</Button>
@@ -113,7 +128,6 @@
 
 		<CardContent>
 			{#if refreshing}
-				<!-- Скелетон -->
 				<div class="space-y-3">
 					{#each Array(5) as _}
 						<div class="flex items-center gap-4">
@@ -159,14 +173,19 @@
 									{new Date(item.created_at).toLocaleString('ru-RU')}
 								</Table.Cell>
 								<Table.Cell class="text-right">
-									<Button
-										variant="ghost"
-										size="icon"
-										onclick={() => (deleteTargetId = item.id)}
-										disabled={deleting}
-									>
-										<Trash2 class="h-4 w-4 text-destructive" />
-									</Button>
+									<div class="flex justify-end gap-1">
+										<Button variant="ghost" size="icon" onclick={() => openEdit(item)}>
+											<Pencil class="h-4 w-4" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon"
+											onclick={() => (deleteTargetId = item.id)}
+											disabled={deleting}
+										>
+											<Trash2 class="h-4 w-4 text-destructive" />
+										</Button>
+									</div>
 								</Table.Cell>
 							</Table.Row>
 						{/each}
@@ -203,24 +222,31 @@
 	</Card>
 </div>
 
-<Dialog.Root bind:open={addDialogOpen}>
-	<Dialog.Content class="sm:max-w-md">
+<Dialog.Root bind:open={dialogOpen}>
+	<Dialog.Content class="sm:max-w-lg">
 		<Dialog.Header>
-			<Dialog.Title>Добавить факт</Dialog.Title>
+			<Dialog.Title>{editingId ? 'Редактировать факт' : 'Добавить факт'}</Dialog.Title>
 			<Dialog.Description>
-				Факт попадёт в долгосрочную память бота и будет использоваться в диалогах.
+				{editingId ? `ID: ${editingId}` : 'Факт попадёт в долгосрочную память бота и будет использоваться в диалогах.'}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="py-2">
-			<Input
-				bind:value={newFact}
+			<Textarea
+				bind:value={factText}
 				placeholder="Например: Пользователь X предпочитает тёмную тему"
-				onkeydown={(e) => e.key === 'Enter' && addFact()}
+				rows="3"
+				class="text-sm resize-y"
+				onkeydown={(e) => {
+					if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+						e.preventDefault();
+						submitForm();
+					}
+				}}
 			/>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => (addDialogOpen = false)}>Отмена</Button>
-			<Button onclick={addFact} disabled={submitting || !newFact.trim()}>
+			<Button variant="outline" onclick={() => (dialogOpen = false)}>Отмена</Button>
+			<Button onclick={submitForm} disabled={submitting || !factText.trim()}>
 				{submitting ? 'Сохранение...' : 'Сохранить'}
 			</Button>
 		</Dialog.Footer>

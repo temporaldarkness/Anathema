@@ -17,13 +17,13 @@
 	const ov = $derived(data.overview);
 
 	const statCards = $derived([
-		{ key: 'ltm', label: 'Факты LTM', icon: Brain, color: 'text-violet-400', sub: 'долгосрочная память' },
-		{ key: 'users', label: 'Пользователи', icon: Users, color: 'text-blue-400', sub: 'в базе бота' },
-		{ key: 'channels', label: 'Каналы', icon: Hash, color: 'text-emerald-400', sub: 'с настройками' },
-		{ key: 'emotes', label: 'Эмодзи', icon: Smile, color: 'text-amber-400', sub: 'в справочнике' },
-		{ key: 'keywords', label: 'Ключевые слова', icon: Zap, color: 'text-pink-400', sub: 'реакции по тексту' },
-		{ key: 'user_reactions', label: 'Реакции', icon: MessageSquare, color: 'text-cyan-400', sub: 'привязки к юзерам' }
-	]);
+    { key: 'ltm', label: 'Факты LTM', icon: Brain, color: 'text-violet-400', sub: 'долгосрочная память', href: '/ltm' },
+    { key: 'users', label: 'Пользователи', icon: Users, color: 'text-blue-400', sub: 'в базе бота', href: '/users' },
+    { key: 'channels', label: 'Каналы', icon: Hash, color: 'text-emerald-400', sub: 'с настройками', href: '/channels' },
+    { key: 'emotes', label: 'Эмодзи', icon: Smile, color: 'text-amber-400', sub: 'в справочнике', href: '/emotes' },
+    { key: 'keywords', label: 'Ключевые слова', icon: Zap, color: 'text-pink-400', sub: 'реакции по тексту', href: '/reactions?tab=keywords' },
+    { key: 'user_reactions', label: 'Реакции', icon: MessageSquare, color: 'text-cyan-400', sub: 'привязки к юзерам', href: '/reactions?tab=users' }
+]);
 
 	const services = $derived([
 		{ key: 'memory', name: 'Memory' },
@@ -257,19 +257,22 @@
 			</h2>
 			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 				{#each statCards as card}
-					<Card class="group hover:border-primary/30 transition-colors">
-						<CardContent class="p-4">
+					<a
+						href={card.href}
+						class="group block rounded-xl border bg-card text-card-foreground transition-colors hover:border-primary/40 hover:bg-accent/30"
+					>
+						<div class="p-4">
 							<div class="flex items-start justify-between">
 								<card.icon class="h-4 w-4 {card.color}" />
-								<ArrowRight class="h-3 w-3 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+								<ArrowRight class="h-3 w-3 text-muted-foreground/40 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
 							</div>
 							<div class="mt-3">
 								<div class="text-3xl font-bold tabular-nums">{ov.counts[card.key] ?? 0}</div>
 								<div class="text-xs font-medium mt-0.5">{card.label}</div>
 								<div class="text-[10px] text-muted-foreground mt-0.5">{card.sub}</div>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</a>
 				{/each}
 			</div>
 		</section>
