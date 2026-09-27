@@ -1,14 +1,29 @@
 :80 {
-    handle /auth/* {
+    @radio_stream path /radio/stream
+    handle @radio_stream {
+        uri strip_prefix /radio
+        reverse_proxy icecast:8000 {
+            flush_interval -1
+            transport http {
+                read_timeout 0
+            }
+        }
+    }
+
+    @api path /api/*
+    handle @api {
         reverse_proxy webway_backend:8000
     }
 
-    handle /api/* {
+    @auth path /auth/*
+    handle @auth {
         reverse_proxy webway_backend:8000
     }
 
     handle {
-        reverse_proxy webway_frontend:3000
+        reverse_proxy webway_frontend:3000 {
+            header_down Cache-Control "no-cache, no-store, must-revalidate"
+        }
     }
 
     encode gzip

@@ -20,7 +20,8 @@
 		LogOut,
 		User,
 		ChevronDown,
-		Eye
+		Eye,
+		Radio
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -60,6 +61,12 @@
 			label: 'Наблюдение',
 			items: [
 				{ href: '/eyes', label: 'Discord глазами', icon: Eye }
+			]
+		},
+		{
+			label: 'Развлечения',
+			items: [
+				{ href: '/radio', label: 'Радио', icon: Radio }
 			]
 		}
 	];

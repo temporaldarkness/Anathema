@@ -94,6 +94,7 @@ services:
         mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
         mc mb --ignore-existing myminio/images;
         mc mb --ignore-existing myminio/images-favorites;
+        mc mb --ignore-existing myminio/radio-songs;
         mc ilm rule add myminio/images --expire-days 1 || true;
       "
     restart: "no"
@@ -345,10 +346,12 @@ services:
       WEBWAY_HISTORY_CLIENT_KEY: ${WEBWAY_HISTORY_CLIENT_KEY}
       WEBWAY_STORAGE_CLIENT_KEY: ${WEBWAY_STORAGE_CLIENT_KEY}
       WEBWAY_AUDIT_CLIENT_KEY: ${WEBWAY_AUDIT_CLIENT_KEY}
+      WEBWAY_RADIO_CLIENT_KEY: ${WEBWAY_RADIO_CLIENT_KEY}
       MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
       SECURITY_SERVICE_URL: ${SECURITY_SERVICE_URL}
       STORAGE_SERVICE_URL: ${STORAGE_SERVICE_URL}
       MESSAGE_HISTORY_SERVICE_URL: ${MESSAGE_HISTORY_SERVICE_URL}
+      RADIO_SERVICE_URL: ${RADIO_SERVICE_URL}
       PROXY_API_KEY: ${PROXY_API_KEY}
       COOKIE_SECURE: ${COOKIE_SECURE}
       BACKEND_URL: ${BACKEND_URL}
@@ -421,6 +424,56 @@ services:
     networks:
       - anathema_network
     restart: unless-stopped
+  
+  icecast:
+    image: moul/icecast
+    container_name: icecast
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD}
+      ICECAST_HOSTNAME: ${ICECAST_HOSTNAME}
+      ICECAST_MAX_CLIENTS: "100"
+      ICECAST_MAX_SOURCES: "2"
+    ports:
+      - "8000:8000"
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  radio_service:
+    build: ./services/radio_service
+    container_name: radio_service
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${RADIO_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_HOST: ${MINIO_HOST}
+      MINIO_PORT: ${MINIO_PORT}
+      MINIO_SECURE: ${MINIO_SECURE}
+      MINIO_RADIO_BUCKET: ${MINIO_RADIO_BUCKET}
+      REDIS_URL: ${REDIS_URL}
+      ICECAST_URL: ${ICECAST_URL}
+      WEBWAY_RADIO_CLIENT_KEY: ${WEBWAY_RADIO_CLIENT_KEY}
+      RADIO_CACHE_DIR: /var/cache/radio
+    volumes:
+      - radio_cache:/var/cache/radio
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+      icecast:
+        condition: service_started
+    networks:
+      - anathema_network
+    restart: unless-stopped
 
 networks:
   anathema_network:
@@ -433,3 +486,4 @@ volumes:
   minio_data:
   caddy_data:
   caddy_config:
+  radio_cache:

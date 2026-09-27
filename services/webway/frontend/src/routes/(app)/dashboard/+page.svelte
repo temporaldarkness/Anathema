@@ -30,7 +30,8 @@
 		{ key: 'history', name: 'History' },
 		{ key: 'security', name: 'Security' },
 		{ key: 'storage', name: 'Storage' },
-		{ key: 'audit', name: 'Audit' }
+		{ key: 'audit', name: 'Audit' },
+		{ key: 'radio', name: 'Radio' }
 	]);
 
 	function formatBalance(b: number | null | undefined): string {
@@ -90,37 +91,6 @@
 					Работает
 				</Badge>
 			{/if}
-		</div>
-
-		<!-- ======================== SERVICES STRIP ======================== -->
-		<div class="flex flex-wrap items-center gap-2">
-			{#each services as s}
-				{@const c = ov.services[s.key]}
-				{@const st = serviceState(c)}
-				<div
-					class="inline-flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs transition-colors hover:border-primary/30"
-					title={c?.error ?? `${s.name} Service`}
-				>
-					{#if st === 'up'}
-						<span class="relative flex h-2 w-2">
-							<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50"></span>
-							<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-						</span>
-					{:else if st === 'down'}
-						<span class="relative inline-flex h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px] shadow-red-500/50"></span>
-					{:else}
-						<span class="relative inline-flex h-2 w-2 rounded-full bg-muted-foreground/40"></span>
-					{/if}
-					<span class="font-medium">{s.name}</span>
-					{#if c?.latency_ms != null}
-						<span class="font-mono text-muted-foreground">{c.latency_ms.toFixed(0)}ms</span>
-					{/if}
-					{#if c?.uptime_seconds != null}
-						<span class="text-muted-foreground/40">·</span>
-						<span class="text-muted-foreground">{formatUptime(c.uptime_seconds)}</span>
-					{/if}
-				</div>
-			{/each}
 		</div>
 
 		<!-- ======================== SYSTEM ======================== -->
@@ -249,6 +219,37 @@
 				</Card>
 			</div>
 		</section>
+		
+		<!-- ======================== SERVICES STRIP ======================== -->
+		<div class="flex flex-wrap items-center gap-2">
+			{#each services as s}
+				{@const c = ov.services[s.key]}
+				{@const st = serviceState(c)}
+				<div
+					class="inline-flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs transition-colors hover:border-primary/30"
+					title={c?.error ?? `${s.name} Service`}
+				>
+					{#if st === 'up'}
+						<span class="relative flex h-2 w-2">
+							<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50"></span>
+							<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+						</span>
+					{:else if st === 'down'}
+						<span class="relative inline-flex h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px] shadow-red-500/50"></span>
+					{:else}
+						<span class="relative inline-flex h-2 w-2 rounded-full bg-muted-foreground/40"></span>
+					{/if}
+					<span class="font-medium">{s.name}</span>
+					{#if c?.latency_ms != null}
+						<span class="font-mono text-muted-foreground">{c.latency_ms.toFixed(0)}ms</span>
+					{/if}
+					{#if c?.uptime_seconds != null}
+						<span class="text-muted-foreground/40">·</span>
+						<span class="text-muted-foreground">{formatUptime(c.uptime_seconds)}</span>
+					{/if}
+				</div>
+			{/each}
+		</div>
 
 		<!-- ======================== BOT DATA ======================== -->
 		<section class="space-y-3">

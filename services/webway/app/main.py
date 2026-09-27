@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Union
 
 import httpx
-from fastapi import FastAPI, HTTPException, Depends, Request, Response, Query
+from fastapi import FastAPI, HTTPException, Depends, Request, Response, Query, UploadFile, File, Form, Query
 from fastapi.responses import RedirectResponse
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field, field_validator
@@ -14,8 +14,9 @@ import uuid
 from .audit_transport import audit_transport
 from contextlib import asynccontextmanager
 from .discord_client import DiscordClient
+from .radio_client import radio
 
-from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID
+from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY
 
 CHANNEL_TYPES = {
     0: "Текстовый",
@@ -35,6 +36,7 @@ discord_client = DiscordClient()
 async def lifespan(app: FastAPI):
     await audit_transport.start()
     yield
+    await radio.client.aclose()
     await discord_client.close()
     await audit_transport.stop()
     await memory.close()
@@ -888,7 +890,7 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
         (
             ltm_res, users_res, channels_res, emotes_res,
             kw_res, ur_res, settings_res,
-            mem_h, hist_h, sec_h, st_h, au_h,
+            mem_h, hist_h, sec_h, st_h, au_h, ra_h,
             balance,
             kafka_data,
             bot_uptime,
@@ -925,6 +927,11 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
                 AUDIT_SERVICE_URL,
                 {"X-API-Key": WEBWAY_AUDIT_CLIENT_KEY},
             ) if AUDIT_SERVICE_URL else _skip(),
+            ping_service(
+                client,
+                RADIO_SERVICE_URL,
+                {"X-API-Key": WEBWAY_RADIO_CLIENT_KEY},
+            ) if RADIO_SERVICE_URL else _skip(),
             get_proxy_balance(),
             get_kafka_metrics(KAFKA_BOOTSTRAP_SERVERS),
             get_bot_uptime(),
@@ -961,6 +968,7 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
             "security": sec_h,
             "storage": st_h,
             "audit": au_h,
+            "radio": ra_h,
         },
         "balance": balance,
         "kafka": kafka_data,
@@ -1538,3 +1546,131 @@ async def discord_users_batch(
             for uid, u in users.items()
         }
     }
+
+@app.get("/api/radio/songs")
+async def radio_list_songs(
+    limit: int = Query(200, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    search: str | None = None,
+    current_user: UserSession = Depends(get_current_user),
+):
+    return await radio.list_songs(limit=limit, offset=offset, search=search)
+
+
+@app.post("/api/radio/songs")
+async def radio_upload_song(
+    request: Request,
+    file: UploadFile = File(...),
+    title: str = Form(...),
+    artist: str = Form(""),
+    description: str = Form(""),
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    if not file.filename.lower().endswith(".mp3"):
+        raise HTTPException(400, "Only .mp3 files accepted")
+
+    data = await file.read()
+    if len(data) == 0:
+        raise HTTPException(400, "Empty file")
+    if len(data) > 50 * 1024 * 1024:
+        raise HTTPException(413, "File too large (max 50 MB)")
+
+    try:
+        song = await radio.upload_song(
+            data, file.filename,
+            {
+                "title": title.strip()[:200],
+                "artist": (artist or "").strip()[:200],
+                "description": (description or "").strip()[:1000],
+                "uploaded_by": current_user.user_id,
+                "uploaded_by_username": current_user.username,
+            },
+        )
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(e.response.status_code, f"Radio service error: {e.response.text}")
+
+    await write_audit(
+        request, current_user,
+        action="upload", entity_type="radio_song", entity_id=str(song["id"]),
+        details={"title": title, "size": len(data)},
+    )
+    return song
+
+
+@app.patch("/api/radio/songs/{song_id}")
+async def radio_update_song(
+    song_id: int,
+    payload: dict,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    allowed = {"title", "artist", "description"}
+    clean = {k: v for k, v in payload.items() if k in allowed}
+    if not clean:
+        raise HTTPException(400, "No valid fields")
+
+    song = await radio.update_song(song_id, clean)
+    if not song:
+        raise HTTPException(404, "Song not found")
+
+    await write_audit(
+        request, current_user,
+        action="update", entity_type="radio_song", entity_id=str(song_id),
+        details=clean,
+    )
+    return song
+
+
+@app.delete("/api/radio/songs/{song_id}")
+async def radio_delete_song(
+    song_id: int,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    if not await radio.delete_song(song_id):
+        raise HTTPException(404, "Song not found")
+
+    await write_audit(
+        request, current_user,
+        action="delete", entity_type="radio_song", entity_id=str(song_id),
+    )
+    return {"ok": True}
+
+
+@app.get("/api/radio/now")
+async def radio_now(current_user: UserSession = Depends(get_current_user)):
+    return await radio.now_playing()
+
+
+@app.post("/api/radio/skip")
+async def radio_skip(
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    await radio.skip(current_user.user_id, current_user.username)
+    await write_audit(
+        request, current_user,
+        action="skip", entity_type="radio",
+    )
+    return {"ok": True}
+
+
+@app.get("/api/radio/history")
+async def radio_history(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    current_user: UserSession = Depends(get_current_user),
+):
+    return await radio.history(limit=limit, offset=offset)
