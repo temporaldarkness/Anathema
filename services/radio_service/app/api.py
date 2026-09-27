@@ -5,8 +5,12 @@ from .redis_client import get_redis
 from . import crud
 from .player import request_skip
 from .storage import upload_song, delete_song as delete_song_file
-from .utils import probe_duration_seconds  # см. ниже
+from .utils import probe_duration_seconds, normalize_mp3
 import uuid
+import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -44,11 +48,17 @@ async def upload_new_song(
     data = await file.read()
     if len(data) == 0:
         raise HTTPException(400, "Empty file")
+    
+    try:
+        normalized = await normalize_mp3(data)
+    except Exception as e:
+        logger.exception("normalize failed")
+        raise HTTPException(500, f"Failed to normalize audio: {e}")
 
-    duration = await probe_duration_seconds(data)
+    duration = await probe_duration_seconds(normalized)
     file_id = str(uuid.uuid4())
 
-    await upload_song(file_id, data)
+    await upload_song(file_id, normalized)
 
     song = await crud.insert_song(
         storage_file_id=file_id,
@@ -56,7 +66,7 @@ async def upload_new_song(
         artist=(artist or "").strip(),
         description=(description or "").strip(),
         duration_sec=duration,
-        size_bytes=len(data),
+        size_bytes=len(normalized),
         uploaded_by=uploaded_by,
         uploaded_by_username=uploaded_by_username,
     )
@@ -113,3 +123,50 @@ async def history(
     caller: str = Depends(verify_api_key),
 ):
     return await crud.get_history(limit=limit, offset=offset)
+
+@router.post("/maintenance/normalize-all")
+async def normalize_all(caller: str = Depends(verify_api_key)):
+    asyncio.create_task(_normalize_all_bg())
+    return {"ok": True, "message": "Normalization started in background"}
+
+
+async def _normalize_all_bg():
+    from .storage import download_song, upload_song
+    from .utils import normalize_mp3, probe_duration_seconds
+    from .db import get_pool
+
+    logger.info("Starting background normalization of all songs")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("SELECT id, storage_file_id, title FROM songs")
+    total = len(rows)
+    done = 0
+    failed = 0
+
+    for r in rows:
+        try:
+            data = await download_song(r["storage_file_id"])
+            normalized = await normalize_mp3(data)
+            duration = await probe_duration_seconds(normalized)
+
+            import uuid
+            new_file_id = str(uuid.uuid4())
+            await upload_song(new_file_id, normalized)
+
+            from .storage import delete_song as delete_from_minio
+            await delete_from_minio(r["storage_file_id"])
+
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    "UPDATE songs SET storage_file_id = $1, duration_sec = $2, size_bytes = $3 WHERE id = $4",
+                    new_file_id, duration, len(normalized), r["id"],
+                )
+            done += 1
+        except Exception:
+            logger.exception(f"normalize failed for song {r['id']}")
+            failed += 1
+
+        if (done + failed) % 10 == 0:
+            logger.info(f"Normalize progress: {done+failed}/{total}")
+
+    logger.info(f"Normalization finished: {done} ok, {failed} failed")

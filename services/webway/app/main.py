@@ -1674,3 +1674,25 @@ async def radio_history(
     current_user: UserSession = Depends(get_current_user),
 ):
     return await radio.history(limit=limit, offset=offset)
+
+@app.post("/api/radio/normalize-all")
+async def radio_normalize_all(
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{RADIO_SERVICE_URL}/maintenance/normalize-all",
+            headers={"X-API-Key": WEBWAY_RADIO_CLIENT_KEY},
+            timeout=15.0,
+        )
+        resp.raise_for_status()
+
+    await write_audit(
+        request, current_user,
+        action="normalize_all", entity_type="radio",
+    )
+    return {"ok": True}

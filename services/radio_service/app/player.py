@@ -17,139 +17,225 @@ logger = logging.getLogger(__name__)
 
 Path(CACHE_DIR).mkdir(parents=True, exist_ok=True)
 
-
-class RadioState:
-    process: asyncio.subprocess.Process | None = None
-    current_song: dict | None = None
-    current_history_id: int | None = None
-    current_started_at: datetime | None = None
-    skip_requested: bool = False
-    skip_by: int | None = None
-    skip_by_username: str | None = None
+CHUNK_SIZE = 4 * 1024
 
 
-state = RadioState()
+class ContinuousPlayer:
+    def __init__(self):
+        self.ffmpeg: asyncio.subprocess.Process | None = None
+        self.stdin: asyncio.StreamWriter | None = None
+        self.current_song: dict | None = None
+        self.current_history_id: int | None = None
+        self.current_started_at: datetime | None = None
+        self.skip_requested: bool = False
+        self.skip_by: int | None = None
+        self.skip_by_username: str | None = None
+        self.stopping: bool = False
 
+    async def start_ffmpeg(self):
+        """Запускает долгоживущий ffmpeg → Icecast."""
+        if self.ffmpeg is not None and self.ffmpeg.returncode is None:
+            return
 
-async def _ensure_cached(song: dict) -> str:
-    path = os.path.join(CACHE_DIR, f"{song['storage_file_id']}.mp3")
-    if os.path.exists(path) and os.path.getsize(path) > 0:
+        logger.info("Starting persistent ffmpeg → Icecast")
+        self.ffmpeg = await asyncio.create_subprocess_exec(
+            "ffmpeg",
+            "-hide_banner", "-loglevel", "warning",
+            "-re",
+            "-f", "mp3",
+            "-i", "pipe:0",
+            "-c", "copy",
+            "-f", "mp3",
+            "-content_type", "audio/mpeg",
+            ICECAST_URL,
+            stdin=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        self.stdin = self.ffmpeg.stdin
+        asyncio.create_task(self._drain_stderr())
+
+    async def _drain_stderr(self):
+        if not self.ffmpeg or not self.ffmpeg.stderr:
+            return
+        try:
+            while True:
+                line = await self.ffmpeg.stderr.readline()
+                if not line:
+                    break
+                text = line.decode(errors="ignore").strip()
+                if text:
+                    logger.debug(f"[ffmpeg] {text}")
+        except Exception:
+            pass
+
+    async def stop_ffmpeg(self):
+        if self.ffmpeg is None:
+            return
+        try:
+            if self.stdin:
+                try:
+                    self.stdin.close()
+                    await self.stdin.wait_closed()
+                except Exception:
+                    pass
+            self.ffmpeg.terminate()
+            try:
+                await asyncio.wait_for(self.ffmpeg.wait(), timeout=1.5)
+            except asyncio.TimeoutError:
+                self.ffmpeg.kill()
+                await self.ffmpeg.wait()
+        except Exception:
+            logger.exception("error stopping ffmpeg")
+        finally:
+            self.ffmpeg = None
+            self.stdin = None
+
+    async def _ensure_cached(self, song: dict) -> str:
+        path = os.path.join(CACHE_DIR, f"{song['storage_file_id']}.mp3")
+        if os.path.exists(path) and os.path.getsize(path) > 0:
+            return path
+        logger.info(f"Downloading {song['title']} from MinIO...")
+        data = await download_song(song["storage_file_id"])
+        tmp = path + ".part"
+        with open(tmp, "wb") as f:
+            f.write(data)
+        os.replace(tmp, path)
         return path
-    logger.info(f"Downloading {song['title']} from MinIO...")
-    data = await download_song(song["storage_file_id"])
-    tmp = path + ".part"
-    with open(tmp, "wb") as f:
-        f.write(data)
-    os.replace(tmp, path)
-    return path
 
-
-async def _publish_now_playing(song: dict, started_at: datetime, status: str = "playing"):
-    try:
-        r = await get_redis()
-        ends_at = None
-        if song.get("duration_sec"):
-            ends_at = (
-                datetime.fromtimestamp(
+    async def _publish_now_playing(self, song: dict, started_at: datetime, status: str = "playing"):
+        try:
+            r = await get_redis()
+            ends_at = None
+            if song.get("duration_sec"):
+                ends_at = datetime.fromtimestamp(
                     started_at.timestamp() + float(song["duration_sec"]), tz=timezone.utc
+                ).isoformat()
+            await r.set("radio:now_playing", json.dumps({
+                "status": status,
+                "song_id": song["id"],
+                "title": song["title"],
+                "artist": song["artist"] or "",
+                "started_at": started_at.isoformat(),
+                "ends_at": ends_at,
+                "duration_sec": song.get("duration_sec"),
+            }))
+        except Exception as e:
+            logger.warning(f"failed to publish now_playing: {e}")
+
+    async def _clear_now_playing(self):
+        try:
+            r = await get_redis()
+            await r.set("radio:now_playing", json.dumps({"status": "idle"}))
+        except Exception:
+            pass
+
+    async def _play_song(self, song: dict) -> tuple[bool, float]:
+        if self.ffmpeg is None or self.ffmpeg.returncode is not None:
+            await self.start_ffmpeg()
+
+        path = await self._ensure_cached(song)
+        started_at = datetime.now(timezone.utc)
+        self.current_song = song
+        self.current_started_at = started_at
+        self.skip_requested = False
+        self.skip_by = None
+        self.skip_by_username = None
+
+        await self._publish_now_playing(song, started_at, "playing")
+        self.current_history_id = await log_history_start(song, started_at)
+        logger.info(f"▶ {song['title']} — {song.get('artist') or ''}")
+
+        killed_for_skip = False
+
+        try:
+            with open(path, "rb") as f:
+                while True:
+                    if self.skip_requested or self.stopping:
+                        killed_for_skip = True
+                        await self.stop_ffmpeg()
+                        break
+
+                    if self.ffmpeg is None or self.ffmpeg.returncode is not None:
+                        logger.warning("ffmpeg died, restarting...")
+                        await self.start_ffmpeg()
+                        f.seek(0)
+                        continue
+
+                    chunk = f.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    try:
+                        self.stdin.write(chunk)
+                        await self.stdin.drain()
+                    except (BrokenPipeError, ConnectionResetError):
+                        logger.warning("broken pipe to ffmpeg, restarting")
+                        await self.start_ffmpeg()
+                        f.seek(0)
+                        continue
+        except Exception:
+            logger.exception("error writing song to ffmpeg")
+            raise
+        finally:
+            ended_at = datetime.now(timezone.utc)
+            played = (ended_at - started_at).total_seconds()
+            skipped = self.skip_requested
+            try:
+                await log_history_end(
+                    self.current_history_id, ended_at, skipped,
+                    self.skip_by, self.skip_by_username, played,
                 )
-            ).isoformat()
-        payload = {
-            "status": status,
-            "song_id": song["id"],
-            "title": song["title"],
-            "artist": song["artist"] or "",
-            "started_at": started_at.isoformat(),
-            "ends_at": ends_at,
-            "duration_sec": song.get("duration_sec"),
-        }
-        await r.set("radio:now_playing", json.dumps(payload))
-    except Exception as e:
-        logger.warning(f"failed to publish now_playing: {e}")
+                if not skipped:
+                    await bump_play_count(song["id"])
+            except Exception:
+                logger.exception("failed to log history end")
+            self.current_song = None
+            self.current_history_id = None
+            self.current_started_at = None
+            
+        if killed_for_skip and not self.stopping:
+            await asyncio.sleep(1.5)
+            await self.start_ffmpeg()
+
+        return self.skip_requested, played
+
+    async def run(self):
+        logger.info("Radio player loop starting...")
+        await asyncio.sleep(2)
+        await self.start_ffmpeg()
+        while not self.stopping:
+            try:
+                song = await pick_random_song(exclude_ids=[])
+                if not song:
+                    logger.warning("No songs in library, waiting...")
+                    await self._clear_now_playing()
+                    await asyncio.sleep(15)
+                    continue
+                await self._play_song(song)
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                logger.exception("player iteration error")
+                await asyncio.sleep(5)
+
+    async def skip(self, by: int | None, by_username: str | None):
+        if self.current_song is None or self.skip_requested:
+            return
+        self.skip_requested = True
+        self.skip_by = by
+        self.skip_by_username = by_username
+        logger.info(f"Skip requested by {by_username}")
+
+    async def shutdown(self):
+        self.stopping = True
+        await self.stop_ffmpeg()
 
 
-async def _clear_now_playing():
-    try:
-        r = await get_redis()
-        await r.set("radio:now_playing", json.dumps({"status": "idle"}))
-    except Exception:
-        pass
-
-
-async def _play_song(song: dict) -> tuple[bool, float]:
-    path = await _ensure_cached(song)
-    started_at = datetime.now(timezone.utc)
-    await _publish_now_playing(song, started_at, "playing")
-
-    history_id = await log_history_start(song, started_at)
-    state.current_history_id = history_id
-    state.current_song = song
-    state.current_started_at = started_at
-    state.skip_requested = False
-    state.skip_by = None
-    state.skip_by_username = None
-
-    proc = await asyncio.create_subprocess_exec(
-        "ffmpeg",
-        "-hide_banner",
-        "-loglevel", "warning",
-        "-re",
-        "-i", path,
-        "-c", "copy",
-        "-f", "mp3",
-        "-content_type", "audio/mpeg",
-        ICECAST_URL,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    state.process = proc
-    logger.info(f"▶ {song['title']} — {song.get('artist') or ''}")
-
-    try:
-        await proc.wait()
-    except asyncio.CancelledError:
-        proc.kill()
-        await proc.wait()
-        raise
-
-    ended_at = datetime.now(timezone.utc)
-    played = (ended_at - started_at).total_seconds()
-    skipped = state.skip_requested
-
-    await log_history_end(
-        history_id, ended_at, skipped,
-        state.skip_by, state.skip_by_username, played,
-    )
-    if not skipped:
-        await bump_play_count(song["id"])
-
-    state.process = None
-    state.current_song = None
-    state.current_history_id = None
-    state.current_started_at = None
-
-    return skipped, played
+# Глобальный экземпляр
+player = ContinuousPlayer()
 
 
 async def player_loop():
-    logger.info("Radio player loop starting...")
-    await asyncio.sleep(2)  # дать Icecast прогреться
-    while True:
-        try:
-            song = await pick_random_song(exclude_ids=[])
-            if not song:
-                logger.warning("No songs in library, waiting...")
-                await _clear_now_playing()
-                await asyncio.sleep(15)
-                continue
-            await _play_song(song)
-        except asyncio.CancelledError:
-            logger.info("Player loop cancelled")
-            if state.process:
-                state.process.kill()
-            raise
-        except Exception as e:
-            logger.exception(f"player loop error: {e}")
-            await asyncio.sleep(5)
+    await player.run()
 
 
 async def skip_command_listener():
@@ -166,13 +252,7 @@ async def skip_command_listener():
             except Exception:
                 continue
             if data.get("cmd") == "skip":
-                if state.process is None or state.skip_requested:
-                    continue
-                state.skip_requested = True
-                state.skip_by = data.get("by")
-                state.skip_by_username = data.get("by_username")
-                logger.info(f"Skip requested by {state.skip_by_username}")
-                state.process.kill()
+                await player.skip(data.get("by"), data.get("by_username"))
     finally:
         await pubsub.unsubscribe("radio:commands")
 

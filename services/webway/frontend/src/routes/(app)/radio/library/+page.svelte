@@ -12,7 +12,7 @@
 	import { formatDateTime, formatBytes } from '$lib/utils/format';
 	import {
 		ArrowLeft, Upload, Trash2, Pencil, Search, Music, FileAudio,
-		Loader2, Clock
+		Loader2, Clock, RefreshCw
 	} from 'lucide-svelte';
 
 	let { data } = $props();
@@ -20,6 +20,22 @@
 	let search = $state('');
 	let uploading = $state(false);
 	let uploadProgress = $state(0);
+	
+	let normalizing = $state(false);
+
+	async function normalizeAll() {
+		if (!confirm('Запустить перекодирование всех треков в фоне? Это может занять несколько минут.')) return;
+		normalizing = true;
+		try {
+			const resp = await fetch('/api/radio/normalize-all', { method: 'POST' });
+			if (!resp.ok) throw new Error(await resp.text());
+			notify.success('Нормализация запущена в фоне. Смотри логи radio_service.');
+		} catch (e: any) {
+			notify.error(e.message ?? 'Ошибка');
+		} finally {
+			normalizing = false;
+		}
+	}
 
 	let editing = $state<any>(null);
 	let editDialogOpen = $state(false);
@@ -167,33 +183,51 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<div class="flex items-start justify-between gap-4">
-		<div>
-			<a href="/radio" class="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-2">
-				<ArrowLeft class="h-3 w-3" /> К радио
+	<div class="flex flex-wrap items-center justify-between gap-4">
+		<div class="min-w-0">
+			<a
+				href="/radio"
+				class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1"
+			>
+				<ArrowLeft class="h-3 w-3" />
+				К радио
 			</a>
-			<h1 class="text-2xl font-bold tracking-tight flex items-center gap-3">
+			<h1 class="text-2xl font-bold tracking-tight flex items-center gap-2.5">
 				<Music class="h-6 w-6 text-violet-400" />
 				Библиотека
 			</h1>
 			<p class="text-sm text-muted-foreground mt-1">
-				{data.songs?.total ?? 0} треков · mp3, до 50 МБ каждый
+				{data.songs?.total ?? 0} треков
+				<span class="text-muted-foreground/50 mx-1">·</span>
+				mp3, до 50 МБ
 			</p>
 		</div>
-		<Button onclick={openUploadDialog} class="gap-2">
-			<Upload class="h-4 w-4" />
-			Загрузить
-		</Button>
+
+		<!-- Правая часть: обе кнопки в одной группе -->
+		<div class="flex items-center gap-2">
+			<Button variant="outline" onclick={normalizeAll} disabled={normalizing} class="gap-2">
+				{#if normalizing}
+					<Loader2 class="h-4 w-4 animate-spin" />
+				{:else}
+					<RefreshCw class="h-4 w-4" />
+				{/if}
+				Нормализовать
+			</Button>
+			<Button onclick={openUploadDialog} class="gap-2">
+				<Upload class="h-4 w-4" />
+				Загрузить
+			</Button>
+		</div>
 	</div>
 
 	<Card>
-		<CardHeader class="flex flex-row items-center justify-between space-y-0">
-			<CardTitle class="text-base">
-				Всего: {filtered.length}
+		<CardHeader class="flex flex-row items-center justify-between space-y-0 pb-3">
+			<CardTitle class="text-sm text-muted-foreground font-normal">
+				Всего: <span class="text-foreground font-medium">{filtered.length}</span>
 			</CardTitle>
 			<div class="relative w-72">
 				<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-				<Input placeholder="Поиск по названию, артисту, описанию..." bind:value={search} class="pl-9" />
+				<Input placeholder="Поиск..." bind:value={search} class="pl-9 h-9" />
 			</div>
 		</CardHeader>
 		<CardContent class="p-0">
