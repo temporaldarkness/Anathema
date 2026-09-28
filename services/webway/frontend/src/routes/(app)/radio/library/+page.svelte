@@ -42,13 +42,6 @@
 			if (n.ok) now = await n.json();
 		} catch {}
 	}
-	
-	async function refreshNow() {
-		try {
-			const r = await fetch('/api/radio/now');
-			if (r.ok) now = await r.json();
-		} catch {}
-	}
 
 	async function skipCurrent() {
 		if (skipping) return;
@@ -59,7 +52,6 @@
 			notify.success('Трек пропущен');
 			setTimeout(async () => {
 				await refreshQueue();
-				await refreshNow();
 			}, 700);
 		} catch (e: any) {
 			notify.error(e.message ?? 'Не удалось пропустить');
@@ -129,8 +121,7 @@
 
 	let deleteTarget = $state<any>(null);
 	let deleting = $state(false);
-
-	// Загрузка
+=
 	let uploadDialogOpen = $state(false);
 	let filesToUpload = $state<{ file: File; title: string; artist: string; description: string }[]>([]);
 
@@ -263,10 +254,7 @@
 	
 	$effect(() => {
 		const id = setInterval(async () => {
-			try {
-				const r = await fetch('/api/radio/now');
-				if (r.ok) now = await r.json();
-			} catch {}
+			refreshQueue()
 		}, 5000);
 		return () => clearInterval(id);
 	});
