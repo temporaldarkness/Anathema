@@ -8,7 +8,7 @@
 	import { formatDateTime } from '$lib/utils/format';
 	import { radio } from '$lib/radio.svelte';
 	import {
-		Radio as RadioIcon, Volume2, Music, ExternalLink, Library, Loader2
+		Radio as RadioIcon, Volume2, Music, ExternalLink, Library, Loader2, Headphones, Volume2 as Vol2Icon, LogIn, LogOut
 	} from 'lucide-svelte';
 
 	let { data } = $props();
@@ -55,6 +55,72 @@
 	}
 
 	const streamUrl = '/radio/stream';
+	
+	let voice = $state<any>({ enabled: false, connected: false, playing: false, volume: 0.7 });
+	let voiceChannels = $state<any[]>([]);
+	let selectedVoiceChannel = $state<string>('');
+	
+	$effect(() => {
+		const id = setInterval(async () => {
+			try {
+				const r = await fetch('/api/radio/voice/status');
+				if (r.ok) voice = await r.json();
+			} catch {}
+		}, 5000);
+		return () => clearInterval(id);
+	});
+	
+	$effect(() => {
+		(async () => {
+			try {
+				const r = await fetch('/api/discord/voice-channels');
+				if (r.ok) voiceChannels = (await r.json()).channels ?? [];
+			} catch {}
+		})();
+	});
+	
+	async function voiceJoin() {
+		if (!selectedVoiceChannel) return;
+		try {
+			const r = await fetch('/api/radio/voice/command', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ cmd: 'join', channel_id: selectedVoiceChannel })
+			});
+			if (!r.ok) throw new Error(await r.text());
+			notify.success('Бот заходит в канал');
+		} catch (e: any) {
+			notify.error(e.message ?? 'Ошибка');
+		}
+	}
+
+	async function voiceLeave() {
+		try {
+			const r = await fetch('/api/radio/voice/command', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ cmd: 'leave' })
+			});
+			if (!r.ok) throw new Error(await r.text());
+			notify.success('Бот вышел из канала');
+		} catch (e: any) {
+			notify.error(e.message ?? 'Ошибка');
+		}
+	}
+
+	let volumeDebounce: ReturnType<typeof setTimeout> | null = null;
+	function voiceVolumeChange(v: number) {
+		if (volumeDebounce) clearTimeout(volumeDebounce);
+		volumeDebounce = setTimeout(async () => {
+			try {
+				await fetch('/api/radio/voice/command', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ cmd: 'volume', value: v })
+				});
+			} catch {}
+		}, 200);
+	}
 </script>
 
 <svelte:head>
@@ -102,6 +168,62 @@
 			</div>
 		</div>
 	{/if}
+	
+	<!-- Voice в Discord -->
+	<Card>
+		<CardHeader class="pb-3 flex flex-row items-center justify-between space-y-0">
+			<CardTitle class="text-sm flex items-center gap-2">
+				<Headphones class="h-4 w-4 text-violet-400" />
+				Discord Voice
+				{#if voice.connected}
+					<Badge class="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px]">
+						в канале
+					</Badge>
+				{/if}
+			</CardTitle>
+		</CardHeader>
+		<CardContent class="space-y-3">
+			{#if voice.connected}
+				<div class="flex items-center gap-4">
+					<div class="flex-1 min-w-0">
+						<div class="text-sm font-medium truncate">{voice.channel_name || voice.channel_id}</div>
+						<div class="text-xs text-muted-foreground">
+							{voice.playing ? 'Играет' : 'Пауза/буферизация'}
+						</div>
+					</div>
+					<div class="flex items-center gap-2">
+						<Volume2 class="h-4 w-4 text-muted-foreground" />
+						<input
+							type="range" min="0" max="1" step="0.01"
+							value={voice.volume}
+							oninput={(e) => voiceVolumeChange(Number((e.target as HTMLInputElement).value))}
+							class="w-24 accent-violet-500"
+						/>
+					</div>
+					<Button variant="outline" onclick={voiceLeave} class="gap-2">
+						<LogOut class="h-4 w-4" />
+						Выйти
+					</Button>
+				</div>
+			{:else}
+				<div class="flex items-center gap-3">
+					<select
+						bind:value={selectedVoiceChannel}
+						class="flex-1 h-9 rounded-md border bg-background px-3 text-sm"
+					>
+						<option value="">— выбери голосовой канал —</option>
+						{#each voiceChannels as c (c.id)}
+							<option value={c.id}>#{c.name}</option>
+						{/each}
+					</select>
+					<Button onclick={voiceJoin} disabled={!selectedVoiceChannel} class="gap-2">
+						<LogIn class="h-4 w-4" />
+						Войти
+					</Button>
+				</div>
+			{/if}
+		</CardContent>
+	</Card>
 
 	<!-- Player (тоже из стора) -->
 	<div class="rounded-xl border bg-gradient-to-br from-card to-muted/20 p-5">

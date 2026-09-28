@@ -121,7 +121,7 @@
 
 	let deleteTarget = $state<any>(null);
 	let deleting = $state(false);
-=
+	
 	let uploadDialogOpen = $state(false);
 	let filesToUpload = $state<{ file: File; title: string; artist: string; description: string }[]>([]);
 

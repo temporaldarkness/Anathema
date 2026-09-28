@@ -31,3 +31,7 @@ MEMORY_SERVICE_URL = os.getenv("MEMORY_SERVICE_URL")
 
 GATEWAY_MEMORY_CLIENT_KEY = os.getenv("GATEWAY_MEMORY_CLIENT_KEY")
 GATEWAY_STORAGE_CLIENT_KEY = os.getenv("GATEWAY_STORAGE_CLIENT_KEY")
+
+RADIO_VOICE_ENABLED = os.getenv("RADIO_VOICE_ENABLED", "false").lower() == "true"
+VOICE_CHANNEL_ID = int(os.getenv("VOICE_CHANNEL_ID", "0") or 0)
+RADIO_STREAM_URL = os.getenv("RADIO_STREAM_URL", "http://caddy/radio/stream")

@@ -11,7 +11,8 @@ from .kafka_producer import KafkaProducer
 from .kafka_consumer import AIResponseConsumer, ImageResponseConsumer, AdminResponseConsumer, ReactionCommandConsumer
 import redis.asyncio as redis
 import logging
-from .config import REDIS_URL, REDIS_PENDING_AI_PREFIX, REDIS_PENDING_IMAGE_PREFIX, REDIS_PENDING_ADMIN_PREFIX, PENDING_TTL_SECONDS
+from .config import REDIS_URL, REDIS_PENDING_AI_PREFIX, REDIS_PENDING_IMAGE_PREFIX, REDIS_PENDING_ADMIN_PREFIX, PENDING_TTL_SECONDS, RADIO_VOICE_ENABLED
+from .voice import RadioVoice, voice_command_listener
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,11 @@ class DiscordBot(commands.Bot):
         
         self.redis = None
         self.pending_responses = {}
+        
+        self.radio_voice: RadioVoice | None = None
+        self._voice_listener_task: asyncio.Task | None = None
+        self._webhook_listener_task: asyncio.Task | None = None
+        self._shutting_down: bool = False
     
     async def setup_hook(self):
         self.redis = await redis.from_url(REDIS_URL, decode_responses=True)
@@ -47,6 +53,19 @@ class DiscordBot(commands.Bot):
         await self.reaction_command_consumer.start()
         await self.image_response_consumer.start()
         await self.admin_response_consumer.start()
+        
+        self.radio_voice = RadioVoice(self)
+        self._voice_listener_task = asyncio.create_task(
+            voice_command_listener(self),
+            name="voice_command_listener",
+        )
+        
+        if RADIO_VOICE_ENABLED:
+            async def _auto_join():
+                await asyncio.sleep(8)
+                if self.radio_voice:
+                    await self.radio_voice.connect()
+            asyncio.create_task(_auto_join())
         
         @self.tree.command(name="ping", description="Проверка работоспособности")
         async def ping(interaction: discord.Interaction):
@@ -424,6 +443,22 @@ class DiscordBot(commands.Bot):
                 logger.warning(f"Failed to add reaction: {e}")
     
     async def close(self):
+        self._shutting_down = True
+        for task_name, task in [
+            ("voice_listener", self._voice_listener_task)
+        ]:
+            if task and not task.done():
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+                except Exception:
+                    logger.exception(f"{task_name} crashed during shutdown")
+        
+        if self.radio_voice:
+            await self.radio_voice.disconnect()
+        
         await self.producer.stop()
         await self.ai_response_consumer.stop()
         await self.reaction_command_consumer.stop()
@@ -432,5 +467,6 @@ class DiscordBot(commands.Bot):
         await self.storage.close()
         await self.memory.close()
         if self.redis:
-            await self.redis.close()
+            await self.redis.aclose()
+        
         await super().close()

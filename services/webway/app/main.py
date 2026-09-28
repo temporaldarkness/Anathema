@@ -15,6 +15,7 @@ from .audit_transport import audit_transport
 from contextlib import asynccontextmanager
 from .discord_client import DiscordClient
 from .radio_client import radio
+import json
 
 from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY
 
@@ -109,6 +110,11 @@ async def get_redis():
     if _redis is None:
         _redis = await redis.from_url(REDIS_URL, decode_responses=True)
     return _redis
+
+class VoiceCommand(BaseModel):
+    cmd: str   # join | leave | volume
+    channel_id: str | None = None
+    value: float | None = None
 
 async def get_kafka_metrics(bootstrap: str) -> dict:
     return {"ok": None, "topics": [], "error": "disabled"}
@@ -1297,7 +1303,7 @@ async def eyes_channels(current_user: UserSession = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(502, f"Discord unavailable: {e}")
 
-    categories = {c["id"]: c for c in raw if c.get("type") == CATEGORY_TYPE}
+    categories = {str(c["id"]): c for c in raw if c.get("type") == CATEGORY_TYPE}
     channels = []
 
     for c in raw:
@@ -1305,7 +1311,7 @@ async def eyes_channels(current_user: UserSession = Depends(get_current_user)):
             continue
         parent = categories.get(c.get("parent_id"), {}) if c.get("parent_id") else {}
         channels.append({
-            "id": c["id"],
+            "id": str(c["id"]),
             "name": c.get("name"),
             "topic": c.get("topic"),
             "type": c.get("type"),
@@ -1775,3 +1781,52 @@ async def radio_queue_clear(
         details={"removed": result.get("removed", 0)},
     )
     return result
+
+@app.post("/api/radio/voice/command")
+async def radio_voice_command(
+    payload: VoiceCommand,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    r = await get_redis()
+    await r.publish("voice:commands", json.dumps(payload.model_dump(exclude_none=True)))
+
+    await write_audit(
+        request, current_user,
+        action=f"voice_{payload.cmd}", entity_type="radio",
+        details=payload.model_dump(exclude_none=True),
+    )
+    return {"ok": True}
+
+
+@app.get("/api/discord/voice-channels")
+async def list_voice_channels(current_user: UserSession = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    
+    if not DISCORD_GUILD_ID:
+        raise HTTPException(500, "DISCORD_GUILD_ID not configured")
+
+    try:
+        raw = await discord_client.list_guild_channels(DISCORD_GUILD_ID)
+    except Exception as e:
+        raise HTTPException(502, f"Discord unavailable: {e}")
+
+    voice = [c for c in raw if c.get("type") in (2, 13)]  # voice, stage
+    return {
+        "channels": [
+            {"id": str(c["id"]), "name": c.get("name"), "parent_id": str(c["parent_id"]) if c.get("parent_id") else None}
+            for c in voice
+        ]
+    }
+
+@app.get("/api/radio/voice/status")
+async def radio_voice_status(current_user: UserSession = Depends(get_current_user)):
+    r = await get_redis()
+    raw = await r.get("voice:status")
+    if not raw:
+        return {"enabled": False, "connected": False, "playing": False, "volume": 0.7}
+    return json.loads(raw)
