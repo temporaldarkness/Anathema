@@ -6,7 +6,7 @@
 	import { page } from '$app/state';
 
 	// Прячем на самой странице /radio
-	const hidden = $derived(page.url.pathname.startsWith('/radio'));
+	const hidden = $derived(page.url.pathname === '/radio');
 
 	async function skip() {
 		try {
@@ -40,9 +40,7 @@
 			<!-- Track info -->
 			<div class="flex-1 min-w-0">
 				<div class="flex items-center gap-2">
-					<Badge
-						class="gap-1 bg-red-500/15 text-red-400 border-red-500/30 text-[9px] px-1 py-0 shrink-0"
-					>
+					<Badge class="gap-1 bg-red-500/15 text-red-400 border-red-500/30 text-[9px] px-1 py-0 shrink-0">
 						<span class="relative flex h-1 w-1">
 							<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60"></span>
 							<span class="relative inline-flex h-1 w-1 rounded-full bg-red-500"></span>
@@ -58,6 +56,14 @@
 						</span>
 					{/if}
 				</div>
+				{#if radio.now?.next}
+					<div class="text-[10px] text-muted-foreground truncate mt-0.5">
+						Далее: <span class="text-foreground/70">{radio.now.next.title}</span>
+						{#if radio.now.next.from_queue}
+							<span class="text-violet-400 ml-1">· очередь</span>
+						{/if}
+					</div>
+				{/if}
 			</div>
 
 			<!-- Volume (hidden on mobile) -->

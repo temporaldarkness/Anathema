@@ -34,7 +34,10 @@
 	const ENTITY_OPTIONS = [
 		'all', 'user', 'channel', 'emote', 'ltm', 'setting', 'keyword', 'user_reaction', 'file'
 	];
-	const ACTION_OPTIONS = ['all', 'create', 'update', 'delete', 'reset', 'upsert', 'favorite', 'unfavorite'];
+	const ACTION_OPTIONS = ['all', 'create', 'update', 'delete', 'reset', 'upsert', 
+		'favorite', 'unfavorite',
+		'queue_clear', 'queue_remove', 'queue_add', 'normalize_all', 'skip', 'upload'
+	];
 	const SOURCE_OPTIONS = ['all', 'webway', 'gateway', 'admin_service'];
 
 	function updateParam(key: string, value: string | null) {
@@ -69,25 +72,42 @@
 
 	function actionColor(action: string) {
 		switch (action) {
+			// Созидательные
 			case 'create':
+			case 'queue_add':
 				return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
 			case 'update':
 				return 'bg-blue-500/15 text-blue-400 border-blue-500/30';
-			case 'delete':
-				return 'bg-red-500/15 text-red-400 border-red-500/30';
-			case 'reset':
-				return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
 			case 'upsert':
 				return 'bg-violet-500/15 text-violet-400 border-violet-500/30';
+			case 'upload':
+				return 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30';
+
+			// Разрушительные
+			case 'delete':
+			case 'queue_remove':
+				return 'bg-red-500/15 text-red-400 border-red-500/30';
+			case 'queue_clear':
+				return 'bg-rose-500/15 text-rose-400 border-rose-500/30';
+
+			// Предупреждающие
+			case 'reset':
+				return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+			case 'normalize_all':
+				return 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30';
+			case 'skip':
+				return 'bg-orange-500/15 text-orange-400 border-orange-500/30';
+
+			// Избранное
 			case 'favorite':
 				return 'bg-pink-500/15 text-pink-400 border-pink-500/30';
 			case 'unfavorite':
-				return 'bg-pink-500/15 text-pink-400 border-pink-500/30';
+				return 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30';
+
 			default:
-				return '';
+				return 'bg-muted text-muted-foreground border-border';
 		}
 	}
-
 	function sourceColor(source: string) {
 		switch (source) {
 			case 'webway':

@@ -12,7 +12,7 @@
 	import { formatDateTime, formatBytes } from '$lib/utils/format';
 	import {
 		ArrowLeft, Upload, Trash2, Pencil, Search, Music, FileAudio,
-		Loader2, Clock, RefreshCw, ListPlus, ListX, X, PlayCircle
+		Loader2, Clock, RefreshCw, ListPlus, ListX, X, PlayCircle, SkipForward
 	} from 'lucide-svelte';
 
 	let { data } = $props();
@@ -24,17 +24,48 @@
 
 	// Очередь
 	let queue = $state<any[]>(data.queue?.items ?? []);
+	let now = $state<any>(data.now);
+	let skipping = $state(false);
 	let queueingId = $state<number | null>(null);
 	const queuedIds = $derived(new Set(queue.map((q: any) => q.song_id)));
 
 	async function refreshQueue() {
 		try {
-			const r = await fetch('/api/radio/queue');
-			if (r.ok) {
-				const body = await r.json();
+			const [q, n] = await Promise.all([
+				fetch('/api/radio/queue'),
+				fetch('/api/radio/now')
+			]);
+			if (q.ok) {
+				const body = await q.json();
 				queue = body.items ?? [];
 			}
+			if (n.ok) now = await n.json();
 		} catch {}
+	}
+	
+	async function refreshNow() {
+		try {
+			const r = await fetch('/api/radio/now');
+			if (r.ok) now = await r.json();
+		} catch {}
+	}
+
+	async function skipCurrent() {
+		if (skipping) return;
+		skipping = true;
+		try {
+			const resp = await fetch('/api/radio/skip', { method: 'POST' });
+			if (!resp.ok) throw new Error(await resp.text());
+			notify.success('Трек пропущен');
+			setTimeout(async () => {
+				await refreshQueue();
+				await refreshNow();
+			}, 700);
+		} catch (e: any) {
+			notify.error(e.message ?? 'Не удалось пропустить');
+		} finally {
+			skipping = false;
+		}
 	}
 
 	async function addToQueue(song: any) {
@@ -52,9 +83,12 @@
 		}
 	}
 
-	async function removeFromQueue(songId: number) {
+	async function removeFromQueue(songId: number, isNext: boolean = false) {
 		try {
-			const resp = await fetch(`/api/radio/queue/${songId}`, { method: 'DELETE' });
+			const url = isNext
+				? '/api/radio/queue/next'
+				: `/api/radio/queue/${songId}`;
+			const resp = await fetch(url, { method: 'DELETE' });
 			if (!resp.ok) throw new Error(await resp.text());
 			await refreshQueue();
 		} catch (e: any) {
@@ -226,6 +260,16 @@
 		if (uploaded > 0) notify.success(`Загружено: ${uploaded}${failed ? `, ошибок: ${failed}` : ''}`);
 		await invalidateAll();
 	}
+	
+	$effect(() => {
+		const id = setInterval(async () => {
+			try {
+				const r = await fetch('/api/radio/now');
+				if (r.ok) now = await r.json();
+			} catch {}
+		}, 5000);
+		return () => clearInterval(id);
+	});
 </script>
 
 <svelte:head>
@@ -270,34 +314,100 @@
 	</div>
 
 	<!-- Очередь воспроизведения -->
-	{#if queue.length > 0}
-		<Card class="border-violet-500/30 bg-violet-500/5">
-			<CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0">
+	{#if now?.status === 'playing' || queue.length > 0}
+		<Card class="border-border bg-card">
+			<CardHeader class="pb-3 flex flex-row items-center justify-between space-y-0">
 				<CardTitle class="text-sm flex items-center gap-2">
 					<PlayCircle class="h-4 w-4 text-violet-400" />
-					Очередь воспроизведения
-					<Badge variant="outline" class="text-[10px]">{queue.length}</Badge>
+					План воспроизведения
+					<Badge variant="outline" class="text-[10px]">
+						{(now?.status === 'playing' ? 1 : 0) + queue.length}
+					</Badge>
+					<span class="text-[10px] text-muted-foreground font-normal normal-case">
+						(сейчас {now?.status === 'playing' ? '+ ' : ''}следующий + очередь)
+					</span>
 				</CardTitle>
-				<Button variant="ghost" size="sm" onclick={clearQueue} class="gap-1.5 text-xs h-7">
-					<X class="h-3 w-3" /> Очистить
-				</Button>
+				{#if queue.length > 0}
+					<Button variant="ghost" size="sm" onclick={clearQueue} class="gap-1.5 text-xs h-7">
+						<X class="h-3 w-3" /> Очистить очередь
+					</Button>
+				{/if}
 			</CardHeader>
+
 			<CardContent class="pt-0">
-				<ol class="space-y-1">
-					{#each queue as q, i (q.song_id)}
-						<li class="flex items-center gap-2 rounded-md border bg-card px-3 py-1.5 text-sm">
-							<span class="font-mono text-xs text-muted-foreground w-5">{i + 1}.</span>
+				<ol class="space-y-1.5">
+					<!-- СЕЙЧАС ИГРАЕТ -->
+					{#if now?.status === 'playing'}
+						<li class="flex items-center gap-3 rounded-md border border-border bg-violet-500/15 px-3 py-2 text-sm">
+							<span class="font-mono text-xs text-violet-300 w-5 shrink-0 text-right font-semibold">
+								1.
+							</span>
 							<div class="flex-1 min-w-0">
-								<div class="font-medium truncate">{q.title}</div>
+								<div class="font-medium truncate flex items-center gap-2">
+									<span class="truncate">{now.title}</span>
+									<Badge class="text-[9px] py-0 px-1.5 gap-1.5 bg-violet-500 text-white border-0 shrink-0">
+										<span class="relative flex h-1.5 w-1.5">
+											<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70"></span>
+											<span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
+										</span>
+										сейчас
+									</Badge>
+								</div>
+								{#if now.artist}
+									<div class="text-[11px] text-violet-200/60 truncate">{now.artist}</div>
+								{/if}
+							</div>
+							<button
+								type="button"
+								onclick={skipCurrent}
+								disabled={skipping}
+								class="shrink-0 text-violet-300/70 hover:text-violet-200 transition-colors disabled:opacity-50"
+								title="Пропустить текущий трек"
+							>
+								{#if skipping}
+									<Loader2 class="h-3.5 w-3.5 animate-spin" />
+								{:else}
+									<SkipForward class="h-3.5 w-3.5" />
+								{/if}
+							</button>
+						</li>
+					{/if}
+
+					<!-- ОЧЕРЕДЬ (первый = следующий) -->
+					{#each queue as q, i (q.song_id)}
+						{@const isNext = i === 0}
+						{@const num = (now?.status === 'playing' ? 2 : 1) + i}
+						<li
+							class="flex items-center gap-3 rounded-md border border-border px-3 py-2 text-sm
+								{isNext ? 'bg-violet-500/[0.06]' : 'bg-card'}"
+						>
+							<span
+								class="font-mono text-xs w-5 shrink-0 text-right
+									{isNext ? 'text-violet-400/80' : 'text-muted-foreground'}"
+							>
+								{num}.
+							</span>
+							<div class="flex-1 min-w-0">
+								<div class="font-medium truncate flex items-center gap-2">
+									<span class="truncate">{q.title}</span>
+									{#if isNext}
+										<Badge
+											variant="outline"
+											class="text-[9px] py-0 px-1.5 border-violet-500/40 text-violet-400 shrink-0"
+										>
+											следующий
+										</Badge>
+									{/if}
+								</div>
 								{#if q.artist}
 									<div class="text-[11px] text-muted-foreground truncate">{q.artist}</div>
 								{/if}
 							</div>
 							<button
 								type="button"
-								onclick={() => removeFromQueue(q.song_id)}
-								class="text-muted-foreground hover:text-destructive shrink-0"
-								title="Убрать из очереди"
+								onclick={() => removeFromQueue(q.song_id, isNext)}
+								class="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
+								title={isNext ? 'Убрать следующий трек' : 'Убрать из очереди'}
 							>
 								<X class="h-3.5 w-3.5" />
 							</button>

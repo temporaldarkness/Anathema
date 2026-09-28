@@ -176,16 +176,67 @@ async def _normalize_all_bg():
 
 @router.get("/queue")
 async def get_queue(caller: str = Depends(verify_api_key)):
-    return {"items": await list_queue()}
+    items = await list_queue()
+
+    from_queue_next = None
+    if player.next_song is not None and player.next_song.get("_from_queue"):
+        from_queue_next = {
+            "song_id": player.next_song["id"],
+            "title": player.next_song["title"],
+            "artist": player.next_song.get("artist") or "",
+            "duration_sec": player.next_song.get("duration_sec"),
+        }
+    else:
+        r = await get_redis()
+        raw = await r.get("radio:next")
+        if raw:
+            try:
+                data = json.loads(raw)
+                if data.get("from_queue"):
+                    from_queue_next = {
+                        "song_id": data["song_id"],
+                        "title": data["title"],
+                        "artist": data.get("artist") or "",
+                        "duration_sec": data.get("duration_sec"),
+                    }
+            except Exception:
+                pass
+
+    if from_queue_next:
+        items.insert(0, from_queue_next)
+
+    return {"items": items}
 
 
 @router.post("/queue/{song_id}")
 async def add_to_queue(song_id: int, caller: str = Depends(verify_api_key)):
     if not await push_song(song_id):
         raise HTTPException(404, "Song not found")
-    if player.current_song is None and player.next_song is None:
+
+    current_next_from_queue = False
+    if player.next_song is not None:
+        current_next_from_queue = player.next_song.get("_from_queue", False)
+    else:
+        r = await get_redis()
+        raw = await r.get("radio:next")
+        if raw:
+            try:
+                current_next_from_queue = json.loads(raw).get("from_queue", False)
+            except Exception:
+                pass
+
+    if player.next_song is None or not current_next_from_queue:
         await player.refresh_next()
+
     return {"ok": True}
+
+@router.delete("/queue/next")
+async def remove_next(caller: str = Depends(verify_api_key)):
+    if player.next_song is None:
+        raise HTTPException(404, "No next song")
+    removed_id = player.next_song["id"]
+    await player.refresh_next()
+    return {"ok": True, "removed": removed_id}
 
 
 @router.delete("/queue/{song_id}")

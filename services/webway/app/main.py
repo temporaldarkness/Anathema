@@ -1723,6 +1723,23 @@ async def radio_queue_add(
     )
     return {"ok": True}
 
+@app.delete("/api/radio/queue/next")
+async def radio_queue_remove_next(
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+
+    ok = await radio.queue_remove_next()
+    if not ok:
+        raise HTTPException(404, "No next song")
+
+    await write_audit(
+        request, current_user,
+        action="queue_remove", entity_type="radio_song", entity_id="next",
+    )
+    return {"ok": True}
 
 @app.delete("/api/radio/queue/{song_id}")
 async def radio_queue_remove(

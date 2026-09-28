@@ -93,6 +93,13 @@ class RadioClient:
         resp = await self.client.delete("/queue")
         resp.raise_for_status()
         return resp.json()
+    
+    async def queue_remove_next(self):
+        resp = await self.client.delete("/queue/next")
+        if resp.status_code == 404:
+            return False
+        resp.raise_for_status()
+        return True
 
 
 radio = RadioClient()
