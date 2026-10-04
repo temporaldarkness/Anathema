@@ -212,6 +212,7 @@ services:
       AIWORKER_MEMORY_CLIENT_KEY: ${AIWORKER_MEMORY_CLIENT_KEY}
       AIWORKER_HISTORY_CLIENT_KEY: ${AIWORKER_HISTORY_CLIENT_KEY}
       KAFKA_TOPIC_API_USAGE: ${KAFKA_TOPIC_API_USAGE}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       memory_service:
         condition: service_started
@@ -219,6 +220,8 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - anathema_network
     restart: unless-stopped
@@ -240,11 +243,14 @@ services:
       STORAGE_SERVICE_URL: ${STORAGE_SERVICE_URL}
       IMAGEWORKER_STORAGE_CLIENT_KEY: ${IMAGEWORKER_STORAGE_CLIENT_KEY}
       KAFKA_TOPIC_API_USAGE: ${KAFKA_TOPIC_API_USAGE}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       storage_service:
         condition: service_started
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - anathema_network
     restart: unless-stopped
@@ -260,11 +266,14 @@ services:
       MEMORY_SERVICE_URL: ${MEMORY_SERVICE_URL}
       REACTIONWORKER_MEMORY_CLIENT_KEY: ${REACTIONWORKER_MEMORY_CLIENT_KEY}
       REACTIONWORKER_AUTOUPDATE_INTERVAL: ${REACTIONWORKER_AUTOUPDATE_INTERVAL}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       memory_service:
         condition: service_started
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - anathema_network
     restart: unless-stopped
@@ -281,6 +290,7 @@ services:
       SECURITY_SERVICE_URL: ${SECURITY_SERVICE_URL}
       ADMIN_SECURITY_CLIENT_KEY: ${ADMIN_SECURITY_CLIENT_KEY}
       ADMIN_MEMORY_CLIENT_KEY: ${ADMIN_MEMORY_CLIENT_KEY}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       memory_service:
         condition: service_started
@@ -288,6 +298,8 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - anathema_network
     restart: unless-stopped

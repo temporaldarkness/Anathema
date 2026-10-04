@@ -12,6 +12,7 @@ from .config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC_AI_RESPONSES, KAFKA_GRO
 from .exceptions import InsufficientFundsError
 from .pricing import compute_token_cost
 from .kafka_producer import UsageProducer
+from .heartbeat import heartbeat_loop
 
 logging.basicConfig(
     level=logging.INFO,
@@ -336,6 +337,8 @@ async def main():
     await usage_producer.start()
     await producer.start()
     
+    hb_task = asyncio.create_task(heartbeat_loop("ai_worker"))
+    
     logger.info("AI Worker online")
     
     try:
@@ -359,6 +362,11 @@ async def main():
             await producer.send(KAFKA_TOPIC_AI_RESPONSES, response)
             logger.info(f"Sent answer for {correlation_id}")
     finally:
+        hb_task.cancel()
+        try:
+            await hb_task
+        except asyncio.CancelledError:
+            pass
         await consumer.stop()
         await producer.stop()
         await memory.close()

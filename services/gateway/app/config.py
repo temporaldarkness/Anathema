@@ -35,3 +35,5 @@ GATEWAY_STORAGE_CLIENT_KEY = os.getenv("GATEWAY_STORAGE_CLIENT_KEY")
 RADIO_VOICE_ENABLED = os.getenv("RADIO_VOICE_ENABLED", "false").lower() == "true"
 VOICE_CHANNEL_ID = int(os.getenv("VOICE_CHANNEL_ID", "0") or 0)
 RADIO_STREAM_URL = os.getenv("RADIO_STREAM_URL", "http://caddy/radio/stream")
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379")

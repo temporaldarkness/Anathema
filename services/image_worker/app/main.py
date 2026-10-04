@@ -6,6 +6,7 @@ from .kafka_producer import ImageResponseProducer, UsageProducer
 from .ai_client import generate_image, edit_image
 from .storage_client import StorageClient
 from .pricing import compute_flat_cost
+from .heartbeat import heartbeat_loop
 
 logger = logging.getLogger(__name__)
 
@@ -102,11 +103,17 @@ async def main():
     await usage_producer.start()
     consumer = ImageRequestConsumer(process_request)
     await consumer.start()
+    hb_task = asyncio.create_task(heartbeat_loop("image_worker"))
     
     logger.info("Image Worker started")
     try:
         await consumer.consume()
     finally:
+        hb_task.cancel()
+        try:
+            await hb_task
+        except asyncio.CancelledError:
+            pass
         await consumer.stop()
         await producer.stop()
         await storage.close()

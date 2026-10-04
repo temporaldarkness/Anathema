@@ -4,6 +4,7 @@ from .memory_client import MemoryClient
 from .reaction_checker import ReactionChecker
 from .kafka_consumer import RawMessageConsumer, InvalidationConsumer
 from .kafka_producer import ReactionCommandProducer
+from .heartbeat import heartbeat_loop
 
 logging.basicConfig(
     level=logging.INFO,
@@ -49,11 +50,17 @@ async def main():
     
     raw_task = asyncio.create_task(consumer.consume())
     inval_task = asyncio.create_task(invalidation_consumer.consume())
+    hb_task = asyncio.create_task(heartbeat_loop("reaction_worker"))
 
     logger.info("Reaction Worker running...")
     try:
         await asyncio.gather(raw_task, inval_task)
     finally:
+        hb_task.cancel()
+        try:
+            await hb_task
+        except asyncio.CancelledError:
+            pass
         await consumer.stop()
         await invalidation_consumer.stop()
         await producer.stop()

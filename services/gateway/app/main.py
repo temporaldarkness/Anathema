@@ -6,6 +6,7 @@ from .memory_client import MemoryClient
 from .storage_client import StorageClient
 from .kafka_consumer import AIResponseConsumer, ImageResponseConsumer, AdminResponseConsumer, ReactionCommandConsumer
 from .kafka_producer import KafkaProducer
+from .heartbeat import heartbeat_loop
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,6 +20,7 @@ async def main():
     reaction_command_consumer = ReactionCommandConsumer(on_reaction_callback=None)
     image_response_consumer = ImageResponseConsumer(on_response_callback=None)
     admin_response_consumer = AdminResponseConsumer(on_response_callback=None)
+    hb_task = asyncio.create_task(heartbeat_loop("gateway"))
     
     producer = KafkaProducer()
     bot = DiscordBot(
@@ -38,6 +40,15 @@ async def main():
     
     async with bot:
         await bot.start(DISCORD_TOKEN)
+    
+    try:
+        await asyncio.Future()
+    finally:
+        hb_task.cancel()
+        try:
+            await hb_task
+        except asyncio.CancelledError:
+            pass
 
 if __name__ == "__main__":
     asyncio.run(main())

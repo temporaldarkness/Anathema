@@ -17,7 +17,7 @@ from .discord_client import DiscordClient
 from .radio_client import radio
 import json
 
-from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY
+from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY, BACKEND_URL
 
 CHANNEL_TYPES = {
     0: "Текстовый",
@@ -31,7 +31,18 @@ CHANNEL_TYPES = {
 TEXT_CHANNEL_TYPES = {0, 5, 15, 16}
 CATEGORY_TYPE = 4
 
+EXPECTED_WORKERS = {
+    "gateway":          {"label": "Gateway"},
+    "ai_worker":        {"label": "AI Worker"},
+    "image_worker":     {"label": "Image Worker"},
+    "reaction_worker":  {"label": "Reaction Worker"},
+    "admin_service":    {"label": "Admin Service"},
+}
+STALE_AFTER_SEC = 50
+
 discord_client = DiscordClient()
+
+BOOT_TIME = datetime.now(timezone.utc)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -896,7 +907,7 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
         (
             ltm_res, users_res, channels_res, emotes_res,
             kw_res, ur_res, settings_res,
-            mem_h, hist_h, sec_h, st_h, au_h, ra_h,
+            mem_h, hist_h, sec_h, st_h, au_h, ra_h, ww_h,
             balance,
             kafka_data,
             bot_uptime,
@@ -938,6 +949,10 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
                 RADIO_SERVICE_URL,
                 {"X-API-Key": WEBWAY_RADIO_CLIENT_KEY},
             ) if RADIO_SERVICE_URL else _skip(),
+            ping_service(
+                client,
+                BACKEND_URL,
+            ) if BACKEND_URL else _skip(),
             get_proxy_balance(),
             get_kafka_metrics(KAFKA_BOOTSTRAP_SERVERS),
             get_bot_uptime(),
@@ -975,6 +990,7 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
             "storage": st_h,
             "audit": au_h,
             "radio": ra_h,
+            "webway_backend": ww_h
         },
         "balance": balance,
         "kafka": kafka_data,
@@ -1830,3 +1846,37 @@ async def radio_voice_status(current_user: UserSession = Depends(get_current_use
     if not raw:
         return {"enabled": False, "connected": False, "playing": False, "volume": 0.7}
     return json.loads(raw)
+
+@app.get("/api/dashboard/heartbeats")
+async def dashboard_heartbeats(current_user: UserSession = Depends(get_current_user)):
+    r = await get_redis()
+    now = datetime.now(timezone.utc)
+    result = []
+    for name, meta in EXPECTED_WORKERS.items():
+        ts_str = await r.get(f"heartbeat:{name}")
+        age_sec = None
+        alive = False
+        if ts_str:
+            try:
+                ts = datetime.fromisoformat(ts_str)
+                age_sec = (now - ts).total_seconds()
+                alive = age_sec < STALE_AFTER_SEC
+            except Exception:
+                pass
+        result.append({
+            "service": name,
+            "label": meta["label"],
+            "alive": alive,
+            "seconds_since": round(age_sec, 1) if age_sec is not None else None,
+        })
+    return {"services": result}
+
+from datetime import datetime, timezone
+BOOT_TIME = datetime.now(timezone.utc)
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "uptime_seconds": int((datetime.now(timezone.utc) - BOOT_TIME).total_seconds()),
+    }

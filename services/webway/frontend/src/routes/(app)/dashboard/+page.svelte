@@ -31,7 +31,8 @@
 		{ key: 'security', name: 'Security' },
 		{ key: 'storage', name: 'Storage' },
 		{ key: 'audit', name: 'Audit' },
-		{ key: 'radio', name: 'Radio' }
+		{ key: 'radio', name: 'Radio' },
+		{ key: 'webway_backend', name: 'Webway' }
 	]);
 
 	function formatBalance(b: number | null | undefined): string {
@@ -250,6 +251,34 @@
 				</div>
 			{/each}
 		</div>
+		<!-- Background workers (heartbeat) -->
+		{#if data.heartbeats?.services?.length}
+			<div class="flex flex-wrap items-center gap-2">
+				{#each data.heartbeats.services as w (w.service)}
+					<div
+						class="inline-flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs transition-colors hover:border-primary/30"
+						title={w.seconds_since !== null
+							? `Последний heartbeat: ${w.seconds_since} сек назад`
+							: 'Никогда не отвечал'}
+					>
+						{#if w.alive}
+							<span class="relative flex h-2 w-2">
+								<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50"></span>
+								<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+							</span>
+						{:else}
+							<span class="relative inline-flex h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px] shadow-red-500/50"></span>
+						{/if}
+						<span class="font-medium">{w.label}</span>
+						{#if w.seconds_since !== null && !w.alive}
+							<span class="font-mono text-muted-foreground">
+								{Math.round(w.seconds_since)}s
+							</span>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		{/if}
 
 		<!-- ======================== BOT DATA ======================== -->
 		<section class="space-y-3">
