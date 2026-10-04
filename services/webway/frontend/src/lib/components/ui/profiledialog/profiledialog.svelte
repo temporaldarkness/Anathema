@@ -3,12 +3,13 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { Copy, Check, ShieldCheck, User as UserIcon, LogOut } from 'lucide-svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { Copy, Check, ShieldCheck, User as UserIcon, LogOut, Loader2 } from 'lucide-svelte';
 
 	let {
 		open = $bindable(false),
 		user
-	}: { open?: boolean; user: { user_id: number; username: string; is_admin: boolean; expires_at?: number | null } } =
+	}: { open?: boolean; user: { user_id: number; username: string; is_admin: boolean; created_at?: number | null; expires_at?: number | null } } =
 		$props();
 
 	let copied = $state(false);
@@ -18,9 +19,35 @@
 		copied = true;
 		setTimeout(() => (copied = false), 1500);
 	}
+	
+	let confirmLogoutOpen = $state(false);
+	let loggingOut = $state(false);
+
+	function requestLogout() {
+		open = false;
+		confirmLogoutOpen = true;
+	}
+
+	async function doLogout() {
+		if (loggingOut) return;
+		loggingOut = true;
+		try {
+			await fetch('/auth/logout', {
+				method: 'POST',
+				credentials: 'include'
+			});
+		} catch {}
+		window.location.href = '/';
+	}
 
 	const initials = $derived(user.username.slice(0, 2).toUpperCase());
 
+	const createdLabel = $derived.by(() => {
+		if (!user.created_at) return '—';
+		const d = new Date(user.created_at);
+		return d.toLocaleString('ru-RU');
+	});
+	
 	const expiresLabel = $derived.by(() => {
 		if (!user.expires_at) return '—';
 		const d = new Date(user.expires_at * 1000);
@@ -88,6 +115,10 @@
 					</dd>
 				</div>
 				<div class="flex items-center justify-between gap-2">
+					<dt class="text-xs text-muted-foreground">Сессия создана</dt>
+					<dd class="text-xs">{createdLabel}</dd>
+				</div>
+				<div class="flex items-center justify-between gap-2">
 					<dt class="text-xs text-muted-foreground">Сессия истекает</dt>
 					<dd class="text-xs">{expiresLabel}</dd>
 				</div>
@@ -111,12 +142,48 @@
 
 		<Dialog.Footer>
 			<Button variant="outline" onclick={() => (open = false)}>Закрыть</Button>
-			<form method="POST" action="/auth/logout" class="inline">
-				<Button type="submit" variant="destructive" class="gap-2">
-					<LogOut class="h-4 w-4" />
-					Выйти
-				</Button>
-			</form>
+			<Button type="submit" variant="destructive" class="gap-2" onclick={requestLogout}>
+				<LogOut class="h-4 w-4" />
+				Выйти
+			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
+<AlertDialog.Root bind:open={confirmLogoutOpen}>
+	<AlertDialog.Content class="sm:max-w-md">
+		<AlertDialog.Header>
+			<div class="flex items-start gap-3">
+				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/15">
+					<LogOut class="h-5 w-5 text-destructive" />
+				</div>
+				<div class="space-y-1.5">
+					<AlertDialog.Title>Выйти из панели?</AlertDialog.Title>
+					<AlertDialog.Description>
+						Сессия на этом устройстве будет завершена. Другие устройства
+						останутся залогинены — их можно посмотреть и отозвать в разделе
+						«Сессии».
+					</AlertDialog.Description>
+				</div>
+			</div>
+		</AlertDialog.Header>
+
+		<AlertDialog.Footer>
+			<Button
+				variant="outline"
+				onclick={() => (confirmLogoutOpen = false, open = true)}
+				disabled={loggingOut}
+			>
+				Отмена
+			</Button>
+			<Button variant="destructive" onclick={doLogout} disabled={loggingOut} class="gap-2">
+				{#if loggingOut}
+					<Loader2 class="h-4 w-4 animate-spin" />
+					Выходим...
+				{:else}
+					<LogOut class="h-4 w-4" />
+					Выйти
+				{/if}
+			</Button>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

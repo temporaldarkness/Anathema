@@ -3,15 +3,12 @@ import type { LayoutServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
 
 export const load: LayoutServerLoad = async ({ fetch, cookies }) => {
-	const token = cookies.get('access_token');
-	if (!token) {
-		throw redirect(302, '/');
-	}
+	const cookieHeader = cookies.getAll().map(c => `${c.name}=${c.value}`).join('; ');
 	const backendUrl = env.BACKEND_URL ?? 'http://webway_backend:8000';
 
 	const response = await fetch(`${backendUrl}/api/me`, {
         headers: {
-            'Cookie': `access_token=${token}`
+            'Cookie': cookieHeader
         }
     });
 

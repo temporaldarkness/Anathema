@@ -2,7 +2,7 @@ import { env } from '$env/dynamic/private';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, cookies, url }) => {
-	const token = cookies.get('access_token');
+	const cookieHeader = cookies.getAll().map(c => `${c.name}=${c.value}`).join('; ');
 	const params = new URLSearchParams();
 	params.set('limit', url.searchParams.get('limit') ?? '50');
 	params.set('offset', url.searchParams.get('offset') ?? '0');
@@ -14,8 +14,8 @@ export const load: PageServerLoad = async ({ fetch, cookies, url }) => {
 	const backendUrl = env.BACKEND_URL ?? 'http://webway_backend:8000';
 
 	const [listRes, statsRes] = await Promise.all([
-		fetch(`${backendUrl}/api/audit?${params}`, { headers: { Cookie: `access_token=${token}` } }),
-		fetch(`${backendUrl}/api/audit/stats`, { headers: { Cookie: `access_token=${token}` } })
+		fetch(`${backendUrl}/api/audit?${params}`, { headers: { Cookie: cookieHeader } }),
+		fetch(`${backendUrl}/api/audit/stats`, { headers: { Cookie: cookieHeader } })
 	]);
 
 	return {

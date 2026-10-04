@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
+	let remember = $state(true);
 </script>
 
 <svelte:head>
@@ -31,7 +32,7 @@
 		</CardHeader>
 
 		<CardContent class="space-y-4">
-			<a href="/auth/discord/login" class="block">
+			<a href="/auth/discord/login?remember={remember ? 'true' : 'false'}" class="block">
 				<Button
 					class="w-full gap-2 bg-[#5865F2] text-white hover:bg-[#4752C4] transition-colors"
 					size="lg"
@@ -50,10 +51,13 @@
 					Войти через Discord
 				</Button>
 			</a>
-
 			<p class="text-center text-xs text-muted-foreground">
 				Доступ только для участников сервера с соответствующими правами.
 			</p>
+			<label class="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+				<input type="checkbox" bind:checked={remember} class="accent-violet-500" />
+				Запомнить меня на 30 дней
+			</label>
 		</CardContent>
 	</Card>
 

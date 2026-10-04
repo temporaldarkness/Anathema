@@ -10,6 +10,7 @@
 	import { onMount } from 'svelte';
 	import { radio } from '$lib/radio.svelte';
 	import MiniPlayer from '$lib/components/ui/miniplayer';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import {
 		LayoutDashboard,
 		Brain,
@@ -44,6 +45,21 @@
 	$effect(() => {
 		if (audioEl) radio.attach(audioEl);
 	});
+	
+	import { goto } from '$app/navigation';
+
+	let confirmOpen = $state(false);
+
+	function requestLogout() {
+		confirmOpen = true;
+	}
+
+	async function doLogout() {
+		try {
+			await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+		} catch {}
+		window.location.href = '/';
+	}
 
 	const navGroups = [
 		{
@@ -225,17 +241,10 @@
 
 							<DropdownMenu.Separator class="my-1" />
 
-							<form method="POST" action="/auth/logout">
-								<DropdownMenu.Item asChild>
-									<button
-										type="submit"
-										class="flex w-full cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
-									>
-										<LogOut class="h-4 w-4" />
-										Выйти
-									</button>
-								</DropdownMenu.Item>
-							</form>
+							<DropdownMenu.Item asChild class="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive" onSelect={requestLogout}>
+								<LogOut class="h-4 w-4" />
+									Выйти
+							</DropdownMenu.Item>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
 				</div>
@@ -253,6 +262,20 @@
 			<MiniPlayer />
 		</div>
 	</div>
+	<AlertDialog.Root bind:open={confirmOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Выйти из панели?</AlertDialog.Title>
+			<AlertDialog.Description>
+				Сессия на этом устройстве будет завершена. Другие устройства останутся залогинены.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<Button variant="outline" onclick={() => (confirmOpen = false)}>Отмена</Button>
+			<Button variant="destructive" onclick={doLogout}>Выйти</Button>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 	<ProfileDialog bind:open={profileOpen} user={data.user} />
 {:else}
 	<!-- Скелетон layout -->

@@ -1,12 +1,11 @@
-import type { PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, cookies }) => {
 	const cookieHeader = cookies.getAll().map(c => `${c.name}=${c.value}`).join('; ');
 	const backendUrl = env.BACKEND_URL ?? 'http://webway_backend:8000';
-	const resp = await fetch(`${backendUrl}/api/eyes/channels`, {
+	const resp = await fetch(`${backendUrl}/api/sessions`, {
 		headers: { Cookie: cookieHeader }
 	});
-	const data = resp.ok ? await resp.json() : { channels: [], guild_id: 0 };
-	return { channels: data.channels, guildId: data.guild_id };
+	return { sessions: resp.ok ? (await resp.json()).sessions : [] };
 };

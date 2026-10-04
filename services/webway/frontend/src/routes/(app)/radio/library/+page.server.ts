@@ -2,8 +2,8 @@ import { env } from '$env/dynamic/private';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, cookies }) => {
-	const token = cookies.get('access_token');
-	const headers = { Cookie: `access_token=${token}` };
+	const cookieHeader = cookies.getAll().map(c => `${c.name}=${c.value}`).join('; ');
+	const headers = { Cookie: cookieHeader };
 	const backendUrl = env.BACKEND_URL ?? 'http://webway_backend:8000';
 
 	const [songsRes, queueRes, nowRes] = await Promise.all([

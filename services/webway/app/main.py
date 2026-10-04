@@ -4,7 +4,6 @@ from typing import Optional, List, Union
 import httpx
 from fastapi import FastAPI, HTTPException, Depends, Request, Response, Query, UploadFile, File, Form, Query
 from fastapi.responses import RedirectResponse
-from jose import JWTError, jwt
 from pydantic import BaseModel, Field, field_validator
 import asyncio
 from .memory_client import MemoryClient
@@ -16,8 +15,10 @@ from contextlib import asynccontextmanager
 from .discord_client import DiscordClient
 from .radio_client import radio
 import json
+from . import session as session_store
+import secrets
 
-from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, COOKIE_SECURE, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY, BACKEND_URL
+from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY, BACKEND_URL, SESSION_COOKIE_NAME, SESSION_COOKIE_SECURE
 
 CHANNEL_TYPES = {
     0: "Текстовый",
@@ -61,6 +62,7 @@ class UserSession(BaseModel):
     avatar_url: str | None = None
     is_admin: bool
     expires_at: int | None = None
+    created_at: str | None = None
     
     @field_validator("user_id", mode="before")
     @classmethod
@@ -173,21 +175,29 @@ async def get_bot_uptime() -> dict:
     except Exception as e:
         return {"ok": False, "uptime_seconds": None, "boot_time": None, "error": str(e)}
 
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-
 async def get_current_user(request: Request) -> UserSession:
-    token = request.cookies.get("access_token")
-    if not token:
+    sid = request.cookies.get(SESSION_COOKIE_NAME)
+    if not sid:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    data = await session_store.get_session(sid)
+    if not data:
+        raise HTTPException(status_code=401, detail="Session expired")
+    await session_store.touch_session(sid)
     try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        return UserSession(**payload)
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        last_seen = datetime.fromisoformat(data["last_seen"])
+        ttl = int(data.get("ttl_seconds", 0))
+        expires_dt = last_seen + timedelta(seconds=ttl)
+        expires_at = int(expires_dt.timestamp())
+    except Exception:
+        expires_at = None
+    return UserSession(
+        user_id=int(data["user_id"]),
+        username=data["username"],
+        avatar_url=data["avatar_url"],
+        is_admin=bool(data["is_admin"]),
+        expires_at=expires_at,
+        created_at=data.get("created_at")
+    )
 
 memory = MemoryClient()
 
@@ -217,12 +227,18 @@ async def dashboard_stats(current_user: UserSession = Depends(get_current_user))
 
 
 @app.get("/auth/discord/login")
-async def discord_login():
+async def discord_login(remember: bool = True):
+    
+    state = secrets.token_urlsafe(24)
+    r = await session_store.get_redis()
+    await r.setex(f"oauth_state:{state}", 300, "1" if remember else "0")
+    
     params = {
         "client_id": DISCORD_CLIENT_ID,
         "redirect_uri": DISCORD_REDIRECT_URI,
         "response_type": "code",
         "scope": "identify guilds",
+        "state": state,
     }
     query_string = "&".join(f"{k}={v}" for k, v in params.items())
     return RedirectResponse(f"https://discord.com/api/oauth2/authorize?{query_string}")
@@ -234,7 +250,15 @@ def build_avatar_url(user: dict) -> str | None:
     return f"https://cdn.discordapp.com/avatars/{user['id']}/{user['avatar']}.{ext}"
 
 @app.get("/auth/discord/callback")
-async def discord_callback(code: str):
+async def discord_callback(code: str, state: str, request: Request):
+    
+    r = await session_store.get_redis()
+    remember_raw = await r.get(f"oauth_state:{state}")
+    if remember_raw is None:
+        raise HTTPException(status_code=400, detail="Invalid or expired state")
+    await r.delete(f"oauth_state:{state}")
+    remember = remember_raw == "1"
+    
     data = {
         "client_id": DISCORD_CLIENT_ID,
         "client_secret": DISCORD_CLIENT_SECRET,
@@ -271,26 +295,75 @@ async def discord_callback(code: str):
     if not is_admin:
         raise HTTPException(status_code=403, detail="You do not have permission to access this panel.")
 
-    jwt_token = create_access_token(
-        {"user_id": str(user["id"]), "username": user["username"], "avatar_url": avatar_url, "is_admin": is_admin}
+    user_agent = request.headers.get("user-agent")
+    ip = request.client.host if request.client else None
+    sid, ttl = await session_store.create_session(
+        user_id=int(user["id"]),
+        username=user["username"],
+        avatar_url=avatar_url,
+        is_admin=is_admin,
+        remember=remember,
+        user_agent=user_agent,
+        ip=ip,
     )
-    
-    response = RedirectResponse(url="/dashboard", status_code=303)
+
+    response = RedirectResponse(url="/dashboard")
     response.set_cookie(
-        key="access_token",
-        value=jwt_token,
+        key=SESSION_COOKIE_NAME,
+        value=sid,
         httponly=True,
-        secure=COOKIE_SECURE,
+        secure=SESSION_COOKIE_SECURE,
         samesite="lax",
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        max_age=ttl,
+        path="/",
     )
     return response
 
 @app.post("/auth/logout")
-async def logout():
-    response = RedirectResponse(url="/", status_code=303)
-    response.delete_cookie("access_token")
+async def logout(request: Request):
+    sid = request.cookies.get(SESSION_COOKIE_NAME)
+    if sid:
+        data = await session_store.get_session(sid)
+        user_id = int(data["user_id"]) if data else None
+        await session_store.delete_session(sid, user_id=user_id)
+    response = JSONResponse({"ok": True})
+    response.delete_cookie(SESSION_COOKIE_NAME, path="/")
     return response
+
+@app.get("/api/sessions")
+async def list_sessions(
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    sessions = await session_store.list_user_sessions(current_user.user_id)
+    current_sid = request.cookies.get(SESSION_COOKIE_NAME)
+    for s in sessions:
+        s["is_current"] = (s["session_id"] == current_sid)
+    return {"sessions": sessions}
+
+
+@app.delete("/api/sessions/{sid}")
+async def revoke_session(
+    sid: str,
+    current_user: UserSession = Depends(get_current_user),
+):
+    target = await session_store.get_session(sid)
+    if not target or int(target.get("user_id", -1)) != current_user.user_id:
+        raise HTTPException(404, "Session not found")
+    await session_store.delete_session(sid, user_id=current_user.user_id)
+    return {"ok": True}
+
+
+@app.post("/api/sessions/revoke-all")
+async def revoke_all_sessions(
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    current_sid = request.cookies.get(SESSION_COOKIE_NAME)
+    n = await session_store.delete_all_user_sessions(
+        current_user.user_id, except_sid=current_sid
+    )
+    return {"ok": True, "revoked": n}
 
 @app.get("/api/me")
 async def read_users_me(current_user: UserSession = Depends(get_current_user)):
@@ -1111,18 +1184,18 @@ async def gallery_file(
     file_id: str,
     request: Request,
 ):
-    token = request.cookies.get("access_token")
-    if not token:
+    sid = request.cookies.get(SESSION_COOKIE_NAME)
+    if not sid:
         raise HTTPException(401, "Not authenticated")
-    try:
-        jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-    except JWTError:
-        raise HTTPException(401, "Invalid token")
+
+    session_data = await session_store.get_session(sid)
+    if not session_data:
+        raise HTTPException(401, "Session expired")
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.get(
-            f"{STORAGE_SERVICE_URL}/file/{file_id}",
-            headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY}
+            f"{os.getenv('STORAGE_SERVICE_URL')}/file/{file_id}",
+            headers={"X-API-Key": os.getenv("WEBWAY_STORAGE_CLIENT_KEY")}
         )
         if resp.status_code == 404:
             raise HTTPException(404, "File not found")
