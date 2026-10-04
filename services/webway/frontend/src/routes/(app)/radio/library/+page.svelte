@@ -35,6 +35,10 @@
 				fetch('/api/radio/queue'),
 				fetch('/api/radio/now')
 			]);
+			if (r.status === 401) {
+				window.location.href = '/';
+				return;
+			}
 			if (q.ok) {
 				const body = await q.json();
 				queue = body.items ?? [];
