@@ -131,7 +131,7 @@ async def handle_request_chat(msg):
 
     instruction = PromptBuilder.build_system_prompt_chat(user_data, channel_data, ltm, settings)
 
-    history_messages = await history.get_channel_history(channel_id, limit=20)
+    history_messages = await history.get_channel_history(channel_id, limit=200)
     history_text = PromptBuilder.format_history(history_messages)
     full_prompt = (
         f"{instruction}\n"
