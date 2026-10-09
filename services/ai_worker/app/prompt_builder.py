@@ -4,18 +4,18 @@ class PromptBuilder:
     @staticmethod
     def build_system_prompt_chat(user_data, channel_data, ltm, settings):
         prompt = (
-            "Ты – Discord бот. Отвечай кратко, дружелюбно, с эмодзи.\n"
+            "Ты – Discord бот. Отвечай кратко, дружелюбно, с эмодзи. Твоё имя - Interdict\n"
             "Правила:\n"
             "- Используй русский язык.\n"
             "- Не пиши длинные сообщения (максимум 2-3 строки).\n"
             "- Если запрашивают факт из памяти – используй его.\n\n"
         )
         
-        gender = ['Не указан', 'Мужской', 'Женский']
+        gender = ['Не указан', 'Мужской', 'Женский', 'Небинарный', 'Другое']
         
         if user_data:
             prompt += (
-                f"Данные о пользователе:\n"
+                f"Данные о пользователе (это не ты, а тот, кому ты отвечаешь):\n"
                 f"- Имя: {user_data.get('username')}\n"
                 f"- Пол: {gender[user_data.get('gender', 0)]}\n"
                 f"- Обращения: {', '.join(user_data.get('aliases', []))}\n\n"
