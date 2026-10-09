@@ -133,6 +133,38 @@ class VoiceCommand(BaseModel):
 async def get_kafka_metrics(bootstrap: str) -> dict:
     return {"ok": None, "topics": [], "error": "disabled"}
 
+async def write_audit_raw(
+    *,
+    actor_id: str,
+    actor_username: str,
+    action: str,
+    actor_type: str = "webway",
+    source_service: str = "webway",
+    entity_type: str | None = None,
+    entity_id: str | None = None,
+    details: dict | None = None,
+    success: bool = True,
+    error: str | None = None,
+    ip: str | None = None,
+):
+    event = {
+        "event_id": str(uuid.uuid4()),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "source_service": source_service,
+        "actor_id": str(actor_id),
+        "actor_username": actor_username,
+        "actor_type": actor_type,
+        "action": action,
+        "entity_type": entity_type,
+        "entity_id": str(entity_id) if entity_id is not None else None,
+        "details": details or {},
+        "success": success,
+        "error": error,
+        "ip": ip,
+    }
+    await audit_transport.send(event)
+
+
 async def write_audit(
     request: Request,
     current_user: UserSession,
@@ -143,22 +175,19 @@ async def write_audit(
     success: bool = True,
     error: str | None = None,
 ):
-    event = {
-        "event_id": str(uuid.uuid4()),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "source_service": "webway",
-        "actor_id": current_user.user_id,
-        "actor_username": current_user.username,
-        "actor_type": "webway",
-        "action": action,
-        "entity_type": entity_type,
-        "entity_id": str(entity_id) if entity_id is not None else None,
-        "details": details or {},
-        "success": success,
-        "error": error,
-        "ip": request.client.host if request.client else None,
-    }
-    await audit_transport.send(event)
+    await write_audit_raw(
+        actor_id=str(current_user.user_id),
+        actor_username=current_user.username,
+        actor_type="webway",
+        source_service="webway",
+        action=action,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        details=details,
+        success=success,
+        error=error,
+        ip=request.client.host if request.client else None,
+    )
 
 async def get_bot_uptime() -> dict:
     try:
@@ -1971,25 +2000,6 @@ async def tts_voices():
         r.raise_for_status()
         return r.json()
 
-
-class TTSPreviewPayload(BaseModel):
-    text: str = Field(..., min_length=1, max_length=500)
-    voice: str = Field(..., min_length=1, max_length=32)
-
-
-@app.post("/api/tts/preview")
-async def tts_preview(
-    payload: TTSPreviewPayload,
-):
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        r = await client.post(
-            f"{TTS_SERVICE_URL}/synthesize",
-            json=payload.model_dump(),
-            headers={"X-API-Key": WEBWAY_TTS_CLIENT_KEY},
-        )
-        if r.status_code != 200:
-            raise HTTPException(r.status_code, r.text)
-        return Response(content=r.content, media_type="audio/mpeg")
 
 @app.get("/api/radio/settings")
 async def radio_settings_get(current_user: UserSession = Depends(get_current_user)):
