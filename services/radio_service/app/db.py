@@ -41,12 +41,35 @@ async def init_db():
                 skipped_by_username TEXT
             )
         """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS radio_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        """)
+        defaults = {
+            "announcements_enabled": "true",
+            "announcement_voices": '["dmitri", "irina"]',
+            "greeting_enabled": "true",
+            "greeting_interval_minutes": "30",
+        }
+        for k, v in defaults.items():
+            await conn.execute(
+                "INSERT INTO radio_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING",
+                k, v
+            )
+        
         await conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_history_started ON radio_history (started_at DESC)"
         )
         await conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_songs_last_played ON songs (last_played_at DESC NULLS LAST)"
         )
+        
+        await conn.execute("""
+            ALTER TABLE songs
+            ADD COLUMN IF NOT EXISTS announce_title TEXT
+        """)
     return _pool
 
 

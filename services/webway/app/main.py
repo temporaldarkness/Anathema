@@ -18,7 +18,7 @@ import json
 from . import session as session_store
 import secrets
 
-from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY, BACKEND_URL, SESSION_COOKIE_NAME, SESSION_COOKIE_SECURE
+from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY, BACKEND_URL, SESSION_COOKIE_NAME, SESSION_COOKIE_SECURE, WEBWAY_TTS_CLIENT_KEY, TTS_SERVICE_URL
 
 CHANNEL_TYPES = {
     0: "Текстовый",
@@ -38,6 +38,7 @@ EXPECTED_WORKERS = {
     "image_worker":     {"label": "Image Worker"},
     "reaction_worker":  {"label": "Reaction Worker"},
     "admin_service":    {"label": "Admin Service"},
+    "tts_service":      {"label": "TTS Service"}
 }
 STALE_AFTER_SEC = 50
 
@@ -980,7 +981,7 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
         (
             ltm_res, users_res, channels_res, emotes_res,
             kw_res, ur_res, settings_res,
-            mem_h, hist_h, sec_h, st_h, au_h, ra_h, ww_h,
+            mem_h, hist_h, sec_h, st_h, au_h, ra_h, ww_h, tts_h,
             balance,
             kafka_data,
             bot_uptime,
@@ -1026,6 +1027,11 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
                 client,
                 BACKEND_URL,
             ) if BACKEND_URL else _skip(),
+            ping_service(
+                client,
+                TTS_SERVICE_URL,
+                {"X-API-Key": WEBWAY_TTS_CLIENT_KEY},
+            ) if TTS_SERVICE_URL else _skip(),
             get_proxy_balance(),
             get_kafka_metrics(KAFKA_BOOTSTRAP_SERVERS),
             get_bot_uptime(),
@@ -1063,7 +1069,8 @@ async def dashboard_overview(current_user: UserSession = Depends(get_current_use
             "storage": st_h,
             "audit": au_h,
             "radio": ra_h,
-            "webway_backend": ww_h
+            "webway_backend": ww_h,
+            "tts": tts_h
         },
         "balance": balance,
         "kafka": kafka_data,
@@ -1194,8 +1201,8 @@ async def gallery_file(
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.get(
-            f"{os.getenv('STORAGE_SERVICE_URL')}/file/{file_id}",
-            headers={"X-API-Key": os.getenv("WEBWAY_STORAGE_CLIENT_KEY")}
+            f"{STORAGE_SERVICE_URL}/file/{file_id}",
+            headers={"X-API-Key": WEBWAY_STORAGE_CLIENT_KEY}
         )
         if resp.status_code == 404:
             raise HTTPException(404, "File not found")
@@ -1705,7 +1712,7 @@ async def radio_update_song(
     if not current_user.is_admin:
         raise HTTPException(403, "Admin privileges required")
 
-    allowed = {"title", "artist", "description"}
+    allowed = {"title", "artist", "description", "announce_title"}
     clean = {k: v for k, v in payload.items() if k in allowed}
     if not clean:
         raise HTTPException(400, "No valid fields")
@@ -1953,3 +1960,118 @@ async def health():
         "status": "ok",
         "uptime_seconds": int((datetime.now(timezone.utc) - BOOT_TIME).total_seconds()),
     }
+
+@app.get("/api/tts/voices")
+async def tts_voices():
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        r = await client.get(
+            f"{TTS_SERVICE_URL}/voices",
+            headers={"X-API-Key": WEBWAY_TTS_CLIENT_KEY}
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+class TTSPreviewPayload(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+    voice: str = Field(..., min_length=1, max_length=32)
+
+
+@app.post("/api/tts/preview")
+async def tts_preview(
+    payload: TTSPreviewPayload,
+):
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        r = await client.post(
+            f"{TTS_SERVICE_URL}/synthesize",
+            json=payload.model_dump(),
+            headers={"X-API-Key": WEBWAY_TTS_CLIENT_KEY},
+        )
+        if r.status_code != 200:
+            raise HTTPException(r.status_code, r.text)
+        return Response(content=r.content, media_type="audio/mpeg")
+
+@app.get("/api/radio/settings")
+async def radio_settings_get(current_user: UserSession = Depends(get_current_user)):
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{RADIO_SERVICE_URL}/settings",
+            headers={"X-API-Key": WEBWAY_RADIO_CLIENT_KEY},
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@app.patch("/api/radio/settings")
+async def radio_settings_patch(
+    payload: dict,
+    request: Request,
+    current_user: UserSession = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
+    async with httpx.AsyncClient() as client:
+        r = await client.patch(
+            f"{RADIO_SERVICE_URL}/settings",
+            json=payload,
+            headers={"X-API-Key": WEBWAY_TTS_CLIENT_KEY},
+        )
+        r.raise_for_status()
+        result = r.json()
+    await write_audit(
+        request, current_user,
+        action="radio_settings_update", entity_type="radio",
+        details=payload,
+    )
+    return result
+
+
+@app.get("/api/tts/voices")
+async def tts_voices(current_user: UserSession = Depends(get_current_user)):
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{TTS_SERVICE_URL}/voices",
+            headers={"X-API-Key": WEBWAY_TTS_CLIENT_KEY},
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+class TTSPreview(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+    voice: str = Field(..., min_length=1, max_length=32)
+
+
+@app.post("/api/tts/preview")
+async def tts_preview(
+    payload: TTSPreview,
+    current_user: UserSession = Depends(get_current_user),
+):
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        r = await client.post(
+            f"{TTS_SERVICE_URL}/synthesize",
+            json=payload.model_dump(),
+            headers={"X-API-Key": WEBWAY_TTS_CLIENT_KEY},
+        )
+        if r.status_code != 200:
+            raise HTTPException(r.status_code, r.text)
+        from fastapi.responses import Response
+        return Response(content=r.content, media_type="audio/mpeg")
+
+class TranslitPayload(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+
+
+@app.post("/api/tts/translit")
+async def tts_translit(
+    payload: TranslitPayload,
+    current_user: UserSession = Depends(get_current_user),
+):
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        r = await client.post(
+            f"{TTS_SERVICE_URL}/translit",
+            json=payload.model_dump(),
+            headers={"X-API-Key": WEBWAY_TTS_CLIENT_KEY},
+        )
+        r.raise_for_status()
+        return r.json()

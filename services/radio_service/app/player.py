@@ -12,7 +12,9 @@ from .crud import (
     pick_random_song, log_history_start, log_history_end,
     bump_play_count, get_song
 )
+from .crud_settings import get_settings
 from .queue import pop_next_song_id
+from .tts_client import fetch_announce, fetch_greeting, pick_voice, close_client
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ class ContinuousPlayer:
         self.skip_by_username: str | None = None
         self.stopping: bool = False
         self.next_song: dict | None = None
+        self.last_greeting_at: datetime | None = None
 
     async def start_ffmpeg(self):
         """Запускает долгоживущий ffmpeg → Icecast."""
@@ -123,6 +126,14 @@ class ContinuousPlayer:
             }))
         except Exception as e:
             logger.warning(f"failed to publish now_playing: {e}")
+    
+    async def _finalize_skipped(self, song: dict):
+        logger.info(f"skipped before playing: {song['title']}")
+        skipped = self.skip_requested
+        self.skip_requested = False
+        self.skip_by = None
+        self.skip_by_username = None
+        return skipped, 0.0
 
     async def _clear_now_playing(self):
         try:
@@ -134,6 +145,45 @@ class ContinuousPlayer:
     async def _play_song(self, song: dict) -> tuple[bool, float]:
         if self.ffmpeg is None or self.ffmpeg.returncode is not None:
             await self.start_ffmpeg()
+            
+        self.skip_requested = False
+        self.skip_by = None
+        self.skip_by_username = None
+        
+        settings = await get_settings()
+        
+        play_greeting = False
+        if settings.get("greeting_enabled"):
+            if self.last_greeting_at is None:
+                play_greeting = True
+            else:
+                delta_min = (datetime.now(timezone.utc) - self.last_greeting_at).total_seconds() / 60
+                if delta_min >= settings.get("greeting_interval_minutes", 30):
+                    play_greeting = True
+        
+        announce_bytes = None
+        if settings.get("announcements_enabled"):
+            voice = pick_voice(settings.get("announcement_voices") or ["dmitri"])
+            announce_bytes = await fetch_announce(song, voice)
+        
+        if announce_bytes or play_greeting:
+            await self._publish_announcing(song)
+        
+        if play_greeting:
+            voice = pick_voice(settings.get("announcement_voices") or ["dmitri"])
+            greeting_bytes = await fetch_greeting(voice)
+            if greeting_bytes:
+                logger.info("▶ greeting")
+                await self._stream_bytes(greeting_bytes)
+                self.last_greeting_at = datetime.now(timezone.utc)
+            else:
+                self.last_greeting_at = datetime.now(timezone.utc)
+        
+        if announce_bytes:
+            logger.info(f"▶ announce → {song['title']}")
+            await self._stream_bytes(announce_bytes)
+            if self.skip_requested or self.stopping:
+                return await self._finalize_skipped(song)
 
         path = await self._ensure_cached(song)
         started_at = datetime.now(timezone.utc)
@@ -274,6 +324,41 @@ class ContinuousPlayer:
     async def shutdown(self):
         self.stopping = True
         await self.stop_ffmpeg()
+        await close_client()
+    
+    async def _stream_bytes(self, data: bytes):
+        pos = 0
+        while pos < len(data):
+            if self.skip_requested or self.stopping:
+                return
+            if self.ffmpeg is None or self.ffmpeg.returncode is not None:
+                await self.start_ffmpeg()
+                pos = 0
+                continue
+            chunk = data[pos:pos + CHUNK_SIZE]
+            try:
+                self.stdin.write(chunk)
+                await self.stdin.drain()
+            except (BrokenPipeError, ConnectionResetError):
+                await self.start_ffmpeg()
+                pos = 0
+                continue
+            pos += len(chunk)
+    
+    async def _publish_announcing(self, song: dict):
+        try:
+            r = await get_redis()
+            await r.set("radio:now_playing", json.dumps({
+                "status": "announcing",
+                "song_id": song["id"],
+                "title": song["title"],
+                "artist": song.get("artist") or "",
+                "started_at": None,
+                "ends_at": None,
+                "duration_sec": song.get("duration_sec"),
+            }))
+        except Exception:
+            pass
 
 
 player = ContinuousPlayer()

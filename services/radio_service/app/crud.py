@@ -53,7 +53,7 @@ async def get_song(song_id: int):
 async def update_song(song_id: int, **fields):
     if not fields:
         return await get_song(song_id)
-    allowed = {"title", "artist", "description"}
+    allowed = {"title", "artist", "description", "announce_title"}
     keys = [k for k in fields if k in allowed and fields[k] is not None]
     if not keys:
         return await get_song(song_id)

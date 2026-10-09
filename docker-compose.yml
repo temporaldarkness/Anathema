@@ -380,6 +380,8 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
       KAFKA_TOPIC_API_USAGE: ${KAFKA_TOPIC_API_USAGE}
       KAFKA_GROUP_USAGE_CONSUMER: ${KAFKA_GROUP_USAGE_CONSUMER}
+      TTS_SERVICE_URL: ${TTS_SERVICE_URL}
+      WEBWAY_TTS_CLIENT_KEY: ${WEBWAY_TTS_CLIENT_KEY}
     depends_on:
       redis:
         condition: service_started
@@ -476,6 +478,8 @@ services:
       WEBWAY_RADIO_CLIENT_KEY: ${WEBWAY_RADIO_CLIENT_KEY}
       RADIO_CACHE_DIR: /var/cache/radio
       RADIO_QUEUE_KEY: ${RADIO_QUEUE_KEY}
+      TTS_SERVICE_URL: ${TTS_SERVICE_URL}
+      RADIO_TTS_CLIENT_KEY: ${RADIO_TTS_CLIENT_KEY}
     volumes:
       - radio_cache:/var/cache/radio
     depends_on:
@@ -486,6 +490,27 @@ services:
       minio:
         condition: service_started
       icecast:
+        condition: service_started
+      tts_service:
+        condition: service_started
+    networks:
+      - anathema_network
+    restart: unless-stopped
+    
+    
+  tts_service:
+    build: ./services/tts_service
+    container_name: tts_service
+    environment:
+      REDIS_URL: ${REDIS_URL}
+      WEBWAY_TTS_CLIENT_KEY: ${WEBWAY_TTS_CLIENT_KEY}
+      RADIO_TTS_CLIENT_KEY: ${RADIO_TTS_CLIENT_KEY}
+      TTS_CACHE_DIR: /var/cache/tts
+      PIPER_VOICES_DIR: /app/voices
+    volumes:
+      - tts_cache:/var/cache/tts
+    depends_on:
+      redis:
         condition: service_started
     networks:
       - anathema_network
@@ -503,3 +528,4 @@ volumes:
   caddy_data:
   caddy_config:
   radio_cache:
+  tts_cache:

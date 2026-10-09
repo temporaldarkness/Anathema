@@ -3,6 +3,7 @@ const STREAM_URL = '/radio/stream';
 
 class RadioStore {
 	private _el = $state<HTMLAudioElement | null>(null);
+	private _userStopped = false;
 
 	playing = $state(false);
 	reconnecting = $state(false);
@@ -31,15 +32,14 @@ class RadioStore {
 			this.lastProgressAt = Date.now();
 		});
 
-		// Watchdog: currentTime не растёт 2.5 сек — рвём и подключаемся заново
 		setInterval(() => {
-			if (!this.playing || !this._el) return;
+			if (this._userStopped || !this._el) return;
 			const t = this._el.currentTime;
 			if (t > this.lastCurrentTime) {
 				this.lastCurrentTime = t;
 				this.lastProgressAt = Date.now();
 			} else if (Date.now() - this.lastProgressAt > 2500) {
-				this.scheduleReconnect(150);
+				this._scheduleReconnect(150);
 			}
 		}, 1200);
 	}
@@ -54,10 +54,11 @@ class RadioStore {
 			this.reconnectTimer = null;
 		}
 	}
-
-	async start() {
+	
+	private async _tryPlay() {
 		const el = this._el;
-		if (!el) return;
+		if (!el || this._userStopped) return;
+
 		this._cancelReconnect();
 		this.reconnecting = true;
 		try {
@@ -65,43 +66,51 @@ class RadioStore {
 			el.removeAttribute('src');
 			el.load();
 			await new Promise((r) => setTimeout(r, 120));
+
 			el.src = this._buildStreamUrl();
 			el.load();
 			await el.play();
-			this.playing = true;
+
 			this.lastProgressAt = Date.now();
 			this.lastCurrentTime = 0;
+			this.playing = true;
 		} catch (e) {
-			console.warn('stream start failed', e);
-			this.playing = false;
+			console.warn('stream start failed, will retry', e);
 		} finally {
 			this.reconnecting = false;
 		}
 	}
 
+	async start() {
+		this._userStopped = false;
+		this.playing = true;
+		await this._tryPlay();
+	}
+
 	stop() {
-		const el = this._el;
-		if (!el) return;
+		this._userStopped = true;
 		this._cancelReconnect();
-		el.pause();
-		el.removeAttribute('src');
-		el.load();
+		const el = this._el;
+		if (el) {
+			el.pause();
+			el.removeAttribute('src');
+			el.load();
+		}
 		this.playing = false;
 	}
 
 	toggle() {
-		if (this.playing) this.stop();
-		else this.start();
+		if (this._userStopped) this.start();
+		else this.stop();
 	}
 
-	private scheduleReconnect(delay = 300) {
-		if (!this.playing) return;
+		private _scheduleReconnect(delay = 300) {
+		if (this._userStopped) return;
 		if (this.reconnecting) return;
 		if (this.reconnectTimer) return;
 		this.reconnectTimer = setTimeout(() => {
 			this.reconnectTimer = null;
-			if (!this.playing) return;
-			this.start();
+			this._tryPlay();
 		}, delay);
 	}
 

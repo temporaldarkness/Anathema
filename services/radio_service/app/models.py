@@ -19,9 +19,10 @@ class SongOut(BaseModel):
 
 
 class SongUpdate(BaseModel):
-    title: Optional[str] = None
-    artist: Optional[str] = None
-    description: Optional[str] = None
+    title: str | None = None
+    artist: str | None = None
+    description: str | None = None
+    announce_title: str | None = None
 
 
 class NowPlaying(BaseModel):

@@ -10,6 +10,8 @@ from .queue import push_song, remove_song, clear_queue, list_queue
 import uuid
 import asyncio
 import logging
+from pydantic import BaseModel, Field
+from .crud_settings import get_settings, update_settings
 
 logger = logging.getLogger(__name__)
 
@@ -251,3 +253,62 @@ async def remove_from_queue(song_id: int, caller: str = Depends(verify_api_key))
 async def clear_queue_endpoint(caller: str = Depends(verify_api_key)):
     n = await clear_queue()
     return {"ok": True, "removed": n}
+
+@router.get("/settings")
+async def radio_settings_get(caller: str = Depends(verify_api_key)):
+    return await get_settings()
+
+
+class RadioSettingsPatch(BaseModel):
+    announcements_enabled: bool | None = None
+    announcement_voices: list[str] | None = None
+    greeting_enabled: bool | None = None
+    greeting_interval_minutes: int | None = Field(None, ge=5, le=240)
+
+
+@router.patch("/settings")
+async def radio_settings_patch(
+    payload: RadioSettingsPatch,
+    caller: str = Depends(verify_api_key),
+):
+    patch = {k: v for k, v in payload.model_dump().items() if v is not None}
+    return await update_settings(patch)
+
+@router.post("/maintenance/fill-announce-titles")
+async def fill_announce_titles(caller: str = Depends(verify_api_key)):
+    asyncio.create_task(_fill_announce_bg())
+    return {"ok": True}
+
+
+async def _fill_announce_bg():
+    from .db import get_pool
+    import httpx
+    from .config import TTS_URL, TTS_KEY
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT id, title FROM songs
+            WHERE announce_title IS NULL OR announce_title = ''
+        """)
+
+    logger.info(f"filling announce_title for {len(rows)} songs")
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        for r in rows:
+            try:
+                resp = await client.post(
+                    f"{TTS_URL}/translit",
+                    json={"text": r["title"]},
+                    headers={"X-API-Key": TTS_KEY},
+                )
+                if resp.status_code == 200:
+                    translit_title = resp.json()["text"]
+                    async with pool.acquire() as conn:
+                        await conn.execute(
+                            "UPDATE songs SET announce_title = $1 WHERE id = $2",
+                            translit_title, r["id"],
+                        )
+            except Exception:
+                logger.exception(f"failed for song {r['id']}")
+
+    logger.info("fill announce titles done")

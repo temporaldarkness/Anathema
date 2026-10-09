@@ -86,12 +86,21 @@ async def save_file(
 
 
 async def get_file(file_id: str) -> tuple[bytes, str]:
-    """Возвращает (data, content_type)."""
     async with session.client("s3", **_client_kwargs()) as s3:
-        response = await s3.get_object(Bucket=MINIO_BUCKET, Key=file_id)
-        content_type = response.get("ContentType", "application/octet-stream")
-        data = await response["Body"].read()
-        return data, content_type
+        try:
+            response = await s3.get_object(Bucket=MINIO_BUCKET, Key=file_id)
+            return (
+                await response["Body"].read(),
+                response.get("ContentType", "application/octet-stream"),
+            )
+        except ClientError as e:
+            if e.response["Error"]["Code"] not in ("NoSuchKey", "404"):
+                raise
+        response = await s3.get_object(Bucket=MINIO_FAVORITES_BUCKET, Key=file_id)
+        return (
+            await response["Body"].read(),
+            response.get("ContentType", "application/octet-stream"),
+        )
 
 
 async def get_file_meta(file_id: str) -> dict | None:
@@ -204,7 +213,7 @@ async def copy_to_favorites(file_id: str) -> bool:
             try:
                 await s3.copy_object(
                     Bucket=MINIO_FAVORITES_BUCKET,
-                    Key=file_id,
+                    Key=f"{file_id}.meta.json",
                     CopySource={"Bucket": MINIO_BUCKET, "Key": f"{file_id}.meta.json"},
                 )
             except ClientError:
@@ -235,7 +244,10 @@ async def list_favorite_keys() -> set[str]:
             paginator = s3.get_paginator("list_objects_v2")
             async for page in paginator.paginate(Bucket=MINIO_FAVORITES_BUCKET):
                 for obj in page.get("Contents", []) or []:
-                    keys.add(obj["Key"])
+                    key = obj["Key"]
+                    if key.endswith(".meta.json"):
+                        continue
+                    keys.add(key)
         except Exception:
             pass
     return keys
@@ -247,6 +259,8 @@ async def list_favorites(limit: int = 60, offset: int = 0):
         paginator = s3.get_paginator("list_objects_v2")
         async for page in paginator.paginate(Bucket=MINIO_FAVORITES_BUCKET):
             for obj in page.get("Contents", []) or []:
+                if obj["Key"].endswith(".meta.json"):
+                    continue
                 all_objects.append(obj)
 
         all_objects.sort(

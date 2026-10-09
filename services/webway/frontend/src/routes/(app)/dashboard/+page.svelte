@@ -32,6 +32,7 @@
 		{ key: 'storage', name: 'Storage' },
 		{ key: 'audit', name: 'Audit' },
 		{ key: 'radio', name: 'Radio' },
+		{ key: 'tts', name: 'TTS' },
 		{ key: 'webway_backend', name: 'Webway' }
 	]);
 

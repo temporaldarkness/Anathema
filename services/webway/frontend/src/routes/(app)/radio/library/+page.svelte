@@ -12,7 +12,7 @@
 	import { formatDateTime, formatBytes } from '$lib/utils/format';
 	import {
 		ArrowLeft, Upload, Trash2, Pencil, Search, Music, FileAudio,
-		Loader2, Clock, RefreshCw, ListPlus, ListX, X, PlayCircle, SkipForward
+		Loader2, Clock, RefreshCw, ListPlus, ListX, X, PlayCircle, SkipForward, Wand2, Volume2
 	} from 'lucide-svelte';
 
 	let { data } = $props();
@@ -120,7 +120,7 @@
 
 	let editing = $state<any>(null);
 	let editDialogOpen = $state(false);
-	let editForm = $state({ title: '', artist: '', description: '' });
+	let editForm = $state({ title: '', artist: '', description: '', announce_title: '' });
 	let editSubmitting = $state(false);
 
 	let deleteTarget = $state<any>(null);
@@ -139,6 +139,48 @@
 			);
 		})
 	);
+	
+	async function autoAnnounceTitle() {
+		if (!editForm.title.trim()) return;
+		try {
+			const r = await fetch('/api/tts/translit', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text: editForm.title })
+			});
+			if (r.ok) {
+				const data = await r.json();
+				editForm.announce_title = data.text;
+			}
+		} catch (e: any) {
+			notify.error('Не удалось сгенерировать');
+		}
+	}
+	
+	let previewAudio: HTMLAudioElement | null = $state(null);
+
+	async function previewAnnounce() {
+		const text = editForm.announce_title || editForm.title;
+		if (!text) return;
+		try {
+			const r = await fetch('/api/tts/preview', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text, voice: 'dmitri' })
+			});
+			if (!r.ok) throw new Error(await r.text());
+			const blob = await r.blob();
+			const url = URL.createObjectURL(blob);
+			if (previewAudio) {
+				previewAudio.pause();
+				URL.revokeObjectURL(previewAudio.src);
+			}
+			previewAudio = new Audio(url);
+			await previewAudio.play();
+		} catch (e: any) {
+			notify.error(e.message ?? 'Ошибка');
+		}
+	}
 
 	function formatDuration(sec: number | null): string {
 		if (!sec) return '—';
@@ -152,7 +194,8 @@
 		editForm = {
 			title: song.title,
 			artist: song.artist ?? '',
-			description: song.description ?? ''
+			description: song.description ?? '',
+			announce_title: song.announce_title ?? ''
 		};
 		editDialogOpen = true;
 	}
@@ -621,6 +664,37 @@
 					placeholder="Пара слов о треке, которые бот/радио могут использовать..."
 					class="resize-y text-sm"
 				/>
+			</div>
+			<div class="space-y-1.5">
+				<label class="text-xs font-medium">Название для анонса</label>
+				<div class="flex gap-2">
+					<Input
+						bind:value={editForm.announce_title}
+						placeholder="Пусто — сгенерируется автоматически"
+						class="flex-1"
+					/>
+					<Button
+						type="button"
+						variant="outline"
+						size="icon"
+						onclick={autoAnnounceTitle}
+						title="Сгенерировать транслит"
+					>
+						<Wand2 class="h-4 w-4" />
+					</Button>
+					<Button
+						type="button"
+						variant="outline"
+						size="icon"
+						onclick={previewAnnounce}
+						title="Прослушать"
+					>
+						<Volume2 class="h-4 w-4" />
+					</Button>
+				</div>
+				<p class="text-[10px] text-muted-foreground">
+					Как название будет звучать в эфире. Если оставить пустым — применится автоматическая транслитерация.
+				</p>
 			</div>
 		</div>
 		<Dialog.Footer>

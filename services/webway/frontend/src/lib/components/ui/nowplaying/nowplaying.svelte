@@ -50,13 +50,20 @@
 
 		<div class="flex-1 min-w-0">
 			<div class="flex items-center gap-2 flex-wrap">
-				<Badge class="gap-1 bg-red-500/15 text-red-400 border-red-500/30 text-[10px] px-1.5 py-0">
-					<span class="relative flex h-1.5 w-1.5">
-						<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60"></span>
-						<span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
-					</span>
-					LIVE
-				</Badge>
+				{#if now?.status === 'announcing'}
+					<Badge class="gap-1 bg-amber-500/15 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0">
+						<Volume2 class="h-2.5 w-2.5" />
+						анонс
+					</Badge>
+				{:else}
+					<Badge class="gap-1 bg-red-500/15 text-red-400 border-red-500/30 text-[10px] px-1.5 py-0">
+						<span class="relative flex h-1.5 w-1.5">
+							<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60"></span>
+							<span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
+						</span>
+						LIVE
+					</Badge>
+				{/if}
 				{#if timeLeft}
 					<span class="text-[10px] text-muted-foreground font-mono">
 						осталось {timeLeft}
@@ -64,7 +71,7 @@
 				{/if}
 			</div>
 
-			{#if now?.status === 'playing'}
+			{#if now?.status === 'playing' || now?.status === 'announcing'}
 				<div class="text-lg font-semibold truncate mt-1">{now.title}</div>
 				{#if now.artist}
 					<div class="text-sm text-muted-foreground truncate">{now.artist}</div>
