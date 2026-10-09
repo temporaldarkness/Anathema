@@ -3,7 +3,6 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const cookieHeader = cookies.getAll().map(c => `${c.name}=${c.value}`).join('; ');
-	if (!token) return { items: [] };
 	const backendUrl = env.BACKEND_URL ?? 'http://webway_backend:8000';
 
 	try {
