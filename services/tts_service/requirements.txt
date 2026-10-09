@@ -5,3 +5,9 @@ python-dotenv==1.0.1
 pydantic==2.10.4
 redis==5.0.1
 transliterate==1.10.2
+numpy<2
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.1
+omegaconf==2.3.0
+pyyaml>=6.0
+scipy==1.13.1

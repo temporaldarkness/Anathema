@@ -509,6 +509,7 @@ services:
       PIPER_VOICES_DIR: /app/voices
     volumes:
       - tts_cache:/var/cache/tts
+      - tts_torch_cache:/app/.cache/torch
     depends_on:
       redis:
         condition: service_started
@@ -529,3 +530,4 @@ volumes:
   caddy_config:
   radio_cache:
   tts_cache:
+  tts_torch_cache:

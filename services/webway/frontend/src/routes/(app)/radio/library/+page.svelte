@@ -166,7 +166,7 @@
 			const r = await fetch('/api/tts/preview', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ text, voice: 'dmitri' })
+				body: JSON.stringify({ text, voice: 'baya' })
 			});
 			if (!r.ok) throw new Error(await r.text());
 			const blob = await r.blob();

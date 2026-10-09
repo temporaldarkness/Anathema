@@ -7,7 +7,7 @@ from .auth import verify_api_key
 from .voices import list_voices, get_voice
 from . import templates as tpl
 from . import cache
-from .piper_engine import synthesize
+from .engines import synthesize
 from .text_normalize import normalize_for_tts
 
 logger = logging.getLogger(__name__)

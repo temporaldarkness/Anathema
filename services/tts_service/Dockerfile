@@ -1,13 +1,16 @@
 FROM python:3.11-slim
 
+ENV TORCH_HOME=/app/.cache/torch
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg curl ca-certificates \
+    ffmpeg curl ca-certificates git libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    --extra-index-url https://download.pytorch.org/whl/cpu
 
 COPY scripts/download_voices.py /tmp/download_voices.py
 RUN python /tmp/download_voices.py

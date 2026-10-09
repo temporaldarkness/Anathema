@@ -28,7 +28,7 @@ PRONUNCIATION_OVERRIDES = {
     "ost":       "оу-эс-ти",
     "mix":       "микс",
     "original":  "ориджинал",
-    "official":  "офишл",
+    "official":  "офиишл",
     "remaster":  "ремастер",
     "remastered":"ремастерд",
     "version":   "версия",
@@ -69,5 +69,19 @@ def normalize_for_tts(text: str) -> str:
     text = text.replace("/", " или ")
     text = text.replace("+", " плюс ")
 
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+def clean_only(text: str) -> str:
+    if not text:
+        return ""
+    text = text.replace('"', '').replace("«", "").replace("»", "")
+    text = text.replace("&", " и ")
+    text = text.replace("@", " собака ")
+    text = text.replace("#", " номер ")
+    text = text.replace("*", "")
+    text = text.replace("/", " или ")
+    text = text.replace("+", " плюс ")
+    import re
     text = re.sub(r"\s+", " ", text).strip()
     return text

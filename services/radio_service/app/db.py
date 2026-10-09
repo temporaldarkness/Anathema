@@ -49,7 +49,7 @@ async def init_db():
         """)
         defaults = {
             "announcements_enabled": "true",
-            "announcement_voices": '["dmitri", "irina"]',
+            "announcement_voices": '["aidar", "baya", "kseniya"]',
             "greeting_enabled": "true",
             "greeting_interval_minutes": "30",
         }
