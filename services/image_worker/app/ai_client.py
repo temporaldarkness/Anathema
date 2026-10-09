@@ -46,7 +46,7 @@ async def generate_image(prompt: str, n: int = 2, size: str = "auto", quality: s
 async def edit_image(prompt: str, images_bytes: list[bytes], n: int = 2, size: str = "auto", quality: str = "low"):
     
     data = {
-        "model": "gpt-image-2",
+        "model": "gpt-image-2.5-sunburst",
         "prompt": prompt,
         "n": str(n),
         "size": size,
