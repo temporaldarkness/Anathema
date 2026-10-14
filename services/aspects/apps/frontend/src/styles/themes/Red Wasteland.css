@@ -1,0 +1,85 @@
+/* @theme
+   name: Red Wasteland
+   description: Марсианская пустошь. Оранжевая пыль на ржавом горизонте.
+   light: false
+*/
+
+:root {
+  --clr-background: #381A1A;
+  --clr-element-bg: #4D2525;
+  --clr-element-muted: #633030;
+  --clr-border: #804040;
+  --clr-title: #FFD8A8;
+  --clr-subtitle: #CCAA7D;
+  --clr-accent: #FF6B35;
+  --clr-text: #E8CBB9;
+
+  --clr-shadow: rgba(255, 107, 53, 0.2);
+  --clr-shadow-focus: rgba(255, 107, 53, 0.35);
+
+  --clr-bg-input: #2A1010;
+  --clr-bg-muted: #633030;
+  --clr-bg-subtle: #401E1E;
+  --clr-surface: #552828;
+  --clr-surface-hover: #602E2E;
+  --clr-surface-active: #6A3535;
+  --clr-border-strong: #8A4A4A;
+  --clr-border-hover: #9E5A5A;
+
+  --clr-text-soft: #D0B0A0;
+  --clr-text-muted: #B0907E;
+  --clr-text-dim: #8A6E5C;
+  --clr-text-faint: #665040;
+
+  --clr-accent-dark: #7A3018;
+  --clr-accent-mid: #B04820;
+  --clr-accent-hover: #FF8A5A;
+  --clr-accent-light: #FFA882;
+  --clr-accent-soft: #FFC8A8;
+  --clr-accent-bg: #3A1808;
+  --clr-accent-bg-2: #2A1005;
+
+  --clr-danger: #E83040;
+  --clr-danger-dark: #6A1820;
+  --clr-danger-mid: #A82830;
+  --clr-danger-hover: #EE4A5A;
+  --clr-danger-light: #F58090;
+  --clr-danger-light-2: #F47888;
+  --clr-danger-light-3: #F8A8B0;
+  --clr-danger-border: #8A2030;
+  --clr-danger-bg: #2A1018;
+  --clr-danger-bg-2: #4A1820;
+
+  --clr-warning: #FFB84D;
+  --clr-warning-hover: #FFC86A;
+  --clr-warning-border: #8A6028;
+  --clr-warning-mid: #C08E30;
+  --clr-warning-hover-2: #E0A848;
+  --clr-warning-bg: #2A2010;
+  --clr-warning-bg-2: #3A2C18;
+  --clr-warning-bg-3: #4A3820;
+
+  --clr-success: #5ABF5A;
+
+  --clr-epic: #A855F7;
+  --clr-epic-light: #C08AF8;
+  --clr-epic-soft: #DDB8FC;
+  --clr-epic-bg: #221525;
+  --clr-epic-bg-2: #321D38;
+  --clr-epic-bg-3: #422848;
+  --clr-epic-bg-4: #3A2028;
+  --clr-epic-border: #4A2858;
+  --clr-epic-border-2: #603870;
+  --clr-epic-border-3: #704060;
+
+  --clr-rarity-common: #804040;
+  --clr-rarity-uncommon: #5ABF5A;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #A855F7;
+  --clr-rarity-legendary: #FFB84D;
+
+  --clr-tooltip-bg: #401E1E;
+
+  --clr-p1: #FF6B35;
+  --clr-p2: #E8C860;
+}

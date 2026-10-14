@@ -1,0 +1,189 @@
+/* ─── App shell (игровой экран и общий лейаут) ─── */
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--clr-border);
+  background: var(--clr-element-bg);
+  min-height: 52px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.app-header-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.app-header-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.app-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.app-left {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.app-right {
+  width: 320px;
+  flex-shrink: 0;
+  min-height: 0;
+  display: flex;
+}
+
+/* ─── Buttons ─── */
+
+.btn-header {
+  background: var(--clr-surface-hover);
+  color: var(--clr-text-soft);
+  border: 1px solid var(--clr-border-strong);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btn-header:hover {
+  background: var(--clr-surface-active);
+  color: var(--clr-text);
+  border-color: var(--clr-accent);
+}
+
+.btn-header-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-header-locked:hover {
+  border-color: var(--clr-danger-border);
+  color: var(--clr-danger-light-2);
+}
+
+.cancel-btn {
+  background: var(--clr-danger-bg-2);
+  border-color: var(--clr-danger-border);
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary,
+.btn-primary-p1 {
+  background: var(--clr-accent-dark);
+  color: var(--clr-accent-light);
+  border-color: var(--clr-accent-mid);
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-primary-p1:hover:not(:disabled) {
+  background: var(--clr-accent-hover);
+  border-color: var(--clr-accent);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary-p2 {
+  background: var(--clr-danger-dark);
+  color: var(--clr-danger-light);
+  border-color: var(--clr-danger-mid);
+}
+
+.btn-primary-p2:hover:not(:disabled) {
+  background: var(--clr-danger-hover);
+  border-color: var(--clr-danger);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--clr-text-soft);
+  border-color: var(--clr-border-strong);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--clr-surface-hover);
+  color: var(--clr-text);
+  border-color: var(--clr-text-faint);
+}
+
+.btn-concede {
+  background: transparent;
+  color: var(--clr-text-muted);
+  border: 1px solid var(--clr-border-hover);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-concede:hover {
+  color: var(--clr-danger-light-2);
+  border-color: var(--clr-danger-border);
+  background: var(--clr-danger-bg);
+}
+
+/* ─── Turn badge ─── */
+
+.turn-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.turn-p1 { background: var(--clr-accent-dark); color: var(--clr-accent-light); }
+.turn-p2 { background: var(--clr-danger-dark); color: var(--clr-danger-light); }

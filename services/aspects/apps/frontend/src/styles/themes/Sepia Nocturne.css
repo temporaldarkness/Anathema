@@ -1,0 +1,85 @@
+/* @theme
+   name: Sepia Nocturne
+   description: Выцветшая фотография в ящике комода. Тёплая сепия и холодный луч луны.
+   light: false
+*/
+
+:root {
+  --clr-background: #1A1410;
+  --clr-element-bg: #241C16;
+  --clr-element-muted: #2E241C;
+  --clr-border: #40342A;
+  --clr-title: #E8DBC8;
+  --clr-subtitle: #B8A088;
+  --clr-accent: #6DB5B0;
+  --clr-text: #D4C4B0;
+
+  --clr-shadow: rgba(0, 0, 0, 0.5);
+  --clr-shadow-focus: rgba(109, 181, 176, 0.25);
+
+  --clr-bg-input: #120D0A;
+  --clr-bg-muted: #2E241C;
+  --clr-bg-subtle: #1E1814;
+  --clr-surface: #282018;
+  --clr-surface-hover: #302620;
+  --clr-surface-active: #3A2E26;
+  --clr-border-strong: #54453A;
+  --clr-border-hover: #6A5848;
+
+  --clr-text-soft: #BCAC98;
+  --clr-text-muted: #988878;
+  --clr-text-dim: #766858;
+  --clr-text-faint: #584C40;
+
+  --clr-accent-dark: #2F5A58;
+  --clr-accent-mid: #4A8A86;
+  --clr-accent-hover: #8AC8C4;
+  --clr-accent-light: #A8D8D4;
+  --clr-accent-soft: #C8E8E4;
+  --clr-accent-bg: #1A2624;
+  --clr-accent-bg-2: #141E1C;
+
+  --clr-danger: #D45048;
+  --clr-danger-dark: #582820;
+  --clr-danger-mid: #8A3E32;
+  --clr-danger-hover: #E87068;
+  --clr-danger-light: #F0A098;
+  --clr-danger-light-2: #ED9890;
+  --clr-danger-light-3: #F4C0B8;
+  --clr-danger-border: #7A3828;
+  --clr-danger-bg: #241410;
+  --clr-danger-bg-2: #3A1E18;
+
+  --clr-warning: #D4A040;
+  --clr-warning-hover: #E8B860;
+  --clr-warning-border: #6E5420;
+  --clr-warning-mid: #A87C30;
+  --clr-warning-hover-2: #886828;
+  --clr-warning-bg: #241E10;
+  --clr-warning-bg-2: #342818;
+  --clr-warning-bg-3: #443420;
+
+  --clr-success: #7AA858;
+
+  --clr-epic: #A878B8;
+  --clr-epic-light: #C098CC;
+  --clr-epic-soft: #D8B8DC;
+  --clr-epic-bg: #201828;
+  --clr-epic-bg-2: #2E2038;
+  --clr-epic-bg-3: #3E2C48;
+  --clr-epic-bg-4: #322028;
+  --clr-epic-border: #483058;
+  --clr-epic-border-2: #604070;
+  --clr-epic-border-3: #704868;
+
+  --clr-rarity-common: #54453A;
+  --clr-rarity-uncommon: #7AA858;
+  --clr-rarity-rare: #6DB5B0;
+  --clr-rarity-epic: #A878B8;
+  --clr-rarity-legendary: #D4A040;
+
+  --clr-tooltip-bg: #1E1814;
+
+  --clr-p1: #6DB5B0;
+  --clr-p2: #D45048;
+}

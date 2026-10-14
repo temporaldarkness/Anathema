@@ -1,0 +1,2752 @@
+[
+  {
+    "id": "sw_spearman",
+    "name": "Копейщик стражи",
+    "personalityTag": "sw_spearman",
+    "tags": ["stormwind", "soldier"],
+    "cost": 1, "strength": 1, "health": 2,
+    "rarity": "common", "abilities": []
+  },
+  {
+    "id": "sw_gatekeeper",
+    "name": "Стражник ворот",
+    "personalityTag": "sw_gatekeeper",
+    "tags": ["stormwind", "soldier"],
+    "cost": 2, "strength": 1, "health": 5,
+    "rarity": "common", "abilities": ["taunt"]
+  },
+  {
+    "id": "sw_runner",
+    "name": "Гонец заставы",
+    "personalityTag": "sw_runner",
+    "tags": ["stormwind", "soldier"],
+    "cost": 1, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": ["charge"]
+  },
+  {
+    "id": "sw_herald",
+    "name": "Вестовой штаба",
+    "personalityTag": "sw_herald",
+    "tags": ["stormwind", "soldier"],
+    "cost": 2, "strength": 2, "health": 2,
+    "rarity": "uncommon", "abilities": ["charge", "scout"]
+  },
+  {
+    "id": "sw_mage",
+    "name": "Боевой маг",
+    "personalityTag": "sw_mage",
+    "tags": ["stormwind", "mage"],
+    "cost": 3, "strength": 2, "health": 3,
+    "rarity": "rare", "abilities": [],
+    "activatedAbilities": [
+      { "id": "arcane_bolt", "cost": 1,
+        "effects": [ { "kind": "CHOOSE_TARGETS_THEN",
+          "selection": {"from": "ENEMY_FRONT", "count": 1},
+          "then": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"} ] } ] }
+    ]
+  },
+  {
+    "id": "sw_archmage",
+    "name": "Магистр Круглой Башни",
+    "personalityTag": "sw_archmage",
+    "tags": ["stormwind", "mage"],
+    "cost": 4, "strength": 3, "health": 5,
+    "rarity": "rare", "abilities": [],
+    "activatedAbilities": [
+      { "id": "fireball", "cost": 2,
+        "effects": [ { "kind": "CHOOSE_TARGETS_THEN",
+          "selection": {"from": "ENEMY_BOARD", "count": 1},
+          "then": [ {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"} ] } ] }
+    ]
+  },
+  {
+    "id": "sw_knight",
+    "name": "Рыцарь короны",
+    "personalityTag": "sw_knight",
+    "tags": ["stormwind", "soldier"],
+    "cost": 3, "strength": 3, "health": 3,
+    "rarity": "uncommon", "abilities": ["charge"]
+  },
+  {
+    "id": "sw_swordsman",
+    "name": "Мечник аванпоста",
+    "personalityTag": "sw_swordsman",
+    "tags": ["stormwind", "soldier"],
+    "cost": 2, "strength": 3, "health": 3,
+    "rarity": "common", "abilities": []
+  },
+  {
+    "id": "sw_templar",
+    "name": "Храмовник Света",
+    "personalityTag": "sw_templar",
+    "tags": ["stormwind", "priest"],
+    "cost": 4, "strength": 3, "health": 5,
+    "rarity": "uncommon", "abilities": ["taunt"],
+    "triggers": [
+      { "id": "blessing", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "sw_chaplain",
+    "name": "Служитель",
+    "personalityTag": "sw_chaplain",
+    "tags": ["stormwind", "priest"],
+    "cost": 2, "strength": 2, "health": 3,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "sermon", "trigger": "ON_TURN_END",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_scout",
+    "name": "Разведчик фланга",
+    "personalityTag": "sw_scout",
+    "tags": ["stormwind", "archer"],
+    "cost": 2, "strength": 2, "health": 1,
+    "rarity": "common", "abilities": ["charge", "scout"]
+  },
+  {
+    "id": "sw_archer",
+    "name": "Башенный лучник",
+    "personalityTag": "sw_archer",
+    "tags": ["stormwind", "archer"],
+    "cost": 3, "strength": 3, "health": 2,
+    "rarity": "uncommon", "abilities": ["breakthrough"]
+  },
+  {
+    "id": "sw_captain",
+    "name": "Капитан отряда",
+    "personalityTag": "sw_captain",
+    "tags": ["stormwind", "soldier"],
+    "cost": 3, "strength": 3, "health": 4,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "rally", "trigger": "ON_REINFORCE",
+        "effects": [ { "kind": "BUFF", "strength": 1, "health": 1, "target": "ALL_FRIENDLY_FRONT" } ] }
+    ]
+  },
+  {
+    "id": "sw_shieldbearer",
+    "name": "Щитоносец",
+    "personalityTag": "sw_shieldbearer",
+    "tags": ["stormwind", "soldier"],
+    "cost": 2, "strength": 2, "health": 4,
+    "rarity": "uncommon", "abilities": ["shield", "taunt"]
+  },
+  {
+    "id": "sw_berserk",
+    "name": "Берсерк",
+    "personalityTag": "sw_berserk",
+    "tags": ["stormwind", "soldier"],
+    "cost": 3, "strength": 4, "health": 2,
+    "rarity": "uncommon", "abilities": ["breakthrough"]
+  },
+  {
+    "id": "sw_wallguard",
+    "name": "Страж стены",
+    "personalityTag": "sw_wallguard",
+    "tags": ["stormwind", "soldier"],
+    "cost": 4, "strength": 2, "health": 7,
+    "rarity": "uncommon", "abilities": ["taunt", "suppress"]
+  },
+  {
+    "id": "sw_lookout",
+    "name": "Дозорный",
+    "personalityTag": "sw_lookout",
+    "tags": ["stormwind", "archer"],
+    "cost": 2, "strength": 1, "health": 2,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "alert", "trigger": "ON_ENEMY_ATTACK", "oncePerTurn": true,
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_champion",
+    "name": "Чемпион гильдии",
+    "personalityTag": "sw_champion",
+    "tags": ["stormwind", "soldier"],
+    "cost": 5, "strength": 4, "health": 5,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "inspire", "trigger": "ON_ALLY_DIED", "oncePerTurn": true,
+        "effects": [ {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_marshall",
+    "name": "Маршал",
+    "personalityTag": "sw_marshall",
+    "tags": ["stormwind", "soldier"],
+    "cost": 6, "strength": 4, "health": 6,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "command", "trigger": "ON_TURN_START",
+        "effects": [ { "kind": "BUFF", "strength": 1, "health": 0, "target": "ALL_FRIENDLY_FRONT" } ] }
+    ]
+  },
+  {
+    "id": "sw_advisor",
+    "name": "Королевский советник",
+    "personalityTag": "sw_advisor",
+    "tags": ["stormwind", "intel"],
+    "cost": 4, "strength": 2, "health": 4,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "counsel", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_priest",
+    "name": "Жрец-целитель",
+    "personalityTag": "sw_priest",
+    "tags": ["stormwind", "priest"],
+    "cost": 3, "strength": 2, "health": 5,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "prayer", "trigger": "ON_TURN_END",
+        "effects": [ {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "sw_vanguard",
+    "name": "Авангард",
+    "personalityTag": "sw_vanguard",
+    "tags": ["stormwind", "soldier"],
+    "cost": 3, "strength": 3, "health": 4,
+    "rarity": "uncommon", "abilities": ["vanguard"]
+  },
+  {
+    "id": "sw_marksman",
+    "name": "Меткий стрелок",
+    "personalityTag": "sw_marksman",
+    "tags": ["stormwind", "archer"],
+    "cost": 3, "strength": 3, "health": 3,
+    "rarity": "uncommon", "abilities": [],
+    "activatedAbilities": [
+      { "id": "aimed_shot", "cost": 1,
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "sw_mason",
+    "name": "Мастер-строитель",
+    "personalityTag": "sw_mason",
+    "tags": ["stormwind", "engineer"],
+    "cost": 2, "strength": 1, "health": 3,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "fortify", "trigger": "ON_REINFORCE",
+        "effects": [ {"kind": "BUFF", "strength": 0, "health": 2, "target": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_inspector",
+    "name": "Инспектор гарнизона",
+    "personalityTag": "sw_inspector",
+    "tags": ["stormwind", "intel"],
+    "cost": 2, "strength": 3, "health": 2,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "report", "trigger": "ON_ENTER",
+        "condition": { "kind": "FRONT_COUNT", "who": "OPPONENT", "op": "AT_MOST", "value": 1 },
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_commander",
+    "name": "Командир отряда",
+    "personalityTag": "sw_commander",
+    "tags": ["stormwind", "soldier"],
+    "cost": 4, "strength": 3, "health": 4,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "tactics", "trigger": "ON_ENTER",
+        "effects": [ { "kind": "BUFF", "strength": 2, "health": 0, "target": "ALL_FRIENDLY_FRONT" } ] }
+    ]
+  },
+  {
+    "id": "sw_chronicler",
+    "name": "Летописец гильдии",
+    "personalityTag": "sw_chronicler",
+    "tags": ["stormwind", "intel"],
+    "cost": 2, "strength": 1, "health": 2,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "annals", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_armorer",
+    "name": "Оружейник",
+    "personalityTag": "sw_armorer",
+    "tags": ["stormwind", "engineer"],
+    "cost": 3, "strength": 2, "health": 3,
+    "rarity": "common", "abilities": [],
+    "activatedAbilities": [
+      { "id": "forge", "cost": 1,
+        "effects": [ {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "sw_bannerman",
+    "name": "Знаменосец",
+    "personalityTag": "sw_bannerman",
+    "tags": ["stormwind", "soldier"],
+    "cost": 3, "strength": 1, "health": 5,
+    "rarity": "uncommon", "abilities": ["taunt"],
+    "triggers": [
+      { "id": "rally_flag", "trigger": "ON_TURN_START",
+        "condition": { "kind": "CELLS", "who": "SELF", "op": "AT_LEAST", "value": 2 },
+        "effects": [ { "kind": "BUFF", "strength": 1, "health": 0, "target": "ALL_FRIENDLY_FRONT" } ] }
+    ]
+  },
+  {
+    "id": "sw_field_medic",
+    "name": "Полевой целитель",
+    "personalityTag": "sw_medic",
+    "tags": ["stormwind", "priest"],
+    "cost": 2, "strength": 1, "health": 3,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "first_aid", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_spark",
+    "name": "Искра",
+    "personalityTag": "vf_spark",
+    "tags": ["voidflame", "cult"],
+    "cost": 1, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": ["charge"],
+    "triggers": []
+  },
+  {
+    "id": "vf_scorcher",
+    "name": "Гаритель",
+    "personalityTag": "vf_scorcher",
+    "tags": ["voidflame", "cult", "mage"],
+    "cost": 3, "strength": 2, "health": 4,
+    "rarity": "uncommon", "abilities": [],
+    "activatedAbilities": [
+      { "id": "void_flame", "cost": 1,
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_core",
+    "name": "Ядро праха",
+    "personalityTag": "vf_ash_core",
+    "tags": ["voidflame", "cult"],
+    "cost": 2, "strength": 2, "health": 2,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "detonate", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_slag_thrower",
+    "name": "Шлаковый метатель",
+    "personalityTag": "vf_slag_thrower",
+    "tags": ["voidflame", "cult"],
+    "cost": 4, "strength": 3, "health": 2,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "void_strike", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_sniper",
+    "name": "Искристый стрелок",
+    "personalityTag": "vf_ash_sniper",
+    "tags": ["voidflame", "cult", "archer"],
+    "cost": 2, "strength": 1, "health": 1,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "snipe", "trigger": "ON_ENTER",
+        "effects": [ { "kind": "CHOOSE_TARGETS_THEN",
+          "selection": {"from": "ENEMY_FRONT", "count": 1},
+          "then": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"} ] } ] }
+    ]
+  },
+  {
+    "id": "vf_charred",
+    "name": "Обугленный",
+    "personalityTag": "vf_charred",
+    "tags": ["voidflame", "cult"],
+    "cost": 3, "strength": 2, "health": 1,
+    "rarity": "uncommon", "abilities": ["charge"],
+    "triggers": [
+      { "id": "final_flare", "trigger": "ON_EXIT",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_scribe",
+    "name": "Сожжённый писец",
+    "personalityTag": "vf_scribe",
+    "tags": ["voidflame", "damned"],
+    "cost": 2, "strength": 2, "health": 2,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "writ_of_ashes", "trigger": "ON_THIS_DAMAGED", "oncePerTurn": true,
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_vow",
+    "name": "Тлеющий обет",
+    "personalityTag": "vf_vow",
+    "tags": ["voidflame", "damned"],
+    "cost": 1, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "void_offering", "trigger": "ON_EXIT",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_brand",
+    "name": "Головня",
+    "personalityTag": "vf_brand",
+    "tags": ["voidflame", "damned"],
+    "cost": 2, "strength": 0, "health": 1,
+    "rarity": "common", "abilities": ["charge"],
+    "triggers": [
+      { "id": "boom", "trigger": "ON_EXIT",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_priest",
+    "name": "Жрец праха",
+    "personalityTag": "vf_ash_priest",
+    "tags": ["voidflame", "damned", "priest"],
+    "cost": 3, "strength": 2, "health": 3,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "raise_ghoul", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "SUMMON", "defId": "tk_ghoul", "count": 1, "who": "SELF"} ] },
+      { "id": "soul_fuel", "trigger": "ON_ALLY_DIED", "oncePerTurn": true,
+        "effects": [ {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_cinder",
+    "name": "Изгар",
+    "personalityTag": "vf_cinder",
+    "tags": ["voidflame", "damned"],
+    "cost": 2, "strength": 2, "health": 2,
+    "rarity": "common", "abilities": ["charge"]
+  },
+  {
+    "id": "vf_ash_lord",
+    "name": "Владыка пепла",
+    "personalityTag": "vf_ash_lord",
+    "tags": ["voidflame", "damned", "mage"],
+    "cost": 5, "strength": 3, "health": 5,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "void_aura", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_coal_golem",
+    "name": "Угольный голем",
+    "personalityTag": "vf_coal_golem",
+    "tags": ["voidflame", "damned"],
+    "cost": 4, "strength": 1, "health": 10,
+    "rarity": "uncommon", "abilities": ["taunt", "slow"],
+    "triggers": [
+      { "id": "adaptive_plating", "trigger": "ON_THIS_DAMAGED", "oncePerTurn": true,
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_avenger",
+    "name": "Мститель праха",
+    "personalityTag": "vf_ash_avenger",
+    "tags": ["voidflame", "damned"],
+    "cost": 2, "strength": 3, "health": 2,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "vengeance", "trigger": "ON_ALLY_ATTACKED",
+        "effects": [ {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_coal_warden",
+    "name": "Угольный страж",
+    "personalityTag": "vf_coal_warden",
+    "tags": ["voidflame", "damned"],
+    "cost": 2, "strength": 1, "health": 4,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "riposte", "trigger": "ON_ENEMY_ATTACK", "oncePerTurn": true,
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_wall",
+    "name": "Стена праха",
+    "personalityTag": "vf_ash_wall",
+    "tags": ["voidflame", "damned"],
+    "cost": 3, "strength": 0, "health": 8,
+    "rarity": "uncommon", "abilities": ["taunt", "suppress"]
+  },
+  {
+    "id": "vf_ash_sentinel",
+    "name": "Часовой праха",
+    "personalityTag": "vf_ash_sentinel",
+    "tags": ["voidflame", "damned"],
+    "cost": 4, "strength": 3, "health": 5,
+    "rarity": "uncommon", "abilities": ["scout"]
+  },
+  {
+    "id": "vf_ash_colossus",
+    "name": "Колосс пепла",
+    "personalityTag": "vf_ash_colossus",
+    "tags": ["voidflame", "damned"],
+    "cost": 7, "strength": 4, "health": 8,
+    "rarity": "rare", "abilities": ["taunt", "slow"],
+    "triggers": [
+      { "id": "quake", "trigger": "ON_REINFORCE",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_apprentice",
+    "name": "Ученик праха",
+    "personalityTag": "vf_ash_apprentice",
+    "tags": ["voidflame", "scholar"],
+    "cost": 2, "strength": 1, "health": 3,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "first_lesson", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_medic",
+    "name": "Медик праха",
+    "personalityTag": "vf_ash_medic",
+    "tags": ["voidflame", "scholar"],
+    "cost": 2, "strength": 1, "health": 3,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "triage", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 5, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_looter",
+    "name": "Стяжатель",
+    "personalityTag": "vf_looter",
+    "tags": ["voidflame", "scholar"],
+    "cost": 1, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": [],
+    "triggers": [
+      { "id": "seize_moment", "trigger": "ON_ENTER",
+        "condition": { "kind": "FRONT_COUNT", "who": "OPPONENT", "op": "AT_MOST", "value": 1 },
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_chronicler",
+    "name": "Летописец праха",
+    "personalityTag": "vf_ash_chronicler",
+    "tags": ["voidflame", "scholar"],
+    "cost": 2, "strength": 1, "health": 1,
+    "rarity": "uncommon", "abilities": ["charge"],
+    "triggers": [
+      { "id": "chronicle", "trigger": "ON_ENTER",
+        "condition": { "kind": "CELLS", "who": "SELF", "op": "AT_LEAST", "value": 2 },
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_cartographer",
+    "name": "Картограф праха",
+    "personalityTag": "vf_ash_cartographer",
+    "tags": ["voidflame", "scholar"],
+    "cost": 3, "strength": 2, "health": 3,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "survey", "trigger": "ON_ENTER",
+        "condition": { "kind": "CELLS", "who": "SELF", "op": "AT_LEAST", "value": 3 },
+        "effects": [ {"kind": "DRAW", "count": 2, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_oracle",
+    "name": "Оракул праха",
+    "personalityTag": "vf_ash_oracle",
+    "tags": ["voidflame", "scholar", "priest"],
+    "cost": 4, "strength": 2, "health": 4,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "foresight", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_pit_berserker",
+    "name": "Ямный берсерк",
+    "personalityTag": "vf_pit_berserker",
+    "tags": ["voidflame", "gladiator"],
+    "cost": 3, "strength": 3, "health": 2,
+    "rarity": "uncommon", "abilities": ["charge"]
+  },
+  {
+    "id": "vf_desperate",
+    "name": "Отчаявшийся",
+    "personalityTag": "vf_desperate",
+    "tags": ["voidflame", "gladiator"],
+    "cost": 1, "strength": 1, "health": 1,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "second_wind", "trigger": "ON_ENTER",
+        "condition": { "kind": "INFLUENCE", "who": "SELF", "op": "EQUAL", "value": 0 },
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_blood_reaper",
+    "name": "Кровавый жнец",
+    "personalityTag": "vf_blood_reaper",
+    "tags": ["voidflame", "gladiator"],
+    "cost": 7, "strength": 4, "health": 4,
+    "rarity": "rare", "abilities": ["charge"]
+  },
+  {
+    "id": "vf_pit_champion",
+    "name": "Чемпион ямы",
+    "personalityTag": "vf_pit_champion",
+    "tags": ["voidflame", "gladiator"],
+    "cost": 5, "strength": 4, "health": 4,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "glory_of_the_fallen", "trigger": "ON_ALLY_DIED", "oncePerTurn": true,
+        "effects": [ {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "vf_duelist",
+    "name": "Дуэлянт",
+    "personalityTag": "vf_duelist",
+    "tags": ["voidflame", "gladiator"],
+    "cost": 3, "strength": 3, "health": 2,
+    "rarity": "rare", "abilities": ["charge"]
+  },
+  {
+    "id": "vf_blademaster",
+    "name": "Мастер ржавого клинка",
+    "personalityTag": "vf_blademaster",
+    "tags": ["voidflame", "gladiator"],
+    "cost": 4, "strength": 3, "health": 4,
+    "rarity": "uncommon", "abilities": [],
+    "activatedAbilities": [
+      { "id": "precise_strike", "cost": 1,
+        "effects": [ { "kind": "CHOOSE_TARGETS_THEN",
+          "selection": {"from": "ENEMY_FRONT", "count": 1},
+          "then": [ {"kind": "DEAL_DAMAGE", "amount": 3, "target": "CHOSEN"} ] } ] }
+    ]
+  },
+  {
+    "id": "vf_symbiote",
+    "name": "Симбиот",
+    "personalityTag": "symbiote",
+    "tags": ["voidflame", "damned"],
+    "cost": 3, "strength": 3, "health": 3,
+    "rarity": "rare", "abilities": []
+  },
+  {
+    "id": "vf_parasite",
+    "name": "Гнездовой паразит",
+    "personalityTag": "vf_parasite",
+    "tags": ["voidflame", "damned"],
+    "cost": 2, "strength": 1, "health": 2,
+    "rarity": "uncommon", "abilities": ["charge"],
+    "triggers": [
+      { "id": "infest", "trigger": "ON_ENTER",
+        "effects": [ { "kind": "SUMMON", "defId": "tk_symbiote_larva", "count": 1, "who": "SELF", "destination": "FRONT" } ] }
+    ]
+  },
+  {
+    "id": "vf_ash_necromancer",
+    "name": "Некромант праха",
+    "personalityTag": "vf_ash_necromancer",
+    "tags": ["voidflame", "damned"],
+    "cost": 3, "strength": 2, "health": 3,
+    "rarity": "uncommon", "abilities": [],
+    "triggers": [
+      { "id": "raise", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "RETURN_FROM_DISCARD", "count": 1, "who": "SELF", "destination": "HAND"} ] }
+    ]
+  },
+  {
+    "id": "vf_shadowstep",
+    "name": "Тенеход",
+    "personalityTag": "vf_shadowstep",
+    "tags": ["voidflame", "gladiator"],
+    "cost": 2, "strength": 2, "health": 2,
+    "rarity": "uncommon", "abilities": ["charge"],
+    "triggers": [
+      { "id": "reposition", "trigger": "ON_TURN_START", "oncePerTurn": true,
+        "effects": [ {"kind": "MOVE_CARD", "target": "SELF", "to": "RANDOM_OWN_EMPTY"} ] }
+    ]
+  },
+  {
+    "id": "vf_ash_echo",
+    "name": "Отблеск праха",
+    "personalityTag": "vf_ash_echo",
+    "tags": ["voidflame", "mage"],
+    "cost": 3, "strength": 2, "health": 2,
+    "rarity": "uncommon", "abilities": [],
+    "activatedAbilities": [
+      { "id": "bounce", "cost": 1,
+        "effects": [ { "kind": "CHOOSE_TARGETS_THEN",
+          "selection": {"from": "ENEMY_FRONT", "count": 1},
+          "then": [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ] } ] }
+    ]
+  },
+  {
+    "id": "lg_roland",
+    "name": "Король Роланд Непреклонный",
+    "personalityTag": "lg_roland",
+    "tags": ["legend", "stormwind", "sovereign"],
+    "cost": 7, "strength": 5, "health": 7,
+    "rarity": "legendary", "abilities": ["slow"],
+    "triggers": [
+      { "id": "for_the_alliance", "trigger": "ON_ENTER",
+        "effects": [ { "kind": "BUFF", "strength": 2, "health": 2, "target": "ALL_FRIENDLY_FRONT" } ] },
+      { "id": "royal_command", "trigger": "ON_TURN_START",
+        "effects": [ { "kind": "BUFF", "strength": 1, "health": 0, "target": "ALL_FRIENDLY_FRONT" } ] }
+    ]
+  },
+  {
+    "id": "lg_anselm",
+    "name": "Светоносец Ансельм",
+    "personalityTag": "lg_anselm",
+    "tags": ["legend", "stormwind", "templar"],
+    "cost": 6, "strength": 4, "health": 6,
+    "rarity": "legendary", "abilities": ["taunt"],
+    "triggers": [
+      { "id": "lightbringer", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"} ] },
+      { "id": "resolve", "trigger": "ON_THIS_DAMAGED", "oncePerTurn": true,
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "lg_ingrid",
+    "name": "Морская Ведьма Ингрид",
+    "personalityTag": "lg_ingrid",
+    "tags": ["legend", "neutral", "seer"],
+    "cost": 5, "strength": 3, "health": 5,
+    "rarity": "legendary", "abilities": [],
+    "triggers": [
+      { "id": "arcane_torrent", "trigger": "ON_ENTER",
+        "effects": [ { "kind": "CHOOSE_TARGETS_THEN",
+          "selection": {"from": "ENEMY_BOARD", "count": 1},
+          "then": [ {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"} ] } ] }
+    ],
+    "activatedAbilities": [
+      { "id": "frostbolt", "cost": 2,
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "lg_cormac",
+    "name": "Вождь Исхода Кормак",
+    "personalityTag": "lg_cormac",
+    "tags": ["legend", "wanderer", "chieftain"],
+    "cost": 6, "strength": 4, "health": 6,
+    "rarity": "legendary", "abilities": [],
+    "triggers": [
+      { "id": "elements_favor", "trigger": "ON_REINFORCE",
+        "effects": [ { "kind": "BUFF", "strength": 2, "health": 2, "target": "ALL_FRIENDLY_FRONT" } ] },
+      { "id": "chain_lightning", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "lg_lianna",
+    "name": "Плачущая Королева Лианна",
+    "personalityTag": "lg_lianna",
+    "tags": ["legend", "forsaken", "archer"],
+    "cost": 5, "strength": 3, "health": 3,
+    "rarity": "legendary", "abilities": [],
+    "triggers": [
+      { "id": "banshee_wail", "trigger": "ON_EXIT",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"},
+          {"kind": "SUMMON", "defId": "tk_banshee", "count": 2, "who": "SELF"}
+        ] }
+    ]
+  },
+  {
+    "id": "lg_marcan",
+    "name": "Король-в-Цепях Маркан",
+    "personalityTag": "lg_marcan",
+    "tags": ["legend", "forsaken", "warden"],
+    "cost": 7, "strength": 4, "health": 8,
+    "rarity": "legendary", "abilities": ["slow"],
+    "triggers": [
+      { "id": "frostmourne", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"} ] },
+      { "id": "raise_dead", "trigger": "ON_ALLY_DIED", "oncePerTurn": true,
+        "effects": [
+          {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"},
+          {"kind": "SUMMON", "defId": "tk_skeleton", "count": 1, "who": "SELF"}
+        ] }
+    ]
+  },
+  {
+    "id": "lg_tarn",
+    "name": "Одноглазый Пророк Тэрн",
+    "personalityTag": "lg_tarn",
+    "tags": ["legend", "wanderer", "prophet"],
+    "cost": 6, "strength": 4, "health": 4,
+    "rarity": "legendary", "abilities": ["charge", "scout", "breakthrough"],
+    "triggers": [
+      { "id": "demonic_fury", "trigger": "ON_TURN_START",
+        "effects": [
+          {"kind": "DAMAGE_GLORY", "amount": 1, "who": "SELF"},
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ] }
+    ]
+  },
+  {
+    "id": "lg_brann",
+    "name": "Охотник Пустошей Бранн",
+    "personalityTag": "lg_brann",
+    "tags": ["legend", "wanderer", "hunter"],
+    "cost": 4, "strength": 3, "health": 3,
+    "rarity": "legendary", "abilities": ["charge", "scout"],
+    "triggers": [
+      { "id": "hunters_mark", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"} ] }
+    ],
+    "activatedAbilities": [
+      { "id": "kill_command", "cost": 1,
+        "effects": [ { "kind": "CHOOSE_TARGETS_THEN",
+          "selection": {"from": "ENEMY_FRONT", "count": 1},
+          "then": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "CHOSEN"} ] } ] }
+    ]
+  },
+  {
+    "id": "lg_grim",
+    "name": "Военачальник Грим",
+    "personalityTag": "lg_grim",
+    "tags": ["legend", "wanderer", "warlord"],
+    "cost": 5, "strength": 4, "health": 4,
+    "rarity": "legendary", "abilities": ["charge"],
+    "triggers": [
+      { "id": "bloodlust", "trigger": "ON_ALLY_DIED",
+        "effects": [ {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "lg_edwin",
+    "name": "Юный Наследник Эдвин",
+    "personalityTag": "lg_edwin",
+    "tags": ["legend", "neutral", "heir"],
+    "cost": 4, "strength": 2, "health": 5,
+    "rarity": "legendary", "abilities": [],
+    "triggers": [
+      { "id": "greater_heal", "trigger": "ON_TURN_END",
+        "effects": [ {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"} ] },
+      { "id": "renew", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 5, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "lg_calamity",
+    "name": "Крылатая Погибель",
+    "personalityTag": "lg_calamity",
+    "tags": ["legend", "neutral", "dragon"],
+    "cost": 8, "strength": 7, "health": 7,
+    "rarity": "legendary", "abilities": ["slow"],
+    "triggers": [
+      { "id": "cataclysm", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"} ] },
+      { "id": "madness", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_FRIENDLY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "lg_hunger",
+    "name": "Древний Голод",
+    "personalityTag": "lg_hunger",
+    "tags": ["legend", "voidflame", "ancient"],
+    "cost": 6, "strength": 5, "health": 8,
+    "rarity": "legendary", "abilities": ["slow"],
+    "triggers": [
+      { "id": "maddening_whispers", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DRAW", "count": 3, "who": "SELF"} ] },
+      { "id": "void_pulse", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_CARDS_ON_BOARD"} ] }
+    ]
+  },
+  {
+    "id": "lg_timeweaver",
+    "name": "Прядущий Время",
+    "personalityTag": "lg_timeweaver",
+    "tags": ["legend", "neutral", "dragon", "mage"],
+    "cost": 5, "strength": 3, "health": 6,
+    "rarity": "legendary", "abilities": [],
+    "triggers": [
+      { "id": "time_shift", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 3, "who": "SELF"} ] },
+      { "id": "eternal_sands", "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"} ] }
+    ]
+  },
+  {
+    "id": "lg_lifemother",
+    "name": "Матерь Жизни",
+    "personalityTag": "lg_lifemother",
+    "tags": ["legend", "neutral", "dragon"],
+    "cost": 6, "strength": 4, "health": 8,
+    "rarity": "legendary", "abilities": ["slow"],
+    "triggers": [
+      { "id": "breath_of_life", "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"},
+          {"kind": "HEAL_GLORY", "amount": 8, "who": "SELF"}
+        ] },
+      { "id": "life_bond", "trigger": "ON_TURN_END",
+        "effects": [ {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_BOARD"} ] }
+    ]
+  },
+  {
+    "id": "lg_starweaver",
+    "name": "Прядущий Звёзды",
+    "personalityTag": "lg_starweaver",
+    "tags": ["legend", "stormwind", "mage"],
+    "cost": 5, "strength": 3, "health": 6,
+    "rarity": "legendary", "abilities": [],
+    "triggers": [
+      { "id": "time_warp", "trigger": "ON_TURN_START",
+        "effects": [ { "kind": "SUMMON", "defId": "tk_mirror_image", "count": 1, "who": "SELF", "destination": "FRONT" } ] }
+    ]
+  },
+  {
+    "id": "lg_spellweaver",
+    "name": "Чароплёт",
+    "personalityTag": "lg_spellweaver",
+    "tags": ["legend", "neutral", "dragon", "mage"],
+    "cost": 7, "strength": 4, "health": 8,
+    "rarity": "legendary", "abilities": ["slow"],
+    "triggers": [
+      { "id": "arcane_missiles", "trigger": "ON_ENTER",
+        "effects": [
+          { "kind": "SUMMON", "defId": "tk_meteor", "count": 1, "who": "SELF", "destination": "FRONT" },
+          { "kind": "SUMMON", "defId": "tk_meteor", "count": 1, "who": "SELF", "destination": "FRONT" }
+        ] }
+    ]
+  },
+  {
+    "id": "tk_skeleton",
+    "name": "Скелет",
+    "personalityTag": "tk_skeleton",
+    "tags": ["token", "undead"],
+    "cost": 0, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": [],
+    "isToken": true
+  },
+  {
+    "id": "tk_wisp",
+    "name": "Огонёк",
+    "personalityTag": "tk_wisp",
+    "tags": ["token"],
+    "cost": 0, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": ["charge"],
+    "isToken": true
+  },
+  {
+    "id": "tk_imp",
+    "name": "Бес",
+    "personalityTag": "tk_imp",
+    "tags": ["token", "demon"],
+    "cost": 0, "strength": 2, "health": 1,
+    "rarity": "common", "abilities": ["charge"],
+    "isToken": true
+  },
+  {
+    "id": "tk_treant",
+    "name": "Древень",
+    "personalityTag": "tk_treant",
+    "tags": ["token"],
+    "cost": 0, "strength": 2, "health": 3,
+    "rarity": "common", "abilities": ["taunt"],
+    "isToken": true
+  },
+  {
+    "id": "tk_totem",
+    "name": "Тотем",
+    "personalityTag": "tk_totem",
+    "tags": ["token"],
+    "cost": 0, "strength": 0, "health": 3,
+    "rarity": "common", "abilities": ["taunt"],
+    "isToken": true
+  },
+  {
+    "id": "tk_ghoul",
+    "name": "Вурдалак",
+    "personalityTag": "tk_ghoul",
+    "tags": ["token", "undead"],
+    "cost": 0, "strength": 2, "health": 2,
+    "rarity": "common", "abilities": ["slow"],
+    "isToken": true
+  },
+  {
+    "id": "tk_banshee",
+    "name": "Банши",
+    "personalityTag": "tk_banshee",
+    "tags": ["token", "undead"],
+    "cost": 0, "strength": 2, "health": 1,
+    "rarity": "common", "abilities": ["charge", "scout"],
+    "isToken": true
+  },
+  {
+    "id": "tk_symbiote_larva",
+    "name": "Симбиот-личинка",
+    "personalityTag": "symbiote",
+    "tags": ["token", "damned"],
+    "cost": 0, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": ["charge"],
+    "isToken": true,
+    "sharesIdentity": true
+  },
+  {
+    "id": "tk_mirror_image",
+    "name": "Зеркальное отражение",
+    "personalityTag": "tk_mirror_image",
+    "tags": ["token"],
+    "cost": 0, "strength": 1, "health": 1,
+    "rarity": "common", "abilities": ["taunt", "temporary"],
+    "isToken": true, "tempDuration": 2
+  },
+  {
+    "id": "tk_phantom",
+    "name": "Фантом",
+    "personalityTag": "tk_phantom",
+    "tags": ["token"],
+    "cost": 0, "strength": 2, "health": 2,
+    "rarity": "common", "abilities": ["charge", "temporary"],
+    "isToken": true, "tempDuration": 1
+  },
+  {
+    "id": "tk_meteor",
+    "name": "Метеор",
+    "personalityTag": "tk_meteor",
+    "tags": ["token"],
+    "cost": 0, "strength": 3, "health": 1,
+    "rarity": "common", "abilities": ["charge", "temporary", "breakthrough"],
+    "isToken": true, "tempDuration": 1
+  },
+  {
+    "id": "tk_shade",
+    "name": "Тень",
+    "personalityTag": "tk_shade",
+    "tags": ["token"],
+    "cost": 0, "strength": 2, "health": 2,
+    "rarity": "common", "abilities": ["scout", "temporary"],
+    "isToken": true, "tempDuration": 3
+  },
+  {
+    "id": "sw_dawn_volley",
+    "name": "Рассветный залп",
+    "personalityTag": "sw_dawn_volley",
+    "tags": ["stormwind", "priest"],
+    "cost": 3, "strength": 1, "health": 3,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "nova", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id": "sw_retribution",
+    "name": "Кара",
+    "personalityTag": "sw_retribution",
+    "tags": ["stormwind", "priest"],
+    "cost": 4, "strength": 2, "health": 4,
+    "rarity": "rare", "abilities": [],
+    "triggers": [
+      { "id": "smite", "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"} ] }
+    ]
+  },
+  {
+    "id"            : "st_private",
+    "name"          : "Рядовой",
+    "personalityTag": "st_private",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : []
+  },
+  {
+    "id"            : "st_runner",
+    "name"          : "Вестовой",
+    "personalityTag": "st_runner",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"            : "st_rifleman",
+    "name"          : "Автоматчик",
+    "personalityTag": "st_rifleman",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 2,
+    "strength"      : 3,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : []
+  },
+  {
+    "id"            : "st_mg",
+    "name"          : "Пулемётчик",
+    "personalityTag": "st_mg",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 5,
+    "rarity"        : "common",
+    "abilities"     : ["taunt"]
+  },
+  {
+    "id"            : "st_sapper",
+    "name"          : "Сапёр",
+    "personalityTag": "st_sapper",
+    "tags"          : ["steel", "engineer"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "demo_charge",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_medic",
+    "name"          : "Санитар",
+    "personalityTag": "st_medic",
+    "tags"          : ["steel", "medical"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 3,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "first_aid",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_scout",
+    "name"          : "Разведчик",
+    "personalityTag": "st_scout",
+    "tags"          : ["steel", "sniper"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge", "scout"]
+  },
+  {
+    "id"            : "st_engineer",
+    "name"          : "Инженер",
+    "personalityTag": "st_engineer",
+    "tags"          : ["steel", "engineer"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 3,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "dig_in",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {"kind": "BUFF", "strength": 0, "health": 2, "target": "SELF"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_intel",
+    "name"          : "Разведсвязной",
+    "personalityTag": "st_intel",
+    "tags"          : ["steel", "intel"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "intel_report",
+        "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_sgt",
+    "name"          : "Сержант",
+    "personalityTag": "st_sgt",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 3,
+    "strength"      : 3,
+    "health"        : 3,
+    "rarity"        : "uncommon",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"            : "st_marksman",
+    "name"          : "Снайпер",
+    "personalityTag": "st_marksman",
+    "tags"          : ["steel", "sniper"],
+    "cost"          : 3,
+    "strength"      : 3,
+    "health"        : 2,
+    "rarity"        : "uncommon",
+    "abilities"     : ["breakthrough"]
+  },
+  {
+    "id"                : "st_grenadier",
+    "name"              : "Гранатомётчик",
+    "personalityTag"    : "st_grenadier",
+    "tags"              : ["steel", "specialist"],
+    "cost"              : 3,
+    "strength"          : 3,
+    "health"            : 3,
+    "rarity"            : "uncommon",
+    "abilities"         : [],
+    "activatedAbilities": [
+      {
+        "id"     : "throw_grenade",
+        "cost"   : 1,
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_apc",
+    "name"          : "БТР",
+    "personalityTag": "st_apc",
+    "tags"          : ["steel", "armored"],
+    "cost"          : 3,
+    "strength"      : 2,
+    "health"        : 5,
+    "rarity"        : "uncommon",
+    "abilities"     : ["taunt"]
+  },
+  {
+    "id"            : "st_barrage",
+    "name"          : "Миномётный обстрел",
+    "personalityTag": "st_barrage",
+    "tags"          : ["steel", "artillery"],
+    "cost"          : 3,
+    "strength"      : 1,
+    "health"        : 3,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "barrage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_officer",
+    "name"          : "Офицер",
+    "personalityTag": "st_officer",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 4,
+    "strength"      : 3,
+    "health"        : 4,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "battle_plan",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 2,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_howitzer",
+    "name"          : "Гаубица",
+    "personalityTag": "st_howitzer",
+    "tags"          : ["steel", "artillery"],
+    "cost"          : 4,
+    "strength"      : 2,
+    "health"        : 4,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "bombardment",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_tank",
+    "name"          : "Танк",
+    "personalityTag": "st_tank",
+    "tags"          : ["steel", "armored"],
+    "cost"          : 5,
+    "strength"      : 5,
+    "health"        : 5,
+    "rarity"        : "rare",
+    "abilities"     : ["breakthrough"]
+  },
+  {
+    "id"            : "st_veteran",
+    "name"          : "Ветеран",
+    "personalityTag": "st_veteran",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 5,
+    "strength"      : 4,
+    "health"        : 5,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"         : "no_man_left",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_general",
+    "name"          : "Генерал",
+    "personalityTag": "st_general",
+    "tags"          : ["steel", "infantry"],
+    "cost"          : 6,
+    "strength"      : 4,
+    "health"        : 6,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "tactical_command",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_ghost_lead",
+    "name"          : "Призрачный Лидер",
+    "personalityTag": "st_ghost_lead",
+    "tags"          : ["steel", "legend"],
+    "cost"          : 7,
+    "strength"      : 5,
+    "health"        : 7,
+    "rarity"        : "legendary",
+    "abilities"     : ["slow"],
+    "triggers"      : [
+      {
+        "id"     : "hold_the_line",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 2,
+            "health"  : 2,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id"     : "command_presence",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "st_bulwark",
+    "name"          : "Майор Тайтус Кросс",
+    "personalityTag": "st_bulwark",
+    "tags"          : ["steel", "legend"],
+    "cost"          : 6,
+    "strength"      : 4,
+    "health"        : 6,
+    "rarity"        : "legendary",
+    "abilities"     : ["taunt"],
+    "triggers"      : [
+      {
+        "id"     : "field_triage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      },
+      {
+        "id"         : "battle_hardened",
+        "trigger"    : "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"                : "st_polaris",
+    "name"              : "Полярис",
+    "personalityTag"    : "st_polaris",
+    "tags"              : ["steel", "legend"],
+    "cost"              : 5,
+    "strength"          : 3,
+    "health"            : 5,
+    "rarity"            : "legendary",
+    "abilities"         : [],
+    "triggers"          : [
+      {
+        "id"     : "precision_strike",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id"     : "suppressive_fire",
+        "cost"   : 2,
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "tk_bunker",
+    "name"          : "Блокпост",
+    "personalityTag": "tk_bunker",
+    "tags"          : ["token"],
+    "cost"          : 0,
+    "strength"      : 0,
+    "health"        : 3,
+    "rarity"        : "common",
+    "abilities"     : ["taunt"],
+    "isToken"       : true
+  },
+  {
+    "id"            : "rl_firestarter",
+    "name"          : "Поджигатель",
+    "personalityTag": "rl_firestarter",
+    "tags"          : ["razlom", "cell"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"            : "rl_martyr",
+    "name"          : "Смертник",
+    "personalityTag": "rl_martyr",
+    "tags"          : ["razlom", "fanatic"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "final_sacrifice",
+        "trigger": "ON_EXIT",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_desperate",
+    "name"          : "Отчаявшийся",
+    "personalityTag": "rl_desperate",
+    "tags"          : ["razlom", "assault"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"       : "second_wind",
+        "trigger"  : "ON_ENTER",
+        "condition": {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "EQUAL",
+          "value": 0
+        },
+        "effects"  : [ {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_opportunist",
+    "name"          : "Стяжатель",
+    "personalityTag": "rl_opportunist",
+    "tags"          : ["razlom", "intel"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"       : "loot",
+        "trigger"  : "ON_ENTER",
+        "condition": {
+          "kind" : "FRONT_COUNT",
+          "who"  : "OPPONENT",
+          "op"   : "AT_MOST",
+          "value": 1
+        },
+        "effects"  : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_militant",
+    "name"          : "Боевик",
+    "personalityTag": "rl_militant",
+    "tags"          : ["razlom", "fanatic"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : []
+  },
+  {
+    "id"            : "rl_sniper",
+    "name"          : "Городской стрелок",
+    "personalityTag": "rl_sniper",
+    "tags"          : ["razlom", "sniper"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "headshot",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_ied",
+    "name"          : "СВУ",
+    "personalityTag": "rl_ied",
+    "tags"          : ["razlom", "cell"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "detonate",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_living_bomb",
+    "name"          : "Живая бомба",
+    "personalityTag": "rl_living_bomb",
+    "tags"          : ["razlom", "fanatic"],
+    "cost"          : 2,
+    "strength"      : 0,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge"],
+    "triggers"      : [
+      {
+        "id"     : "self_destruct",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_ghostwire",
+    "name"          : "Радист",
+    "personalityTag": "rl_ghostwire",
+    "tags"          : ["razlom", "intel"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"         : "data_leak",
+        "trigger"    : "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_berserker",
+    "name"          : "Берсерк",
+    "personalityTag": "rl_berserker",
+    "tags"          : ["razlom", "assault"],
+    "cost"          : 4,
+    "strength"      : 4,
+    "health"        : 3,
+    "rarity"        : "uncommon",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"            : "rl_raider",
+    "name"          : "Налётчик",
+    "personalityTag": "rl_raider",
+    "tags"          : ["razlom", "assault"],
+    "cost"          : 4,
+    "strength"      : 4,
+    "health"        : 3,
+    "rarity"        : "rare",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"            : "rl_fanatic",
+    "name"          : "Фанатик",
+    "personalityTag": "rl_fanatic",
+    "tags"          : ["razlom", "fanatic"],
+    "cost"          : 3,
+    "strength"      : 2,
+    "health"        : 1,
+    "rarity"        : "uncommon",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"                : "rl_incendiary",
+    "name"              : "Огнемётчик",
+    "personalityTag"    : "rl_incendiary",
+    "tags"              : ["razlom", "saboteur"],
+    "cost"              : 3,
+    "strength"          : 2,
+    "health"            : 4,
+    "rarity"            : "uncommon",
+    "abilities"         : [],
+    "activatedAbilities": [
+      {
+        "id"     : "flame_wave",
+        "cost"   : 1,
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_cell_leader",
+    "name"          : "Главарь ячейки",
+    "personalityTag": "rl_cell_leader",
+    "tags"          : ["razlom", "ideologue"],
+    "cost"          : 3,
+    "strength"      : 2,
+    "health"        : 3,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "recruit_militant",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "SUMMON", "defId": "tk_looter", "count": 1, "who": "SELF"}
+        ]
+      },
+      {
+        "id"         : "ruthless",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_agitator",
+    "name"          : "Агитатор",
+    "personalityTag": "rl_agitator",
+    "tags"          : ["razlom", "intel"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "uncommon",
+    "abilities"     : ["charge"],
+    "triggers"      : [
+      {
+        "id"       : "propaganda",
+        "trigger"  : "ON_ENTER",
+        "condition": {
+          "kind" : "CELLS",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 2
+        },
+        "effects"  : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_bomber",
+    "name"          : "Подрывник",
+    "personalityTag": "rl_bomber",
+    "tags"          : ["razlom", "saboteur"],
+    "cost"          : 4,
+    "strength"      : 3,
+    "health"        : 2,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "shockwave",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_commissar",
+    "name"          : "Комиссар",
+    "personalityTag": "rl_commissar",
+    "tags"          : ["razlom", "ideologue"],
+    "cost"          : 5,
+    "strength"      : 3,
+    "health"        : 5,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "terror_aura",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_champion",
+    "name"          : "Полевой командир",
+    "personalityTag": "rl_champion",
+    "tags"          : ["razlom", "assault"],
+    "cost"          : 5,
+    "strength"      : 4,
+    "health"        : 4,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"         : "survival_instinct",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_killer",
+    "name"          : "Ликвидатор",
+    "personalityTag": "rl_killer",
+    "tags"          : ["razlom", "assault"],
+    "cost"          : 7,
+    "strength"      : 4,
+    "health"        : 4,
+    "rarity"        : "rare",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"            : "rl_butcher",
+    "name"          : "Бородач",
+    "personalityTag": "rl_butcher",
+    "tags"          : ["razlom", "legend"],
+    "cost"          : 6,
+    "strength"      : 4,
+    "health"        : 7,
+    "rarity"        : "legendary",
+    "abilities"     : ["slow"],
+    "triggers"      : [
+      {
+        "id"     : "butcher_call",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id"     : "bloodlust",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "rl_hollow_voice",
+    "name"          : "Пустой Голос",
+    "personalityTag": "rl_hollow_voice",
+    "tags"          : ["razlom", "legend"],
+    "cost"          : 6,
+    "strength"      : 5,
+    "health"        : 8,
+    "rarity"        : "legendary",
+    "abilities"     : ["slow"],
+    "triggers"      : [
+      {
+        "id"     : "interrogation",
+        "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DRAW", "count": 3, "who": "SELF"} ]
+      },
+      {
+        "id"     : "terror_wave",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_CARDS_ON_BOARD"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "tk_looter",
+    "name"          : "Мародёр",
+    "personalityTag": "tk_looter",
+    "tags"          : ["token", "militant"],
+    "cost"          : 0,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : ["slow"],
+    "isToken"       : true
+  },
+  {
+    "id"            : "eh_spotter",
+    "name"          : "Наводчик",
+    "personalityTag": "eh_spotter",
+    "tags"          : ["echo", "sniper"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge", "scout"]
+  },
+  {
+    "id"            : "eh_agent",
+    "name"          : "Агент",
+    "personalityTag": "eh_agent",
+    "tags"          : ["echo", "intel"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : []
+  },
+  {
+    "id"            : "eh_operator",
+    "name"          : "Оперативник",
+    "personalityTag": "eh_operator",
+    "tags"          : ["echo", "intel"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "intel_report",
+        "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_analyst",
+    "name"          : "Аналитик",
+    "personalityTag": "eh_analyst",
+    "tags"          : ["echo", "intel"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 3,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "data_analysis",
+        "trigger": "ON_ENTER",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_sharpshooter",
+    "name"          : "Снайпер",
+    "personalityTag": "eh_sharpshooter",
+    "tags"          : ["echo", "sniper"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "focused_shot",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 1, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_infiltrator",
+    "name"          : "Инфильтратор",
+    "personalityTag": "eh_infiltrator",
+    "tags"          : ["echo", "assault"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 2,
+    "rarity"        : "uncommon",
+    "abilities"     : ["charge"],
+    "triggers"      : [
+      {
+        "id"     : "plant_sleeper",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"       : "SUMMON",
+            "defId"      : "tk_sleeper",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"                : "eh_hacker",
+    "name"              : "Хакер",
+    "personalityTag"    : "eh_hacker",
+    "tags"              : ["echo", "saboteur"],
+    "cost"              : 2,
+    "strength"          : 2,
+    "health"            : 2,
+    "rarity"            : "uncommon",
+    "abilities"         : [],
+    "activatedAbilities": [
+      {
+        "id"     : "system_crash",
+        "cost"   : 1,
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"                : "eh_drone_operator",
+    "name"              : "Оператор дрона",
+    "personalityTag"    : "eh_drone_operator",
+    "tags"              : ["echo", "sniper"],
+    "cost"              : 3,
+    "strength"          : 2,
+    "health"            : 3,
+    "rarity"            : "uncommon",
+    "abilities"         : [],
+    "activatedAbilities": [
+      {
+        "id"     : "drone_strike",
+        "cost"   : 1,
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_courier",
+    "name"          : "Связной",
+    "personalityTag": "eh_courier",
+    "tags"          : ["echo", "intel"],
+    "cost"          : 3,
+    "strength"      : 2,
+    "health"        : 3,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"       : "intel_sweep",
+        "trigger"  : "ON_ENTER",
+        "condition": {
+          "kind" : "CELLS",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 3
+        },
+        "effects"  : [ {"kind": "DRAW", "count": 2, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_marksman",
+    "name"          : "Меткий стрелок",
+    "personalityTag": "eh_marksman",
+    "tags"          : ["echo", "sniper"],
+    "cost"          : 3,
+    "strength"      : 3,
+    "health"        : 2,
+    "rarity"        : "uncommon",
+    "abilities"     : ["breakthrough", "scout"]
+  },
+  {
+    "id"                : "eh_saboteur",
+    "name"              : "Диверсант",
+    "personalityTag"    : "eh_saboteur",
+    "tags"              : ["echo", "saboteur"],
+    "cost"              : 3,
+    "strength"          : 3,
+    "health"            : 4,
+    "rarity"            : "uncommon",
+    "abilities"         : [],
+    "activatedAbilities": [
+      {
+        "id"     : "deadly_strike",
+        "cost"   : 1,
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 3, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_medic",
+    "name"          : "Военврач",
+    "personalityTag": "eh_medic",
+    "tags"          : ["echo", "medical"],
+    "cost"          : 3,
+    "strength"      : 3,
+    "health"        : 3,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "field_surgery",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_oracle",
+    "name"          : "Штабной аналитик",
+    "personalityTag": "eh_oracle",
+    "tags"          : ["echo", "intel"],
+    "cost"          : 4,
+    "strength"      : 2,
+    "health"        : 4,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "foresight",
+        "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"                : "eh_psi_op",
+    "name"              : "Психолог",
+    "personalityTag"    : "eh_psi_op",
+    "tags"              : ["echo", "saboteur"],
+    "cost"              : 3,
+    "strength"          : 2,
+    "health"            : 2,
+    "rarity"            : "uncommon",
+    "abilities"         : [],
+    "activatedAbilities": [
+      {
+        "id"     : "demoralize",
+        "cost"   : 1,
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_quartermaster",
+    "name"          : "Вербовщик",
+    "personalityTag": "eh_quartermaster",
+    "tags"          : ["echo", "intel"],
+    "cost"          : 3,
+    "strength"      : 2,
+    "health"        : 3,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "recall",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind"       : "RETURN_FROM_DISCARD",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "HAND"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_ghost",
+    "name"          : "Спектр",
+    "personalityTag": "eh_ghost",
+    "tags"          : ["echo", "assault"],
+    "cost"          : 5,
+    "strength"      : 3,
+    "health"        : 3,
+    "rarity"        : "rare",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"                : "eh_pathfinder",
+    "name"              : "Следопыт",
+    "personalityTag"    : "eh_pathfinder",
+    "tags"              : ["echo", "legend"],
+    "cost"              : 4,
+    "strength"          : 3,
+    "health"            : 3,
+    "rarity"            : "legendary",
+    "abilities"         : ["charge", "scout"],
+    "triggers"          : [
+      {
+        "id"     : "opening_shot",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id"     : "called_shot",
+        "cost"   : 1,
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 1, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_widowmaker",
+    "name"          : "Чёрная Вуаль",
+    "personalityTag": "eh_widowmaker",
+    "tags"          : ["echo", "legend"],
+    "cost"          : 5,
+    "strength"      : 3,
+    "health"        : 3,
+    "rarity"        : "legendary",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "last_stand",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"},
+          {
+            "kind" : "SUMMON",
+            "defId": "tk_attack_drone",
+            "count": 2,
+            "who"  : "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "eh_blackout",
+    "name"          : "Блэкаут",
+    "personalityTag": "eh_blackout",
+    "tags"          : ["echo", "legend"],
+    "cost"          : 4,
+    "strength"      : 3,
+    "health"        : 3,
+    "rarity"        : "legendary",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "system_shutdown",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "tk_sleeper",
+    "name"          : "Спящий агент",
+    "personalityTag": "tk_sleeper",
+    "tags"          : ["token"],
+    "cost"          : 0,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["slow"],
+    "isToken"       : true
+  },
+  {
+    "id"            : "tk_attack_drone",
+    "name"          : "Ударный дрон",
+    "personalityTag": "tk_attack_drone",
+    "tags"          : ["token"],
+    "cost"          : 0,
+    "strength"      : 2,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge", "scout"],
+    "isToken"       : true
+  },
+  {
+    "id"            : "sk_conscript",
+    "name"          : "Мобилизованный",
+    "personalityTag": "sk_conscript",
+    "tags"          : ["sky", "infantry"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : []
+  },
+  {
+    "id"            : "sk_runner",
+    "name"          : "Посыльный",
+    "personalityTag": "sk_runner",
+    "tags"          : ["sky", "infantry"],
+    "cost"          : 1,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge"]
+  },
+  {
+    "id"            : "sk_rifleman",
+    "name"          : "Окопник",
+    "personalityTag": "sk_rifleman",
+    "tags"          : ["sky", "infantry"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 5,
+    "rarity"        : "common",
+    "abilities"     : ["taunt"]
+  },
+  {
+    "id"            : "sk_medic",
+    "name"          : "Медик",
+    "personalityTag": "sk_medic",
+    "tags"          : ["sky", "medical"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 3,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "triage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_chaplain",
+    "name"          : "Капеллан",
+    "personalityTag": "sk_chaplain",
+    "tags"          : ["sky", "medical"],
+    "cost"          : 2,
+    "strength"      : 2,
+    "health"        : 3,
+    "rarity"        : "uncommon",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "field_prayer",
+        "trigger": "ON_TURN_END",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_observer",
+    "name"          : "Корректировщик",
+    "personalityTag": "sk_observer",
+    "tags"          : ["sky", "sniper"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"         : "report_in",
+        "trigger"    : "ON_ENEMY_ATTACK",
+        "oncePerTurn": true,
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_engineer",
+    "name"          : "Инженер",
+    "personalityTag": "sk_engineer",
+    "tags"          : ["sky", "engineer"],
+    "cost"          : 2,
+    "strength"      : 1,
+    "health"        : 3,
+    "rarity"        : "common",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "dig_in",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {"kind": "BUFF", "strength": 0, "health": 2, "target": "SELF"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_barrage",
+    "name"          : "Огневой налёт",
+    "personalityTag": "sk_barrage",
+    "tags"          : ["sky", "artillery"],
+    "cost"          : 3,
+    "strength"      : 1,
+    "health"        : 3,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "barrage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_vanguard",
+    "name"          : "Авангард",
+    "personalityTag": "sk_vanguard",
+    "tags"          : ["sky", "infantry"],
+    "cost"          : 3,
+    "strength"      : 3,
+    "health"        : 4,
+    "rarity"        : "uncommon",
+    "abilities"     : ["vanguard"]
+  },
+  {
+    "id"                : "sk_sniper",
+    "name"              : "Снайпер",
+    "personalityTag"    : "sk_sniper",
+    "tags"              : ["sky", "specialist"],
+    "cost"              : 4,
+    "strength"          : 3,
+    "health"            : 5,
+    "rarity"            : "rare",
+    "abilities"         : [],
+    "activatedAbilities": [
+      {
+        "id"     : "precision_shot",
+        "cost"   : 2,
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_heavy_artillery",
+    "name"          : "Тяжёлая артиллерия",
+    "personalityTag": "sk_heavy_artillery",
+    "tags"          : ["sky", "artillery"],
+    "cost"          : 4,
+    "strength"      : 2,
+    "health"        : 4,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "bombardment",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_apc",
+    "name"          : "БТР",
+    "personalityTag": "sk_apc",
+    "tags"          : ["sky", "armored"],
+    "cost"          : 4,
+    "strength"      : 3,
+    "health"        : 5,
+    "rarity"        : "uncommon",
+    "abilities"     : ["scout"]
+  },
+  {
+    "id"            : "sk_veteran",
+    "name"          : "Ветеран",
+    "personalityTag": "sk_veteran",
+    "tags"          : ["sky", "infantry"],
+    "cost"          : 5,
+    "strength"      : 4,
+    "health"        : 5,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"         : "no_man_left",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_marshall",
+    "name"          : "Маршал",
+    "personalityTag": "sk_marshall",
+    "tags"          : ["sky", "infantry"],
+    "cost"          : 6,
+    "strength"      : 4,
+    "health"        : 6,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "tactical_command",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_advisor",
+    "name"          : "Аналитик",
+    "personalityTag": "sk_advisor",
+    "tags"          : ["sky", "intel"],
+    "cost"          : 4,
+    "strength"      : 2,
+    "health"        : 4,
+    "rarity"        : "rare",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "intelligence",
+        "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_sanctuary",
+    "name"          : "Лейтенант Энди Рейн",
+    "personalityTag": "sk_sanctuary",
+    "tags"          : ["sky", "legend"],
+    "cost"          : 4,
+    "strength"      : 2,
+    "health"        : 5,
+    "rarity"        : "legendary",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "renewing_fire",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      },
+      {
+        "id"     : "renew",
+        "trigger": "ON_ENTER",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 5, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_lifeline",
+    "name"          : "Военный госпиталь",
+    "personalityTag": "sk_lifeline",
+    "tags"          : ["sky", "legend"],
+    "cost"          : 6,
+    "strength"      : 4,
+    "health"        : 8,
+    "rarity"        : "legendary",
+    "abilities"     : ["slow"],
+    "triggers"      : [
+      {
+        "id"     : "field_hospital",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"},
+          {"kind": "HEAL_GLORY", "amount": 8, "who": "SELF"}
+        ]
+      },
+      {
+        "id"     : "steady_hands",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_BOARD"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_supercell",
+    "name"          : "Суперъячейка",
+    "personalityTag": "sk_supercell",
+    "tags"          : ["sky", "legend"],
+    "cost"          : 8,
+    "strength"      : 7,
+    "health"        : 7,
+    "rarity"        : "legendary",
+    "abilities"     : ["slow"],
+    "triggers"      : [
+      {
+        "id"     : "carpet_bombing",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+        ]
+      },
+      {
+        "id"     : "collateral_damage",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id"            : "sk_chronos",
+    "name"          : "«Хронос»",
+    "personalityTag": "sk_chronos",
+    "tags"          : ["sky", "legend"],
+    "cost"          : 5,
+    "strength"      : 3,
+    "health"        : 6,
+    "rarity"        : "legendary",
+    "abilities"     : [],
+    "triggers"      : [
+      {
+        "id"     : "signal_boost",
+        "trigger": "ON_ENTER",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 3, "who": "SELF"} ]
+      },
+      {
+        "id"     : "steady_flow",
+        "trigger": "ON_TURN_START",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"} ]
+      }
+    ]
+  },
+  {
+    "id"            : "tk_airstrike",
+    "name"          : "Авиаудар",
+    "personalityTag": "tk_airstrike",
+    "tags"          : ["token"],
+    "cost"          : 0,
+    "strength"      : 3,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["charge", "temporary", "breakthrough"],
+    "isToken"       : true,
+    "tempDuration"  : 1
+  },
+  {
+    "id"            : "tk_decoy",
+    "name"          : "Ложная цель",
+    "personalityTag": "tk_decoy",
+    "tags"          : ["token"],
+    "cost"          : 0,
+    "strength"      : 1,
+    "health"        : 1,
+    "rarity"        : "common",
+    "abilities"     : ["taunt", "temporary"],
+    "isToken"       : true,
+    "tempDuration"  : 2
+  },
+  {
+    "id"            : "tk_paratrooper",
+    "name"          : "Десантник",
+    "personalityTag": "tk_paratrooper",
+    "tags"          : ["token"],
+    "cost"          : 0,
+    "strength"      : 2,
+    "health"        : 2,
+    "rarity"        : "common",
+    "abilities"     : ["charge", "temporary"],
+    "isToken"       : true,
+    "tempDuration"  : 1
+  }
+]

@@ -1,0 +1,86 @@
+/* @theme
+   name: Candy Floss
+   description: Ярмарка на набережной. Клубничная вата с мятной карамелью.
+   light: true
+*/
+
+:root {
+  --clr-background: #FFF0F5;
+  --clr-element-bg: #FFFFFF;
+  --clr-element-muted: #FFE4E1;
+  --clr-border: #FFB6C1;
+  --clr-title: #FF1493;
+  --clr-subtitle: #FF69B4;
+  --clr-accent: #3EE8A0;
+  --clr-text: #4B0082;
+
+  --clr-shadow: rgba(255, 20, 147, 0.15);
+  --clr-shadow-focus: rgba(62, 232, 160, 0.3);
+
+  --clr-bg-input: #F8E8EE;
+  --clr-bg-muted: #FFE4E1;
+  --clr-bg-subtle: #FFEDF2;
+  --clr-surface: #FFF5F8;
+  --clr-surface-hover: #FFE8EF;
+  --clr-surface-active: #FFDAE6;
+  --clr-border-strong: #F0A8B8;
+  --clr-border-hover: #E08898;
+  --clr-elevated: var(--clr-element-bg);
+
+  --clr-text-soft: #5C2078;
+  --clr-text-muted: #7A4098;
+  --clr-text-dim: #9870B0;
+  --clr-text-faint: #B898C8;
+
+  --clr-accent-dark: #1F7A50;
+  --clr-accent-mid: #2AB070;
+  --clr-accent-hover: #60EEB4;
+  --clr-accent-light: #90F2CC;
+  --clr-accent-soft: #BFF6E0;
+  --clr-accent-bg: #DEF8EC;
+  --clr-accent-bg-2: #C6F0DC;
+
+  --clr-danger: #E8446E;
+  --clr-danger-dark: #7A1F38;
+  --clr-danger-mid: #B02E50;
+  --clr-danger-hover: #F06080;
+  --clr-danger-light: #F898B0;
+  --clr-danger-light-2: #F58EA8;
+  --clr-danger-light-3: #FBB8C8;
+  --clr-danger-border: #D03860;
+  --clr-danger-bg: #FCE0E8;
+  --clr-danger-bg-2: #F8C8D8;
+
+  --clr-warning: #FFA830;
+  --clr-warning-hover: #FFB848;
+  --clr-warning-border: #C08830;
+  --clr-warning-mid: #B88020;
+  --clr-warning-hover-2: #906818;
+  --clr-warning-bg: #FFF4DC;
+  --clr-warning-bg-2: #FFE8B8;
+  --clr-warning-bg-3: #FFDCA0;
+
+  --clr-success: #2AB070;
+
+  --clr-epic: #A855F7;
+  --clr-epic-light: #C08AF8;
+  --clr-epic-soft: #DDB8FC;
+  --clr-epic-bg: #F4E8FF;
+  --clr-epic-bg-2: #EAD5FF;
+  --clr-epic-bg-3: #DDB8FC;
+  --clr-epic-bg-4: #F4DAEC;
+  --clr-epic-border: #C8A0E8;
+  --clr-epic-border-2: #B088D8;
+  --clr-epic-border-3: #C088B8;
+
+  --clr-rarity-common: #C8B8D8;
+  --clr-rarity-uncommon: #2AB070;
+  --clr-rarity-rare: #48A8F0;
+  --clr-rarity-epic: #A855F7;
+  --clr-rarity-legendary: #FFA830;
+
+  --clr-tooltip-bg: #FFF5F8;
+
+  --clr-p1: #3EE8A0;
+  --clr-p2: #E8446E;
+}

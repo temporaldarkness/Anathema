@@ -25,7 +25,8 @@
 		User,
 		ChevronDown,
 		Eye,
-		Radio
+		Radio,
+		Gamepad2
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -98,7 +99,8 @@
 		{
 			label: 'Развлечения',
 			items: [
-				{ href: '/radio', label: 'Радио', icon: Radio }
+				{ href: '/radio', label: 'Радио', icon: Radio },
+				{ href: '/games', label: 'Игры', icon: Gamepad2 }
 			]
 		}
 	];

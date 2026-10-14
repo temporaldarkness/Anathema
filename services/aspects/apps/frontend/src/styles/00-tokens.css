@@ -1,0 +1,99 @@
+/* ═══════════════════════════════════════════════════════════════
+   Токены дизайна. Базовая тема = текущая тёмная палитра.
+   Тема может переопределить любую переменную. Не заданные
+   переменные наследуют значения из :root.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ─── Базовые (обязательные для кастомных тем) ─── */
+  --clr-background: #0a0c10;
+  --clr-element-bg: #14171c;
+  --clr-element-muted: #101317;
+  --clr-border: #22262e;
+  --clr-title: #e6e6e6;
+  --clr-subtitle: #b0b4bb;
+  --clr-accent: #3b82f6;
+  --clr-text: #e6e6e6;
+  --clr-shadow: rgba(0, 0, 0, 0.5);
+  --clr-shadow-focus: rgba(59, 130, 246, 0.3);
+
+  /* ─── Поверхности ─── */
+  --clr-bg-input: #0f1115;
+  --clr-bg-muted: #101317;
+  --clr-bg-subtle: #171b21;
+  --clr-surface: #1a1e25;
+  --clr-surface-hover: #1c2027;
+  --clr-surface-active: #232831;
+  --clr-border-strong: #2c313a;
+  --clr-border-hover: #3a3f47;
+  /* Поверхность «второго уровня» — слоты внутри доски,
+   карты в руке, мини-карточки. По умолчанию = --clr-surface,
+   но тема может задать его более плотным/непрозрачным. */
+  --clr-elevated: var(--clr-surface);
+
+  /* ─── Текст ─── */
+  --clr-text-soft: #b0b4bb;
+  --clr-text-muted: #8a8f99;
+  --clr-text-dim: #6b7280;
+  --clr-text-faint: #4a4e55;
+
+  /* ─── Акцент (по умолчанию синий) ─── */
+  --clr-accent-dark: #1e3a5f;
+  --clr-accent-mid: #2d5a8c;
+  --clr-accent-hover: #264a78;
+  --clr-accent-light: #8ec5ff;
+  --clr-accent-soft: #cbe4ff;
+  --clr-accent-bg: #1e2a3a;
+  --clr-accent-bg-2: #1a2530;
+
+  /* ─── Danger (красный) ─── */
+  --clr-danger: #ef4444;
+  --clr-danger-dark: #5a1e28;
+  --clr-danger-mid: #8c2d3a;
+  --clr-danger-hover: #782630;
+  --clr-danger-light: #ff9b9b;
+  --clr-danger-light-2: #ff8b8b;
+  --clr-danger-light-3: #ffb3b3;
+  --clr-danger-border: #6b2c2c;
+  --clr-danger-bg: #2a1a1a;
+  --clr-danger-bg-2: #4a2020;
+
+  /* ─── Warning (жёлтый) ─── */
+  --clr-warning: #fbbf24;
+  --clr-warning-hover: #fcd34d;
+  --clr-warning-border: #6b542c;
+  --clr-warning-mid: #a07a2c;
+  --clr-warning-hover-2: #8a6c2c;
+  --clr-warning-bg: #2a2418;
+  --clr-warning-bg-2: #3a3222;
+  --clr-warning-bg-3: #4a3820;
+
+  /* ─── Success (зелёный) ─── */
+  --clr-success: #22c55e;
+
+  /* ─── Epic (фиолетовый) ─── */
+  --clr-epic: #a855f7;
+  --clr-epic-light: #a78bfa;
+  --clr-epic-soft: #c0a0ff;
+  --clr-epic-bg: #1a1526;
+  --clr-epic-bg-2: #2a1f3a;
+  --clr-epic-bg-3: #3a2c5a;
+  --clr-epic-bg-4: #3a2c2a;
+  --clr-epic-border: #3a2a5a;
+  --clr-epic-border-2: #4a3a6a;
+  --clr-epic-border-3: #6a4a4a;
+
+  /* ─── Rarity ─── */
+  --clr-rarity-common: #2c313a;
+  --clr-rarity-uncommon: #22c55e;
+  --clr-rarity-rare: #3b82f6;
+  --clr-rarity-epic: #a855f7;
+  --clr-rarity-legendary: #f59e0b;
+
+  /* ─── Прочее ─── */
+  --clr-tooltip-bg: #16191f;
+
+  /* ─── Игроки (производные) ─── */
+  --clr-p1: var(--clr-accent);
+  --clr-p2: var(--clr-danger);
+}

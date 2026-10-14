@@ -1,0 +1,86 @@
+/* @theme
+   name: Snow White
+   description: Первый снег в январе. Небесный акцент на холодной белизне.
+   light: true
+*/
+
+:root {
+  --clr-background: #F8FBFE;
+  --clr-element-bg: #FFFFFF;
+  --clr-element-muted: #EFF4F9;
+  --clr-border: #D3E0EA;
+  --clr-title: #2C3E50;
+  --clr-subtitle: #6C7A89;
+  --clr-accent: #29B6F6;
+  --clr-text: #34495E;
+
+  --clr-shadow: rgba(52, 152, 219, 0.1);
+  --clr-shadow-focus: rgba(52, 152, 219, 0.2);
+
+  --clr-bg-input: #E4ECF3;
+  --clr-bg-muted: #EFF4F9;
+  --clr-bg-subtle: #F2F6FA;
+  --clr-surface: #FBFDFE;
+  --clr-surface-hover: #F2F6FB;
+  --clr-surface-active: #E7EFF6;
+  --clr-border-strong: #B4C4D4;
+  --clr-border-hover: #96A8BC;
+  --clr-elevated: var(--clr-element-bg);
+
+  --clr-text-soft: #4A5E72;
+  --clr-text-muted: #657A8E;
+  --clr-text-dim: #8696A8;
+  --clr-text-faint: #A8B6C4;
+
+  --clr-accent-dark: #14567A;
+  --clr-accent-mid: #1E88B8;
+  --clr-accent-hover: #4DC8F8;
+  --clr-accent-light: #80D8FA;
+  --clr-accent-soft: #B3E8FC;
+  --clr-accent-bg: #DCF2FC;
+  --clr-accent-bg-2: #C8EAF8;
+
+  --clr-danger: #E53935;
+  --clr-danger-dark: #6A1A18;
+  --clr-danger-mid: #A82A28;
+  --clr-danger-hover: #EE5553;
+  --clr-danger-light: #F58080;
+  --clr-danger-light-2: #F47878;
+  --clr-danger-light-3: #F8A0A0;
+  --clr-danger-border: #C83028;
+  --clr-danger-bg: #FCE4E3;
+  --clr-danger-bg-2: #F8C8C6;
+
+  --clr-warning: #E0A830;
+  --clr-warning-hover: #F0B848;
+  --clr-warning-border: #B88830;
+  --clr-warning-mid: #A88838;
+  --clr-warning-hover-2: #8A6828;
+  --clr-warning-bg: #FBF2DC;
+  --clr-warning-bg-2: #F5E5BE;
+  --clr-warning-bg-3: #EFD8A0;
+
+  --clr-success: #2E9E5C;
+
+  --clr-epic: #7E57C2;
+  --clr-epic-light: #9E7CD4;
+  --clr-epic-soft: #C5B0E2;
+  --clr-epic-bg: #F0EBF8;
+  --clr-epic-bg-2: #E0D5EE;
+  --clr-epic-bg-3: #CFBDE2;
+  --clr-epic-bg-4: #EFD8E5;
+  --clr-epic-border: #B0A0D0;
+  --clr-epic-border-2: #9A80C0;
+  --clr-epic-border-3: #A888A8;
+
+  --clr-rarity-common: #B4C4D4;
+  --clr-rarity-uncommon: #2E9E5C;
+  --clr-rarity-rare: #29B6F6;
+  --clr-rarity-epic: #7E57C2;
+  --clr-rarity-legendary: #E0A830;
+
+  --clr-tooltip-bg: #EDF2F7;
+
+  --clr-p1: #29B6F6;
+  --clr-p2: #E53935;
+}

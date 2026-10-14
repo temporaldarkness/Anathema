@@ -1,0 +1,162 @@
+.tooltip-fixed {
+  pointer-events: none;
+}
+
+.tooltip {
+  position: relative;
+  background: var(--clr-tooltip-bg);
+  border: 1px solid var(--clr-border-strong);
+  border-radius: 8px;
+  padding: 14px 14px 12px;
+  min-width: 240px;
+  max-width: 320px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
+  font-size: 12px;
+  color: var(--clr-text);
+  overflow: hidden;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--rarity-color, var(--clr-border-strong));
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.tooltip-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--clr-text);
+  line-height: 1.2;
+}
+
+.tooltip-rarity {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--clr-text-dim);
+  white-space: nowrap;
+}
+
+.tooltip-stats {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid var(--clr-surface-active);
+  border-bottom: 1px solid var(--clr-surface-active);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--clr-text);
+}
+
+.tooltip-stat-cost { color: var(--clr-accent-light); }
+.tooltip-stat-str  { color: var(--clr-warning); }
+.tooltip-stat-hp   { color: var(--clr-success); }
+
+.tooltip-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--clr-epic-bg-3);
+  color: var(--clr-epic-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tooltip-badge-shield { background: var(--clr-accent-dark); color: var(--clr-accent-light); }
+.tooltip-badge-exh    { background: #3a2c2c; color: var(--clr-danger-light); }
+
+.tooltip-section {
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid var(--clr-surface-active);
+}
+
+.tooltip-section:first-of-type {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 8px;
+}
+
+.tooltip-section-title {
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--clr-text-dim);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.tooltip-keyword {
+  color: var(--clr-epic-light);
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 2px 0;
+}
+
+.tooltip-trigger { margin-bottom: 8px; }
+.tooltip-trigger:last-child { margin-bottom: 0; }
+
+.tooltip-trigger-label {
+  font-size: 11px;
+  color: var(--clr-accent-light);
+  font-weight: 600;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltip-tag {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--clr-text-muted);
+  background: var(--clr-surface-active);
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+
+.tooltip-effects {
+  padding-left: 8px;
+  color: var(--clr-text-soft);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.tooltip-personality {
+  display: flex;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--clr-text-dim);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--clr-surface-active);
+}
+
+.tooltip-personality-label { text-transform: uppercase; letter-spacing: 0.5px; }
+.tooltip-personality-value { color: var(--clr-epic-light); font-family: ui-monospace, monospace; }
+
+.tooltip-condition {
+  font-size: 10px;
+  color: var(--clr-warning);
+  font-style: italic;
+  margin: 2px 0 4px 6px;
+  padding-left: 6px;
+  border-left: 2px solid var(--clr-warning-border);
+}

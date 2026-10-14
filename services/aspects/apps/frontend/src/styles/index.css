@@ -1,0 +1,14 @@
+/* Порядок импортов = порядок каскада.
+   Не менять без причины: поздние файлы перекрывают ранние. */
+
+@import './00-tokens.css';
+@import './01-reset.css';
+@import './02-layout.css';
+@import './03-board.css';
+@import './04-panels.css';
+@import './05-log.css';
+@import './06-hand.css';
+@import './07-tooltip.css';
+@import './08-overlays.css';
+@import './09-pages.css';
+@import './10-v2-shell.css';

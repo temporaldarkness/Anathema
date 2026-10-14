@@ -1,0 +1,23 @@
+{
+  "name": "@aspects/engine",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "tsc -p tsconfig.json --watch",
+    "cli": "tsx scripts/cli.ts"
+  },
+  "dependencies": {
+    "@aspects/cards": "workspace:*",
+    "@aspects/shared": "workspace:*",
+    "immer": "^10.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3",
+    "tsx": "^4.19.1"
+  }
+}

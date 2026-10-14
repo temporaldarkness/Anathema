@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+	"types": ["vite/client"],
+    "paths": {
+      "@aspects/engine": ["../../packages/engine/src/index.ts"],
+      "@aspects/cards":  ["../../packages/cards/src/index.ts"],
+      "@aspects/shared": ["../../packages/shared/src/index.ts"],
+      "@aspects/bot":    ["../../packages/bot/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}

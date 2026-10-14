@@ -1,0 +1,19 @@
+{
+  "name": "@aspects/cards",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-data.mjs",
+    "dev": "tsc -p tsconfig.json --watch",
+	"validate": "tsx scripts/validate.mts",
+	"validate:only": "tsx scripts/validate.mts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "tsx": "^4.19.1"
+  }
+}

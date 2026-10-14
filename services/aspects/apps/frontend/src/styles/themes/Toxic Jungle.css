@@ -1,0 +1,86 @@
+/* @theme
+   name: Toxic Jungle
+   description: Мутировавшая флора. Кислотный лайм и розовый цветок в отравленной чаще.
+   light: false
+*/
+
+:root {
+  --clr-background: #1A1A1A;
+  --clr-element-bg: #262626;
+  --clr-element-muted: #333333;
+  --clr-border: #4D4D4D;
+  --clr-title: #D4FF99;
+  --clr-subtitle: #8FB359;
+  --clr-accent: #FF467E;
+  --clr-text: #E6E6E6;
+
+  --clr-shadow: rgba(193, 255, 114, 0.15);
+  --clr-shadow-focus: rgba(255, 70, 126, 0.3);
+
+  --clr-bg-input: #101010;
+  --clr-bg-muted: #333333;
+  --clr-bg-subtle: #202020;
+  --clr-surface: #2C2C2C;
+  --clr-surface-hover: #333333;
+  --clr-surface-active: #3D3D3D;
+  --clr-border-strong: #5E5E5E;
+  --clr-border-hover: #737373;
+
+  --clr-text-soft: #C8C8C8;
+  --clr-text-muted: #A0A0A0;
+  --clr-text-dim: #7A7A7A;
+  --clr-text-faint: #5A5A5A;
+
+  --clr-accent-dark: #7A1E3C;
+  --clr-accent-mid: #B02E58;
+  --clr-accent-hover: #FF6694;
+  --clr-accent-light: #FF90B0;
+  --clr-accent-light-2: #FFA0BC;
+  --clr-accent-soft: #FFB8CC;
+  --clr-accent-bg: #3A1020;
+  --clr-accent-bg-2: #2A0A18;
+
+  --clr-danger: #E83030;
+  --clr-danger-dark: #6A1818;
+  --clr-danger-mid: #A82828;
+  --clr-danger-hover: #EE5050;
+  --clr-danger-light: #F58080;
+  --clr-danger-light-2: #F47878;
+  --clr-danger-light-3: #F8A8A8;
+  --clr-danger-border: #8A2020;
+  --clr-danger-bg: #2A1010;
+  --clr-danger-bg-2: #4A1818;
+
+  --clr-warning: #D4FF99;
+  --clr-warning-hover: #E0FFB3;
+  --clr-warning-border: #6A8A40;
+  --clr-warning-mid: #A0C070;
+  --clr-warning-hover-2: #B8D888;
+  --clr-warning-bg: #2A3018;
+  --clr-warning-bg-2: #3A4020;
+  --clr-warning-bg-3: #4A5030;
+
+  --clr-success: #8FB359;
+
+  --clr-epic: #A855F7;
+  --clr-epic-light: #C08AF8;
+  --clr-epic-soft: #DDB8FC;
+  --clr-epic-bg: #1A1530;
+  --clr-epic-bg-2: #281848;
+  --clr-epic-bg-3: #382860;
+  --clr-epic-bg-4: #2A2030;
+  --clr-epic-border: #40306A;
+  --clr-epic-border-2: #5840A0;
+  --clr-epic-border-3: #684890;
+
+  --clr-rarity-common: #4D4D4D;
+  --clr-rarity-uncommon: #8FB359;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #A855F7;
+  --clr-rarity-legendary: #D4FF99;
+
+  --clr-tooltip-bg: #202020;
+
+  --clr-p1: #FF467E;
+  --clr-p2: #A0E050;
+}

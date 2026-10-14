@@ -1,0 +1,147 @@
+import type { WritableDraft } from 'immer';
+import type { GameState } from '../types/state';
+import type { ResolutionContext } from '../types/resolution';
+import type { CardInstanceId, PlayerId } from '../types/ids';
+import { opponentOf } from '../types/ids';
+import { promoteFromReserve } from '../state/mutations';
+import { queuePhaseTriggers } from '../abilities/triggerEngine';
+import { resolveEffect } from '../abilities/effectResolver';
+import { advancePhaseInternal } from './advancePhase';
+import { processTemporaryCards } from './advancePhase';
+import { controlledCells } from '../state/helpers';
+
+export interface ResolveChoiceParams {
+  playerId: PlayerId;
+  cardIds: CardInstanceId[];
+}
+
+export function resolveChoiceInternal(
+  draft: WritableDraft<GameState>,
+  params: ResolveChoiceParams,
+  ctx: ResolutionContext,
+): { ok: true } | { ok: false; reason: string } {
+  const choice = draft.pendingChoice;
+  if (!choice) return { ok: false, reason: 'no_pending_choice' };
+  if (choice.playerId !== params.playerId) return { ok: false, reason: 'not_your_choice' };
+  
+  if (
+    choice.kind === 'EFFECT_TARGET_SELECTION' &&
+    params.cardIds.length === 0
+  ) {
+    draft.pendingChoice = null;
+    ctx.events.push({
+      type: 'CHOICE_RESOLVED',
+      playerId: choice.playerId,
+      kind: 'EFFECT_TARGET_SELECTION',
+    });
+    return { ok: true };
+  }
+  
+  if (params.cardIds.length !== choice.count) return { ok: false, reason: 'wrong_card_count' };
+
+  const seen = new Set<CardInstanceId>();
+  for (const id of params.cardIds) {
+    if (seen.has(id)) return { ok: false, reason: 'duplicate_cards' };
+    seen.add(id);
+    if (!choice.eligibleCardIds.includes(id)) return { ok: false, reason: 'card_not_eligible' };
+  }
+
+  switch (choice.kind) {
+    case 'END_TURN_DISCARD': {
+      const player = choice.playerId;
+      for (const id of params.cardIds) {
+        const hand = draft.players[player].hand;
+        const idx = hand.indexOf(id);
+        if (idx < 0) continue;
+        hand.splice(idx, 1);
+        draft.players[player].discard.push(id);
+        const card = draft.cards[id];
+        if (card) {
+          card.zone = 'DISCARD';
+          card.column = null;
+        }
+        ctx.events.push({ type: 'CARD_DISCARDED', playerId: player, cardId: id });
+      }
+      draft.pendingChoice = null;
+      ctx.events.push({ type: 'CHOICE_RESOLVED', playerId: player, kind: 'END_TURN_DISCARD' });
+
+      if (draft.players[player].glory < 10) {
+        for (let i = 0; i < 5; i++) {
+          const col = draft.board[i];
+          const reserveId = player === 'p1' ? col.p1Reserve : col.p2Reserve;
+          if (reserveId) promoteFromReserve(draft, reserveId, ctx);
+        }
+      }
+	  
+	  processTemporaryCards(draft, ctx);
+
+      draft.activePlayer = opponentOf(draft.activePlayer);
+      draft.turnNumber += 1;
+      draft.players[draft.activePlayer].replacementUsedThisTurn = false;
+      draft.players[draft.activePlayer].cardsPlayedThisTurn = 0;
+	  const newActive = draft.activePlayer;
+      for (const id of Object.keys(draft.cards) as CardInstanceId[]) {
+        const card = draft.cards[id];
+        if (card.ownerId !== newActive) continue;
+        if (card.usedAbilitiesThisTurn.length > 0) {
+          card.usedAbilitiesThisTurn = [];
+        }
+		if (card.usedTriggerIdsThisTurn.length > 0) {
+          card.usedTriggerIdsThisTurn = [];
+        }
+      }
+      draft.phase = 'RESTORE';
+      ctx.events.push({
+        type: 'TURN_STARTED',
+        playerId: draft.activePlayer,
+        turnNumber: draft.turnNumber,
+      });
+      ctx.events.push({
+        type: 'PHASE_CHANGED',
+        playerId: draft.activePlayer,
+        phase: 'RESTORE',
+      });
+      queuePhaseTriggers(draft, 'ON_TURN_START', draft.activePlayer, ctx);
+
+      const p = draft.activePlayer;
+      if (controlledCells(draft as GameState, p) === 5) {
+        if (draft.altVictoryPending[p]) {
+          draft.winner = p;
+          draft.winnerReason = 'alt_victory';
+          ctx.events.push({ type: 'GAME_OVER', winner: p, reason: 'alt_victory' });
+        } else {
+          draft.altVictoryPending[p] = true;
+        }
+      } else {
+        draft.altVictoryPending[p] = false;
+      }
+
+      advancePhaseInternal(draft, ctx);
+      return { ok: true };
+    }
+
+    case 'EFFECT_TARGET_SELECTION': {
+      const cont = choice.continuation;
+      draft.pendingChoice = null;
+      ctx.events.push({
+        type: 'CHOICE_RESOLVED',
+        playerId: choice.playerId,
+        kind: 'EFFECT_TARGET_SELECTION',
+      });
+
+      for (const effect of cont.then) {
+        if (!draft.cards[cont.sourceId] && effect.kind !== 'DAMAGE_GLORY' && effect.kind !== 'HEAL_GLORY') {
+        }
+        resolveEffect(
+          draft,
+          effect,
+          { sourceId: cont.sourceId, ownerId: cont.ownerId },
+          ctx,
+          params.cardIds,
+        );
+        if (draft.pendingChoice) break;
+      }
+      return { ok: true };
+    }
+  }
+}

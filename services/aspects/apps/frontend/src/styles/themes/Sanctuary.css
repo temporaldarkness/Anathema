@@ -1,0 +1,86 @@
+/* @theme
+   name: Sanctuary
+   description: Убежище в горах. Золото свечей в прозрачных слоях над градиентом.
+   light: false
+*/
+
+:root {
+  --clr-background: #1A1A1A;
+  --clr-element-bg: linear-gradient(145deg, #2E2E2E, #404040);
+  --clr-element-muted: #333333;
+  --clr-border: #4D4D4D;
+  --clr-title: #F0F0F0;
+  --clr-subtitle: #909090;
+  --clr-accent: #FFD700;
+  --clr-text: #E0E0E0;
+
+  --clr-shadow: rgba(255, 215, 0, 0.15);
+  --clr-shadow-focus: rgba(255, 215, 0, 0.3);
+
+  --clr-bg-input: rgba(0, 0, 0, 0.25);
+  --clr-bg-muted: rgba(255, 255, 255, 0.1);
+  --clr-bg-subtle: rgba(255, 255, 255, 0.05);
+  --clr-surface: rgba(255, 255, 255, 0.1);
+  --clr-surface-hover: rgba(255, 255, 255, 0.14);
+  --clr-surface-active: rgba(255, 255, 255, 0.18);
+  --clr-border-strong: rgba(255, 255, 255, 0.2);
+  --clr-border-hover: rgba(255, 255, 255, 0.3);
+  --clr-elevated: rgba(255, 255, 255, 0.14);
+
+  --clr-text-soft: #C8C8C8;
+  --clr-text-muted: #A0A0A0;
+  --clr-text-dim: #7A7A7A;
+  --clr-text-faint: #5A5A5A;
+
+  --clr-accent-dark: #7A6600;
+  --clr-accent-mid: #B09400;
+  --clr-accent-hover: #FFE44D;
+  --clr-accent-light: #FFEC80;
+  --clr-accent-soft: #FFF4B3;
+  --clr-accent-bg: rgba(255, 215, 0, 0.1);
+  --clr-accent-bg-2: rgba(255, 215, 0, 0.06);
+
+  --clr-danger: #E84040;
+  --clr-danger-dark: #6A1818;
+  --clr-danger-mid: #A82828;
+  --clr-danger-hover: #EE5A5A;
+  --clr-danger-light: #F58888;
+  --clr-danger-light-2: #F48080;
+  --clr-danger-light-3: #F8A8A8;
+  --clr-danger-border: rgba(232, 64, 64, 0.5);
+  --clr-danger-bg: rgba(232, 64, 64, 0.12);
+  --clr-danger-bg-2: rgba(232, 64, 64, 0.2);
+
+  --clr-warning: #FFA830;
+  --clr-warning-hover: #FFB84D;
+  --clr-warning-border: rgba(255, 168, 48, 0.4);
+  --clr-warning-mid: #C08020;
+  --clr-warning-hover-2: #E09828;
+  --clr-warning-bg: rgba(255, 168, 48, 0.1);
+  --clr-warning-bg-2: rgba(255, 168, 48, 0.16);
+  --clr-warning-bg-3: rgba(255, 168, 48, 0.22);
+
+  --clr-success: #4ADE80;
+
+  --clr-epic: #A855F7;
+  --clr-epic-light: #C08AF8;
+  --clr-epic-soft: #DDB8FC;
+  --clr-epic-bg: rgba(168, 85, 247, 0.12);
+  --clr-epic-bg-2: rgba(168, 85, 247, 0.18);
+  --clr-epic-bg-3: rgba(168, 85, 247, 0.25);
+  --clr-epic-bg-4: rgba(168, 85, 247, 0.15);
+  --clr-epic-border: rgba(168, 85, 247, 0.4);
+  --clr-epic-border-2: rgba(168, 85, 247, 0.55);
+  --clr-epic-border-3: rgba(168, 85, 247, 0.7);
+
+  --clr-rarity-common: rgba(255, 255, 255, 0.25);
+  --clr-rarity-uncommon: #4ADE80;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #A855F7;
+  --clr-rarity-legendary: #E8B040;
+
+  --clr-tooltip-bg: rgba(24, 24, 24, 0.95);
+
+  --clr-p1: #FFD700;
+  --clr-p2: #E84040;
+}

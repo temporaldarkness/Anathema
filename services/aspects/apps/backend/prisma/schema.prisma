@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String   @id
+  username       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  decks          Deck[]
+  matchesAsP1    Match[]  @relation("P1")
+  matchesAsP2    Match[]  @relation("P2")
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  ownerId     String
+  name        String
+  description String   @default("")
+  packId      String   @default("azeroth")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  cards       DeckCard[]
+
+  @@index([ownerId])
+}
+
+model DeckCard {
+  deckId     String
+  cardId     String
+  count      Int      @default(1)
+
+  deck       Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@id([deckId, cardId])
+}
+
+model Match {
+  id           String    @id @default(cuid())
+  player1Id    String?
+  player2Id    String?
+  player1Name  String
+  player2Name  String
+  winnerId     String?
+  winnerReason String?
+  packId       String    @default("azeroth")
+  seed         String
+  turnNumber   Int       @default(0)
+  durationMs   Int       @default(0)
+  p1BotName    String?
+  p2BotName    String?
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+
+  player1      User?          @relation("P1", fields: [player1Id], references: [id])
+  player2      User?          @relation("P2", fields: [player2Id], references: [id])
+  decks        MatchDeck[]
+  commands     MatchCommand[]
+
+  @@index([player1Id])
+  @@index([player2Id])
+  @@index([startedAt])
+}
+
+model MatchDeck {
+  matchId String
+  player  Int
+  cardIds String[]
+
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@id([matchId, player])
+}
+
+model MatchCommand {
+  id        BigInt   @id @default(autoincrement())
+  matchId   String
+  sequence  Int
+  playerId  String
+  command   Json
+  createdAt DateTime @default(now())
+
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, sequence])
+  @@index([matchId])
+}
+
+model Rating {
+  userId        String    @id
+  rating        Float     @default(1500)
+  rd            Float     @default(350)
+  volatility    Float     @default(0.06)
+  matchesPlayed Int       @default(0)
+  wins          Int       @default(0)
+  losses        Int       @default(0)
+  lastPlayedAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("ratings")
+}
+
+model BotRating {
+  botId         String    @id
+  rating        Float     @default(1500)
+  rd            Float     @default(350)
+  volatility    Float     @default(0.06)
+  matchesPlayed Int       @default(0)
+  wins          Int       @default(0)
+  losses        Int       @default(0)
+  updatedAt     DateTime  @updatedAt
+
+  @@map("bot_ratings")
+}
+
+model UserProfile {
+  userId    String   @id
+  username  String
+  avatarUrl String?
+  isAdmin   Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+model RatingHistory {
+  id           BigInt   @id @default(autoincrement())
+  userId       String
+  matchId      String?
+  opponentId   String
+  opponentName String
+  result       String   // 'win' | 'loss' | 'draw'
+  ratingBefore Float
+  ratingAfter  Float
+  delta        Float
+  rdBefore     Float
+  rdAfter      Float
+  playedAt     DateTime @default(now())
+
+  @@index([userId, playedAt(sort: Desc)])
+  @@map("rating_history")
+}
+
+model Friendship {
+  id            String   @id @default(cuid())
+  // userAId < userBId лексикографически — гарантирует уникальность пары.
+  userAId       String
+  userBId       String
+  requestedById String
+  status        String   @default("pending") // 'pending' | 'accepted'
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+  @@map("friendships")
+}

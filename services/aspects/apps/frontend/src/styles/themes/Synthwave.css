@@ -1,0 +1,85 @@
+/* @theme
+   name: Synthwave
+   description: Закат над неоновым Майами. Розовый горизонт в мятном небе.
+   light: false
+*/
+
+:root {
+  --clr-background: #2B1B2F;
+  --clr-element-bg: #3D2B40;
+  --clr-element-muted: #4F3C50;
+  --clr-border: #6A4D6B;
+  --clr-title: #FF7ED4;
+  --clr-subtitle: #FFA8EB;
+  --clr-accent: #36F1CD;
+  --clr-text: #E8D7F1;
+
+  --clr-shadow: rgba(255, 126, 212, 0.15);
+  --clr-shadow-focus: rgba(54, 241, 205, 0.3);
+
+  --clr-bg-input: #1E1220;
+  --clr-bg-muted: #4F3C50;
+  --clr-bg-subtle: #342038;
+  --clr-surface: #45324A;
+  --clr-surface-hover: #4E3A52;
+  --clr-surface-active: #58425C;
+  --clr-border-strong: #7A5C7C;
+  --clr-border-hover: #8E6E90;
+
+  --clr-text-soft: #D0BEE0;
+  --clr-text-muted: #B0A0C0;
+  --clr-text-dim: #8E7E9E;
+  --clr-text-faint: #6E5E7E;
+
+  --clr-accent-dark: #1B7A68;
+  --clr-accent-mid: #26B0A0;
+  --clr-accent-hover: #5CF5D8;
+  --clr-accent-light: #88F8E0;
+  --clr-accent-soft: #B8FCE8;
+  --clr-accent-bg: #103A32;
+  --clr-accent-bg-2: #0C2A24;
+
+  --clr-danger: #FF3A6E;
+  --clr-danger-dark: #7A1538;
+  --clr-danger-mid: #B02450;
+  --clr-danger-hover: #FF5C88;
+  --clr-danger-light: #FF90B0;
+  --clr-danger-light-2: #FF889E;
+  --clr-danger-light-3: #FFB0C4;
+  --clr-danger-border: #8A2040;
+  --clr-danger-bg: #2A0A1C;
+  --clr-danger-bg-2: #4A1030;
+
+  --clr-warning: #FFD966;
+  --clr-warning-hover: #FFE68A;
+  --clr-warning-border: #8A7020;
+  --clr-warning-mid: #C0A040;
+  --clr-warning-hover-2: #E0C060;
+  --clr-warning-bg: #2A2418;
+  --clr-warning-bg-2: #3A3020;
+  --clr-warning-bg-3: #4A3828;
+
+  --clr-success: #4ADE80;
+
+  --clr-epic: #8B5CF6;
+  --clr-epic-light: #A888F8;
+  --clr-epic-soft: #C8B0FC;
+  --clr-epic-bg: #1A1038;
+  --clr-epic-bg-2: #2A1858;
+  --clr-epic-bg-3: #3A2070;
+  --clr-epic-bg-4: #302050;
+  --clr-epic-border: #403080;
+  --clr-epic-border-2: #5840A8;
+  --clr-epic-border-3: #6848A0;
+
+  --clr-rarity-common: #6A4D6B;
+  --clr-rarity-uncommon: #4ADE80;
+  --clr-rarity-rare: #36F1CD;
+  --clr-rarity-epic: #8B5CF6;
+  --clr-rarity-legendary: #FFD966;
+
+  --clr-tooltip-bg: #342038;
+
+  --clr-p1: #36F1CD;
+  --clr-p2: #FF3A6E;
+}

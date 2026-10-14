@@ -1,0 +1,86 @@
+/* @theme
+   name: Hanko
+   description: Рисовая бумага и красная печать. Один цветной оттиск на бесцветной основе.
+   light: true
+*/
+
+:root {
+  --clr-background: #F2EDE2;
+  --clr-element-bg: #FAF6EC;
+  --clr-element-muted: #E8E2D4;
+  --clr-border: #D4CCB8;
+  --clr-title: #1A1A1A;
+  --clr-subtitle: #6A6A66;
+  --clr-accent: #B83828;
+  --clr-text: #2E2E2E;
+
+  --clr-shadow: rgba(26, 26, 26, 0.08);
+  --clr-shadow-focus: rgba(184, 56, 40, 0.15);
+
+  --clr-bg-input: #E8E2D4;
+  --clr-bg-muted: #EDE7D8;
+  --clr-bg-subtle: #F0EBDE;
+  --clr-surface: #F8F4E9;
+  --clr-surface-hover: #EDE8DA;
+  --clr-surface-active: #E4DED0;
+  --clr-border-strong: #B8B0A0;
+  --clr-border-hover: #96907E;
+  --clr-elevated: var(--clr-element-bg);
+
+  --clr-text-soft: #444444;
+  --clr-text-muted: #666666;
+  --clr-text-dim: #8A8A8A;
+  --clr-text-faint: #B0B0B0;
+
+  --clr-accent-dark: #5C1A14;
+  --clr-accent-mid: #8E2A20;
+  --clr-accent-hover: #D04E3C;
+  --clr-accent-light: #E08878;
+  --clr-accent-soft: #E8B0A4;
+  --clr-accent-bg: #F8E4E0;
+  --clr-accent-bg-2: #F0D0C8;
+
+  --clr-danger: #B83828;
+  --clr-danger-dark: #5C1A14;
+  --clr-danger-mid: #8E2A20;
+  --clr-danger-hover: #D04E3C;
+  --clr-danger-light: #E08878;
+  --clr-danger-light-2: #DE8272;
+  --clr-danger-light-3: #E8B0A4;
+  --clr-danger-border: #A8301E;
+  --clr-danger-bg: #F8E4E0;
+  --clr-danger-bg-2: #F0D0C8;
+
+  --clr-warning: #A07A20;
+  --clr-warning-hover: #B89030;
+  --clr-warning-border: #6A5418;
+  --clr-warning-mid: #886828;
+  --clr-warning-hover-2: #6E5418;
+  --clr-warning-bg: #F4EED8;
+  --clr-warning-bg-2: #EAE0C0;
+  --clr-warning-bg-3: #DED0A0;
+
+  --clr-success: #4A7A4A;
+
+  --clr-epic: #6A4A78;
+  --clr-epic-light: #9870A8;
+  --clr-epic-soft: #BCA0C4;
+  --clr-epic-bg: #EDE6EC;
+  --clr-epic-bg-2: #E0D5DE;
+  --clr-epic-bg-3: #D4C4D0;
+  --clr-epic-bg-4: #E8DCE0;
+  --clr-epic-border: #A890B0;
+  --clr-epic-border-2: #8A7294;
+  --clr-epic-border-3: #98728C;
+
+  --clr-rarity-common: #B8B0A0;
+  --clr-rarity-uncommon: #4A7A4A;
+  --clr-rarity-rare: #3A6A9A;
+  --clr-rarity-epic: #6A4A78;
+  --clr-rarity-legendary: #A07A20;
+
+  --clr-tooltip-bg: #F5F0E4;
+
+  --clr-p1: #B83828;
+  --clr-p2: #3A6A9A;
+}

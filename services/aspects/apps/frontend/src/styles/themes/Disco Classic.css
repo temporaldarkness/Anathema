@@ -1,0 +1,86 @@
+/* @theme
+   name: Disco Classic
+   description: Диско-шар под потолком. Розовый и циан сквозь прозрачные слои.
+   light: false
+*/
+
+:root {
+  --clr-background: #272931;
+  --clr-element-bg: rgba(255, 255, 255, 0.08);
+  --clr-element-muted: rgba(255, 255, 255, 0.12);
+  --clr-border: rgba(255, 255, 255, 0.2);
+  --clr-title: #89F7FE;
+  --clr-subtitle: #66D9EF;
+  --clr-accent: #FF6BCB;
+  --clr-text: rgba(255, 255, 255, 0.9);
+
+  --clr-shadow: rgba(137, 247, 254, 0.2);
+  --clr-shadow-focus: rgba(255, 107, 203, 0.4);
+
+  --clr-bg-input: rgba(0, 0, 0, 0.25);
+  --clr-bg-muted: rgba(255, 255, 255, 0.12);
+  --clr-bg-subtle: rgba(255, 255, 255, 0.04);
+  --clr-surface: rgba(255, 255, 255, 0.07);
+  --clr-surface-hover: rgba(255, 255, 255, 0.1);
+  --clr-surface-active: rgba(255, 255, 255, 0.14);
+  --clr-border-strong: rgba(255, 255, 255, 0.3);
+  --clr-border-hover: rgba(255, 255, 255, 0.4);
+  --clr-elevated: rgba(255, 255, 255, 0.1);
+
+  --clr-text-soft: rgba(255, 255, 255, 0.75);
+  --clr-text-muted: rgba(255, 255, 255, 0.6);
+  --clr-text-dim: rgba(255, 255, 255, 0.45);
+  --clr-text-faint: rgba(255, 255, 255, 0.3);
+
+  --clr-accent-dark: #7A2A5E;
+  --clr-accent-mid: #B04488;
+  --clr-accent-hover: #FF88D4;
+  --clr-accent-light: #FFA8DE;
+  --clr-accent-soft: #FFC8EA;
+  --clr-accent-bg: rgba(255, 107, 203, 0.12);
+  --clr-accent-bg-2: rgba(255, 107, 203, 0.08);
+
+  --clr-danger: #FF4444;
+  --clr-danger-dark: #7A1515;
+  --clr-danger-mid: #B02828;
+  --clr-danger-hover: #FF6666;
+  --clr-danger-light: #FF9090;
+  --clr-danger-light-2: #FF8888;
+  --clr-danger-light-3: #FFAAAA;
+  --clr-danger-border: rgba(255, 68, 68, 0.5);
+  --clr-danger-bg: rgba(255, 68, 68, 0.12);
+  --clr-danger-bg-2: rgba(255, 68, 68, 0.2);
+
+  --clr-warning: #FFD700;
+  --clr-warning-hover: #FFE44D;
+  --clr-warning-border: rgba(255, 215, 0, 0.4);
+  --clr-warning-mid: #C0A000;
+  --clr-warning-hover-2: #E0B800;
+  --clr-warning-bg: rgba(255, 215, 0, 0.1);
+  --clr-warning-bg-2: rgba(255, 215, 0, 0.16);
+  --clr-warning-bg-3: rgba(255, 215, 0, 0.22);
+
+  --clr-success: #4ADE80;
+
+  --clr-epic: #A855F7;
+  --clr-epic-light: #C08AF8;
+  --clr-epic-soft: #DDB8FC;
+  --clr-epic-bg: rgba(168, 85, 247, 0.12);
+  --clr-epic-bg-2: rgba(168, 85, 247, 0.18);
+  --clr-epic-bg-3: rgba(168, 85, 247, 0.25);
+  --clr-epic-bg-4: rgba(168, 85, 247, 0.15);
+  --clr-epic-border: rgba(168, 85, 247, 0.4);
+  --clr-epic-border-2: rgba(168, 85, 247, 0.55);
+  --clr-epic-border-3: rgba(168, 85, 247, 0.7);
+
+  --clr-rarity-common: rgba(255, 255, 255, 0.35);
+  --clr-rarity-uncommon: #4ADE80;
+  --clr-rarity-rare: #66D9EF;
+  --clr-rarity-epic: #A855F7;
+  --clr-rarity-legendary: #FFD700;
+
+  --clr-tooltip-bg: rgba(20, 22, 28, 0.95);
+
+  --clr-p1: #FF6BCB;
+  --clr-p2: #89F7FE;
+}

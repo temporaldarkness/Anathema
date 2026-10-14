@@ -1,0 +1,85 @@
+/* @theme
+   name: 8-Bit
+   description: Зал игровых автоматов после закрытия. Пиксельный неон на выгоревшем пластике.
+   light: false
+*/
+
+:root {
+  --clr-background: #2D2D2D;
+  --clr-element-bg: #3C3C3C;
+  --clr-element-muted: #4B4B4B;
+  --clr-border: #5A5A5A;
+  --clr-title: #FFD700;
+  --clr-subtitle: #00FF00;
+  --clr-accent: #FF0000;
+  --clr-text: #FFFFFF;
+
+  --clr-shadow: rgba(255, 0, 0, 0.2);
+  --clr-shadow-focus: rgba(0, 255, 0, 0.3);
+
+  --clr-bg-input: #262626;
+  --clr-bg-muted: #454545;
+  --clr-bg-subtle: #333333;
+  --clr-surface: #424242;
+  --clr-surface-hover: #4E4E4E;
+  --clr-surface-active: #5A5A5A;
+  --clr-border-strong: #6E6E6E;
+  --clr-border-hover: #8A8A8A;
+
+  --clr-text-soft: #E8E8E8;
+  --clr-text-muted: #B8B8B8;
+  --clr-text-dim: #909090;
+  --clr-text-faint: #6E6E6E;
+
+  --clr-accent-dark: #7A0000;
+  --clr-accent-mid: #B00000;
+  --clr-accent-hover: #FF3333;
+  --clr-accent-light: #FF8080;
+  --clr-accent-soft: #FFB3B3;
+  --clr-accent-bg: #3A1F1F;
+  --clr-accent-bg-2: #2D1818;
+
+  --clr-danger: #FF4444;
+  --clr-danger-dark: #7A2020;
+  --clr-danger-mid: #B03030;
+  --clr-danger-hover: #FF6666;
+  --clr-danger-light: #FF9999;
+  --clr-danger-light-2: #FFA0A0;
+  --clr-danger-light-3: #FFC0C0;
+  --clr-danger-border: #8A2020;
+  --clr-danger-bg: #3A1A1A;
+  --clr-danger-bg-2: #5A2020;
+
+  --clr-warning: #FFD700;
+  --clr-warning-hover: #FFE44D;
+  --clr-warning-border: #8A7000;
+  --clr-warning-mid: #C0A000;
+  --clr-warning-hover-2: #E0B800;
+  --clr-warning-bg: #3A3020;
+  --clr-warning-bg-2: #4A3A20;
+  --clr-warning-bg-3: #5A4A28;
+
+  --clr-success: #00FF00;
+
+  --clr-epic: #FF00FF;
+  --clr-epic-light: #FF80FF;
+  --clr-epic-soft: #FFB3FF;
+  --clr-epic-bg: #3A1F3A;
+  --clr-epic-bg-2: #4A204A;
+  --clr-epic-bg-3: #5A205A;
+  --clr-epic-bg-4: #5A2030;
+  --clr-epic-border: #6A206A;
+  --clr-epic-border-2: #8A208A;
+  --clr-epic-border-3: #A02080;
+
+  --clr-rarity-common: #5A5A5A;
+  --clr-rarity-uncommon: #00FF00;
+  --clr-rarity-rare: #00BFFF;
+  --clr-rarity-epic: #FF00FF;
+  --clr-rarity-legendary: #FFD700;
+
+  --clr-tooltip-bg: #333333;
+
+  --clr-p1: #FF0000;
+  --clr-p2: #00BFFF;
+}

@@ -1,0 +1,86 @@
+/* @theme
+   name: Volcano Pit
+   description: Кратер действующего вулкана. Мятный кристалл в оранжевой лаве.
+   light: false
+*/
+
+:root {
+  --clr-background: #331100;
+  --clr-element-bg: #4D1A00;
+  --clr-element-muted: #662200;
+  --clr-border: #803300;
+  --clr-title: #FF6600;
+  --clr-subtitle: #CC5200;
+  --clr-accent: #00FF88;
+  --clr-text: #FFD9BF;
+
+  --clr-shadow: rgba(255, 102, 0, 0.2);
+  --clr-shadow-focus: rgba(0, 255, 136, 0.4);
+
+  --clr-bg-input: #220B00;
+  --clr-bg-muted: #662200;
+  --clr-bg-subtle: #3D1400;
+  --clr-surface: #571E00;
+  --clr-surface-hover: #622400;
+  --clr-surface-active: #6E2A00;
+  --clr-border-strong: #984000;
+  --clr-border-hover: #B04D00;
+
+  --clr-text-soft: #F0C0A0;
+  --clr-text-muted: #D0A080;
+  --clr-text-dim: #AC8060;
+  --clr-text-faint: #856044;
+
+  --clr-accent-dark: #007A40;
+  --clr-accent-mid: #00B360;
+  --clr-accent-hover: #33FF9F;
+  --clr-accent-light: #80FFC4;
+  --clr-accent-light-2: #90FFCC;
+  --clr-accent-soft: #B3FFD9;
+  --clr-accent-bg: #00301A;
+  --clr-accent-bg-2: #002512;
+
+  --clr-danger: #E83030;
+  --clr-danger-dark: #6A1818;
+  --clr-danger-mid: #A82828;
+  --clr-danger-hover: #EE5050;
+  --clr-danger-light: #F58080;
+  --clr-danger-light-2: #F47878;
+  --clr-danger-light-3: #F8A8A8;
+  --clr-danger-border: #8A2020;
+  --clr-danger-bg: #2A1010;
+  --clr-danger-bg-2: #4A1818;
+
+  --clr-warning: #FFD966;
+  --clr-warning-hover: #FFE68A;
+  --clr-warning-border: #8A7020;
+  --clr-warning-mid: #C0A040;
+  --clr-warning-hover-2: #E0C060;
+  --clr-warning-bg: #3A2E10;
+  --clr-warning-bg-2: #4A3A18;
+  --clr-warning-bg-3: #5A4620;
+
+  --clr-success: #66FFC0;
+
+  --clr-epic: #A855F7;
+  --clr-epic-light: #C08AF8;
+  --clr-epic-soft: #DDB8FC;
+  --clr-epic-bg: #241528;
+  --clr-epic-bg-2: #341D38;
+  --clr-epic-bg-3: #442848;
+  --clr-epic-bg-4: #3A2028;
+  --clr-epic-border: #4A2858;
+  --clr-epic-border-2: #603870;
+  --clr-epic-border-3: #704060;
+
+  --clr-rarity-common: #9A4A20;
+  --clr-rarity-uncommon: #00FF88;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #A855F7;
+  --clr-rarity-legendary: #FFD966;
+
+  --clr-tooltip-bg: #3D1400;
+
+  --clr-p1: #00FF88;
+  --clr-p2: #E83030;
+}

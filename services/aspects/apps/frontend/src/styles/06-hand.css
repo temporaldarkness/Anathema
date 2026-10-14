@@ -1,0 +1,190 @@
+.hand {
+  display: flex;
+  gap: 8px;
+  background: var(--clr-element-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  padding: 8px;
+  min-height: 152px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+}
+
+.hand-empty {
+  color: var(--clr-text-faint);
+  align-items: center;
+  justify-content: center;
+}
+
+.hand-owner-p1 { border-left: 3px solid var(--clr-accent); }
+.hand-owner-p2 { border-left: 3px solid var(--clr-danger); }
+
+.hand-disabled .hand-card { opacity: 0.6; }
+
+.hand-spectator {
+  color: var(--clr-accent-light);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: #101a26;
+  border-color: var(--clr-accent-mid);
+}
+
+/* ─── Hand card ─── */
+
+.hand-card {
+  background: var(--clr-elevated);
+  border: 1px solid var(--clr-border-strong);
+  border-radius: 6px;
+  padding: 5px 6px;
+  min-width: 110px;
+  max-width: 110px;
+  min-height: 136px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 3px;
+  font-size: 11px;
+  position: relative;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.hand-card-name {
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.15;
+  color: var(--clr-text);
+  width: 100%;
+  min-height: 26px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-align: center;
+  word-break: break-word;
+}
+
+.hand-card-stats {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hand-card-keywords {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 14px;
+  flex-wrap: nowrap;
+  color: var(--clr-text-muted);
+  font-size: 10px;
+}
+
+.kw-icon {
+  font-size: 12px;
+  line-height: 1;
+  cursor: help;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+}
+
+.hand-card-abilities {
+  color: var(--clr-epic-light);
+  font-size: 11px;
+}
+
+.hand-card-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: auto;
+  width: 100%;
+  padding-top: 3px;
+}
+
+.hand-card-actions > button {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--clr-surface-active);
+  color: var(--clr-text);
+  border: 1px solid var(--clr-border-strong);
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: inherit;
+}
+
+.hand-card-actions > button:hover {
+  background: var(--clr-border-strong);
+  border-color: var(--clr-accent);
+}
+
+.hand-card-reason {
+  margin-top: auto;
+  padding: 3px 0;
+  font-size: 10px;
+  color: var(--clr-text-dim);
+  font-style: italic;
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+}
+
+.hand-card-bot-label {
+  color: var(--clr-text-muted);
+  font-style: normal;
+  font-weight: 500;
+}
+
+.hand-card-replace-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--clr-warning);
+  color: var(--clr-bg-input);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(251, 191, 36, 0.4);
+  z-index: 1;
+}
+
+.hand-card sup {
+  color: var(--clr-accent-light);
+  font-size: 9px;
+}
+
+/* ─── Stats ─── */
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stat-cost { color: var(--clr-accent-light); }
+.stat-str  { color: var(--clr-warning); }
+.stat-hp   { color: var(--clr-success); }
+.stat-def  { color: var(--clr-accent-light); }
+
+.stat sup {
+  color: var(--clr-warning);
+  font-size: 9px;
+  margin-left: 1px;
+}

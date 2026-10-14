@@ -1,0 +1,85 @@
+/* @theme
+   name: Stargazer Contrast
+   description: Телескоп на скале. Оранжевая звезда в фиолетовой бездне.
+   light: false
+*/
+
+:root {
+  --clr-background: #1A0033;
+  --clr-element-bg: #330066;
+  --clr-element-muted: #4D0099;
+  --clr-border: #6600CC;
+  --clr-title: #FF9933;
+  --clr-subtitle: #CC6600;
+  --clr-accent: #33CCFF;
+  --clr-text: #FFCC99;
+
+  --clr-shadow: rgba(255, 153, 51, 0.2);
+  --clr-shadow-focus: rgba(51, 204, 255, 0.4);
+
+  --clr-bg-input: #0E0020;
+  --clr-bg-muted: #4D0099;
+  --clr-bg-subtle: #250048;
+  --clr-surface: #3A0073;
+  --clr-surface-hover: #440088;
+  --clr-surface-active: #52009E;
+  --clr-border-strong: #7A1AE0;
+  --clr-border-hover: #8E3AE8;
+
+  --clr-text-soft: #E8B890;
+  --clr-text-muted: #C89870;
+  --clr-text-dim: #A07854;
+  --clr-text-faint: #785838;
+
+  --clr-accent-dark: #1A6680;
+  --clr-accent-mid: #2699C0;
+  --clr-accent-hover: #55D8FF;
+  --clr-accent-light: #80E0FF;
+  --clr-accent-soft: #B3EEFF;
+  --clr-accent-bg: #0A2E40;
+  --clr-accent-bg-2: #062030;
+
+  --clr-danger: #FF3A5A;
+  --clr-danger-dark: #7A1528;
+  --clr-danger-mid: #B02440;
+  --clr-danger-hover: #FF5C78;
+  --clr-danger-light: #FF90A4;
+  --clr-danger-light-2: #FF889E;
+  --clr-danger-light-3: #FFB0C0;
+  --clr-danger-border: #8A2038;
+  --clr-danger-bg: #2A0A18;
+  --clr-danger-bg-2: #4A1028;
+
+  --clr-warning: #FFD700;
+  --clr-warning-hover: #FFE44D;
+  --clr-warning-border: #8A7020;
+  --clr-warning-mid: #C0A000;
+  --clr-warning-hover-2: #E0B800;
+  --clr-warning-bg: #3A2E10;
+  --clr-warning-bg-2: #4A3A18;
+  --clr-warning-bg-3: #5A4620;
+
+  --clr-success: #33FFB3;
+
+  --clr-epic: #FF44E0;
+  --clr-epic-light: #FF78E8;
+  --clr-epic-soft: #FFB0F0;
+  --clr-epic-bg: #3A0A38;
+  --clr-epic-bg-2: #4A1050;
+  --clr-epic-bg-3: #5A1A68;
+  --clr-epic-bg-4: #3A1038;
+  --clr-epic-border: #6A2070;
+  --clr-epic-border-2: #8A30A0;
+  --clr-epic-border-3: #9A3890;
+
+  --clr-rarity-common: #6600CC;
+  --clr-rarity-uncommon: #33FFB3;
+  --clr-rarity-rare: #33CCFF;
+  --clr-rarity-epic: #FF44E0;
+  --clr-rarity-legendary: #FFD700;
+
+  --clr-tooltip-bg: #250048;
+
+  --clr-p1: #33CCFF;
+  --clr-p2: #FF3A5A;
+}

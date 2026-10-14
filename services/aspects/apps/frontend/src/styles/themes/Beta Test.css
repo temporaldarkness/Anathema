@@ -1,0 +1,86 @@
+/* @theme
+   name: Beta Test
+   description: Инженерный чертёж в красных пометках. Светлая тема с техничным характером.
+   light: true
+*/
+
+:root {
+  --clr-background: #FFF5F5;
+  --clr-element-bg: #FFFFFF;
+  --clr-element-muted: #FFE8E8;
+  --clr-border: #FFC0C0;
+  --clr-title: #8B0000;
+  --clr-subtitle: #B33A3A;
+  --clr-accent: #FF0000;
+  --clr-text: #1A1A1A;
+
+  --clr-shadow: rgba(255, 0, 0, 0.1);
+  --clr-shadow-focus: rgba(255, 0, 0, 0.2);
+
+  --clr-bg-input: #F0E8E8;
+  --clr-bg-muted: #FFE8E8;
+  --clr-bg-subtle: #FFF0F0;
+  --clr-surface: #FDF7F7;
+  --clr-surface-hover: #F4EBEB;
+  --clr-surface-active: #EADCDC;
+  --clr-border-strong: #E8A8A8;
+  --clr-border-hover: #D88888;
+  --clr-elevated: var(--clr-element-bg);
+
+  --clr-text-soft: #404040;
+  --clr-text-muted: #666666;
+  --clr-text-dim: #8A8A8A;
+  --clr-text-faint: #AAAAAA;
+
+  --clr-accent-dark: #8A0000;
+  --clr-accent-mid: #C00000;
+  --clr-accent-hover: #FF3333;
+  --clr-accent-light: #FF8080;
+  --clr-accent-soft: #FFC0C0;
+  --clr-accent-bg: #FFE8E8;
+  --clr-accent-bg-2: #FFDADA;
+
+  --clr-danger: #D32F2F;
+  --clr-danger-dark: #5A1A1A;
+  --clr-danger-mid: #8A2A2A;
+  --clr-danger-hover: #E84545;
+  --clr-danger-light: #F08080;
+  --clr-danger-light-2: #EE7878;
+  --clr-danger-light-3: #F4A0A0;
+  --clr-danger-border: #C04040;
+  --clr-danger-bg: #FFE0E0;
+  --clr-danger-bg-2: #FFD0D0;
+
+  --clr-warning: #F59E0B;
+  --clr-warning-hover: #FBBF24;
+  --clr-warning-border: #C08830;
+  --clr-warning-mid: #B87A20;
+  --clr-warning-hover-2: #A06818;
+  --clr-warning-bg: #FFF8E0;
+  --clr-warning-bg-2: #FFEEC0;
+  --clr-warning-bg-3: #FFE0A0;
+
+  --clr-success: #22C55E;
+
+  --clr-epic: #A855F7;
+  --clr-epic-light: #C08AF8;
+  --clr-epic-soft: #DDB8FC;
+  --clr-epic-bg: #F5ECFF;
+  --clr-epic-bg-2: #EDD8FF;
+  --clr-epic-bg-3: #E0C0FF;
+  --clr-epic-bg-4: #F0D8F0;
+  --clr-epic-border: #C898E8;
+  --clr-epic-border-2: #B880D8;
+  --clr-epic-border-3: #C080B0;
+
+  --clr-rarity-common: #C0C0C0;
+  --clr-rarity-uncommon: #22C55E;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #A855F7;
+  --clr-rarity-legendary: #F59E0B;
+
+  --clr-tooltip-bg: #FFF0F0;
+
+  --clr-p1: #FF0000;
+  --clr-p2: #0088CC;
+}

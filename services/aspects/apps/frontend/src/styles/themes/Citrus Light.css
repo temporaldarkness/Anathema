@@ -1,0 +1,86 @@
+/* @theme
+   name: Citrus Light
+   description: Полдень в лимонной роще. Солнечный акцент на кремовой цедре.
+   light: true
+*/
+
+:root {
+  --clr-background: #FFFDE7;
+  --clr-element-bg: #FFFFFF;
+  --clr-element-muted: #FCF8E3;
+  --clr-border: #EEE6C4;
+  --clr-title: #4A473D;
+  --clr-subtitle: #7C786B;
+  --clr-accent: #FFD700;
+  --clr-text: #3E3B32;
+
+  --clr-shadow: rgba(255, 215, 0, 0.1);
+  --clr-shadow-focus: rgba(255, 215, 0, 0.2);
+
+  --clr-bg-input: #F5F0D8;
+  --clr-bg-muted: #FCF8E3;
+  --clr-bg-subtle: #FBF7E0;
+  --clr-surface: #FFFDF2;
+  --clr-surface-hover: #F7F3E0;
+  --clr-surface-active: #EEE8CB;
+  --clr-border-strong: #D8CDA0;
+  --clr-border-hover: #BDB080;
+  --clr-elevated: var(--clr-element-bg);
+
+  --clr-text-soft: #524E44;
+  --clr-text-muted: #6E6A5C;
+  --clr-text-dim: #8A8674;
+  --clr-text-faint: #A8A490;
+
+  --clr-accent-dark: #8A7000;
+  --clr-accent-mid: #B09000;
+  --clr-accent-hover: #FFE44D;
+  --clr-accent-light: #FFEC80;
+  --clr-accent-soft: #FFF4B3;
+  --clr-accent-bg: #FFF8D9;
+  --clr-accent-bg-2: #FFF0B3;
+
+  --clr-danger: #E53935;
+  --clr-danger-dark: #6A1A18;
+  --clr-danger-mid: #A82A28;
+  --clr-danger-hover: #EE5553;
+  --clr-danger-light: #F58080;
+  --clr-danger-light-2: #F47878;
+  --clr-danger-light-3: #F8A0A0;
+  --clr-danger-border: #C83028;
+  --clr-danger-bg: #FCE4E3;
+  --clr-danger-bg-2: #F8C8C6;
+
+  --clr-warning: #E89028;
+  --clr-warning-hover: #F0A840;
+  --clr-warning-border: #A06018;
+  --clr-warning-mid: #C07820;
+  --clr-warning-hover-2: #A86018;
+  --clr-warning-bg: #FBEDD8;
+  --clr-warning-bg-2: #F5DDB8;
+  --clr-warning-bg-3: #EFCD98;
+
+  --clr-success: #2E7D32;
+
+  --clr-epic: #9C27B0;
+  --clr-epic-light: #BA68C8;
+  --clr-epic-soft: #D8A8E0;
+  --clr-epic-bg: #F5E8F5;
+  --clr-epic-bg-2: #EDD5EE;
+  --clr-epic-bg-3: #E0C0E4;
+  --clr-epic-bg-4: #F0D8DC;
+  --clr-epic-border: #C090C8;
+  --clr-epic-border-2: #B078B8;
+  --clr-epic-border-3: #B87898;
+
+  --clr-rarity-common: #BDB080;
+  --clr-rarity-uncommon: #2E7D32;
+  --clr-rarity-rare: #1976D2;
+  --clr-rarity-epic: #9C27B0;
+  --clr-rarity-legendary: #E89028;
+
+  --clr-tooltip-bg: #FBF7E0;
+
+  --clr-p1: #FFD700;
+  --clr-p2: #E53935;
+}

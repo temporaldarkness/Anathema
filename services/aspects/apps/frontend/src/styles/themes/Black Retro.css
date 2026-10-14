@@ -1,0 +1,85 @@
+/* @theme
+   name: Black Retro
+   description: Ночной неон заброшенного кинотеатра. Циан и лаванда на смоляном.
+   light: false
+*/
+
+:root {
+  --clr-background: #0A0A14;
+  --clr-element-bg: #120018;
+  --clr-element-muted: #240030;
+  --clr-border: #3D0052;
+  --clr-title: #FFFFFF;
+  --clr-subtitle: #C792EA;
+  --clr-accent: #64D2FF;
+  --clr-text: #E1E1E6;
+
+  --clr-shadow: rgba(137, 221, 255, 0.2);
+  --clr-shadow-focus: rgba(201, 146, 234, 0.4);
+
+  --clr-bg-input: #06060E;
+  --clr-bg-muted: #240030;
+  --clr-bg-subtle: #0E0E1C;
+  --clr-surface: #180822;
+  --clr-surface-hover: #1E0A2A;
+  --clr-surface-active: #2A0E38;
+  --clr-border-strong: #4D1A66;
+  --clr-border-hover: #602080;
+
+  --clr-text-soft: #C8C8D0;
+  --clr-text-muted: #A0A0AC;
+  --clr-text-dim: #787888;
+  --clr-text-faint: #585866;
+
+  --clr-accent-dark: #285372;
+  --clr-accent-mid: #4693B3;
+  --clr-accent-hover: #8ADFFF;
+  --clr-accent-light: #A0E8FF;
+  --clr-accent-soft: #C0F0FF;
+  --clr-accent-bg: #0A2838;
+  --clr-accent-bg-2: #081E28;
+
+  --clr-danger: #FF6B6B;
+  --clr-danger-dark: #5A2028;
+  --clr-danger-mid: #8C3040;
+  --clr-danger-hover: #FF8A8A;
+  --clr-danger-light: #FFB3B3;
+  --clr-danger-light-2: #FFA8A8;
+  --clr-danger-light-3: #FFC8C8;
+  --clr-danger-border: #6B2C34;
+  --clr-danger-bg: #2A1418;
+  --clr-danger-bg-2: #4A1C24;
+
+  --clr-warning: #FFD966;
+  --clr-warning-hover: #FFE68A;
+  --clr-warning-border: #8A7020;
+  --clr-warning-mid: #C0A040;
+  --clr-warning-hover-2: #E0C060;
+  --clr-warning-bg: #2A2418;
+  --clr-warning-bg-2: #3A3020;
+  --clr-warning-bg-3: #4A3828;
+
+  --clr-success: #4ADE80;
+
+  --clr-epic: #FF4DD2;
+  --clr-epic-light: #FF8AE0;
+  --clr-epic-soft: #FFB3EC;
+  --clr-epic-bg: #2A0A28;
+  --clr-epic-bg-2: #3A1035;
+  --clr-epic-bg-3: #4A1845;
+  --clr-epic-bg-4: #3A1828;
+  --clr-epic-border: #5A2055;
+  --clr-epic-border-2: #7A2870;
+  --clr-epic-border-3: #8A2868;
+
+  --clr-rarity-common: #3D0052;
+  --clr-rarity-uncommon: #4ADE80;
+  --clr-rarity-rare: #64D2FF;
+  --clr-rarity-epic: #FF4DD2;
+  --clr-rarity-legendary: #FFD966;
+
+  --clr-tooltip-bg: #0E0E1C;
+
+  --clr-p1: #64D2FF;
+  --clr-p2: #FF6B6B;
+}

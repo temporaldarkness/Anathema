@@ -1,0 +1,85 @@
+/* @theme
+   name: Rose Sentiments
+   description: Письмо, забытое в ящике комода. Пыльная роза на выцветшем шёлке.
+   light: false
+*/
+
+:root {
+  --clr-background: #2D2424;
+  --clr-element-bg: #3B2E2E;
+  --clr-element-muted: #4A3939;
+  --clr-border: #634B4B;
+  --clr-title: #E2B4BD;
+  --clr-subtitle: #B89297;
+  --clr-accent: #C89B7B;
+  --clr-text: #D8C8C8;
+
+  --clr-shadow: rgba(200, 155, 123, 0.15);
+  --clr-shadow-focus: rgba(200, 155, 123, 0.3);
+
+  --clr-bg-input: #1F1919;
+  --clr-bg-muted: #4A3939;
+  --clr-bg-subtle: #332A2A;
+  --clr-surface: #423434;
+  --clr-surface-hover: #4D3E3E;
+  --clr-surface-active: #584848;
+  --clr-border-strong: #706060;
+  --clr-border-hover: #847070;
+
+  --clr-text-soft: #C0B0B0;
+  --clr-text-muted: #A09090;
+  --clr-text-dim: #7E7070;
+  --clr-text-faint: #5C5050;
+
+  --clr-accent-dark: #5A4038;
+  --clr-accent-mid: #906E54;
+  --clr-accent-hover: #D8AD90;
+  --clr-accent-light: #E4BFA8;
+  --clr-accent-soft: #F0D4C0;
+  --clr-accent-bg: #332824;
+  --clr-accent-bg-2: #281E1A;
+
+  --clr-danger: #D83050;
+  --clr-danger-dark: #6A1828;
+  --clr-danger-mid: #A82840;
+  --clr-danger-hover: #E85070;
+  --clr-danger-light: #F08098;
+  --clr-danger-light-2: #EE7890;
+  --clr-danger-light-3: #F4A8B8;
+  --clr-danger-border: #8A2038;
+  --clr-danger-bg: #2A1018;
+  --clr-danger-bg-2: #4A1828;
+
+  --clr-warning: #E0B050;
+  --clr-warning-hover: #F0C46A;
+  --clr-warning-border: #8A6E30;
+  --clr-warning-mid: #B89040;
+  --clr-warning-hover-2: #987838;
+  --clr-warning-bg: #2A2018;
+  --clr-warning-bg-2: #3A2C20;
+  --clr-warning-bg-3: #4A3828;
+
+  --clr-success: #7AAA85;
+
+  --clr-epic: #9C5FA8;
+  --clr-epic-light: #B888C0;
+  --clr-epic-soft: #D0A8D4;
+  --clr-epic-bg: #281A2A;
+  --clr-epic-bg-2: #382438;
+  --clr-epic-bg-3: #483048;
+  --clr-epic-bg-4: #382428;
+  --clr-epic-border: #503058;
+  --clr-epic-border-2: #683E70;
+  --clr-epic-border-3: #784868;
+
+  --clr-rarity-common: #634B4B;
+  --clr-rarity-uncommon: #7AAA85;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #9C5FA8;
+  --clr-rarity-legendary: #E0B050;
+
+  --clr-tooltip-bg: #332A2A;
+
+  --clr-p1: #C89B7B;
+  --clr-p2: #D83050;
+}

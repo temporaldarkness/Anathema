@@ -1,0 +1,373 @@
+.board {
+  background: var(--clr-element-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.board-header,
+.board-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 1fr 60px 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 3px;
+  align-items: stretch;
+}
+
+.board-col-label {
+  font-size: 10px;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-row > .board-col-label {
+  font-size: 14px;
+  color: #c0c4cc;
+}
+
+/* ─── Neutral ─── */
+
+.neutral-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px;
+  font-weight: 700;
+  border-radius: 6px;
+  font-size: 12px;
+  min-height: 48px;
+  border: 1px solid var(--clr-border);
+  background: var(--clr-bg-input);
+}
+
+.neutral-p1 { background: var(--clr-accent-dark); color: var(--clr-accent-light); border-color: var(--clr-accent-mid); }
+.neutral-p2 { background: var(--clr-danger-dark); color: var(--clr-danger-light); border-color: var(--clr-danger-mid); }
+.neutral-none { color: var(--clr-text-faint); }
+
+.neutral-bonus {
+  font-size: 11px;
+  color: var(--clr-warning);
+  text-align: center;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.neutral-owner {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.neutral-attackable {
+  cursor: pointer;
+  outline: 2px solid var(--clr-warning);
+  outline-offset: -2px;
+  animation: pulse 1.5s infinite;
+}
+
+.neutral-attackable:hover {
+  background: var(--clr-warning-bg-2);
+}
+
+/* ─── Slot ─── */
+
+.slot {
+  padding: 4px 6px;
+  border-radius: 6px;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 11px;
+  border: 1px solid var(--clr-border);
+  background: var(--clr-elevated);
+  transition: all 0.1s ease;
+  position: relative;
+}
+
+.slot-reserve {
+  background: var(--clr-bg-subtle);
+  border-style: dashed;
+}
+
+.slot-owner-p1 { border-color: var(--clr-border) var(--clr-border) var(--clr-border) var(--clr-accent); }
+.slot-owner-p2 { border-color: var(--clr-border) var(--clr-border) var(--clr-border) var(--clr-danger); }
+
+.slot-empty {
+  color: var(--clr-text-faint);
+  align-items: center;
+  justify-content: center;
+}
+
+.slot-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot-flags {
+  color: var(--clr-text-muted);
+  font-weight: 400;
+  font-size: 10px;
+}
+
+.slot-stats {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.slot-clickable {
+  cursor: pointer;
+}
+
+.slot-clickable:hover {
+  background: var(--clr-surface-active);
+  transform: translateY(-1px);
+}
+
+.slot-target {
+  outline: 2px solid var(--clr-warning);
+  outline-offset: -2px;
+  animation: pulse 1.5s infinite;
+}
+
+.slot-source {
+  outline: 2px solid var(--clr-accent);
+  outline-offset: -2px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.slot-dead {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.slot-playable {
+  outline: 2px dashed var(--clr-warning);
+  outline-offset: -2px;
+  cursor: pointer;
+  animation: pulse 1.5s infinite;
+  background: var(--clr-warning-bg);
+}
+
+.slot-playable:hover {
+  background: var(--clr-warning-bg-2);
+}
+
+.slot-exhausted {
+  opacity: 0.55;
+  filter: grayscale(0.35);
+}
+
+.slot-exhausted::after {
+  content: '💤';
+  position: absolute;
+  top: 2px;
+  right: 22px;
+  font-size: 11px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.slot-defense-badge {
+  color: var(--clr-accent-light);
+  font-size: 10px;
+  margin-left: 2px;
+}
+
+.slot-defended {
+  background: var(--clr-accent-bg-2);
+}
+
+.slot sup {
+  color: var(--clr-accent-light);
+  font-size: 9px;
+}
+
+.slot:not(.slot-empty) {
+  animation: card-appear 0.25s ease-out;
+}
+
+@keyframes card-appear {
+  from { opacity: 0; transform: translateY(-4px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Slot rarity ─── */
+
+.slot-rarity-common {
+  border-top-color: var(--clr-border-strong);
+  border-right-color: var(--clr-border-strong);
+  border-bottom-color: var(--clr-border-strong);
+}
+
+.slot-rarity-uncommon {
+  border-top-color: var(--clr-success);
+  border-right-color: var(--clr-success);
+  border-bottom-color: var(--clr-success);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3) inset;
+}
+
+.slot-rarity-rare {
+  border-top-color: var(--clr-accent);
+  border-right-color: var(--clr-accent);
+  border-bottom-color: var(--clr-accent);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4) inset,
+              0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.slot-rarity-epic {
+  border-top-color: var(--clr-epic);
+  border-right-color: var(--clr-epic);
+  border-bottom-color: var(--clr-epic);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.5) inset,
+              0 0 6px rgba(168, 85, 247, 0.25);
+}
+
+.slot-rarity-legendary {
+  border-top-color: var(--clr-rarity-legendary);
+  border-right-color: var(--clr-rarity-legendary);
+  border-bottom-color: var(--clr-rarity-legendary);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.4) inset,
+              0 0 8px rgba(245, 158, 11, 0.2),
+              0 0 16px rgba(245, 158, 11, 0.1);
+  animation: legendary-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes legendary-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.4) inset,
+                0 0 8px rgba(245, 158, 11, 0.2),
+                0 0 16px rgba(245, 158, 11, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.5) inset,
+                0 0 10px rgba(245, 158, 11, 0.4),
+                0 0 20px rgba(245, 158, 11, 0.2);
+  }
+}
+
+.slot-legendary-star {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  color: var(--clr-rarity-legendary);
+  font-size: 11px;
+  text-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+}
+
+/* ─── Floating numbers ─── */
+
+.floating-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 50;
+}
+
+.floating-num {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
+  animation: float-up 1.2s ease-out forwards;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@keyframes float-up {
+  0% { opacity: 0; transform: translate(-50%, 4px) scale(0.7); }
+  20% { opacity: 1; transform: translate(-50%, -8px) scale(1.15); }
+  70% { opacity: 1; transform: translate(-50%, -28px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -48px) scale(0.95); }
+}
+
+/* ─── Hint ─── */
+
+.hint {
+  background: var(--clr-warning-bg);
+  border: 1px solid var(--clr-warning-border);
+  color: var(--clr-warning);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hint-container {
+  min-height: 38px;
+  display: flex;
+  align-items: stretch;
+}
+
+.hint-container > .hint {
+  flex: 1;
+}
+
+.hint-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.hint-action {
+  background: var(--clr-warning-border);
+  color: var(--clr-warning);
+  border: 1px solid var(--clr-warning-mid);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.hint-action:hover {
+  background: var(--clr-warning-hover-2);
+}
+
+.hint-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hint-cancel {
+  background: transparent;
+  color: var(--clr-text-soft);
+  border: 1px solid var(--clr-border-hover);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.hint-cancel:hover {
+  color: var(--clr-danger-light-2);
+  border-color: var(--clr-danger-border);
+  background: var(--clr-danger-bg);
+}

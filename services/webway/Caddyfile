@@ -10,6 +10,31 @@
         }
     }
 
+    # --- Aspects: API ---
+    handle_path /games/aspects/api/* {
+        forward_auth webway_backend:8000 {
+            uri /api/games/auth
+            method GET
+            copy_headers X-User-Id X-User-Name X-User-Is-Admin X-User-Avatar-Url
+        }
+        reverse_proxy aspects_backend:8010
+    }
+
+    # --- Aspects: WebSocket ---
+    handle_path /games/aspects/ws/* {
+        reverse_proxy aspects_backend:8010 {
+            transport http {
+                read_timeout 0
+                dial_timeout 5s
+            }
+        }
+    }
+
+    # --- Aspects: SPA ---
+    handle /games/aspects/* {
+        reverse_proxy aspects_frontend:8011
+    }
+
     @api path /api/*
     handle @api {
         reverse_proxy webway_backend:8000

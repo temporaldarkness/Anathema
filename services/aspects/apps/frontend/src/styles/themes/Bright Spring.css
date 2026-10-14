@@ -1,0 +1,86 @@
+/* @theme
+   name: Bright Spring
+   description: Утро первого апреля. Нежная мята на тёплом яичном белке.
+   light: true
+*/
+
+:root {
+  --clr-background: #F9F7F3;
+  --clr-element-bg: #FFFCF8;
+  --clr-element-muted: #F5F0E9;
+  --clr-border: #E5DDD2;
+  --clr-title: #5E5349;
+  --clr-subtitle: #8E8277;
+  --clr-accent: #A8D8B9;
+  --clr-text: #4A423A;
+
+  --clr-shadow: rgba(168, 216, 185, 0.1);
+  --clr-shadow-focus: rgba(168, 216, 185, 0.2);
+
+  --clr-bg-input: #EDE9E2;
+  --clr-bg-muted: #F5F0E9;
+  --clr-bg-subtle: #F2EEE7;
+  --clr-surface: #FDFBF7;
+  --clr-surface-hover: #F4F0E9;
+  --clr-surface-active: #EAE4D8;
+  --clr-border-strong: #C8BFB0;
+  --clr-border-hover: #A89F90;
+  --clr-elevated: var(--clr-element-bg);
+
+  --clr-text-soft: #605850;
+  --clr-text-muted: #7A7168;
+  --clr-text-dim: #98908A;
+  --clr-text-faint: #B8AFA8;
+
+  --clr-accent-dark: #3E6E50;
+  --clr-accent-mid: #589870;
+  --clr-accent-hover: #C0E8D0;
+  --clr-accent-light: #D0EED8;
+  --clr-accent-soft: #E0F5E8;
+  --clr-accent-bg: #E0EEE5;
+  --clr-accent-bg-2: #D2E5D8;
+
+  --clr-danger: #C85A4A;
+  --clr-danger-dark: #6A2A20;
+  --clr-danger-mid: #9E4033;
+  --clr-danger-hover: #D97766;
+  --clr-danger-light: #E8A090;
+  --clr-danger-light-2: #E59686;
+  --clr-danger-light-3: #F0B8AA;
+  --clr-danger-border: #B85A48;
+  --clr-danger-bg: #FBE8E4;
+  --clr-danger-bg-2: #F5D5CE;
+
+  --clr-warning: #E0A030;
+  --clr-warning-hover: #F0B848;
+  --clr-warning-border: #B88830;
+  --clr-warning-mid: #A88A38;
+  --clr-warning-hover-2: #8A6828;
+  --clr-warning-bg: #FBF2DC;
+  --clr-warning-bg-2: #F5E5BE;
+  --clr-warning-bg-3: #EFD8A0;
+
+  --clr-success: #7AB890;
+
+  --clr-epic: #9575CD;
+  --clr-epic-light: #B39DDB;
+  --clr-epic-soft: #D1C4E9;
+  --clr-epic-bg: #F0EBF8;
+  --clr-epic-bg-2: #E4DCF2;
+  --clr-epic-bg-3: #D5C8EC;
+  --clr-epic-bg-4: #F0E0E8;
+  --clr-epic-border: #B8A0D8;
+  --clr-epic-border-2: #A088CC;
+  --clr-epic-border-3: #C090B8;
+
+  --clr-rarity-common: #C8BFB0;
+  --clr-rarity-uncommon: #589870;
+  --clr-rarity-rare: #4A9ED8;
+  --clr-rarity-epic: #9575CD;
+  --clr-rarity-legendary: #E0A030;
+
+  --clr-tooltip-bg: #F0ECE5;
+
+  --clr-p1: #589870;
+  --clr-p2: #C85A4A;
+}

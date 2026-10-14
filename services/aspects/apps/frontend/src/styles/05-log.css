@@ -1,0 +1,113 @@
+.log {
+  flex: 1 1 0;
+  min-height: 0;
+  background: var(--clr-element-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.log-header {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--clr-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.log-count {
+  font-size: 10px;
+  color: var(--clr-text-faint);
+  font-weight: 400;
+}
+
+.log-filters {
+  flex-shrink: 0;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--clr-border);
+  background: var(--clr-bg-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.log-filter-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.log-chip {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--clr-text-dim);
+  border: 1px solid var(--clr-border-strong);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  font-family: inherit;
+}
+
+.log-chip:hover {
+  color: var(--clr-text-soft);
+  border-color: var(--clr-text-faint);
+}
+
+.log-chip-active {
+  background: var(--clr-surface-active);
+  color: var(--clr-text);
+  border-color: var(--clr-accent);
+}
+
+.log-chip-p1.log-chip-active { border-color: var(--clr-accent); color: var(--clr-accent-light); }
+.log-chip-p2.log-chip-active { border-color: var(--clr-danger); color: var(--clr-danger-light); }
+
+.log-entries {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+}
+
+.log-empty {
+  color: var(--clr-text-faint);
+  font-style: italic;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.log-entry {
+  color: var(--clr-text-soft);
+  padding: 2px 0;
+  border-bottom: 1px dashed var(--clr-surface);
+}
+
+.log-entry:last-child { border-bottom: none; }
+
+.log-entry-turn {
+  color: var(--clr-accent-light);
+  font-weight: 600;
+  border-top: 1px solid var(--clr-border-strong);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.log-entry-error   { color: var(--clr-danger-light-2); }
+.log-entry-damage  { color: var(--clr-warning); }
+.log-entry-death   { color: var(--clr-danger-light); }
+.log-entry-capture { color: var(--clr-epic-light); }
+.log-entry-glory   { color: var(--clr-warning); }
+.log-entry-gameover { color: var(--clr-warning); font-weight: 700; }
+.log-entry-choice  { color: var(--clr-epic-light); }
+.log-entry-summon  { color: var(--clr-epic-soft); }

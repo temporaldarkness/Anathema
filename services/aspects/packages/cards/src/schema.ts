@@ -1,0 +1,101 @@
+import { z } from 'zod';
+import {
+  KEYWORD_IDS,
+  TRIGGER_TYPES,
+  TARGET_SELECTORS,
+  COMPARATORS,
+  CONDITION_SIDES,
+} from './abilities';
+
+export const RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary'] as const;
+
+const ConditionSchema: z.ZodType<import('./abilities').Condition> = z.union([
+  z.object({ kind: z.literal('CELLS'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+  z.object({ kind: z.literal('FRONT_COUNT'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+  z.object({ kind: z.literal('GLORY'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+  z.object({ kind: z.literal('INFLUENCE'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+  z.object({ kind: z.literal('HAND_COUNT'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+  z.object({ kind: z.literal('SELF_HEALTH'), op: z.enum(COMPARATORS), value: z.number().int() }),
+  z.object({ kind: z.literal('SELF_STRENGTH'), op: z.enum(COMPARATORS), value: z.number().int() }),
+]) as any;
+
+const EffectSchema: z.ZodType<import('./abilities').Effect> = z.lazy(() =>
+  z.union([
+    z.object({ kind: z.literal('DEAL_DAMAGE'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS) }),
+    z.object({ kind: z.literal('HEAL'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS) }),
+    z.object({ kind: z.literal('BUFF'), strength: z.number().int(), health: z.number().int(), target: z.enum(TARGET_SELECTORS) }),
+    z.object({ kind: z.literal('DRAW'), count: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
+    z.object({ kind: z.literal('GAIN_INFLUENCE'), amount: z.number().int(), who: z.enum(['SELF', 'OPPONENT']) }),
+    z.object({ kind: z.literal('DAMAGE_GLORY'), amount: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
+    z.object({ kind: z.literal('HEAL_GLORY'), amount: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
+    z.object({
+      kind: z.literal('CHOOSE_TARGETS_THEN'),
+      selection: z.object({
+        from: z.enum(['ENEMY_FRONT', 'ENEMY_BOARD', 'FRIENDLY_FRONT', 'FRIENDLY_BOARD', 'ANY_FRONT', 'ANY_CARD']),
+        count: z.number().int().min(1),
+      }),
+      then: z.array(EffectSchema),
+    }),
+    z.object({ 
+	  kind: z.literal('SUMMON'), 
+	  defId: z.string(), 
+	  count: z.number().int().min(1).max(5), 
+	  who: z.enum(['SELF', 'OPPONENT']),
+      destination: z.enum(['FRONT', 'RESERVE', 'HAND']).optional()
+	}),
+    z.object({ 
+	  kind: z.literal('RETURN_TO_HAND'),
+	  target: z.enum(TARGET_SELECTORS),
+	}),
+    z.object({ 
+	  kind: z.literal('MOVE_CARD'),
+	  target: z.enum(TARGET_SELECTORS),
+	  to: z.enum(['RANDOM_OWN_EMPTY', 'OWN_RESERVE']),
+	}),
+    z.object({ 
+	  kind: z.literal('RETURN_FROM_DISCARD'),
+	  count: z.number().int().min(1).max(5),
+	  who: z.enum(['SELF', 'OPPONENT']),
+	  destination: z.enum(['HAND', 'DECK_TOP']),
+	}),
+    z.object({ 
+	  kind: z.literal('DISCARD_RANDOM'),
+	  count: z.number().int().min(1).max(5),
+	  who: z.enum(['SELF', 'OPPONENT']),
+	}),
+  ]),
+) as any;
+
+const TriggeredAbilitySchema = z.object({
+  id: z.string().optional(),
+  trigger: z.enum(TRIGGER_TYPES),
+  condition: ConditionSchema.optional(),
+  oncePerTurn: z.boolean().optional(),
+  effects: z.array(EffectSchema),
+});
+
+const ActivatedAbilitySchema = z.object({
+  id: z.string(),
+  cost: z.number().int().min(0),
+  effects: z.array(EffectSchema),
+});
+
+export const CardDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  personalityTag: z.string(),
+  tags: z.array(z.string()).default([]),
+  cost: z.number().int().min(0),
+  strength: z.number().int().min(0),
+  health: z.number().int().min(1),
+  rarity: z.enum(RARITIES),
+  abilities: z.array(z.enum(KEYWORD_IDS)).default([]),
+  triggers: z.array(TriggeredAbilitySchema).default([]),
+  activatedAbilities: z.array(ActivatedAbilitySchema).default([]),
+  isToken: z.boolean().default(false),
+  sharesIdentity: z.boolean().default(false),
+  tempDuration: z.number().int().min(1).max(10).optional(),
+});
+
+export type CardDefinition = z.input<typeof CardDefinitionSchema>;
+export type ResolvedCardDefinition = z.output<typeof CardDefinitionSchema>;

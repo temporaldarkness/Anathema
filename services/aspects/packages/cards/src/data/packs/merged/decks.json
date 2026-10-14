@@ -1,0 +1,152 @@
+[
+  {
+    "id": "stormwind",
+    "name": "Стража Штормграда",
+    "description": "Дисциплинированный midrange: заслон щитов, лучники на стенах и рыцарская конница",
+    "archetype": "midrange",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "sw_spearman", "sw_spearman", "sw_spearman",
+      "sw_spearman", "sw_runner", "sw_runner",
+      "sw_runner", "sw_swordsman", "sw_swordsman",
+      "sw_swordsman", "sw_swordsman", "sw_gatekeeper",
+      "sw_gatekeeper", "sw_shieldbearer", "sw_shieldbearer",
+      "sw_herald", "sw_herald", "sw_knight",
+      "sw_knight", "sw_knight", "sw_captain",
+      "sw_captain", "sw_captain", "sw_archer",
+      "sw_archer", "sw_vanguard", "sw_vanguard",
+      "sw_marksman", "sw_marksman", "lg_roland"
+    ]
+  },
+  {
+    "id": "voidflame",
+    "name": "Пламя Пустоты",
+    "description": "Культ пепла: дешёвые фанатики, взрывные эффекты и финишеры через жертву",
+    "archetype": "aggro",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "vf_spark", "vf_spark", "vf_spark",
+      "vf_spark", "vf_vow", "vf_vow",
+      "vf_vow", "vf_vow", "vf_desperate",
+      "vf_desperate", "vf_cinder", "vf_cinder",
+      "vf_cinder", "vf_cinder", "vf_ash_sniper",
+      "vf_ash_sniper", "vf_ash_sniper", "vf_scribe",
+      "vf_scribe", "vf_pit_berserker", "vf_pit_berserker",
+      "vf_pit_berserker", "vf_duelist", "vf_duelist",
+      "vf_duelist", "vf_duelist", "vf_slag_thrower",
+      "vf_slag_thrower", "vf_ash_lord", "lg_tarn"
+    ]
+  },
+  {
+    "id": "forsaken",
+    "name": "Отрекшиеся",
+    "description": "Осадный midrange: смерть как ресурс, воскрешение и работа с кладбищем",
+    "archetype": "midrange",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "vf_brand", "vf_brand", "vf_brand",
+      "vf_brand", "vf_vow", "vf_vow",
+      "vf_vow", "vf_cinder", "vf_cinder",
+      "vf_cinder", "vf_scribe", "vf_scribe",
+      "vf_scribe", "vf_ash_core", "vf_ash_core",
+      "vf_ash_core", "vf_ash_priest", "vf_ash_priest",
+      "vf_ash_priest", "vf_parasite", "vf_parasite",
+      "vf_parasite", "vf_symbiote", "vf_symbiote",
+      "vf_symbiote", "vf_ash_medic", "vf_ash_lord",
+      "vf_ash_lord", "lg_marcan", "lg_lianna"
+    ]
+  },
+  {
+    "id": "legends",
+    "name": "Апокриф",
+    "description": "Секретный контроль: taunt-стена, точечные зачистки, поздние финишеры",
+    "archetype": "control",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "sw_spearman", "sw_spearman", "sw_gatekeeper",
+      "sw_gatekeeper", "sw_gatekeeper", "sw_gatekeeper",
+      "sw_shieldbearer", "sw_shieldbearer", "sw_shieldbearer",
+      "sw_shieldbearer", "sw_chaplain", "sw_chaplain",
+      "sw_chaplain", "sw_dawn_volley", "sw_dawn_volley",
+      "sw_dawn_volley", "sw_archmage", "sw_archmage",
+      "sw_templar", "sw_templar", "sw_templar",
+      "sw_retribution", "sw_retribution", "sw_mage",
+      "sw_mage", "lg_edwin", "lg_anselm",
+      "lg_lifemother", "lg_hunger", "lg_calamity"
+    ]
+  },
+  {
+    "id": "steel",
+    "name": "Стальной Корпус",
+    "description": "Регулярная армия: дисциплинированная пехота, техника и артиллерия",
+    "archetype": "midrange",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "st_private",    "st_private",    "st_runner",     "st_runner",
+      "st_runner",     "st_rifleman",   "st_rifleman",   "st_rifleman",
+      "st_mg",         "st_mg",         "st_sapper",     "st_sapper",
+      "st_intel",      "st_intel",      "st_intel",      "st_sgt",
+      "st_sgt",        "st_sgt",        "st_grenadier",  "st_apc",
+      "st_apc",        "st_barrage",    "st_officer",    "st_officer",
+      "st_tank",       "st_tank",       "st_general",    "st_bulwark",
+      "st_ghost_lead", "st_polaris"
+    ]
+  },
+  {
+    "id": "razlom",
+    "name": "Разлом",
+    "description": "Городская герилья: самодельные взрывные устройства, ячейки сопротивления",
+    "archetype": "aggro",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "rl_firestarter",  "rl_firestarter",  "rl_martyr",
+      "rl_martyr",       "rl_martyr",       "rl_desperate",
+      "rl_desperate",    "rl_militant",     "rl_militant",
+      "rl_sniper",       "rl_sniper",       "rl_ied",
+      "rl_ied",          "rl_living_bomb",  "rl_living_bomb",
+      "rl_agitator",     "rl_agitator",     "rl_raider",
+      "rl_raider",       "rl_raider",       "rl_fanatic",
+      "rl_fanatic",      "rl_incendiary",   "rl_incendiary",
+      "rl_cell_leader",  "rl_cell_leader",  "rl_bomber",
+      "rl_bomber",       "rl_commissar",    "rl_hollow_voice"
+    ]
+  },
+  {
+    "id"             : "echo",
+    "name"           : "Эхо-7",
+    "description"    : "Разведка, точечные удары, диверсии и дроны",
+    "archetype"      : "midrange",
+    "expectedWinrate": 0.5,
+    "cards"          : [
+      "eh_spotter",        "eh_spotter",        "eh_agent",
+      "eh_agent",          "eh_operator",       "eh_operator",
+      "eh_analyst",        "eh_analyst",        "eh_sharpshooter",
+      "eh_sharpshooter",   "eh_infiltrator",    "eh_infiltrator",
+      "eh_hacker",         "eh_hacker",         "eh_drone_operator",
+      "eh_drone_operator", "eh_saboteur",       "eh_saboteur",
+      "eh_medic",          "eh_medic",          "eh_ghost",
+      "eh_ghost",          "eh_psi_op",         "eh_quartermaster",
+      "eh_quartermaster",  "eh_oracle",         "eh_oracle",
+      "eh_pathfinder",     "eh_widowmaker",     "eh_blackout"
+    ]
+  },
+  {
+    "id"             : "sky",
+    "name"           : "Стратос",
+    "description"    : "Авиаудары, тяжёлая артиллерия, корпоративные ЧВК",
+    "archetype"      : "control",
+    "expectedWinrate": 0.5,
+    "cards"          : [
+      "sk_conscript",       "sk_conscript",       "sk_runner",
+      "sk_runner",          "sk_rifleman",        "sk_rifleman",
+      "sk_rifleman",        "sk_rifleman",        "sk_medic",
+      "sk_medic",           "sk_chaplain",        "sk_chaplain",
+      "sk_engineer",        "sk_engineer",        "sk_barrage",
+      "sk_barrage",         "sk_barrage",         "sk_vanguard",
+      "sk_vanguard",        "sk_sniper",          "sk_sniper",
+      "sk_heavy_artillery", "sk_heavy_artillery", "sk_apc",
+      "sk_marshall",        "sk_advisor",         "sk_sanctuary",
+      "sk_lifeline",        "sk_supercell",       "sk_chronos"
+    ]
+  }
+]

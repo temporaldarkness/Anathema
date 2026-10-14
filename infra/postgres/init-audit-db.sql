@@ -1,4 +1,6 @@
 CREATE DATABASE audit_db;
 CREATE DATABASE radio_db;
+CREATE DATABASE anathemaaspects;
 GRANT ALL PRIVILEGES ON DATABASE audit_db TO anathema;
 GRANT ALL PRIVILEGES ON DATABASE radio_db TO anathema;
+GRANT ALL PRIVILEGES ON DATABASE anathemaaspects TO anathema;

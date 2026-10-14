@@ -1,0 +1,86 @@
+/* @theme
+   name: Pina Colada
+   description: Пляжный бар на закате. Коралловый коктейль на кремовом песке.
+   light: true
+*/
+
+:root {
+  --clr-background: #FFF7E6;
+  --clr-element-bg: #FFFFFF;
+  --clr-element-muted: #FFF2D9;
+  --clr-border: #FFE6BF;
+  --clr-title: #3E2E1A;
+  --clr-subtitle: #8C7759;
+  --clr-accent: #FF6B6B;
+  --clr-text: #5C4A38;
+
+  --clr-shadow: rgba(255, 107, 107, 0.1);
+  --clr-shadow-focus: rgba(255, 107, 107, 0.2);
+
+  --clr-bg-input: #F5E8D2;
+  --clr-bg-muted: #FFF2D9;
+  --clr-bg-subtle: #FFF5E0;
+  --clr-surface: #FFFBF0;
+  --clr-surface-hover: #F8EFDE;
+  --clr-surface-active: #EFE3CB;
+  --clr-border-strong: #D8C0A0;
+  --clr-border-hover: #B8A080;
+  --clr-elevated: var(--clr-element-bg);
+
+  --clr-text-soft: #5E5240;
+  --clr-text-muted: #7A6C58;
+  --clr-text-dim: #9A8C78;
+  --clr-text-faint: #BAAEA0;
+
+  --clr-accent-dark: #7A3030;
+  --clr-accent-mid: #B04848;
+  --clr-accent-hover: #FF8A8A;
+  --clr-accent-light: #FFA8A8;
+  --clr-accent-soft: #FFC8C8;
+  --clr-accent-bg: #FFE8E8;
+  --clr-accent-bg-2: #FFD8D8;
+
+  --clr-danger: #C8253E;
+  --clr-danger-dark: #5A1018;
+  --clr-danger-mid: #9C1C30;
+  --clr-danger-hover: #D84058;
+  --clr-danger-light: #E88098;
+  --clr-danger-light-2: #E67890;
+  --clr-danger-light-3: #F0A8B8;
+  --clr-danger-border: #B02038;
+  --clr-danger-bg: #FADCE4;
+  --clr-danger-bg-2: #F5C8D2;
+
+  --clr-warning: #D4A230;
+  --clr-warning-hover: #E8B848;
+  --clr-warning-border: #A8802C;
+  --clr-warning-mid: #9E7A2C;
+  --clr-warning-hover-2: #806020;
+  --clr-warning-bg: #FAF2DC;
+  --clr-warning-bg-2: #F5E5BE;
+  --clr-warning-bg-3: #EFD8A0;
+
+  --clr-success: #3A9A5C;
+
+  --clr-epic: #9C4FC4;
+  --clr-epic-light: #B878D8;
+  --clr-epic-soft: #D0A0E4;
+  --clr-epic-bg: #F5E8FA;
+  --clr-epic-bg-2: #EAD5F4;
+  --clr-epic-bg-3: #DEBCE8;
+  --clr-epic-bg-4: #F0D8E4;
+  --clr-epic-border: #C898DC;
+  --clr-epic-border-2: #B078C4;
+  --clr-epic-border-3: #C078A8;
+
+  --clr-rarity-common: #C8B8A0;
+  --clr-rarity-uncommon: #3A9A5C;
+  --clr-rarity-rare: #3A7EB8;
+  --clr-rarity-epic: #9C4FC4;
+  --clr-rarity-legendary: #D4A230;
+
+  --clr-tooltip-bg: #FFF2DE;
+
+  --clr-p1: #FF6B6B;
+  --clr-p2: #2A8A8A;
+}

@@ -1,0 +1,27 @@
+-- CreateTable
+CREATE TABLE "ratings" (
+    "userId" TEXT NOT NULL,
+    "rating" DOUBLE PRECISION NOT NULL DEFAULT 1500,
+    "rd" DOUBLE PRECISION NOT NULL DEFAULT 350,
+    "volatility" DOUBLE PRECISION NOT NULL DEFAULT 0.06,
+    "matchesPlayed" INTEGER NOT NULL DEFAULT 0,
+    "wins" INTEGER NOT NULL DEFAULT 0,
+    "losses" INTEGER NOT NULL DEFAULT 0,
+    "lastPlayedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    CONSTRAINT "ratings_pkey" PRIMARY KEY ("userId")
+);
+
+-- CreateTable
+CREATE TABLE "bot_ratings" (
+    "botId" TEXT NOT NULL,
+    "rating" DOUBLE PRECISION NOT NULL DEFAULT 1500,
+    "rd" DOUBLE PRECISION NOT NULL DEFAULT 350,
+    "volatility" DOUBLE PRECISION NOT NULL DEFAULT 0.06,
+    "matchesPlayed" INTEGER NOT NULL DEFAULT 0,
+    "wins" INTEGER NOT NULL DEFAULT 0,
+    "losses" INTEGER NOT NULL DEFAULT 0,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    CONSTRAINT "bot_ratings_pkey" PRIMARY KEY ("botId")
+);

@@ -1,0 +1,85 @@
+/* @theme
+   name: Aged Bronze
+   description: Морской компас в шкатулке. Патина на окисленной бронзе.
+   light: false
+*/
+
+:root {
+  --clr-background: #0F1A22;
+  --clr-element-bg: #1C2D30;
+  --clr-element-muted: #2A3F43;
+  --clr-border: #3D565B;
+  --clr-title: #B8E1C4;
+  --clr-subtitle: #7DAF9C;
+  --clr-accent: #4FB28B;
+  --clr-text: #C3D8CD;
+
+  --clr-shadow: rgba(95, 187, 151, 0.1);
+  --clr-shadow-focus: rgba(95, 187, 151, 0.25);
+
+  --clr-bg-input: #0B1318;
+  --clr-bg-muted: #2A3F43;
+  --clr-bg-subtle: #14202A;
+  --clr-surface: #243A3E;
+  --clr-surface-hover: #2F474C;
+  --clr-surface-active: #3A555A;
+  --clr-border-strong: #4D6A70;
+  --clr-border-hover: #5F8088;
+
+  --clr-text-soft: #A5BFB3;
+  --clr-text-muted: #84A095;
+  --clr-text-dim: #647A72;
+  --clr-text-faint: #485A54;
+
+  --clr-accent-dark: #23503E;
+  --clr-accent-mid: #377C61;
+  --clr-accent-hover: #69BD9C;
+  --clr-accent-light: #8CCDB4;
+  --clr-accent-soft: #B0DCCB;
+  --clr-accent-bg: #1A3038;
+  --clr-accent-bg-2: #152528;
+
+  --clr-danger: #FF6B6B;
+  --clr-danger-dark: #5A2028;
+  --clr-danger-mid: #8C3040;
+  --clr-danger-hover: #FF8A8A;
+  --clr-danger-light: #FFB3B3;
+  --clr-danger-light-2: #FFA8A8;
+  --clr-danger-light-3: #FFC8C8;
+  --clr-danger-border: #6B2C34;
+  --clr-danger-bg: #2A1A1C;
+  --clr-danger-bg-2: #4A2024;
+
+  --clr-warning: #E6C75C;
+  --clr-warning-hover: #F0D880;
+  --clr-warning-border: #7A6428;
+  --clr-warning-mid: #B09840;
+  --clr-warning-hover-2: #C8B058;
+  --clr-warning-bg: #2A2818;
+  --clr-warning-bg-2: #3A3620;
+  --clr-warning-bg-3: #4A4028;
+
+  --clr-success: #7DAF9C;
+
+  --clr-epic: #A85CD2;
+  --clr-epic-light: #C08AE0;
+  --clr-epic-soft: #D8B0EC;
+  --clr-epic-bg: #201828;
+  --clr-epic-bg-2: #302038;
+  --clr-epic-bg-3: #402848;
+  --clr-epic-bg-4: #382830;
+  --clr-epic-border: #4A2858;
+  --clr-epic-border-2: #603870;
+  --clr-epic-border-3: #705068;
+
+  --clr-rarity-common: #3D565B;
+  --clr-rarity-uncommon: #4FB28B;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #A85CD2;
+  --clr-rarity-legendary: #E6C75C;
+
+  --clr-tooltip-bg: #14202A;
+
+  --clr-p1: #4FB28B;
+  --clr-p2: #FF6B6B;
+}

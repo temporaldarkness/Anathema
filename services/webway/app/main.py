@@ -2,8 +2,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Union
 
 import httpx
-from fastapi import FastAPI, HTTPException, Depends, Request, Response, Query, UploadFile, File, Form, Query
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, HTTPException, Depends, Request, Response, Query, UploadFile, File, Form, Query, Header
+from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel, Field, field_validator
 import asyncio
 from .memory_client import MemoryClient
@@ -18,7 +18,7 @@ import json
 from . import session as session_store
 import secrets
 
-from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY, BACKEND_URL, SESSION_COOKIE_NAME, SESSION_COOKIE_SECURE, WEBWAY_TTS_CLIENT_KEY, TTS_SERVICE_URL
+from .config import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, DISCORD_GUILD_ID, WEBWAY_MEMORY_CLIENT_KEY, WEBWAY_SECURITY_CLIENT_KEY, WEBWAY_HISTORY_CLIENT_KEY, WEBWAY_STORAGE_CLIENT_KEY, WEBWAY_AUDIT_CLIENT_KEY, MEMORY_SERVICE_URL, MESSAGE_HISTORY_SERVICE_URL, SECURITY_SERVICE_URL, STORAGE_SERVICE_URL, DISCORD_TOKEN, PROXY_API_BALANCE_URL, PROXY_API_KEY, REDIS_URL, AUDIT_SERVICE_URL, KAFKA_BOOTSTRAP_SERVERS, DISCORD_GUILD_ID, RADIO_SERVICE_URL, WEBWAY_RADIO_CLIENT_KEY, BACKEND_URL, SESSION_COOKIE_NAME, SESSION_COOKIE_SECURE, WEBWAY_TTS_CLIENT_KEY, TTS_SERVICE_URL, WEBWAY_ASPECTS_CLIENT_KEY
 
 CHANNEL_TYPES = {
     0: "Текстовый",
@@ -38,7 +38,8 @@ EXPECTED_WORKERS = {
     "image_worker":     {"label": "Image Worker"},
     "reaction_worker":  {"label": "Reaction Worker"},
     "admin_service":    {"label": "Admin Service"},
-    "tts_service":      {"label": "TTS Service"}
+    "tts_service":      {"label": "TTS Service"},
+    "aspects_backend":  {"label": "Stormwind Aspects"}
 }
 STALE_AFTER_SEC = 50
 
@@ -1980,8 +1981,56 @@ async def dashboard_heartbeats(current_user: UserSession = Depends(get_current_u
         })
     return {"services": result}
 
-from datetime import datetime, timezone
-BOOT_TIME = datetime.now(timezone.utc)
+
+@app.get("/api/games/auth")
+async def games_auth(request: Request):
+    sid = request.cookies.get(SESSION_COOKIE_NAME)
+    headers: dict[str, str] = {}
+
+    if sid:
+        data = await session_store.get_session(sid)
+        if data:
+            await session_store.touch_session(sid)
+            headers = {
+                "X-User-Id": str(data["user_id"]),
+                "X-User-Name": data["username"],
+                "X-User-Is-Admin": "1" if data.get("is_admin") else "0",
+                "X-User-Avatar-Url": data["avatar_url"],
+            }
+
+    return JSONResponse(status_code=200, content={}, headers=headers)
+
+
+class GameAuditPayload(BaseModel):
+    user_id: str
+    username: str
+    action: str
+    entity_type: str
+    entity_id: str | None = None
+    details: dict = {}
+
+
+@app.post("/api/games/audit")
+async def game_audit(
+    payload: GameAuditPayload,
+    request: Request,
+    x_api_key: str = Header(...),
+):
+    if x_api_key != WEBWAY_ASPECTS_CLIENT_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    await write_audit_raw(
+        actor_id=str(payload.user_id),
+        actor_username=payload.username,
+        actor_type="aspects",
+        source_service="aspects",
+        action=payload.action,
+        entity_type=payload.entity_type,
+        entity_id=payload.entity_id,
+        details=payload.details,
+        ip=request.client.host if request.client else None,
+    )
+    return {"ok": True}
 
 @app.get("/health")
 async def health():

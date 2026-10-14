@@ -1,0 +1,85 @@
+/* @theme
+   name: Bioluminescence
+   description: Свечение медуз на дне океана. Циан и розовый в чернильной глубине.
+   light: false
+*/
+
+:root {
+  --clr-background: #000B18;
+  --clr-element-bg: #001A30;
+  --clr-element-muted: #00294D;
+  --clr-border: #004080;
+  --clr-title: #00FFE0;
+  --clr-subtitle: #00B3A4;
+  --clr-accent: #FF2A6D;
+  --clr-text: #80D0FF;
+
+  --clr-shadow: rgba(0, 255, 224, 0.1);
+  --clr-shadow-focus: rgba(255, 42, 109, 0.3);
+
+  --clr-bg-input: #00060F;
+  --clr-bg-muted: #00294D;
+  --clr-bg-subtle: #001225;
+  --clr-surface: #002040;
+  --clr-surface-hover: #002A50;
+  --clr-surface-active: #003360;
+  --clr-border-strong: #0050A0;
+  --clr-border-hover: #0060C0;
+
+  --clr-text-soft: #60B8E8;
+  --clr-text-muted: #4A98C8;
+  --clr-text-dim: #3478A0;
+  --clr-text-faint: #1F5878;
+
+  --clr-accent-dark: #721231;
+  --clr-accent-mid: #B21D4C;
+  --clr-accent-hover: #FF4A83;
+  --clr-accent-light: #FF75A0;
+  --clr-accent-soft: #FF9FBD;
+  --clr-accent-bg: #3A1025;
+  --clr-accent-bg-2: #2A0A1A;
+
+  --clr-danger: #FF4444;
+  --clr-danger-dark: #5A1A1A;
+  --clr-danger-mid: #8A2A2A;
+  --clr-danger-hover: #FF6666;
+  --clr-danger-light: #FF9090;
+  --clr-danger-light-2: #FF8888;
+  --clr-danger-light-3: #FFAAAA;
+  --clr-danger-border: #8A2A2A;
+  --clr-danger-bg: #2A0A10;
+  --clr-danger-bg-2: #4A1020;
+
+  --clr-warning: #FFD700;
+  --clr-warning-hover: #FFE44D;
+  --clr-warning-border: #8A7020;
+  --clr-warning-mid: #C0A000;
+  --clr-warning-hover-2: #E0B800;
+  --clr-warning-bg: #2A2410;
+  --clr-warning-bg-2: #3A3018;
+  --clr-warning-bg-3: #4A3A20;
+
+  --clr-success: #00FFB3;
+
+  --clr-epic: #8B5CF6;
+  --clr-epic-light: #A888F8;
+  --clr-epic-soft: #C8B0FC;
+  --clr-epic-bg: #1A1030;
+  --clr-epic-bg-2: #281848;
+  --clr-epic-bg-3: #382860;
+  --clr-epic-bg-4: #302040;
+  --clr-epic-border: #40306A;
+  --clr-epic-border-2: #5840A0;
+  --clr-epic-border-3: #684890;
+
+  --clr-rarity-common: #004080;
+  --clr-rarity-uncommon: #00FFB3;
+  --clr-rarity-rare: #00FFE0;
+  --clr-rarity-epic: #8B5CF6;
+  --clr-rarity-legendary: #FFD700;
+
+  --clr-tooltip-bg: #001225;
+
+  --clr-p1: #FF2A6D;
+  --clr-p2: #00FFE0;
+}

@@ -1,0 +1,85 @@
+/* @theme
+   name: Cryptic Quantum
+   description: Зашифрованный сигнал из глубокого космоса. Циан и розовый на чернильном.
+   light: false
+*/
+
+:root {
+  --clr-background: #000A1A;
+  --clr-element-bg: #001233;
+  --clr-element-muted: #001F4D;
+  --clr-border: #003366;
+  --clr-title: #00E6FF;
+  --clr-subtitle: #66B2FF;
+  --clr-accent: #FF4D88;
+  --clr-text: #CCE6FF;
+
+  --clr-shadow: rgba(0, 230, 255, 0.1);
+  --clr-shadow-focus: rgba(255, 77, 136, 0.3);
+
+  --clr-bg-input: #00060F;
+  --clr-bg-muted: #001F4D;
+  --clr-bg-subtle: #000C24;
+  --clr-surface: #001840;
+  --clr-surface-hover: #001F52;
+  --clr-surface-active: #002866;
+  --clr-border-strong: #004080;
+  --clr-border-hover: #0050A0;
+
+  --clr-text-soft: #B0D0F0;
+  --clr-text-muted: #90B0D8;
+  --clr-text-dim: #6E90BC;
+  --clr-text-faint: #4E7098;
+
+  --clr-accent-dark: #7A2040;
+  --clr-accent-mid: #B83060;
+  --clr-accent-hover: #FF6B9C;
+  --clr-accent-light: #FF90B3;
+  --clr-accent-soft: #FFB8CC;
+  --clr-accent-bg: #3A1025;
+  --clr-accent-bg-2: #2A0A1A;
+
+  --clr-danger: #FF4444;
+  --clr-danger-dark: #5A1A1A;
+  --clr-danger-mid: #8A2A2A;
+  --clr-danger-hover: #FF6666;
+  --clr-danger-light: #FF9090;
+  --clr-danger-light-2: #FF8888;
+  --clr-danger-light-3: #FFAAAA;
+  --clr-danger-border: #8A2A2A;
+  --clr-danger-bg: #2A0A10;
+  --clr-danger-bg-2: #4A1018;
+
+  --clr-warning: #FFD700;
+  --clr-warning-hover: #FFE44D;
+  --clr-warning-border: #8A7020;
+  --clr-warning-mid: #C0A000;
+  --clr-warning-hover-2: #E0B800;
+  --clr-warning-bg: #2A2410;
+  --clr-warning-bg-2: #3A3018;
+  --clr-warning-bg-3: #4A3A20;
+
+  --clr-success: #00FFB3;
+
+  --clr-epic: #8B5CF6;
+  --clr-epic-light: #A888F8;
+  --clr-epic-soft: #C8B0FC;
+  --clr-epic-bg: #101838;
+  --clr-epic-bg-2: #1A2050;
+  --clr-epic-bg-3: #282870;
+  --clr-epic-bg-4: #282848;
+  --clr-epic-border: #3A3078;
+  --clr-epic-border-2: #5040A0;
+  --clr-epic-border-3: #604098;
+
+  --clr-rarity-common: #003366;
+  --clr-rarity-uncommon: #00FFB3;
+  --clr-rarity-rare: #00E6FF;
+  --clr-rarity-epic: #8B5CF6;
+  --clr-rarity-legendary: #FFD700;
+
+  --clr-tooltip-bg: #000C24;
+
+  --clr-p1: #FF4D88;
+  --clr-p2: #A8B8FF;
+}

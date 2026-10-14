@@ -1,0 +1,86 @@
+/* @theme
+   name: Umbral
+   description: Сумрак между мирами. Фиолетовый свет сквозь матовое стекло.
+   light: false
+*/
+
+:root {
+  --clr-background: rgba(16, 18, 27, 0.95);
+  --clr-element-bg: rgba(255, 255, 255, 0.05);
+  --clr-element-muted: rgba(255, 255, 255, 0.1);
+  --clr-border: rgba(255, 255, 255, 0.15);
+  --clr-title: #FFFFFF;
+  --clr-subtitle: rgba(255, 255, 255, 0.7);
+  --clr-accent: #7F5AF0;
+  --clr-text: rgba(255, 255, 255, 0.9);
+
+  --clr-shadow: rgba(0, 0, 0, 0.3);
+  --clr-shadow-focus: rgba(127, 90, 240, 0.4);
+
+  --clr-bg-input: rgba(0, 0, 0, 0.3);
+  --clr-bg-muted: rgba(255, 255, 255, 0.1);
+  --clr-bg-subtle: rgba(255, 255, 255, 0.03);
+  --clr-surface: rgba(255, 255, 255, 0.06);
+  --clr-surface-hover: rgba(255, 255, 255, 0.09);
+  --clr-surface-active: rgba(255, 255, 255, 0.13);
+  --clr-border-strong: rgba(255, 255, 255, 0.25);
+  --clr-border-hover: rgba(255, 255, 255, 0.35);
+  --clr-elevated: rgba(255, 255, 255, 0.1);
+
+  --clr-text-soft: rgba(255, 255, 255, 0.75);
+  --clr-text-muted: rgba(255, 255, 255, 0.6);
+  --clr-text-dim: rgba(255, 255, 255, 0.45);
+  --clr-text-faint: rgba(255, 255, 255, 0.3);
+
+  --clr-accent-dark: #3E2C78;
+  --clr-accent-mid: #5E42B8;
+  --clr-accent-hover: #9878F4;
+  --clr-accent-light: #B498F8;
+  --clr-accent-soft: #D0BCFC;
+  --clr-accent-bg: rgba(127, 90, 240, 0.14);
+  --clr-accent-bg-2: rgba(127, 90, 240, 0.08);
+
+  --clr-danger: #FF4D5C;
+  --clr-danger-dark: #7A2028;
+  --clr-danger-mid: #B03040;
+  --clr-danger-hover: #FF6E7C;
+  --clr-danger-light: #FF98A4;
+  --clr-danger-light-2: #FF909E;
+  --clr-danger-light-3: #FFB8C0;
+  --clr-danger-border: rgba(255, 77, 92, 0.5);
+  --clr-danger-bg: rgba(255, 77, 92, 0.12);
+  --clr-danger-bg-2: rgba(255, 77, 92, 0.2);
+
+  --clr-warning: #FFD966;
+  --clr-warning-hover: #FFE68A;
+  --clr-warning-border: rgba(255, 217, 102, 0.4);
+  --clr-warning-mid: #C0A040;
+  --clr-warning-hover-2: #E0C060;
+  --clr-warning-bg: rgba(255, 217, 102, 0.1);
+  --clr-warning-bg-2: rgba(255, 217, 102, 0.16);
+  --clr-warning-bg-3: rgba(255, 217, 102, 0.22);
+
+  --clr-success: #4ADE80;
+
+  --clr-epic: #E044C0;
+  --clr-epic-light: #EC78D4;
+  --clr-epic-soft: #F4B0E4;
+  --clr-epic-bg: rgba(224, 68, 192, 0.12);
+  --clr-epic-bg-2: rgba(224, 68, 192, 0.18);
+  --clr-epic-bg-3: rgba(224, 68, 192, 0.25);
+  --clr-epic-bg-4: rgba(224, 68, 192, 0.15);
+  --clr-epic-border: rgba(224, 68, 192, 0.4);
+  --clr-epic-border-2: rgba(224, 68, 192, 0.55);
+  --clr-epic-border-3: rgba(224, 68, 192, 0.7);
+
+  --clr-rarity-common: rgba(255, 255, 255, 0.3);
+  --clr-rarity-uncommon: #4ADE80;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #E044C0;
+  --clr-rarity-legendary: #FFD966;
+
+  --clr-tooltip-bg: rgba(14, 16, 24, 0.95);
+
+  --clr-p1: #7F5AF0;
+  --clr-p2: #FF4D5C;
+}

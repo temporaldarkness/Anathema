@@ -1,0 +1,85 @@
+/* @theme
+   name: Lava Lamp
+   description: Лавовая лампа в гостиной 70-х. Розовый воск и золото в фиолетовой жидкости.
+   light: false
+*/
+
+:root {
+  --clr-background: #2D0A3D;
+  --clr-element-bg: #45195A;
+  --clr-element-muted: #5D2871;
+  --clr-border: #7A3E8F;
+  --clr-title: #FFD700;
+  --clr-subtitle: #FFA500;
+  --clr-accent: #FF1493;
+  --clr-text: #FFE4E1;
+
+  --clr-shadow: rgba(255, 215, 0, 0.2);
+  --clr-shadow-focus: rgba(255, 20, 147, 0.4);
+
+  --clr-bg-input: #1E0528;
+  --clr-bg-muted: #5D2871;
+  --clr-bg-subtle: #381048;
+  --clr-surface: #4A1E60;
+  --clr-surface-hover: #562670;
+  --clr-surface-active: #623080;
+  --clr-border-strong: #8A4898;
+  --clr-border-hover: #9E58AC;
+
+  --clr-text-soft: #E8C8C8;
+  --clr-text-muted: #C8A8B0;
+  --clr-text-dim: #A88898;
+  --clr-text-faint: #886878;
+
+  --clr-accent-dark: #7A0A47;
+  --clr-accent-mid: #B01070;
+  --clr-accent-hover: #FF44A8;
+  --clr-accent-light: #FF80C0;
+  --clr-accent-soft: #FFB3D8;
+  --clr-accent-bg: #3A1030;
+  --clr-accent-bg-2: #2A0820;
+
+  --clr-danger: #FF3A3A;
+  --clr-danger-dark: #7A1515;
+  --clr-danger-mid: #B02424;
+  --clr-danger-hover: #FF5C5C;
+  --clr-danger-light: #FF8A8A;
+  --clr-danger-light-2: #FF8282;
+  --clr-danger-light-3: #FFAAAA;
+  --clr-danger-border: #8A2020;
+  --clr-danger-bg: #2A0A10;
+  --clr-danger-bg-2: #4A1018;
+
+  --clr-warning: #FFD700;
+  --clr-warning-hover: #FFE44D;
+  --clr-warning-border: #8A7020;
+  --clr-warning-mid: #C0A000;
+  --clr-warning-hover-2: #E0B800;
+  --clr-warning-bg: #3A2A10;
+  --clr-warning-bg-2: #4A3618;
+  --clr-warning-bg-3: #5A4220;
+
+  --clr-success: #4ADE80;
+
+  --clr-epic: #7C5CFF;
+  --clr-epic-light: #A088FF;
+  --clr-epic-soft: #C8B8FF;
+  --clr-epic-bg: #1A1038;
+  --clr-epic-bg-2: #281858;
+  --clr-epic-bg-3: #382870;
+  --clr-epic-bg-4: #302050;
+  --clr-epic-border: #403080;
+  --clr-epic-border-2: #5840A8;
+  --clr-epic-border-3: #6848A0;
+
+  --clr-rarity-common: #7A3E8F;
+  --clr-rarity-uncommon: #4ADE80;
+  --clr-rarity-rare: #38BDF8;
+  --clr-rarity-epic: #7C5CFF;
+  --clr-rarity-legendary: #FF9040;
+
+  --clr-tooltip-bg: #381048;
+
+  --clr-p1: #FF1493;
+  --clr-p2: #FFA500;
+}

@@ -382,6 +382,7 @@ services:
       KAFKA_GROUP_USAGE_CONSUMER: ${KAFKA_GROUP_USAGE_CONSUMER}
       TTS_SERVICE_URL: ${TTS_SERVICE_URL}
       WEBWAY_TTS_CLIENT_KEY: ${WEBWAY_TTS_CLIENT_KEY}
+      WEBWAY_ASPECTS_CLIENT_KEY: ${WEBWAY_ASPECTS_CLIENT_KEY}
     depends_on:
       redis:
         condition: service_started
@@ -438,6 +439,8 @@ services:
         condition: service_started
       redis:
         condition: service_started
+      kafka:
+        condition: service_healthy
     networks:
       - anathema_network
     restart: unless-stopped
@@ -513,6 +516,38 @@ services:
     depends_on:
       redis:
         condition: service_started
+    networks:
+      - anathema_network
+    restart: unless-stopped
+  
+  aspects_backend:
+    build:
+      context: ./services/aspects
+      dockerfile: apps/backend/Dockerfile
+    container_name: aspects_backend
+    environment:
+      ASPECTS_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${ASPECTS_DB_NAME}
+      REDIS_URL: ${REDIS_URL}
+      ASPECTS_REDIS_URL: redis://redis:6379/${ASPECTS_REDIS_DB}
+      WEBWAY_BACKEND_URL: http://webway_backend:8000
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME}
+      WEBWAY_API_KEY: ${WEBWAY_ASPECTS_CLIENT_KEY}
+      PUBLIC_URL: /games/aspects
+      PORT: 8010
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - anathema_network
+    restart: unless-stopped
+
+  aspects_frontend:
+    build:
+      context: ./services/aspects
+      dockerfile: apps/frontend/Dockerfile
+    container_name: aspects_frontend
     networks:
       - anathema_network
     restart: unless-stopped
