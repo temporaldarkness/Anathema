@@ -1,0 +1,1 @@
+ALTER TABLE "Match" DROP COLUMN "packId";

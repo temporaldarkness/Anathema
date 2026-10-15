@@ -19,7 +19,7 @@ export class MatchmakingController {
     return this.matchmaking.enqueue(
       user.id,
       user.username,
-      dto.packId,
+      dto.series,
       dto.deckId,
       dto.deckCards,
     );

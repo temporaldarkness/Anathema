@@ -409,7 +409,7 @@
 					{/if}
 
 					<!-- ОЧЕРЕДЬ (первый = следующий) -->
-					{#each queue as q, i (q.song_id)}
+					{#each queue as q, i}
 						{@const isNext = i === 0}
 						{@const num = (now?.status === 'playing' ? 2 : 1) + i}
 						<li
@@ -489,7 +489,7 @@
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
-						{#each filtered as s (s.id)}
+						{#each filtered as s}
 							<Table.Row>
 								<Table.Cell>
 									<div class="space-y-0.5">

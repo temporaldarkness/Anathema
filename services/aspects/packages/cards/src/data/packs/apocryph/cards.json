@@ -1,0 +1,457 @@
+[
+  {
+    "id": "lg_ingrid",
+    "name": "Морская Ведьма Ингрид",
+    "personalityTag": "lg_ingrid",
+    "tags": [
+      "legend",
+      "neutral",
+      "seer"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "arcane_torrent",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_BOARD",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 4,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id": "frostbolt",
+        "cost": 2,
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_cormac",
+    "name": "Вождь Исхода Кормак",
+    "personalityTag": "lg_cormac",
+    "tags": [
+      "legend",
+      "wanderer",
+      "chieftain"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "elements_favor",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "chain_lightning",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_tarn",
+    "name": "Одноглазый Пророк Тэрн",
+    "personalityTag": "lg_tarn",
+    "tags": [
+      "legend",
+      "wanderer",
+      "prophet"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 4,
+    "rarity": "legendary",
+    "abilities": [
+      "charge",
+      "scout",
+      "breakthrough"
+    ],
+    "triggers": [
+      {
+        "id": "demonic_fury",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DAMAGE_GLORY",
+            "amount": 1,
+            "who": "SELF"
+          },
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_brann",
+    "name": "Охотник Пустошей Бранн",
+    "personalityTag": "lg_brann",
+    "tags": [
+      "legend",
+      "wanderer",
+      "hunter"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "legendary",
+    "abilities": [
+      "charge",
+      "scout"
+    ],
+    "triggers": [
+      {
+        "id": "hunters_mark",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id": "kill_command",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_FRONT",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 1,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_grim",
+    "name": "Военачальник Грим",
+    "personalityTag": "lg_grim",
+    "tags": [
+      "legend",
+      "wanderer",
+      "warlord"
+    ],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "legendary",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "bloodlust",
+        "trigger": "ON_ALLY_DIED",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_edwin",
+    "name": "Юный Наследник Эдвин",
+    "personalityTag": "lg_edwin",
+    "tags": [
+      "legend",
+      "neutral",
+      "heir"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "greater_heal",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "renew",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 5,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_calamity",
+    "name": "Крылатая Погибель",
+    "personalityTag": "lg_calamity",
+    "tags": [
+      "legend",
+      "neutral",
+      "dragon"
+    ],
+    "cost": 8,
+    "strength": 7,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "cataclysm",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 3,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "madness",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_timeweaver",
+    "name": "Прядущий Время",
+    "personalityTag": "lg_timeweaver",
+    "tags": [
+      "legend",
+      "neutral",
+      "dragon",
+      "mage"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "time_shift",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 3,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "eternal_sands",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_lifemother",
+    "name": "Матерь Жизни",
+    "personalityTag": "lg_lifemother",
+    "tags": [
+      "legend",
+      "neutral",
+      "dragon"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "breath_of_life",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 4,
+            "target": "ALL_FRIENDLY_FRONT"
+          },
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 8,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "life_bond",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 1,
+            "target": "ALL_FRIENDLY_BOARD"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_spellweaver",
+    "name": "Чароплёт",
+    "personalityTag": "lg_spellweaver",
+    "tags": [
+      "legend",
+      "neutral",
+      "dragon",
+      "mage"
+    ],
+    "cost": 7,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "arcane_missiles",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "SUMMON",
+            "defId": "tk_meteor",
+            "count": 1,
+            "who": "SELF",
+            "destination": "FRONT"
+          },
+          {
+            "kind": "SUMMON",
+            "defId": "tk_meteor",
+            "count": 1,
+            "who": "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tk_meteor",
+    "name": "Метеор",
+    "personalityTag": "tk_meteor",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 3,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge",
+      "temporary",
+      "breakthrough"
+    ],
+    "isToken": true,
+    "tempDuration": 1
+  },
+  {
+    "id": "tk_phantom",
+    "name": "Фантом",
+    "personalityTag": "tk_phantom",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [
+      "charge",
+      "temporary"
+    ],
+    "isToken": true,
+    "tempDuration": 1
+  }
+]

@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useGame, type ResetParams } from './game/useGame';
-import { listPacks, getDecks } from '@aspects/cards';
+import { listPacks, getDecks, seriesOfDeck, mergedCardsById } from '@aspects/cards';
 import { Board } from './components/Board';
 import { Hand } from './components/Hand';
 import { PlayerPanel } from './components/PlayerPanel';
@@ -34,6 +34,7 @@ import { UserProfileScreen } from './components/UserProfileScreen';
 import { FriendsScreen } from './components/FriendsScreen';
 import { FriendToasts } from './game/friendToasts';
 import { RoomInviteToasts } from './game/roomInviteToasts';
+import { useScreenRouting } from './game/useScreenRouting';
 
 type ActionMode =
   | { kind: 'idle' }
@@ -45,7 +46,7 @@ interface CardMenuState {
   cardId: CardInstanceId;
 }
 
-type Screen =
+export type Screen =
   | { kind: 'profile' }
   | { kind: 'setup' }
   | { kind: 'playing' }
@@ -60,8 +61,6 @@ type Screen =
   | { kind: 'leaderboard' }
   | { kind: 'user-profile'; userId: string }
   | { kind: 'friends' };
-
-const PACKS = listPacks();
 
 function findMatchingPersonalityOnBoard(
   state: GameState,
@@ -83,11 +82,15 @@ function findMatchingPersonalityOnBoard(
   return null;
 }
 
-function defaultResetParams(packId: string): ResetParams {
-  const decks = getDecks(packId);
+function defaultResetParams(): ResetParams {
+  const decks = getDecks();
+  const p1Cards = decks[0]?.cards ?? [];
+  const p2Cards = decks[1]?.cards ?? decks[0]?.cards ?? [];
+  const p1Series = seriesOfDeck(p1Cards);
+  const p2Series = seriesOfDeck(p2Cards);
   return {
     seed: `game-${Date.now()}`,
-    packId,
+    series: [...new Set([...p1Series, ...p2Series])],
     deckP1Id: decks[0]?.id ?? '',
     deckP2Id: decks[1]?.id ?? decks[0]?.id ?? '',
     deckP1Cards: null,
@@ -100,7 +103,7 @@ function defaultResetParams(packId: string): ResetParams {
 
 export default function App() {
   const auth = useAuth();
-  const [screen, setScreen] = useState<Screen>({ kind: 'profile' });
+  const [screen, setScreen] = useScreenRouting();
 
   const navigateByInvite = useCallback(
     (roomCode: string) => {
@@ -131,7 +134,7 @@ function AppMain({
   const matchStore = useMatches(auth);
 
   const [resetParams, setResetParams] = useState<ResetParams>(() =>
-    defaultResetParams(PACKS[0].id),
+    defaultResetParams(),
   );
 
   const {
@@ -532,7 +535,7 @@ function AppMain({
         onStart={(params: StartParams) => {
           const merged: ResetParams = {
             seed: `game-${Date.now()}`,
-            packId: params.packId,
+            series: params.series,
             deckP1Id: params.deckP1Id,
             deckP2Id: params.deckP2Id,
             deckP1Cards: params.deckP1Cards,

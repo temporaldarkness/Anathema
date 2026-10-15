@@ -1,0 +1,1180 @@
+[
+  {
+    "id": "vf_spark",
+    "name": "Искра",
+    "personalityTag": "vf_spark",
+    "tags": [
+      "voidflame",
+      "cult"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": []
+  },
+  {
+    "id": "vf_scorcher",
+    "name": "Гаритель",
+    "personalityTag": "vf_scorcher",
+    "tags": [
+      "voidflame",
+      "cult",
+      "mage"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "void_flame",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_core",
+    "name": "Ядро праха",
+    "personalityTag": "vf_ash_core",
+    "tags": [
+      "voidflame",
+      "cult"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "detonate",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_slag_thrower",
+    "name": "Шлаковый метатель",
+    "personalityTag": "vf_slag_thrower",
+    "tags": [
+      "voidflame",
+      "cult"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "void_strike",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_sniper",
+    "name": "Искристый стрелок",
+    "personalityTag": "vf_ash_sniper",
+    "tags": [
+      "voidflame",
+      "cult",
+      "archer"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "snipe",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_FRONT",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 2,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_charred",
+    "name": "Обугленный",
+    "personalityTag": "vf_charred",
+    "tags": [
+      "voidflame",
+      "cult"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "final_flare",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_scribe",
+    "name": "Сожжённый писец",
+    "personalityTag": "vf_scribe",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "writ_of_ashes",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_vow",
+    "name": "Тлеющий обет",
+    "personalityTag": "vf_vow",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "void_offering",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_brand",
+    "name": "Головня",
+    "personalityTag": "vf_brand",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 2,
+    "strength": 0,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "boom",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_priest",
+    "name": "Жрец праха",
+    "personalityTag": "vf_ash_priest",
+    "tags": [
+      "voidflame",
+      "damned",
+      "priest"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "raise_ghoul",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "SUMMON",
+            "defId": "tk_ghoul",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "soul_fuel",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_cinder",
+    "name": "Изгар",
+    "personalityTag": "vf_cinder",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "vf_ash_lord",
+    "name": "Владыка пепла",
+    "personalityTag": "vf_ash_lord",
+    "tags": [
+      "voidflame",
+      "damned",
+      "mage"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "void_aura",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_coal_golem",
+    "name": "Угольный голем",
+    "personalityTag": "vf_coal_golem",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 4,
+    "strength": 1,
+    "health": 10,
+    "rarity": "uncommon",
+    "abilities": [
+      "taunt",
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "adaptive_plating",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_avenger",
+    "name": "Мститель праха",
+    "personalityTag": "vf_ash_avenger",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 2,
+    "strength": 3,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "vengeance",
+        "trigger": "ON_ALLY_ATTACKED",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_coal_warden",
+    "name": "Угольный страж",
+    "personalityTag": "vf_coal_warden",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 4,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "riposte",
+        "trigger": "ON_ENEMY_ATTACK",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_wall",
+    "name": "Стена праха",
+    "personalityTag": "vf_ash_wall",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 3,
+    "strength": 0,
+    "health": 8,
+    "rarity": "uncommon",
+    "abilities": [
+      "taunt",
+      "suppress"
+    ]
+  },
+  {
+    "id": "vf_ash_sentinel",
+    "name": "Часовой праха",
+    "personalityTag": "vf_ash_sentinel",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": [
+      "scout"
+    ]
+  },
+  {
+    "id": "vf_ash_colossus",
+    "name": "Колосс пепла",
+    "personalityTag": "vf_ash_colossus",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 7,
+    "strength": 4,
+    "health": 8,
+    "rarity": "rare",
+    "abilities": [
+      "taunt",
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "quake",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_apprentice",
+    "name": "Ученик праха",
+    "personalityTag": "vf_ash_apprentice",
+    "tags": [
+      "voidflame",
+      "scholar"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "first_lesson",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_medic",
+    "name": "Медик праха",
+    "personalityTag": "vf_ash_medic",
+    "tags": [
+      "voidflame",
+      "scholar"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "triage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 5,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_looter",
+    "name": "Стяжатель",
+    "personalityTag": "vf_looter",
+    "tags": [
+      "voidflame",
+      "scholar"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "seize_moment",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "FRONT_COUNT",
+          "who": "OPPONENT",
+          "op": "AT_MOST",
+          "value": 1
+        },
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_chronicler",
+    "name": "Летописец праха",
+    "personalityTag": "vf_ash_chronicler",
+    "tags": [
+      "voidflame",
+      "scholar"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "chronicle",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "CELLS",
+          "who": "SELF",
+          "op": "AT_LEAST",
+          "value": 2
+        },
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_cartographer",
+    "name": "Картограф праха",
+    "personalityTag": "vf_ash_cartographer",
+    "tags": [
+      "voidflame",
+      "scholar"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "survey",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "CELLS",
+          "who": "SELF",
+          "op": "AT_LEAST",
+          "value": 3
+        },
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_oracle",
+    "name": "Оракул праха",
+    "personalityTag": "vf_ash_oracle",
+    "tags": [
+      "voidflame",
+      "scholar",
+      "priest"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "foresight",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_pit_berserker",
+    "name": "Ямный берсерк",
+    "personalityTag": "vf_pit_berserker",
+    "tags": [
+      "voidflame",
+      "gladiator"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "vf_desperate",
+    "name": "Отчаявшийся",
+    "personalityTag": "vf_desperate",
+    "tags": [
+      "voidflame",
+      "gladiator"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "second_wind",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "INFLUENCE",
+          "who": "SELF",
+          "op": "EQUAL",
+          "value": 0
+        },
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_blood_reaper",
+    "name": "Кровавый жнец",
+    "personalityTag": "vf_blood_reaper",
+    "tags": [
+      "voidflame",
+      "gladiator"
+    ],
+    "cost": 7,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "vf_pit_champion",
+    "name": "Чемпион ямы",
+    "personalityTag": "vf_pit_champion",
+    "tags": [
+      "voidflame",
+      "gladiator"
+    ],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "glory_of_the_fallen",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_duelist",
+    "name": "Дуэлянт",
+    "personalityTag": "vf_duelist",
+    "tags": [
+      "voidflame",
+      "gladiator"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "vf_blademaster",
+    "name": "Мастер ржавого клинка",
+    "personalityTag": "vf_blademaster",
+    "tags": [
+      "voidflame",
+      "gladiator"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "precise_strike",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_FRONT",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 3,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_symbiote",
+    "name": "Симбиот",
+    "personalityTag": "symbiote",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": []
+  },
+  {
+    "id": "vf_parasite",
+    "name": "Гнездовой паразит",
+    "personalityTag": "vf_parasite",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "infest",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "SUMMON",
+            "defId": "tk_symbiote_larva",
+            "count": 1,
+            "who": "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_necromancer",
+    "name": "Некромант праха",
+    "personalityTag": "vf_ash_necromancer",
+    "tags": [
+      "voidflame",
+      "damned"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "raise",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "RETURN_FROM_DISCARD",
+            "count": 1,
+            "who": "SELF",
+            "destination": "HAND"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_shadowstep",
+    "name": "Тенеход",
+    "personalityTag": "vf_shadowstep",
+    "tags": [
+      "voidflame",
+      "gladiator"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "reposition",
+        "trigger": "ON_TURN_START",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "MOVE_CARD",
+            "target": "SELF",
+            "to": "RANDOM_OWN_EMPTY"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vf_ash_echo",
+    "name": "Отблеск праха",
+    "personalityTag": "vf_ash_echo",
+    "tags": [
+      "voidflame",
+      "mage"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "bounce",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_FRONT",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "RETURN_TO_HAND",
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_hunger",
+    "name": "Древний Голод",
+    "personalityTag": "lg_hunger",
+    "tags": [
+      "legend",
+      "voidflame",
+      "ancient"
+    ],
+    "cost": 6,
+    "strength": 5,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "maddening_whispers",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 3,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "void_pulse",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_CARDS_ON_BOARD"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_lianna",
+    "name": "Плачущая Королева Лианна",
+    "personalityTag": "lg_lianna",
+    "tags": [
+      "legend",
+      "forsaken",
+      "archer"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 3,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "banshee_wail",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 3,
+            "target": "ALL_ENEMY_FRONT"
+          },
+          {
+            "kind": "SUMMON",
+            "defId": "tk_banshee",
+            "count": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_marcan",
+    "name": "Король-в-Цепях Маркан",
+    "personalityTag": "lg_marcan",
+    "tags": [
+      "legend",
+      "forsaken",
+      "warden"
+    ],
+    "cost": 7,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "frostmourne",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "raise_dead",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 2,
+            "who": "SELF"
+          },
+          {
+            "kind": "SUMMON",
+            "defId": "tk_skeleton",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tk_skeleton",
+    "name": "Скелет",
+    "personalityTag": "tk_skeleton",
+    "tags": [
+      "token",
+      "undead"
+    ],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "isToken": true
+  },
+  {
+    "id": "tk_ghoul",
+    "name": "Вурдалак",
+    "personalityTag": "tk_ghoul",
+    "tags": [
+      "token",
+      "undead"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [
+      "slow"
+    ],
+    "isToken": true
+  },
+  {
+    "id": "tk_banshee",
+    "name": "Банши",
+    "personalityTag": "tk_banshee",
+    "tags": [
+      "token",
+      "undead"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge",
+      "scout"
+    ],
+    "isToken": true
+  },
+  {
+    "id": "tk_symbiote_larva",
+    "name": "Симбиот-личинка",
+    "personalityTag": "symbiote",
+    "tags": [
+      "token",
+      "damned"
+    ],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ],
+    "isToken": true,
+    "sharesIdentity": true
+  },
+  {
+    "id": "tk_imp",
+    "name": "Бес",
+    "personalityTag": "tk_imp",
+    "tags": [
+      "token",
+      "demon"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ],
+    "isToken": true
+  },
+  {
+    "id": "tk_shade",
+    "name": "Тень",
+    "personalityTag": "tk_shade",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [
+      "scout",
+      "temporary"
+    ],
+    "isToken": true,
+    "tempDuration": 3
+  }
+]

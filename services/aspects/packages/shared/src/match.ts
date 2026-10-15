@@ -14,7 +14,7 @@ export const CommandRecordSchema = z.object({
 export type CommandRecord = z.infer<typeof CommandRecordSchema>;
 
 export const SaveMatchSchema = z.object({
-  packId: z.string().min(1),
+  series: z.array(z.string().min(1)).min(1).max(4),
   seed: z.string(),
   player1Name: z.string().min(1).max(64),
   player2Name: z.string().min(1).max(64),
@@ -24,6 +24,7 @@ export const SaveMatchSchema = z.object({
   durationMs: z.number().int().min(0),
   p1BotName: z.string().nullable(),
   p2BotName: z.string().nullable(),
+  cardSnapshot: z.record(z.string(), z.any()).optional(),
   deckP1: z.array(z.string()),
   deckP2: z.array(z.string()),
   commands: z.array(CommandRecordSchema),
@@ -44,7 +45,7 @@ export interface MatchSummaryDto {
   player2Id: string | null;
   winnerId: string | null;
   winnerReason: string | null;
-  packId: string;
+  series: string[];
   turnNumber: number;
   durationMs: number;
   p1BotName: string | null;
@@ -58,4 +59,5 @@ export interface MatchDetailDto extends MatchSummaryDto {
   deckP1: string[];
   deckP2: string[];
   commands: CommandRecord[];
+  cardSnapshot?: Record<string, unknown> | null;
 }

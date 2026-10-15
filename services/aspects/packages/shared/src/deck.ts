@@ -1,21 +1,17 @@
 import { z } from 'zod';
 
-/**
- * Минимальный контракт карты, нужный для валидации колоды.
- * Специально НЕ импортируем CardDefinition из @aspects/cards —
- * иначе получаем циклическую зависимость пакетов.
- */
 export interface CardForDeckValidation {
   id: string;
   personalityTag: string;
   rarity: string;
   isToken?: boolean;
+  series?: string[];
 }
 
 export const CreateDeckSchema = z.object({
   name: z.string().min(1).max(64),
   description: z.string().max(200).optional(),
-  packId: z.string().min(1).default('azeroth'),
+  series: z.array(z.string().min(1)).min(1).max(4),
   cardIds: z.array(z.string()).min(1).max(60),
 });
 
@@ -29,7 +25,7 @@ export interface DeckDto {
   ownerId: string;
   name: string;
   description: string;
-  packId: string;
+  series: string[];
   cardIds: string[];
   createdAt: string;
   updatedAt: string;
@@ -46,10 +42,28 @@ export type DeckValidationError =
       max: number;
     }
   | {
+      kind: 'TOO_MANY_ASPECT_COPIES';
+      cardId: string;
+      count: number;
+      max: number;
+    }
+  | {
       kind: 'TOO_MANY_LEGENDARIES';
       cardId: string;
       count: number;
       max: number;
+    }
+  | {
+      kind: 'TOO_MANY_SERIES';
+      series: string[];
+      count: number;
+      max: number;
+    }
+  | {
+      kind: 'CARD_NOT_IN_SELECTED_SERIES';
+      cardId: string;
+      cardSeries: string[];
+      selectedSeries: string[];
     };
 
 export interface DeckValidationResult {
@@ -59,11 +73,14 @@ export interface DeckValidationResult {
 
 export const DECK_SIZE = 30;
 export const MAX_COPIES_PER_PERSONALITY = 5;
+export const MAX_COPIES_PER_ASPECT = 2;
 export const MAX_LEGENDARY_COPIES = 1;
+export const MAX_SERIES = 4;
 
 export function validateDeck(
   cardIds: string[],
   allCards: CardForDeckValidation[],
+  selectedSeries?: string[],
 ): DeckValidationResult {
   const errors: DeckValidationError[] = [];
 
@@ -85,6 +102,22 @@ export function validateDeck(
     }
     if (def.isToken) {
       errors.push({ kind: 'TOKEN_IN_DECK', cardId: id });
+    }
+  }
+
+  const aspectCounts = new Map<string, number>();
+  for (const id of cardIds) {
+    if (!byId.has(id)) continue;
+    aspectCounts.set(id, (aspectCounts.get(id) ?? 0) + 1);
+  }
+  for (const [id, count] of aspectCounts) {
+    if (count > MAX_COPIES_PER_ASPECT) {
+      errors.push({
+        kind: 'TOO_MANY_ASPECT_COPIES',
+        cardId: id,
+        count,
+        max: MAX_COPIES_PER_ASPECT,
+      });
     }
   }
 
@@ -123,6 +156,48 @@ export function validateDeck(
     }
   }
 
+  if (selectedSeries && selectedSeries.length > 0) {
+    if (selectedSeries.length > MAX_SERIES) {
+      errors.push({
+        kind: 'TOO_MANY_SERIES',
+        series: selectedSeries,
+        count: selectedSeries.length,
+        max: MAX_SERIES,
+      });
+    }
+
+    const selectedSet = new Set(selectedSeries);
+    for (const id of cardIds) {
+      const def = byId.get(id);
+      if (!def) continue;
+      const cardSeries = def.series ?? [];
+      const intersects = cardSeries.some((s) => selectedSet.has(s));
+      if (!intersects) {
+        errors.push({
+          kind: 'CARD_NOT_IN_SELECTED_SERIES',
+          cardId: id,
+          cardSeries,
+          selectedSeries,
+        });
+      }
+    }
+  } else {
+    const seriesSet = new Set<string>();
+    for (const id of cardIds) {
+      const def = byId.get(id);
+      if (!def) continue;
+      for (const s of def.series ?? []) seriesSet.add(s);
+    }
+    if (seriesSet.size > MAX_SERIES) {
+      errors.push({
+        kind: 'TOO_MANY_SERIES',
+        series: [...seriesSet],
+        count: seriesSet.size,
+        max: MAX_SERIES,
+      });
+    }
+  }
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -136,7 +211,13 @@ export function errorText(err: DeckValidationError): string {
       return `Токен нельзя положить в колоду: ${err.cardId}`;
     case 'TOO_MANY_COPIES':
       return `Слишком много копий личности ${err.personalityTag}: ${err.count} (макс ${err.max})`;
+    case 'TOO_MANY_ASPECT_COPIES':
+      return `Слишком много копий аспекта ${err.cardId}: ${err.count} (макс ${err.max})`;
     case 'TOO_MANY_LEGENDARIES':
       return `Слишком много копий легендарки ${err.cardId}: ${err.count} (макс ${err.max})`;
+    case 'TOO_MANY_SERIES':
+      return `Слишком много серий: ${err.count} (макс ${err.max}). Серии: ${err.series.join(', ')}`;
+    case 'CARD_NOT_IN_SELECTED_SERIES':
+      return `Карта ${err.cardId} не из выбранных серий (${err.selectedSeries.join(', ')})`;
   }
 }

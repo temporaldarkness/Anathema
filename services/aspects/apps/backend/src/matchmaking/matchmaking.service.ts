@@ -1,14 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import type Redis from 'ioredis';
 import { REDIS_CLIENT } from '../rooms/redis.provider';
 import { RoomsService } from '../rooms/rooms.service';
 import type { MatchmakingStatusDto } from '@aspects/shared';
-import { makeBot, botDisplayName, listAllBotIds } from '@aspects/bot';
+import { botDisplayName } from '@aspects/bot';
 import { BotRatingService } from '../rating/bot-rating.service';
 import { RatingService } from '../rating/rating.service';
 
@@ -25,7 +21,7 @@ const BOT_WINDOW_MAX = 800;
 interface QueueEntry {
   userId: string;
   username: string;
-  packId: string;
+  series: string[];
   deckId: string;
   deckCards: string[];
   queuedAt: number;
@@ -47,6 +43,11 @@ export interface BotMatchResult {
   botName: string;
 }
 
+function queueKey(series: string[]): string {
+  const sorted = [...series].sort();
+  return QUEUE_PREFIX + sorted.join('|');
+}
+
 @Injectable()
 export class MatchmakingService {
   private readonly logger = new Logger(MatchmakingService.name);
@@ -54,30 +55,29 @@ export class MatchmakingService {
   constructor(
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly rooms: RoomsService,
-	private readonly ratings: RatingService,
+    private readonly ratings: RatingService,
     private readonly botRatings: BotRatingService,
   ) {}
 
   async enqueue(
     userId: string,
     username: string,
-    packId: string,
+    series: string[],
     deckId: string,
     deckCards: string[],
   ): Promise<MatchmakingStatusDto> {
     if (deckCards.length !== 30) {
       throw new BadRequestException('Deck must have exactly 30 cards');
     }
-
-    const existing = await this.getEntry(userId);
-    if (existing) {
-      // Уже в очереди — идемпотентно вернём текущий статус.
-      return this.status(userId);
+    if (series.length === 0 || series.length > 4) {
+      throw new BadRequestException('series must have 1..4 entries');
     }
 
-    // Не разрешаем вставать в очередь, если есть активные комнаты.
+    const existing = await this.getEntry(userId);
+    if (existing) return this.status(userId);
+
     const myRooms = await this.rooms.listMine(userId);
-	const hasActive = myRooms.some((r) => r.status !== 'finished');
+    const hasActive = myRooms.some((r) => r.status !== 'finished');
     if (hasActive) {
       throw new BadRequestException(
         'You already have active rooms. Leave them first.',
@@ -88,7 +88,7 @@ export class MatchmakingService {
     const entry: QueueEntry = {
       userId,
       username,
-      packId,
+      series,
       deckId,
       deckCards,
       queuedAt: now,
@@ -101,7 +101,7 @@ export class MatchmakingService {
         ENTRY_TTL_SECONDS,
         JSON.stringify(entry),
       )
-      .zadd(QUEUE_PREFIX + packId, now, userId)
+      .zadd(queueKey(series), now, userId)
       .exec();
 
     return this.status(userId);
@@ -109,10 +109,11 @@ export class MatchmakingService {
 
   async dequeue(userId: string): Promise<void> {
     const entry = await this.getEntry(userId);
+    if (!entry) return;
     await this.redis
       .multi()
       .del(ENTRY_PREFIX + userId)
-      .zrem(QUEUE_PREFIX + (entry?.packId ?? ''), userId)
+      .zrem(queueKey(entry.series), userId)
       .exec();
   }
 
@@ -121,75 +122,54 @@ export class MatchmakingService {
     if (!entry) {
       return {
         inQueue: false,
-        packId: null,
+        series: null,
         queuedAt: null,
         position: null,
-        totalInPack: null,
+        totalInQueue: null,
       };
     }
 
-    const queueKey = QUEUE_PREFIX + entry.packId;
-    const rank = await this.redis.zrank(queueKey, userId);
-    const total = await this.redis.zcard(queueKey);
+    const key = queueKey(entry.series);
+    const rank = await this.redis.zrank(key, userId);
+    const total = await this.redis.zcard(key);
 
     return {
       inQueue: true,
-      packId: entry.packId,
+      series: entry.series,
       queuedAt: entry.queuedAt,
       position: rank !== null ? rank + 1 : null,
-      totalInPack: total,
+      totalInQueue: total,
     };
   }
 
-  /**
-   * Пытается подобрать пары во всех непустых очередях.
-   * Возвращает список готовых матчей — эмитит их вызывающий (socket-io).
-   */
   async tryMatch(): Promise<MatchResult[]> {
     const results: MatchResult[] = [];
 
-    // Находим все непустые очереди.
     const keys = await this.redis.keys(QUEUE_PREFIX + '*');
-    const packIds = keys.map((k) => k.replace(QUEUE_PREFIX, ''));
 
-    for (const packId of packIds) {
-      const queueKey = QUEUE_PREFIX + packId;
-
-      // Пока в очереди есть хотя бы двое — пробуем матчить.
-      // Ограничиваем защитным лимитом, чтобы не залипнуть в одном тике.
+    for (const key of keys) {
       for (let iter = 0; iter < 10; iter++) {
-        const pair = await this.redis.zrange(queueKey, 0, 1);
+        const pair = await this.redis.zrange(key, 0, 1);
         if (pair.length < 2) break;
 
         const [user1Id, user2Id] = pair;
-
-        // Атомарно убираем обоих из очереди.
-        const removed = await this.redis.zrem(queueKey, user1Id, user2Id);
-        if (removed < 2) {
-          // Кто-то успел уйти — не продолжаем по этой паре.
-          continue;
-        }
+        const removed = await this.redis.zrem(key, user1Id, user2Id);
+        if (removed < 2) continue;
 
         const [e1, e2] = await Promise.all([
           this.getEntry(user1Id),
           this.getEntry(user2Id),
         ]);
 
-        // Один из entry уже удалён (leave/expire) — просто продолжаем.
         if (!e1 || !e2) {
-          // Возвращаем в очередь того, кто ещё актуален.
-          if (e1) {
-            await this.redis.zadd(queueKey, e1.queuedAt, e1.userId);
-          } else if (e2) {
-            await this.redis.zadd(queueKey, e2.queuedAt, e2.userId);
-          }
+          if (e1) await this.redis.zadd(key, e1.queuedAt, e1.userId);
+          else if (e2) await this.redis.zadd(key, e2.queuedAt, e2.userId);
           continue;
         }
 
         try {
-          // Создаём комнату «от лица» первого, второго присоединяем.
           const room = await this.rooms.create(e1.userId, e1.username, {
-            packId,
+            series: e1.series,
             deckP1Id: e1.deckId,
             deckP1Cards: e1.deckCards,
             p1BotName: null,
@@ -202,7 +182,6 @@ export class MatchmakingService {
             p2BotName: null,
           });
 
-          // Удаляем entry, чтобы они не висели.
           await this.redis
             .multi()
             .del(ENTRY_PREFIX + e1.userId)
@@ -218,17 +197,16 @@ export class MatchmakingService {
           });
 
           this.logger.log(
-            `[mm] matched ${e1.userId} vs ${e2.userId} → room ${room.code} (pack ${packId})`,
+            `[mm] matched ${e1.userId} vs ${e2.userId} → room ${room.code} (series ${e1.series.join(',')})`,
           );
         } catch (e) {
           this.logger.error(
             `[mm] failed to create room for ${e1.userId}/${e2.userId}: ${e}`,
           );
-          // Возвращаем в очередь, чтобы попробовать снова.
           await this.redis
             .multi()
-            .zadd(queueKey, e1.queuedAt, e1.userId)
-            .zadd(queueKey, e2.queuedAt, e2.userId)
+            .zadd(key, e1.queuedAt, e1.userId)
+            .zadd(key, e2.queuedAt, e2.userId)
             .exec();
         }
       }
@@ -236,57 +214,48 @@ export class MatchmakingService {
 
     return results;
   }
-  
-  /**
-   * Для игроков, которые висят в очереди > BOT_FALLBACK_MS и не нашли пару,
-   * подбирает бота с ближайшим рейтингом. Возвращает список матчей,
-   * которые надо эмитить клиентам.
-   */
+
   async tryFallbackToBot(): Promise<BotMatchResult[]> {
     const results: BotMatchResult[] = [];
     const keys = await this.redis.keys(QUEUE_PREFIX + '*');
-    const packIds = keys.map((k) => k.replace(QUEUE_PREFIX, ''));
-  
-    for (const packId of packIds) {
-      const queueKey = QUEUE_PREFIX + packId;
-  
-      // Берём всю очередь (пакет маленький — ок). Проверяем самого старого.
-      const entriesRaw = await this.redis.zrange(queueKey, 0, -1);
+
+    for (const key of keys) {
+      const entriesRaw = await this.redis.zrange(key, 0, -1);
       if (entriesRaw.length === 0) continue;
-  
+
       for (const userId of entriesRaw) {
         const entry = await this.getEntry(userId);
         if (!entry) {
-          // TTL истёк — вычищаем из очереди.
-          await this.redis.zrem(queueKey, userId);
+          await this.redis.zrem(key, userId);
           continue;
         }
-  
+
         const waited = Date.now() - entry.queuedAt;
-        if (waited < BOT_FALLBACK_MS) break; // дальше только более свежие
-  
-        // Окно расширяется со временем ожидания.
-        const extra = Math.floor((waited - BOT_FALLBACK_MS) / BOT_WINDOW_STEP_MS) * BOT_WINDOW_STEP;
+        if (waited < BOT_FALLBACK_MS) break;
+
+        const extra =
+          Math.floor((waited - BOT_FALLBACK_MS) / BOT_WINDOW_STEP_MS) *
+          BOT_WINDOW_STEP;
         const window = Math.min(BOT_WINDOW_INITIAL + extra, BOT_WINDOW_MAX);
-  
-        // Рейтинг игрока — для подбора ближайшего бота.
-        const playerRating = await this.ratings.getOrCreate(entry.userId).catch(() => null);
+
+        const playerRating = await this.ratings
+          .getOrCreate(entry.userId)
+          .catch(() => null);
         const targetRating = playerRating?.rating ?? 1500;
-  
+
         const bot = await this.botRatings.findClosestTo(targetRating, window);
-        if (!bot) continue; // нет ботов — ждём дальше
-  
-        // Атомарно убираем из очереди.
-        const removed = await this.redis.zrem(queueKey, userId);
-        if (removed === 0) continue; // кто-то другой успел
-  
+        if (!bot) continue;
+
+        const removed = await this.redis.zrem(key, userId);
+        if (removed === 0) continue;
+
         try {
           const botName = botDisplayName(bot.botId);
           const room = await this.rooms.createWithBot(
             entry.userId,
             entry.username,
             {
-              packId,
+              series: entry.series,
               deckP1Id: entry.deckId,
               deckP1Cards: entry.deckCards,
               p1BotName: null,
@@ -295,13 +264,13 @@ export class MatchmakingService {
             bot.botId,
             botName,
           );
-  
+
           await this.redis.del(ENTRY_PREFIX + entry.userId);
-  
+
           this.logger.log(
             `[mm] bot fallback ${entry.userId} → ${bot.botId} (${bot.rating}, window ${window}) room ${room.code}`,
           );
-  
+
           results.push({
             userId: entry.userId,
             userName: entry.username,
@@ -310,13 +279,14 @@ export class MatchmakingService {
             botName,
           });
         } catch (e) {
-          this.logger.error(`[mm] bot fallback failed for ${entry.userId}: ${e}`);
-          // Возвращаем в очередь.
-          await this.redis.zadd(queueKey, entry.queuedAt, entry.userId);
+          this.logger.error(
+            `[mm] bot fallback failed for ${entry.userId}: ${e}`,
+          );
+          await this.redis.zadd(key, entry.queuedAt, entry.userId);
         }
       }
     }
-  
+
     return results;
   }
 

@@ -60,21 +60,6 @@ export function PlayerPanel({
         <div>Влияние: <b>{p.influence}</b></div>
         <div>
           Рука: <b>{handCountOverride ?? p.hand.length}</b>
-          {observe && p.hand.length > 0 && (
-            <span className="player-panel-hand-preview">
-              {' '}
-              {p.hand
-                .slice(0, 3)
-                .map((id) => {
-                  const card = state.cards[id];
-                  const def = state.definitions[card.definitionId];
-                  const name = def?.name ?? '?';
-                  return name.length > 6 ? name.slice(0, 6) + '…' : name;
-                })
-                .join(', ')}
-              {p.hand.length > 3 ? '…' : ''}
-            </span>
-          )}
         </div>
         <div>Колода: <b>{p.deck.length}</b></div>
         <div>Сброс: <b>{p.discard.length}</b></div>

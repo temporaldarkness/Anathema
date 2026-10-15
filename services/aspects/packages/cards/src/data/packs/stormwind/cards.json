@@ -1,0 +1,958 @@
+[
+  {
+    "id": "sw_spearman",
+    "name": "Копейщик стражи",
+    "personalityTag": "sw_spearman",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": []
+  },
+  {
+    "id": "sw_gatekeeper",
+    "name": "Стражник ворот",
+    "personalityTag": "sw_gatekeeper",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 5,
+    "rarity": "common",
+    "abilities": [
+      "taunt"
+    ]
+  },
+  {
+    "id": "sw_runner",
+    "name": "Гонец заставы",
+    "personalityTag": "sw_runner",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "sw_herald",
+    "name": "Вестовой штаба",
+    "personalityTag": "sw_herald",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge",
+      "scout"
+    ]
+  },
+  {
+    "id": "sw_mage",
+    "name": "Боевой маг",
+    "personalityTag": "sw_mage",
+    "tags": [
+      "stormwind",
+      "mage"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "arcane_bolt",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_FRONT",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 2,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_archmage",
+    "name": "Магистр Круглой Башни",
+    "personalityTag": "sw_archmage",
+    "tags": [
+      "stormwind",
+      "mage"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "fireball",
+        "cost": 2,
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_BOARD",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 4,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_knight",
+    "name": "Рыцарь короны",
+    "personalityTag": "sw_knight",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "sw_swordsman",
+    "name": "Мечник аванпоста",
+    "personalityTag": "sw_swordsman",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 2,
+    "strength": 3,
+    "health": 3,
+    "rarity": "common",
+    "abilities": []
+  },
+  {
+    "id": "sw_templar",
+    "name": "Храмовник Света",
+    "personalityTag": "sw_templar",
+    "tags": [
+      "stormwind",
+      "priest"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": [
+      "taunt"
+    ],
+    "triggers": [
+      {
+        "id": "blessing",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_chaplain",
+    "name": "Служитель",
+    "personalityTag": "sw_chaplain",
+    "tags": [
+      "stormwind",
+      "priest"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "sermon",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_scout",
+    "name": "Разведчик фланга",
+    "personalityTag": "sw_scout",
+    "tags": [
+      "stormwind",
+      "archer"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge",
+      "scout"
+    ]
+  },
+  {
+    "id": "sw_archer",
+    "name": "Башенный лучник",
+    "personalityTag": "sw_archer",
+    "tags": [
+      "stormwind",
+      "archer"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [
+      "breakthrough"
+    ]
+  },
+  {
+    "id": "sw_captain",
+    "name": "Капитан отряда",
+    "personalityTag": "sw_captain",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "rally",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_shieldbearer",
+    "name": "Щитоносец",
+    "personalityTag": "sw_shieldbearer",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [
+      "shield",
+      "taunt"
+    ]
+  },
+  {
+    "id": "sw_berserk",
+    "name": "Берсерк",
+    "personalityTag": "sw_berserk",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 3,
+    "strength": 4,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [
+      "breakthrough"
+    ]
+  },
+  {
+    "id": "sw_wallguard",
+    "name": "Страж стены",
+    "personalityTag": "sw_wallguard",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 7,
+    "rarity": "uncommon",
+    "abilities": [
+      "taunt",
+      "suppress"
+    ]
+  },
+  {
+    "id": "sw_lookout",
+    "name": "Дозорный",
+    "personalityTag": "sw_lookout",
+    "tags": [
+      "stormwind",
+      "archer"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "alert",
+        "trigger": "ON_ENEMY_ATTACK",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_champion",
+    "name": "Чемпион гильдии",
+    "personalityTag": "sw_champion",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "inspire",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_marshall",
+    "name": "Маршал",
+    "personalityTag": "sw_marshall",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "command",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_advisor",
+    "name": "Королевский советник",
+    "personalityTag": "sw_advisor",
+    "tags": [
+      "stormwind",
+      "intel"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "counsel",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_priest",
+    "name": "Жрец-целитель",
+    "personalityTag": "sw_priest",
+    "tags": [
+      "stormwind",
+      "priest"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "prayer",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 1,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_vanguard",
+    "name": "Авангард",
+    "personalityTag": "sw_vanguard",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [
+      "vanguard"
+    ]
+  },
+  {
+    "id": "sw_marksman",
+    "name": "Меткий стрелок",
+    "personalityTag": "sw_marksman",
+    "tags": [
+      "stormwind",
+      "archer"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "aimed_shot",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_mason",
+    "name": "Мастер-строитель",
+    "personalityTag": "sw_mason",
+    "tags": [
+      "stormwind",
+      "engineer"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "fortify",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 0,
+            "health": 2,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_inspector",
+    "name": "Инспектор гарнизона",
+    "personalityTag": "sw_inspector",
+    "tags": [
+      "stormwind",
+      "intel"
+    ],
+    "cost": 2,
+    "strength": 3,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "report",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "FRONT_COUNT",
+          "who": "OPPONENT",
+          "op": "AT_MOST",
+          "value": 1
+        },
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_commander",
+    "name": "Командир отряда",
+    "personalityTag": "sw_commander",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "tactics",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_chronicler",
+    "name": "Летописец гильдии",
+    "personalityTag": "sw_chronicler",
+    "tags": [
+      "stormwind",
+      "intel"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "annals",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_armorer",
+    "name": "Оружейник",
+    "personalityTag": "sw_armorer",
+    "tags": [
+      "stormwind",
+      "engineer"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "forge",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_bannerman",
+    "name": "Знаменосец",
+    "personalityTag": "sw_bannerman",
+    "tags": [
+      "stormwind",
+      "soldier"
+    ],
+    "cost": 3,
+    "strength": 1,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": [
+      "taunt"
+    ],
+    "triggers": [
+      {
+        "id": "rally_flag",
+        "trigger": "ON_TURN_START",
+        "condition": {
+          "kind": "CELLS",
+          "who": "SELF",
+          "op": "AT_LEAST",
+          "value": 2
+        },
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_field_medic",
+    "name": "Полевой целитель",
+    "personalityTag": "sw_medic",
+    "tags": [
+      "stormwind",
+      "priest"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "first_aid",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_roland",
+    "name": "Король Роланд Непреклонный",
+    "personalityTag": "lg_roland",
+    "tags": [
+      "legend",
+      "stormwind",
+      "sovereign"
+    ],
+    "cost": 7,
+    "strength": 5,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "for_the_alliance",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "royal_command",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_anselm",
+    "name": "Светоносец Ансельм",
+    "personalityTag": "lg_anselm",
+    "tags": [
+      "legend",
+      "stormwind",
+      "templar"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [
+      "taunt"
+    ],
+    "triggers": [
+      {
+        "id": "lightbringer",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 4,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "resolve",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lg_starweaver",
+    "name": "Прядущий Звёзды",
+    "personalityTag": "lg_starweaver",
+    "tags": [
+      "legend",
+      "stormwind",
+      "mage"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "time_warp",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "SUMMON",
+            "defId": "tk_mirror_image",
+            "count": 1,
+            "who": "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_dawn_volley",
+    "name": "Рассветный залп",
+    "personalityTag": "sw_dawn_volley",
+    "tags": [
+      "stormwind",
+      "priest"
+    ],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "nova",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sw_retribution",
+    "name": "Кара",
+    "personalityTag": "sw_retribution",
+    "tags": [
+      "stormwind",
+      "priest"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "smite",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 3,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tk_mirror_image",
+    "name": "Зеркальное отражение",
+    "personalityTag": "tk_mirror_image",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "taunt",
+      "temporary"
+    ],
+    "isToken": true,
+    "tempDuration": 2
+  },
+  {
+    "id": "tk_wisp",
+    "name": "Огонёк",
+    "personalityTag": "tk_wisp",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ],
+    "isToken": true
+  },
+  {
+    "id": "tk_treant",
+    "name": "Древень",
+    "personalityTag": "tk_treant",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [
+      "taunt"
+    ],
+    "isToken": true
+  },
+  {
+    "id": "tk_totem",
+    "name": "Тотем",
+    "personalityTag": "tk_totem",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 0,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [
+      "taunt"
+    ],
+    "isToken": true
+  }
+]

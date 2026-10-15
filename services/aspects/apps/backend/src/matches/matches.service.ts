@@ -11,6 +11,7 @@ import type {
   MatchDetailDto,
   CommandRecord,
 } from '@aspects/shared';
+import { Prisma } from '../generated/prisma/client';
 
 @Injectable()
 export class MatchesService {
@@ -26,13 +27,16 @@ export class MatchesService {
   ): Promise<MatchSummaryDto> {
     const match = await this.prisma.match.create({
       data: {
-        player1Id: userId,
-        player2Id: null,
+        player1Id: dto.player1Id ?? userId,
+        player2Id: dto.player2Id ?? null,
         player1Name: dto.player1Name,
         player2Name: dto.player2Name,
         winnerId: dto.winnerId,
         winnerReason: dto.winnerReason,
-        packId: dto.packId,
+        series: dto.series,
+		cardSnapshot: dto.cardSnapshot
+          ? (dto.cardSnapshot as Prisma.InputJsonValue)
+          : Prisma.JsonNull,
         seed: dto.seed,
         turnNumber: dto.turnNumber,
         durationMs: dto.durationMs,
@@ -54,7 +58,7 @@ export class MatchesService {
         },
       },
     });
-
+  
     await this.audit.log({
       user_id: userId,
       username,
@@ -66,7 +70,7 @@ export class MatchesService {
         turnNumber: dto.turnNumber,
       },
     });
-
+  
     return this.toSummary(match);
   }
 
@@ -109,7 +113,7 @@ export class MatchesService {
       player2Id: m.player2Id,
       winnerId: m.winnerId,
       winnerReason: m.winnerReason,
-      packId: m.packId,
+	  series: m.series,
       turnNumber: m.turnNumber,
       durationMs: m.durationMs,
       p1BotName: m.p1BotName,

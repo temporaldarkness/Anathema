@@ -12,7 +12,7 @@ import {
   type CreateDeckDto,
   type DeckDto,
 } from '@aspects/shared';
-import { getCards } from '@aspects/cards';
+import { getPack, type CardDefinition } from '@aspects/cards';
 
 @Injectable()
 export class DecksService {
@@ -36,10 +36,9 @@ export class DecksService {
     username: string,
     dto: CreateDeckDto,
   ): Promise<DeckDto> {
-    const packId = dto.packId ?? 'azeroth';
-    const allCards = getCards(packId);
+    const { pool } = this.buildPool(dto.series);
 
-    const validation = validateDeck(dto.cardIds, allCards);
+    const validation = validateDeck(dto.cardIds, pool, dto.series);
     if (!validation.valid) {
       throw new BadRequestException(
         validation.errors.map(errorText).join('; '),
@@ -55,7 +54,7 @@ export class DecksService {
         ownerId: userId,
         name: dto.name,
         description: dto.description ?? '',
-        packId,
+        series: dto.series,
         cards: {
           create: [...counts.entries()].map(([cardId, count]) => ({
             cardId,
@@ -72,7 +71,7 @@ export class DecksService {
       action: 'create_deck',
       entity_type: 'deck',
       entity_id: deck.id,
-      details: { name: dto.name, size: dto.cardIds.length, packId },
+      details: { name: dto.name, size: dto.cardIds.length, series: dto.series },
     });
 
     return this.toDto(deck);
@@ -91,10 +90,9 @@ export class DecksService {
     if (existing.ownerId !== userId)
       throw new ForbiddenException('Not your deck');
 
-    const packId = dto.packId ?? existing.packId ?? 'azeroth';
-    const allCards = getCards(packId);
+    const { pool } = this.buildPool(dto.series);
 
-    const validation = validateDeck(dto.cardIds, allCards);
+    const validation = validateDeck(dto.cardIds, pool, dto.series);
     if (!validation.valid) {
       throw new BadRequestException(
         validation.errors.map(errorText).join('; '),
@@ -110,7 +108,7 @@ export class DecksService {
         data: {
           name: dto.name,
           description: dto.description ?? existing.description,
-          packId,
+          series: dto.series,
           cards: {
             create: [...counts.entries()].map(([cardId, count]) => ({
               cardId,
@@ -128,7 +126,7 @@ export class DecksService {
       action: 'update_deck',
       entity_type: 'deck',
       entity_id: deck.id,
-      details: { name: dto.name, size: dto.cardIds.length, packId },
+      details: { name: dto.name, size: dto.cardIds.length, series: dto.series },
     });
 
     return this.toDto(deck);
@@ -158,7 +156,29 @@ export class DecksService {
     });
   }
 
-  // ─── helpers ───
+  private buildPool(series: string[]): {
+    pool: CardDefinition[];
+  } {
+    const merged = new Map<string, CardDefinition>();
+
+    for (const s of series) {
+      let pack;
+      try {
+        pack = getPack(s);
+      } catch {
+        throw new BadRequestException(`Неизвестная серия: ${s}`);
+      }
+      for (const c of pack.cards) {
+        if (!merged.has(c.id)) merged.set(c.id, c);
+      }
+    }
+
+    if (merged.size === 0) {
+      throw new BadRequestException('Не найдено ни одной карты в сериях');
+    }
+
+    return { pool: [...merged.values()] };
+  }
 
   private countCards(cardIds: string[]): Map<string, number> {
     const counts = new Map<string, number>();
@@ -181,7 +201,7 @@ export class DecksService {
     ownerId: string;
     name: string;
     description: string;
-    packId: string;
+    series: string[];
     cards: { cardId: string; count: number }[];
     createdAt: Date;
     updatedAt: Date;
@@ -190,12 +210,13 @@ export class DecksService {
     for (const dc of deck.cards) {
       for (let i = 0; i < dc.count; i++) cardIds.push(dc.cardId);
     }
+    const series = deck.series
     return {
       id: deck.id,
       ownerId: deck.ownerId,
       name: deck.name,
       description: deck.description ?? '',
-      packId: deck.packId ?? 'azeroth',
+      series,
       cardIds,
       createdAt: deck.createdAt.toISOString(),
       updatedAt: deck.updatedAt.toISOString(),

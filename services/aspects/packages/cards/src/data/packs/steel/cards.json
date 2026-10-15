@@ -1,0 +1,566 @@
+[
+  {
+    "id": "st_private",
+    "name": "Рядовой",
+    "personalityTag": "st_private",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": []
+  },
+  {
+    "id": "st_runner",
+    "name": "Вестовой",
+    "personalityTag": "st_runner",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "st_rifleman",
+    "name": "Автоматчик",
+    "personalityTag": "st_rifleman",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 2,
+    "strength": 3,
+    "health": 2,
+    "rarity": "common",
+    "abilities": []
+  },
+  {
+    "id": "st_mg",
+    "name": "Пулемётчик",
+    "personalityTag": "st_mg",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 5,
+    "rarity": "common",
+    "abilities": [
+      "taunt"
+    ]
+  },
+  {
+    "id": "st_sapper",
+    "name": "Сапёр",
+    "personalityTag": "st_sapper",
+    "tags": [
+      "steel",
+      "engineer"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "demo_charge",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_medic",
+    "name": "Санитар",
+    "personalityTag": "st_medic",
+    "tags": [
+      "steel",
+      "medical"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "first_aid",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_scout",
+    "name": "Разведчик",
+    "personalityTag": "st_scout",
+    "tags": [
+      "steel",
+      "sniper"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge",
+      "scout"
+    ]
+  },
+  {
+    "id": "st_engineer",
+    "name": "Инженер",
+    "personalityTag": "st_engineer",
+    "tags": [
+      "steel",
+      "engineer"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "dig_in",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 0,
+            "health": 2,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_intel",
+    "name": "Разведсвязной",
+    "personalityTag": "st_intel",
+    "tags": [
+      "steel",
+      "intel"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "intel_report",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_sgt",
+    "name": "Сержант",
+    "personalityTag": "st_sgt",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "st_marksman",
+    "name": "Снайпер",
+    "personalityTag": "st_marksman",
+    "tags": [
+      "steel",
+      "sniper"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [
+      "breakthrough"
+    ]
+  },
+  {
+    "id": "st_grenadier",
+    "name": "Гранатомётчик",
+    "personalityTag": "st_grenadier",
+    "tags": [
+      "steel",
+      "specialist"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "throw_grenade",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_apc",
+    "name": "БТР",
+    "personalityTag": "st_apc",
+    "tags": [
+      "steel",
+      "armored"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": [
+      "taunt"
+    ]
+  },
+  {
+    "id": "st_barrage",
+    "name": "Миномётный обстрел",
+    "personalityTag": "st_barrage",
+    "tags": [
+      "steel",
+      "artillery"
+    ],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "barrage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_officer",
+    "name": "Офицер",
+    "personalityTag": "st_officer",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "battle_plan",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_howitzer",
+    "name": "Гаубица",
+    "personalityTag": "st_howitzer",
+    "tags": [
+      "steel",
+      "artillery"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "bombardment",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_tank",
+    "name": "Танк",
+    "personalityTag": "st_tank",
+    "tags": [
+      "steel",
+      "armored"
+    ],
+    "cost": 5,
+    "strength": 5,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [
+      "breakthrough"
+    ]
+  },
+  {
+    "id": "st_veteran",
+    "name": "Ветеран",
+    "personalityTag": "st_veteran",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "no_man_left",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_general",
+    "name": "Генерал",
+    "personalityTag": "st_general",
+    "tags": [
+      "steel",
+      "infantry"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "tactical_command",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_ghost_lead",
+    "name": "Призрачный Лидер",
+    "personalityTag": "st_ghost_lead",
+    "tags": [
+      "steel",
+      "legend"
+    ],
+    "cost": 7,
+    "strength": 5,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "hold_the_line",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "command_presence",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_bulwark",
+    "name": "Майор Тайтус Кросс",
+    "personalityTag": "st_bulwark",
+    "tags": [
+      "steel",
+      "legend"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [
+      "taunt"
+    ],
+    "triggers": [
+      {
+        "id": "field_triage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 4,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "battle_hardened",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "st_polaris",
+    "name": "Полярис",
+    "personalityTag": "st_polaris",
+    "tags": [
+      "steel",
+      "legend"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "precision_strike",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_BOARD",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 4,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id": "suppressive_fire",
+        "cost": 2,
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tk_bunker",
+    "name": "Блокпост",
+    "personalityTag": "tk_bunker",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 0,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [
+      "taunt"
+    ],
+    "isToken": true
+  }
+]

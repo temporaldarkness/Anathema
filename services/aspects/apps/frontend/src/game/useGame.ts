@@ -8,7 +8,7 @@ import {
   type CardInstanceId,
   type PlayerId,
 } from '@aspects/engine';
-import { getDecks, getPack, type DeckPreset } from '@aspects/cards';
+import { getDecks, mergedCardsById, listPacks, seriesOfDeck, type DeckPreset } from '@aspects/cards';
 import { makeBot, type Bot } from '@aspects/bot';
 import type { CommandRecord, SaveMatchDto } from '@aspects/shared';
 import { makeLogEntry, resetLogIdCounter, type LogEntry } from './logEntry';
@@ -16,7 +16,7 @@ import { positionKey, guildKey, type Floating } from './floatings';
 
 export interface ResetParams {
   seed: string;
-  packId: string;
+  series: string[];
   deckP1Id: string;
   deckP2Id: string;
   deckP1Cards: string[] | null;
@@ -51,19 +51,14 @@ interface PositionSnapshot {
   zone: 'FRONT' | 'RESERVE' | 'HAND' | 'DECK' | 'DISCARD';
 }
 
-function pickDeck(packId: string, deckId: string): DeckPreset {
-  const decks = getDecks(packId);
-  if (decks.length === 0) throw new Error(`Pack ${packId} has no decks`);
-  return decks.find((d) => d.id === deckId) ?? decks[0];
-}
-
 function resolveDeckCards(
-  packId: string,
   deckId: string,
   explicitCards: string[] | null,
 ): string[] {
   if (explicitCards && explicitCards.length > 0) return explicitCards;
-  const d = pickDeck(packId, deckId);
+  const all = getDecks();
+  const d = all.find((x) => x.id === deckId);
+  if (!d) throw new Error(`Deck ${deckId} not found`);
   return d.cards;
 }
 
@@ -80,34 +75,30 @@ function makeBots(params: {
 const BASE_BOT_DELAY_MS = 600;
 const OBSERVE_BOT_DELAY_MS = 1200;
 
-export function useGame(initial: ResetParams): UseGameResult {
-  // ─── Состояние React ───
+function buildInitialState(params: ResetParams): GameState {
+  const cardDefs = mergedCardsById(params.series);
+  const p1Cards = resolveDeckCards(params.deckP1Id, params.deckP1Cards);
+  const p2Cards = resolveDeckCards(params.deckP2Id, params.deckP2Cards);
+  return createGame({
+    seed: params.seed,
+    decks: { p1: p1Cards, p2: p2Cards },
+    cardDefinitions: cardDefs,
+    useMulligan: true,
+  }).state;
+}
 
-  const [state, setState] = useState<GameState>(() => {
-    const pack = getPack(initial.packId);
-    const p1Cards = resolveDeckCards(initial.packId, initial.deckP1Id, initial.deckP1Cards);
-    const p2Cards = resolveDeckCards(initial.packId, initial.deckP2Id, initial.deckP2Cards);
-    return createGame({
-      seed: initial.seed,
-      decks: { p1: p1Cards, p2: p2Cards },
-      cardDefinitions: pack.cardsById,
-      useMulligan: true,
-    }).state;
-  });
+export function useGame(initial: ResetParams): UseGameResult {
+  const [state, setState] = useState<GameState>(() => buildInitialState(initial));
 
   const [log, setLog] = useState<LogEntry[]>([]);
   const [floatings, setFloatings] = useState<Floating[]>([]);
-  const [decks, setDecks] = useState<DeckPreset[]>(() => getDecks(initial.packId));
+  const [decks, setDecks] = useState<DeckPreset[]>(() => getDecks());
   const [gameId, setGameId] = useState(0);
   const [bots, setBots] = useState(() => makeBots(initial));
   const [botThinking, setBotThinking] = useState<PlayerId | null>(null);
   const [observe, setObserve] = useState(initial.observe);
   const [paused, setPaused] = useState(false);
   const [speed, setSpeed] = useState(1);
-
-  // ─── Ref'ы для записи матча ───
-  // ВАЖНО: все ref объявлены ДО любых useCallback,
-  // которые к ним обращаются. Иначе — TDZ.
 
   const commandsRef = useRef<CommandRecord[]>([]);
   const startTimeRef = useRef<number>(Date.now());
@@ -117,15 +108,10 @@ export function useGame(initial: ResetParams): UseGameResult {
   const p1IsBot = bots.p1 !== null;
   const p2IsBot = bots.p2 !== null;
 
-  // ─── applyWithLogAndFloating ───
-
   const applyWithLogAndFloating = useCallback(
     (prevState: GameState, cmd: Command) => {
-      // Запись команды в историю матча.
       const pid: PlayerId =
-        'playerId' in cmd
-          ? (cmd as { playerId: PlayerId }).playerId
-          : 'p1';
+        'playerId' in cmd ? (cmd as { playerId: PlayerId }).playerId : 'p1';
       commandsRef.current.push({
         sequence: commandsRef.current.length,
         playerId: pid,
@@ -234,8 +220,6 @@ export function useGame(initial: ResetParams): UseGameResult {
     [state, applyWithLogAndFloating],
   );
 
-  // ─── Бот ───
-
   const botToAct: PlayerId | null = useMemo(() => {
     if (paused) return null;
     if (state.winner) return null;
@@ -306,46 +290,53 @@ export function useGame(initial: ResetParams): UseGameResult {
     };
   }, [botToAct, state, applyWithLogAndFloating, observe, speed, bots]);
 
-  // ─── Reset ───
-
   const reset = useCallback((params: ResetParams) => {
-    const pack = getPack(params.packId);
-    const p1Cards = resolveDeckCards(params.packId, params.deckP1Id, params.deckP1Cards);
-    const p2Cards = resolveDeckCards(params.packId, params.deckP2Id, params.deckP2Cards);
-
-    // Обновляем ref'ы ДО setState.
+    const p1Cards = resolveDeckCards(params.deckP1Id, params.deckP1Cards);
+    const p2Cards = resolveDeckCards(params.deckP2Id, params.deckP2Cards);
+    const cardDefs = mergedCardsById(params.series);
+  
     commandsRef.current = [];
     startTimeRef.current = Date.now();
     resetParamsRef.current = params;
     initialDecksRef.current = { p1: p1Cards, p2: p2Cards };
-
+  
     const r = createGame({
       seed: params.seed,
       decks: { p1: p1Cards, p2: p2Cards },
-      cardDefinitions: pack.cardsById,
+      cardDefinitions: cardDefs,
       useMulligan: true,
     });
-
+  
     setBots(makeBots(params));
     setState(r.state);
-    setDecks(getDecks(params.packId));
+    setDecks(getDecks());
     setGameId((g) => g + 1);
     setFloatings([]);
     setObserve(params.observe);
     setPaused(false);
     setSpeed(1);
     resetLogIdCounter();
-
+  
     const labels: string[] = [];
     if (params.p1BotName) labels.push(`P1 — ${params.p1BotName}`);
     if (params.p2BotName) labels.push(`P2 — ${params.p2BotName}`);
-
+  
+    const packs = listPacks();
+    const nameOfSeries = (id: string) =>
+      packs.find((p) => p.id === id)?.name ?? id;
+  
+    const p1Series = seriesOfDeck(p1Cards);
+    const p2Series = seriesOfDeck(p2Cards);
+  
+    const p1Label = p1Series.length > 0 ? p1Series.map(nameOfSeries).join(' + ') : '—';
+    const p2Label = p2Series.length > 0 ? p2Series.map(nameOfSeries).join(' + ') : '—';
+  
     setLog([
       {
         id: 0,
         kind: 'turn',
         text:
-          `Пак: ${pack.meta.name} · seed: ${params.seed.slice(-8)}` +
+          `P1: ${p1Label} · P2: ${p2Label} · seed: ${params.seed.slice(-8)}` +
           (labels.length > 0 ? ' · ' + labels.join(' · ') : ''),
       },
       ...r.events
@@ -354,13 +345,11 @@ export function useGame(initial: ResetParams): UseGameResult {
     ]);
   }, []);
 
-  // ─── Payload для сохранения матча ───
-
   const getMatchPayload = useCallback(
     (names: { p1: string; p2: string }): SaveMatchDto => {
       const params = resetParamsRef.current;
       return {
-        packId: params.packId,
+		series: params.series,
         seed: params.seed,
         player1Name: names.p1,
         player2Name: names.p2,
@@ -370,6 +359,7 @@ export function useGame(initial: ResetParams): UseGameResult {
         durationMs: Date.now() - startTimeRef.current,
         p1BotName: params.p1BotName,
         p2BotName: params.p2BotName,
+		cardSnapshot: mergedCardsById(params.series),
         deckP1: initialDecksRef.current.p1,
         deckP2: initialDecksRef.current.p2,
         commands: [...commandsRef.current],

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { getDecks, listPacks } from '@aspects/cards';
+import { getDecks, listPacks, getCards, seriesOfDeck } from '@aspects/cards';
+import { generateRandomDeck } from '@aspects/shared';
 import type { DeckDto } from '@aspects/shared';
 import type { AuthState } from '../game/useAuth';
 import { useMatchmaking } from '../game/useMatchmaking';
@@ -14,11 +15,10 @@ interface Props {
 
 const PACKS = listPacks();
 
-type DeckValue = { kind: 'preset'; id: string } | { kind: 'saved'; id: string };
-
-function packName(id: string): string {
-  return PACKS.find((p) => p.id === id)?.name ?? id;
-}
+type DeckValue =
+  | { kind: 'preset'; id: string }
+  | { kind: 'saved'; id: string }
+  | { kind: 'random'; cards: string[]; series: string[] };
 
 function formatDuration(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));
@@ -27,44 +27,82 @@ function formatDuration(ms: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function randomSeries(): string[] {
+  const shuffled = [...PACKS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 4).map((p) => p.id);
+}
+
 export function MatchmakingScreen({ auth, savedDecks, onBack, onMatched }: Props) {
-  const [packId, setPackId] = useState(PACKS[0].id);
-  const [deck, setDeck] = useState<DeckValue>(() => {
-    const ds = getDecks(PACKS[0].id);
-    return ds[0] ? { kind: 'preset', id: ds[0].id } : { kind: 'preset', id: '' };
-  });
+  const allPresets = useMemo(() => getDecks(), []);
+  const [deck, setDeck] = useState<DeckValue>(() =>
+    allPresets[0]
+      ? { kind: 'preset', id: allPresets[0].id }
+      : { kind: 'preset', id: '' },
+  );
   const [localError, setLocalError] = useState<string | null>(null);
 
   const { state, enqueue, cancel } = useMatchmaking({ onMatched });
 
-  const presets = getDecks(packId);
-  const savedForPack = useMemo(
-    () => savedDecks.filter((d) => !d.packId || d.packId === packId),
-    [savedDecks, packId],
-  );
-
-  const resolvedDeckCards = useMemo((): string[] => {
+  const resolved = useMemo((): {
+    cardIds: string[];
+    series: string[];
+  } => {
     if (deck.kind === 'saved') {
-      return savedDecks.find((d) => d.id === deck.id)?.cardIds ?? [];
+      const d = savedDecks.find((x) => x.id === deck.id);
+      return {
+        cardIds: d?.cardIds ?? [],
+        series: d?.series ?? [],
+      };
     }
-    const p = getDecks(packId).find((d) => d.id === deck.id);
-    return p?.cards ?? [];
-  }, [deck, savedDecks, packId]);
+    if (deck.kind === 'random') {
+      return { cardIds: deck.cards, series: deck.series };
+    }
+    const p = allPresets.find((x) => x.id === deck.id);
+    if (!p) return { cardIds: [], series: [] };
+    return { cardIds: p.cards, series: seriesOfDeck(p.cards) };
+  }, [deck, savedDecks, allPresets]);
 
-  const handlePackChange = (newPackId: string) => {
-    setPackId(newPackId);
-    const ds = getDecks(newPackId);
-    if (ds[0]) setDeck({ kind: 'preset', id: ds[0].id });
+  const handleRandom = () => {
+    const s = randomSeries();
+    const allCards = s.flatMap((id) => {
+      try {
+        return getCards(id);
+      } catch {
+        return [];
+      }
+    });
+    const unique = [
+      ...new Map(allCards.map((c) => [c.id, c])).values(),
+    ];
+    const ids = generateRandomDeck(unique, { size: 30 });
+    if (!ids) {
+      setLocalError('Не удалось сгенерировать колоду');
+      return;
+    }
+    setDeck({ kind: 'random', cards: ids, series: s });
   };
 
   const handleFind = () => {
     setLocalError(null);
-    if (resolvedDeckCards.length !== 30) {
+    if (resolved.cardIds.length !== 30) {
       setLocalError('Выбранная колода должна содержать ровно 30 карт');
       return;
     }
-    const deckId = deck.kind === 'preset' ? `preset:${deck.id}` : `saved:${deck.id}`;
-    enqueue(packId, deckId, resolvedDeckCards);
+    if (resolved.series.length === 0) {
+      setLocalError('Не удалось определить серии колоды');
+      return;
+    }
+    if (resolved.series.length > 4) {
+      setLocalError('Колода использует больше 4 серий — недопустимо');
+      return;
+    }
+    const deckId =
+      deck.kind === 'preset'
+        ? `preset:${deck.id}`
+        : deck.kind === 'saved'
+          ? `saved:${deck.id}`
+          : 'random';
+    enqueue(resolved.series, deckId, resolved.cardIds);
   };
 
   // ─── Ожидание ───
@@ -72,7 +110,7 @@ export function MatchmakingScreen({ auth, savedDecks, onBack, onMatched }: Props
   if (state.kind === 'queued' || state.kind === 'matched' || state.kind === 'loading') {
     const elapsed = state.kind === 'queued' ? state.elapsedMs : 0;
     const position = state.kind === 'queued' ? state.status.position : null;
-    const total = state.kind === 'queued' ? state.status.totalInPack : null;
+    const total = state.kind === 'queued' ? state.status.totalInQueue : null;
 
     return (
       <div className="page-screen">
@@ -94,26 +132,20 @@ export function MatchmakingScreen({ auth, savedDecks, onBack, onMatched }: Props
             <div className="mm-search-spinner" />
             <div className="mm-search-title">
               {state.kind === 'matched'
-              ? state.opponentIsBot
-                ? `Найден бот: ${state.opponentName}`
-                : `Найден соперник: ${state.opponentName}`
-              : elapsed > 10_000
-                ? 'Расширяем поиск…'
-                : 'Ищем соперника…'}
+                ? state.opponentIsBot
+                  ? `Найден бот: ${state.opponentName}`
+                  : `Найден соперник: ${state.opponentName}`
+                : elapsed > 10_000
+                  ? 'Расширяем поиск…'
+                  : 'Ищем соперника…'}
             </div>
             <div className="mm-search-meta">
-              Пак: <b>{packName(packId)}</b>
-              {state.kind === 'queued' && (
-                <>
-                  {' · '}
-                  {formatDuration(elapsed)}
-                </>
-              )}
+              {state.kind === 'queued' && <>В очереди: {formatDuration(elapsed)}</>}
             </div>
             {position !== null && total !== null && (
               <div className="mm-search-hint">
                 {total <= 1
-                  ? 'Вы единственный в очереди на этот пак'
+                  ? 'Вы единственный в очереди'
                   : `Позиция в очереди: ${position} из ${total}`}
               </div>
             )}
@@ -149,52 +181,43 @@ export function MatchmakingScreen({ auth, savedDecks, onBack, onMatched }: Props
         </div>
 
         <div className="page-section">
-          <div className="page-section-title">Набор карт</div>
-          <div className="pack-grid">
-            {PACKS.map((p) => (
-              <div
-                key={p.id}
-                className={`pack-tile ${packId === p.id ? 'pack-tile-selected' : ''}`}
-                onClick={() => handlePackChange(p.id)}
-              >
-                <div className="pack-tile-name">{p.name}</div>
-                <div className="pack-tile-desc">{p.description}</div>
-                <div className="pack-tile-meta">
-                  {getDecks(p.id).length} колод
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="page-section">
           <div className="page-section-title">Ваша колода</div>
           <div className="deck-chooser">
-            <div className="deck-group">
-              <div className="deck-group-title">📦 Пресеты</div>
-              {presets.map((d) => {
-                const active = deck.kind === 'preset' && deck.id === d.id;
-                return (
-                  <div
-                    key={d.id}
-                    className={`deck-option ${active ? 'deck-option-p1-selected' : ''}`}
-                    onClick={() => setDeck({ kind: 'preset', id: d.id })}
-                  >
-                    <div className="deck-option-name">{d.name}</div>
-                    {d.description && (
-                      <div className="deck-option-desc">{d.description}</div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <button
+              className={`deck-random-btn ${deck.kind === 'random' ? 'deck-random-btn-active' : ''}`}
+              onClick={handleRandom}
+              title="Случайная колода из 4 случайных серий"
+            >
+              🎲 Случайная колода
+            </button>
 
-            {savedForPack.length > 0 && (
+            {allPresets.length > 0 && (
+              <div className="deck-group">
+                <div className="deck-group-title">📦 Пресеты</div>
+                {allPresets.map((d) => {
+                  const active = deck.kind === 'preset' && deck.id === d.id;
+                  return (
+                    <div
+                      key={d.id}
+                      className={`deck-option ${active ? 'deck-option-p1-selected' : ''}`}
+                      onClick={() => setDeck({ kind: 'preset', id: d.id })}
+                    >
+                      <div className="deck-option-name">{d.name}</div>
+                      {d.description && (
+                        <div className="deck-option-desc">{d.description}</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {savedDecks.length > 0 && (
               <div className="deck-group">
                 <div className="deck-group-title">
-                  🃏 Мои колоды ({savedForPack.length})
+                  🃏 Мои колоды ({savedDecks.length})
                 </div>
-                {savedForPack.map((d) => {
+                {savedDecks.map((d) => {
                   const active = deck.kind === 'saved' && deck.id === d.id;
                   return (
                     <div
@@ -212,14 +235,14 @@ export function MatchmakingScreen({ auth, savedDecks, onBack, onMatched }: Props
               </div>
             )}
 
-            {resolvedDeckCards.length > 0 && (
+            {resolved.cardIds.length > 0 && resolved.series.length > 0 && (
               <div>
                 <div className="deck-group-title" style={{ marginTop: 8 }}>
                   Кривая маны
                 </div>
                 <CostCurve
-                  cardIds={resolvedDeckCards}
-                  packId={packId}
+                  cardIds={resolved.cardIds}
+                  series={resolved.series}
                   compact
                 />
               </div>
@@ -236,7 +259,7 @@ export function MatchmakingScreen({ auth, savedDecks, onBack, onMatched }: Props
         <button
           className="setup-start"
           onClick={handleFind}
-          disabled={resolvedDeckCards.length !== 30}
+          disabled={resolved.cardIds.length !== 30}
         >
           🔍 Найти соперника
         </button>

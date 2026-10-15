@@ -1,0 +1,562 @@
+[
+  {
+    "id": "sk_conscript",
+    "name": "Мобилизованный",
+    "personalityTag": "sk_conscript",
+    "tags": [
+      "sky",
+      "infantry"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": []
+  },
+  {
+    "id": "sk_runner",
+    "name": "Посыльный",
+    "personalityTag": "sk_runner",
+    "tags": [
+      "sky",
+      "infantry"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "sk_rifleman",
+    "name": "Окопник",
+    "personalityTag": "sk_rifleman",
+    "tags": [
+      "sky",
+      "infantry"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 5,
+    "rarity": "common",
+    "abilities": [
+      "taunt"
+    ]
+  },
+  {
+    "id": "sk_medic",
+    "name": "Медик",
+    "personalityTag": "sk_medic",
+    "tags": [
+      "sky",
+      "medical"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "triage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_chaplain",
+    "name": "Капеллан",
+    "personalityTag": "sk_chaplain",
+    "tags": [
+      "sky",
+      "medical"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "field_prayer",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_observer",
+    "name": "Корректировщик",
+    "personalityTag": "sk_observer",
+    "tags": [
+      "sky",
+      "sniper"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "report_in",
+        "trigger": "ON_ENEMY_ATTACK",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_engineer",
+    "name": "Инженер",
+    "personalityTag": "sk_engineer",
+    "tags": [
+      "sky",
+      "engineer"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "dig_in",
+        "trigger": "ON_REINFORCE",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 0,
+            "health": 2,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_barrage",
+    "name": "Огневой налёт",
+    "personalityTag": "sk_barrage",
+    "tags": [
+      "sky",
+      "artillery"
+    ],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "barrage",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_vanguard",
+    "name": "Авангард",
+    "personalityTag": "sk_vanguard",
+    "tags": [
+      "sky",
+      "infantry"
+    ],
+    "cost": 3,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [
+      "vanguard"
+    ]
+  },
+  {
+    "id": "sk_sniper",
+    "name": "Снайпер",
+    "personalityTag": "sk_sniper",
+    "tags": [
+      "sky",
+      "specialist"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "precision_shot",
+        "cost": 2,
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_BOARD",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 4,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_heavy_artillery",
+    "name": "Тяжёлая артиллерия",
+    "personalityTag": "sk_heavy_artillery",
+    "tags": [
+      "sky",
+      "artillery"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "bombardment",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 3,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_apc",
+    "name": "БТР",
+    "personalityTag": "sk_apc",
+    "tags": [
+      "sky",
+      "armored"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": [
+      "scout"
+    ]
+  },
+  {
+    "id": "sk_veteran",
+    "name": "Ветеран",
+    "personalityTag": "sk_veteran",
+    "tags": [
+      "sky",
+      "infantry"
+    ],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "no_man_left",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_marshall",
+    "name": "Маршал",
+    "personalityTag": "sk_marshall",
+    "tags": [
+      "sky",
+      "infantry"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "tactical_command",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_advisor",
+    "name": "Аналитик",
+    "personalityTag": "sk_advisor",
+    "tags": [
+      "sky",
+      "intel"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "intelligence",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_sanctuary",
+    "name": "Лейтенант Энди Рейн",
+    "personalityTag": "sk_sanctuary",
+    "tags": [
+      "sky",
+      "legend"
+    ],
+    "cost": 4,
+    "strength": 2,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "renewing_fire",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "renew",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 5,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_lifeline",
+    "name": "Военный госпиталь",
+    "personalityTag": "sk_lifeline",
+    "tags": [
+      "sky",
+      "legend"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "field_hospital",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 4,
+            "target": "ALL_FRIENDLY_FRONT"
+          },
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 8,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "steady_hands",
+        "trigger": "ON_TURN_END",
+        "effects": [
+          {
+            "kind": "HEAL",
+            "amount": 1,
+            "target": "ALL_FRIENDLY_BOARD"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_supercell",
+    "name": "Суперъячейка",
+    "personalityTag": "sk_supercell",
+    "tags": [
+      "sky",
+      "legend"
+    ],
+    "cost": 8,
+    "strength": 7,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "carpet_bombing",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 3,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "collateral_damage",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sk_chronos",
+    "name": "«Хронос»",
+    "personalityTag": "sk_chronos",
+    "tags": [
+      "sky",
+      "legend"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "signal_boost",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 3,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "steady_flow",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tk_airstrike",
+    "name": "Авиаудар",
+    "personalityTag": "tk_airstrike",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 3,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge",
+      "temporary",
+      "breakthrough"
+    ],
+    "isToken": true,
+    "tempDuration": 1
+  },
+  {
+    "id": "tk_paratrooper",
+    "name": "Десантник",
+    "personalityTag": "tk_paratrooper",
+    "tags": [
+      "token"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [
+      "charge",
+      "temporary"
+    ],
+    "isToken": true,
+    "tempDuration": 1
+  }
+]

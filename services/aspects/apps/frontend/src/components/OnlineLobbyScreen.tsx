@@ -5,14 +5,17 @@ import type {
   JoinRoomDto,
   DeckDto,
 } from '@aspects/shared';
-import { getDecks, listPacks } from '@aspects/cards';
+import { getDecks, listPacks, seriesOfDeck } from '@aspects/cards';
 import type { AuthState } from '../game/useAuth';
 import { onlineApi } from '../game/onlineApi';
 import { AuthBadge } from './AuthBadge';
 import { AnonNameModal } from './AnonNameModal';
 import { getAnonName } from '../game/anonId';
 import { ErrorToast } from './ErrorToast';
-import { extractErrorMessage, localizeErrorMessage } from '../game/errorMessage';
+import {
+  extractErrorMessage,
+  localizeErrorMessage,
+} from '../game/errorMessage';
 import { useOpenProfile } from '../game/profileModal';
 import { InviteFriendsModal } from './InviteFriendsModal';
 import { useConfirm } from '../game/confirmContext';
@@ -31,12 +34,21 @@ const PACKS = listPacks();
 
 type Mode = 'menu' | 'create' | 'join' | 'spectate';
 
-function packName(packId: string | null | undefined): string {
-  if (!packId) return '—';
-  return PACKS.find((p) => p.id === packId)?.name ?? packId;
+function seriesNames(series: string[]): string {
+  return series
+    .map((id) => PACKS.find((p) => p.id === id)?.name ?? id)
+    .join(', ');
 }
 
-export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpectateRoom, onQuickPlay, initialJoinCode }: Props) {
+export function OnlineLobbyScreen({
+  auth,
+  savedDecks,
+  onBack,
+  onJoinRoom,
+  onSpectateRoom,
+  onQuickPlay,
+  initialJoinCode,
+}: Props) {
   const [mode, setMode] = useState<Mode>('menu');
   const [needName, setNeedName] = useState(
     auth.kind === 'anonymous' && !getAnonName(),
@@ -48,14 +60,13 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
   const confirm = useConfirm();
 
   // ─── Create ───
-  const [packId, setPackId] = useState(PACKS[0].id);
   const [deckId, setDeckId] = useState(() => {
-    const d = getDecks(PACKS[0].id)[0];
+    const d = getDecks()[0];
     return d ? `preset:${d.id}` : '';
   });
-  
+
   const [inviteModalRoom, setInviteModalRoom] = useState<string | null>(null);
-  
+
   useEffect(() => {
     if (initialJoinCode) {
       setMode('join');
@@ -66,7 +77,6 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
 
   // ─── Join ───
   const [joinCode, setJoinCode] = useState('');
-  const [joinPackId, setJoinPackId] = useState<string>(PACKS[0].id);
   const [joinDeckId, setJoinDeckId] = useState('');
   const [roomLookup, setRoomLookup] = useState<RoomPublicInfo | null>(null);
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -85,28 +95,21 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
 
   useEffect(() => {
     loadRooms();
-	const id = setInterval(loadRooms, 20_000);
-	return () => clearInterval(id);
+    const id = setInterval(loadRooms, 20_000);
+    return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.kind]);
 
-  // Пак «моей» колоды для join-режима: дефолт — первая колода пака комнаты.
+  // Дефолт для join — первая колода
   useEffect(() => {
-    if (!roomLookup?.packId) return;
-    const decks = getDecks(roomLookup.packId);
-    if (decks.length === 0) return;
-    const stillValid = joinDeckId.startsWith('saved:')
-      ? savedDecks.some(
-          (d) => `saved:${d.id}` === joinDeckId && d.packId === roomLookup.packId,
-        )
-      : getDecks(roomLookup.packId).some((d) => `preset:${d.id}` === joinDeckId);
-    if (!stillValid) {
-      setJoinDeckId(`preset:${decks[0].id}`);
-    }
+    if (!roomLookup) return;
+    if (joinDeckId) return;
+    const d = getDecks()[0];
+    if (d) setJoinDeckId(`preset:${d.id}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomLookup?.packId]);
+  }, [roomLookup]);
 
-  // Подтягиваем пак комнаты по мере ввода кода (debounce 350мс).
+  // Подтягиваем комнату по коду
   useEffect(() => {
     const code = joinCode.trim().toUpperCase();
     if (code.length !== 6) {
@@ -128,7 +131,6 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
             return;
           }
           setRoomLookup(room);
-          if (room.packId) setJoinPackId(room.packId);
         })
         .catch((e: unknown) => {
           if (cancelled) return;
@@ -152,12 +154,21 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
     }
     if (deckValue.startsWith('preset:')) {
       const id = deckValue.slice('preset:'.length);
-      for (const p of PACKS) {
-        const d = getDecks(p.id).find((x) => x.id === id);
-        if (d) return d.cards;
-      }
+      return getDecks().find((x) => x.id === id)?.cards ?? null;
     }
     return null;
+  };
+
+  // Проверка, что карта колоды принадлежит одной из серий комнаты
+  const deckFitsSeries = (
+    deckValue: string,
+    allowed: string[],
+  ): boolean => {
+    if (allowed.length === 0) return true;
+    const cards = resolveCards(deckValue);
+    if (!cards) return false;
+    const deckSeries = seriesOfDeck(cards);
+    return deckSeries.every((s) => allowed.includes(s));
   };
 
   const handleCreate = async () => {
@@ -167,15 +178,22 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
       setError('Выбранная колода должна содержать ровно 30 карт');
       return;
     }
+    const series = seriesOfDeck(cards);
+    if (series.length === 0 || series.length > 4) {
+      setError(
+        `Колода использует ${series.length} серий. Нужно от 1 до 4.`,
+      );
+      return;
+    }
     setLoading(true);
     try {
       const resolvedId = deckId.replace(/^(preset|saved):/, '');
       const dto: CreateRoomDto = {
-        packId,
+        series,
         deckP1Id: resolvedId,
         deckP1Cards: cards,
         p1BotName: null,
-		allowSpectators,
+        allowSpectators,
       };
       const room = await onlineApi.createRoom(dto);
       onJoinRoom(room.code);
@@ -198,9 +216,10 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
       setError('Выбранная колода должна содержать ровно 30 карт');
       return;
     }
-    if (roomLookup?.packId && roomLookup.packId !== joinPackId) {
+    const allowed = roomLookup?.series ?? [];
+    if (allowed.length > 0 && !deckFitsSeries(joinDeckId, allowed)) {
       setError(
-        `Пак комнаты — «${packName(roomLookup.packId)}». Выберите колоду из этого пака.`,
+        `Серии комнаты: «${seriesNames(allowed)}». Выберите совместимую колоду.`,
       );
       return;
     }
@@ -220,16 +239,13 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
       setLoading(false);
     }
   };
-  
+
   const handleTakeover = async () => {
     if (!roomLookup?.takeoverOpenFor) return;
     setError(null);
     setLoading(true);
     try {
-      await onlineApi.takeover(
-        roomLookup.code,
-        roomLookup.takeoverOpenFor,
-      );
+      await onlineApi.takeover(roomLookup.code, roomLookup.takeoverOpenFor);
       onJoinRoom(roomLookup.code);
     } catch (e) {
       setError(localizeErrorMessage(extractErrorMessage(e)));
@@ -255,19 +271,8 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
     }
   };
 
-  const decksForCreate = getDecks(packId);
-  const decksForJoin = roomLookup?.packId
-    ? getDecks(roomLookup.packId)
-    : getDecks(joinPackId);
-
-  // Фильтр кастомных колод: тот же пак, что у комнаты (или легаси без packId).
-  const joinSavedDecks = roomLookup?.packId
-    ? savedDecks.filter((d) => !d.packId || d.packId === roomLookup.packId)
-    : savedDecks;
-
-  const createSavedDecks = savedDecks.filter(
-    (d) => !d.packId || d.packId === packId,
-  );
+  const allDecks = getDecks();
+  const allPresets = allDecks;
 
   return (
     <div className="online-screen">
@@ -304,7 +309,7 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
               Найдём соперника автоматически
             </div>
           </button>
-		  <button
+          <button
             className="online-menu-btn online-menu-btn-primary"
             onClick={() => setMode('create')}
           >
@@ -322,7 +327,7 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
               Введите 6-символьный код от друга.
             </div>
           </button>
-		  <button className="online-menu-btn" onClick={() => setMode('spectate')}>
+          <button className="online-menu-btn" onClick={() => setMode('spectate')}>
             <div className="online-menu-icon">👁</div>
             <div className="online-menu-title">Смотреть партию</div>
             <div className="online-menu-desc">
@@ -348,12 +353,12 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
                     )}
                     {!r.hasGuest && ' (ожидание)'}
                   </div>
-				  <span className={`online-room-status online-room-status-${r.status}`}>
+                  <span className={`online-room-status online-room-status-${r.status}`}>
                     {r.status === 'waiting'
-                    ? 'ожидание'
-                    : r.status === 'ready'
-                      ? 'в игре'
-                      : 'завершена'}
+                      ? 'ожидание'
+                      : r.status === 'ready'
+                        ? 'в игре'
+                        : 'завершена'}
                   </span>
                   <button
                     className="online-room-enter"
@@ -361,7 +366,7 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
                   >
                     Войти
                   </button>
-				  {r.status === 'waiting' && (
+                  {r.status === 'waiting' && (
                     <button
                       className="online-room-invite"
                       onClick={() => setInviteModalRoom(r.code)}
@@ -383,8 +388,8 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
           )}
         </div>
       )}
-	  
-	  {mode === 'spectate' && (
+
+      {mode === 'spectate' && (
         <div className="online-form">
           <div className="online-form-title">Наблюдать за партией</div>
           <label className="setup-label">Код комнаты</label>
@@ -426,39 +431,29 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
         <div className="online-form">
           <div className="online-form-title">Создать комнату</div>
 
-          <label className="setup-label">Набор карт</label>
-          <select
-            className="online-form-select"
-            value={packId}
-            onChange={(e) => {
-              setPackId(e.target.value);
-              const d = getDecks(e.target.value)[0];
-              setDeckId(d ? `preset:${d.id}` : '');
-            }}
-          >
-            {PACKS.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-
-          <label className="setup-label">Ваша колода</label>
+          <label className="setup-label">
+            Ваша колода
+            <span className="online-form-locked">
+              {' '}· серии определяются автоматически
+            </span>
+          </label>
           <select
             className="online-form-select"
             value={deckId}
             onChange={(e) => setDeckId(e.target.value)}
           >
-            {decksForCreate.length > 0 && (
+            {allPresets.length > 0 && (
               <optgroup label="Пресеты">
-                {decksForCreate.map((d) => (
+                {allPresets.map((d) => (
                   <option key={`preset:${d.id}`} value={`preset:${d.id}`}>
                     {d.name}
                   </option>
                 ))}
               </optgroup>
             )}
-            {createSavedDecks.length > 0 && (
+            {savedDecks.length > 0 && (
               <optgroup label="Мои колоды">
-                {createSavedDecks.map((d) => (
+                {savedDecks.map((d) => (
                   <option key={`saved:${d.id}`} value={`saved:${d.id}`}>
                     {d.name} ({d.cardIds.length})
                   </option>
@@ -468,7 +463,7 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
           </select>
 
           <div className="online-form-actions">
-		    <label className="online-form-checkbox">
+            <label className="online-form-checkbox">
               <input
                 type="checkbox"
                 checked={allowSpectators}
@@ -513,61 +508,52 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
             </div>
           )}
 
-          <label className="setup-label">
-            Набор карт комнаты
-            {roomLookup?.packId && (
+          {roomLookup && roomLookup.series.length > 0 && (
+            <label className="setup-label">
+              Серии комнаты
               <span className="online-form-locked">
-                {' '}· {packName(roomLookup.packId)} (нельзя сменить)
+                {' '}· {seriesNames(roomLookup.series)}
               </span>
-            )}
-          </label>
-          {!roomLookup?.takeoverOpenFor && (<select
-            className="online-form-select"
-            value={roomLookup?.packId ?? joinPackId}
-            onChange={(e) => setJoinPackId(e.target.value)}
-            disabled={!!roomLookup?.packId}
-          >
-            {PACKS.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>)}
+            </label>
+          )}
 
           <label className="setup-label">Ваша колода</label>
-          {!roomLookup?.takeoverOpenFor && (<select
-            className="online-form-select"
-            value={joinDeckId}
-            onChange={(e) => setJoinDeckId(e.target.value)}
-            disabled={!roomLookup}
-          >
-            {decksForJoin.length > 0 && (
+          {!roomLookup?.takeoverOpenFor && (
+            <select
+              className="online-form-select"
+              value={joinDeckId}
+              onChange={(e) => setJoinDeckId(e.target.value)}
+              disabled={!roomLookup}
+            >
               <optgroup label="Пресеты">
-                {decksForJoin.map((d) => (
+                {allPresets.map((d) => (
                   <option key={`preset:${d.id}`} value={`preset:${d.id}`}>
                     {d.name}
                   </option>
                 ))}
               </optgroup>
-            )}
-            {joinSavedDecks.length > 0 && (
-              <optgroup label="Мои колоды">
-                {joinSavedDecks.map((d) => (
-                  <option key={`saved:${d.id}`} value={`saved:${d.id}`}>
-                    {d.name} ({d.cardIds.length})
-                  </option>
-                ))}
-              </optgroup>
-            )}
-          </select>)}
+              {savedDecks.length > 0 && (
+                <optgroup label="Мои колоды">
+                  {savedDecks.map((d) => (
+                    <option key={`saved:${d.id}`} value={`saved:${d.id}`}>
+                      {d.name} ({d.cardIds.length})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+          )}
 
           {roomLookup?.takeoverOpenFor ? (
             <>
               <div className="takeover-info">
                 <div className="takeover-info-title">
-                  🔄 Свободное место: {roomLookup.takeoverOpenFor === 'p1' ? 'P1' : 'P2'}
+                  🔄 Свободное место:{' '}
+                  {roomLookup.takeoverOpenFor === 'p1' ? 'P1' : 'P2'}
                 </div>
                 <div className="takeover-info-desc">
-                  Хозяин разрешил занять освободившееся место. Вы продолжите партию
-                  с текущего состояния — карты и ход сохранятся.
+                  Хозяин разрешил занять освободившееся место. Вы продолжите
+                  партию с текущего состояния — карты и ход сохранятся.
                 </div>
               </div>
               <div className="online-form-actions">
@@ -599,27 +585,28 @@ export function OnlineLobbyScreen({ auth, savedDecks, onBack, onJoinRoom, onSpec
           )}
         </div>
       )}
-		<InviteFriendsModal
-          open={!!inviteModalRoom}
-          auth={auth}
-          alreadyInRoom={
-            inviteModalRoom
-              ? (() => {
-                  const r = myRooms.find((x) => x.code === inviteModalRoom);
-                  if (!r) return [];
-                  const ids: string[] = [];
-                  if (r.ownerId) ids.push(r.ownerId);
-                  if (r.guestId) ids.push(r.guestId);
-                  return ids;
-                })()
-              : []
-          }
-          onInvite={async (userIds) => {
-            if (!inviteModalRoom) return;
-            await onlineApi.inviteFriends(inviteModalRoom, userIds);
-          }}
-          onClose={() => setInviteModalRoom(null)}
-        />
+
+      <InviteFriendsModal
+        open={!!inviteModalRoom}
+        auth={auth}
+        alreadyInRoom={
+          inviteModalRoom
+            ? (() => {
+                const r = myRooms.find((x) => x.code === inviteModalRoom);
+                if (!r) return [];
+                const ids: string[] = [];
+                if (r.ownerId) ids.push(r.ownerId);
+                if (r.guestId) ids.push(r.guestId);
+                return ids;
+              })()
+            : []
+        }
+        onInvite={async (userIds) => {
+          if (!inviteModalRoom) return;
+          await onlineApi.inviteFriends(inviteModalRoom, userIds);
+        }}
+        onClose={() => setInviteModalRoom(null)}
+      />
     </div>
   );
 }

@@ -18,7 +18,7 @@ interface Options {
 
 export interface UseMatchmakingResult {
   state: State;
-  enqueue: (packId: string, deckId: string, deckCards: string[]) => void;
+  enqueue: (series: string[], deckId: string, deckCards: string[]) => void;
   cancel: () => void;
 }
 
@@ -44,7 +44,7 @@ export function useMatchmaking({ onMatched }: Options): UseMatchmakingResult {
   }, []);
 
   const startPolling = useCallback(
-    (packId: string) => {
+    (series: string[]) => {
       startedAtRef.current = Date.now();
 
       // Раз в секунду обновляем elapsedMs.
@@ -138,13 +138,13 @@ export function useMatchmaking({ onMatched }: Options): UseMatchmakingResult {
       .status()
       .then((status) => {
         if (cancelled) return;
-        if (status.inQueue && status.packId) {
+        if (status.inQueue && status.series) {
           setState({
             kind: 'queued',
             status,
             elapsedMs: Date.now() - (status.queuedAt ?? Date.now()),
           });
-          startPolling(status.packId);
+          startPolling(status.series);
         }
       })
       .catch(() => {
@@ -158,21 +158,17 @@ export function useMatchmaking({ onMatched }: Options): UseMatchmakingResult {
   useEffect(() => () => stopPolling(), [stopPolling]);
 
   const enqueue = useCallback(
-    async (packId: string, deckId: string, deckCards: string[]) => {
+    async (series: string[], deckId: string, deckCards: string[]) => {
       if (state.kind === 'queued' || state.kind === 'loading') return;
       setState({ kind: 'loading' });
       try {
         const status = await matchmakingApi.enqueue({
-          packId,
+          series,
           deckId,
           deckCards,
         });
-        setState({
-          kind: 'queued',
-          status,
-          elapsedMs: 0,
-        });
-        startPolling(packId);
+        setState({ kind: 'queued', status, elapsedMs: 0 });
+        startPolling(series);
       } catch (e) {
         setState({
           kind: 'error',

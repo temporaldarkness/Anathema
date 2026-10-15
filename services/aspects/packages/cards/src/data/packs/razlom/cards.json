@@ -1,0 +1,593 @@
+[
+  {
+    "id": "rl_firestarter",
+    "name": "Поджигатель",
+    "personalityTag": "rl_firestarter",
+    "tags": [
+      "razlom",
+      "cell"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "rl_martyr",
+    "name": "Смертник",
+    "personalityTag": "rl_martyr",
+    "tags": [
+      "razlom",
+      "fanatic"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "final_sacrifice",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {
+            "kind": "HEAL_GLORY",
+            "amount": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_desperate",
+    "name": "Отчаявшийся",
+    "personalityTag": "rl_desperate",
+    "tags": [
+      "razlom",
+      "assault"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "second_wind",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "INFLUENCE",
+          "who": "SELF",
+          "op": "EQUAL",
+          "value": 0
+        },
+        "effects": [
+          {
+            "kind": "GAIN_INFLUENCE",
+            "amount": 2,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_opportunist",
+    "name": "Стяжатель",
+    "personalityTag": "rl_opportunist",
+    "tags": [
+      "razlom",
+      "intel"
+    ],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "loot",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "FRONT_COUNT",
+          "who": "OPPONENT",
+          "op": "AT_MOST",
+          "value": 1
+        },
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_militant",
+    "name": "Боевик",
+    "personalityTag": "rl_militant",
+    "tags": [
+      "razlom",
+      "fanatic"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": []
+  },
+  {
+    "id": "rl_sniper",
+    "name": "Городской стрелок",
+    "personalityTag": "rl_sniper",
+    "tags": [
+      "razlom",
+      "sniper"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "headshot",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {
+              "from": "ENEMY_FRONT",
+              "count": 1
+            },
+            "then": [
+              {
+                "kind": "DEAL_DAMAGE",
+                "amount": 2,
+                "target": "CHOSEN"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_ied",
+    "name": "СВУ",
+    "personalityTag": "rl_ied",
+    "tags": [
+      "razlom",
+      "cell"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "detonate",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_living_bomb",
+    "name": "Живая бомба",
+    "personalityTag": "rl_living_bomb",
+    "tags": [
+      "razlom",
+      "fanatic"
+    ],
+    "cost": 2,
+    "strength": 0,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "self_destruct",
+        "trigger": "ON_EXIT",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_ghostwire",
+    "name": "Радист",
+    "personalityTag": "rl_ghostwire",
+    "tags": [
+      "razlom",
+      "intel"
+    ],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "data_leak",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_berserker",
+    "name": "Берсерк",
+    "personalityTag": "rl_berserker",
+    "tags": [
+      "razlom",
+      "assault"
+    ],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "rl_raider",
+    "name": "Налётчик",
+    "personalityTag": "rl_raider",
+    "tags": [
+      "razlom",
+      "assault"
+    ],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "rl_fanatic",
+    "name": "Фанатик",
+    "personalityTag": "rl_fanatic",
+    "tags": [
+      "razlom",
+      "fanatic"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "rl_incendiary",
+    "name": "Огнемётчик",
+    "personalityTag": "rl_incendiary",
+    "tags": [
+      "razlom",
+      "saboteur"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "activatedAbilities": [
+      {
+        "id": "flame_wave",
+        "cost": 1,
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_cell_leader",
+    "name": "Главарь ячейки",
+    "personalityTag": "rl_cell_leader",
+    "tags": [
+      "razlom",
+      "ideologue"
+    ],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "recruit_militant",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "SUMMON",
+            "defId": "tk_looter",
+            "count": 1,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "ruthless",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_agitator",
+    "name": "Агитатор",
+    "personalityTag": "rl_agitator",
+    "tags": [
+      "razlom",
+      "intel"
+    ],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [
+      "charge"
+    ],
+    "triggers": [
+      {
+        "id": "propaganda",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "CELLS",
+          "who": "SELF",
+          "op": "AT_LEAST",
+          "value": 2
+        },
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_bomber",
+    "name": "Подрывник",
+    "personalityTag": "rl_bomber",
+    "tags": [
+      "razlom",
+      "saboteur"
+    ],
+    "cost": 4,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "shockwave",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "ALL_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_commissar",
+    "name": "Комиссар",
+    "personalityTag": "rl_commissar",
+    "tags": [
+      "razlom",
+      "ideologue"
+    ],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "terror_aura",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_champion",
+    "name": "Полевой командир",
+    "personalityTag": "rl_champion",
+    "tags": [
+      "razlom",
+      "assault"
+    ],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "triggers": [
+      {
+        "id": "survival_instinct",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "SELF"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_killer",
+    "name": "Ликвидатор",
+    "personalityTag": "rl_killer",
+    "tags": [
+      "razlom",
+      "assault"
+    ],
+    "cost": 7,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [
+      "charge"
+    ]
+  },
+  {
+    "id": "rl_butcher",
+    "name": "Бородач",
+    "personalityTag": "rl_butcher",
+    "tags": [
+      "razlom",
+      "legend"
+    ],
+    "cost": 6,
+    "strength": 4,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "butcher_call",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "bloodlust",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 1,
+            "target": "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rl_hollow_voice",
+    "name": "Пустой Голос",
+    "personalityTag": "rl_hollow_voice",
+    "tags": [
+      "razlom",
+      "legend"
+    ],
+    "cost": 6,
+    "strength": 5,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": [
+      "slow"
+    ],
+    "triggers": [
+      {
+        "id": "interrogation",
+        "trigger": "ON_ENTER",
+        "effects": [
+          {
+            "kind": "DRAW",
+            "count": 3,
+            "who": "SELF"
+          }
+        ]
+      },
+      {
+        "id": "terror_wave",
+        "trigger": "ON_TURN_START",
+        "effects": [
+          {
+            "kind": "DEAL_DAMAGE",
+            "amount": 2,
+            "target": "ALL_CARDS_ON_BOARD"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tk_looter",
+    "name": "Мародёр",
+    "personalityTag": "tk_looter",
+    "tags": [
+      "token",
+      "militant"
+    ],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [
+      "slow"
+    ],
+    "isToken": true
+  }
+]

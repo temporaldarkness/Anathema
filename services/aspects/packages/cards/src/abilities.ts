@@ -120,3 +120,60 @@ export interface ActivatedAbility {
   cost: number;
   effects: Effect[];
 }
+
+export const FACTION_IDS = [
+  'stormwind',
+  'enterprise',
+  'ganimed',
+  'burgundy',
+] as const;
+
+export type FactionId = (typeof FACTION_IDS)[number];
+
+export function isFactionTag(tag: string): tag is FactionId {
+  return (FACTION_IDS as readonly string[]).includes(tag);
+}
+
+export interface KeywordInfo {
+  name: string;
+  description: string;
+}
+
+export const KEYWORD_INFO: Record<KeywordId, KeywordInfo> = {
+  charge: {
+    name: 'Рвение',
+    description: 'При розыгрыше карта сразу переходит во Фронт, минуя Резерв.',
+  },
+  slow: {
+    name: 'Замедление',
+    description: 'Карта пропускает свой первый плановый переход из Резерва во Фронт.',
+  },
+  vanguard: {
+    name: 'Авангард',
+    description: 'Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке.',
+  },
+  taunt: {
+    name: 'Страж',
+    description: 'Противник в этой колонке вынужден атаковать эту карту, если может.',
+  },
+  scout: {
+    name: 'Разведка',
+    description: 'Может атаковать Резерв противника, даже если Фронт перед ним занят. Игнорирует Страж.',
+  },
+  breakthrough: {
+    name: 'Прорыв',
+    description: 'Если эта карта убивает защитника во Фронте — избыточный урон идёт карте в Резерве за ним.',
+  },
+  shield: {
+    name: 'Щит',
+    description: 'Поглощает первый входящий урон полностью, включая урон от способностей. После поглощения снимается.',
+  },
+  suppress: {
+    name: 'Подавление',
+    description: 'Карта напротив в той же колонке получает −1 силы и −1 здоровья. Действует постоянно.',
+  },
+  temporary: {
+    name: 'Временная',
+    description: 'Карта исчезает с поля через указанное число ходов.',
+  },
+};

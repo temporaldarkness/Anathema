@@ -9,7 +9,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
 import { createGame, applyCommand, type Command, type GameState } from '@aspects/engine';
 import { makeBot, listAllBotIds } from '@aspects/bot';
-import { getDecks, getPack } from '@aspects/cards';
+import { getDecks, mergedCardsById, seriesOfDeck } from '@aspects/cards';
 import {
   updatePair,
   RATING_DEFAULTS,
@@ -59,15 +59,14 @@ function randomSeed(): string {
 function playMatch(
   bot1Id: string,
   bot2Id: string,
-  packId: string,
+  cardDefs: Record<string, any>,
   deckP1: string[],
   deckP2: string[],
 ): 'p1' | 'p2' | 'draw' | 'abort' {
-  const pack = getPack(packId);
   const initial = createGame({
     seed: randomSeed(),
     decks: { p1: deckP1, p2: deckP2 },
-    cardDefinitions: pack.cardsById,
+    cardDefinitions: cardDefs,
     useMulligan: true,
   });
 
@@ -159,7 +158,11 @@ async function main(): Promise<void> {
     }
   }
 
-  const presetDecks = getDecks('azeroth').map((d) => d.cards);
+  const allPresets = getDecks();
+  const presetPools = allPresets.map((d) => ({
+    cards: d.cards,
+    cardDefs: mergedCardsById(seriesOfDeck(d.cards)),
+  }));
 
   let aborted = 0;
 
@@ -173,10 +176,9 @@ async function main(): Promise<void> {
     }
     if (id1 === id2) continue;
 
-    // Одна и та же колода обоим
-    const deck = randomOf(presetDecks);
+    const preset = randomOf(presetPools);
 
-    const outcome = playMatch(id1, id2, 'azeroth', deck, deck);
+    const outcome = playMatch(id1, id2, preset.cardDefs, preset.cards, preset.cards);
 
     if (outcome === 'abort') {
       aborted++;

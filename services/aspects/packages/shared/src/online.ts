@@ -7,7 +7,7 @@ export interface RoomState {
   ownerName: string;
   guestId: string | null;
   guestName: string | null;
-  packId: string;
+  series: string[];
   gameState: unknown;
   createdAt: number;
   lastActivityAt: number;
@@ -42,7 +42,7 @@ export interface RoomPublicInfo {
   ownerName: string;
   guestId: string | null;
   guestName: string | null;
-  packId: string;
+  series: string[];
   createdAt: number;
   hasGuest: boolean;
   status: 'waiting' | 'ready' | 'in-progress' | 'finished';
@@ -56,7 +56,7 @@ export interface RoomPublicInfo {
 }
 
 export const CreateRoomSchema = z.object({
-  packId: z.string().min(1),
+  series: z.array(z.string().min(1)).min(1).max(4),
   deckP1Id: z.string(),
   deckP1Cards: z.array(z.string()).nullable(),
   p1BotName: z.string().nullable(),
@@ -129,7 +129,7 @@ export interface ServerToClientEvents {
 // ─── Matchmaking ───
 
 export const MatchmakingQueueSchema = z.object({
-  packId: z.string().min(1),
+  series: z.array(z.string().min(1)).min(1).max(4),
   deckId: z.string(),
   deckCards: z.array(z.string()).length(30),
 });
@@ -138,10 +138,8 @@ export type MatchmakingQueueDto = z.infer<typeof MatchmakingQueueSchema>;
 
 export interface MatchmakingStatusDto {
   inQueue: boolean;
-  packId: string | null;
+  series: string[] | null;
   queuedAt: number | null;
-  /** Позиция в очереди (1 — первый). null если не в очереди. */
   position: number | null;
-  /** Сколько всего игроков ждут в этом паке. */
-  totalInPack: number | null;
+  totalInQueue: number | null;
 }

@@ -5,9 +5,10 @@ import { CardDefinitionSchema } from '../src/schema.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const packsDir = join(here, '..', 'src', 'data', 'packs');
+const presetsPath = join(here, '..', 'src', 'data', 'presets.json');
 
 let totalCards = 0;
-let totalDecks = 0;
+let totalPresets = 0;
 let errors = 0;
 
 if (!existsSync(packsDir)) {
@@ -15,11 +16,21 @@ if (!existsSync(packsDir)) {
   process.exit(1);
 }
 
+// ─── Общий пул карт всех паков ───
+const globalCardIds = new Set<string>();
+const globalCardRarity = new Map<string, string>();
+const packEntries: Array<{
+  packId: string;
+  cards: any[];
+  ids: Set<string>;
+}> = [];
+
 for (const packName of readdirSync(packsDir)) {
+  if (packName.startsWith('_')) continue;
+
   const packDir = join(packsDir, packName);
   const cardsPath = join(packDir, 'cards.json');
   const metaPath = join(packDir, 'meta.json');
-  const decksPath = join(packDir, 'decks.json');
 
   if (!existsSync(cardsPath)) {
     console.error(`✗ ${packName}: нет cards.json`);
@@ -51,58 +62,78 @@ for (const packName of readdirSync(packsDir)) {
       continue;
     }
     if (ids.has(card.id)) {
-      console.error(`✗ ${packName} [${card.id}]: дубликат id`);
+      console.error(`✗ ${packName} [${card.id}]: дубликат id в паке`);
+      errors++;
+      continue;
+    }
+    if (globalCardIds.has(card.id)) {
+      console.error(`✗ ${packName} [${card.id}]: дубликат id между паками`);
       errors++;
       continue;
     }
     ids.add(card.id);
+    globalCardIds.add(card.id);
+    if (card.rarity) globalCardRarity.set(card.id, card.rarity);
     packOk++;
   }
   totalCards += packOk;
+  packEntries.push({ packId: packName, cards, ids });
 
-  if (existsSync(decksPath)) {
-    const decks = JSON.parse(readFileSync(decksPath, 'utf8')) as any[];
-    for (const deck of decks) {
-      if (!deck.id || !deck.name) {
-        console.error(`✗ ${packName}/decks: колода без id или name`);
-        errors++;
-        continue;
-      }
-      if (!Array.isArray(deck.cards) || deck.cards.length !== 30) {
-        console.error(`✗ ${packName}/decks [${deck.id}]: должно быть ровно 30 карт, есть ${deck.cards?.length ?? 0}`);
-        errors++;
-        continue;
-      }
-      for (const cid of deck.cards) {
-        if (!ids.has(cid)) {
-          console.error(`✗ ${packName}/decks [${deck.id}]: карта "${cid}" не найдена в паке`);
-          errors++;
-        }
-      }
-      const legendCounts = new Map<string, number>();
-      for (const cid of deck.cards) {
-        const card = cards.find((c) => c.id === cid);
-        if (card?.rarity === 'legendary') {
-          legendCounts.set(cid, (legendCounts.get(cid) ?? 0) + 1);
-        }
-      }
-      for (const [cid, n] of legendCounts) {
-        if (n > 1) {
-          console.error(`✗ ${packName}/decks [${deck.id}]: ${n} копий легендарки "${cid}"`);
-          errors++;
-        }
-      }
-      totalDecks++;
+  console.log(`  ${packName}: ${packOk} карт`);
+}
+
+// ─── Пресеты ───
+if (!existsSync(presetsPath)) {
+  console.warn('⚠ presets.json не найден');
+} else {
+  const presets = JSON.parse(readFileSync(presetsPath, 'utf8')) as any[];
+  for (const preset of presets) {
+    if (!preset.id || !preset.name) {
+      console.error('✗ preset без id или name');
+      errors++;
+      continue;
     }
-  }
+    if (!Array.isArray(preset.cards) || preset.cards.length !== 30) {
+      console.error(
+        `✗ preset [${preset.id}]: 30 карт ожидается, есть ${preset.cards?.length ?? 0}`,
+      );
+      errors++;
+      continue;
+    }
 
-  console.log(`  ${packName}: ${packOk} карт, ${existsSync(decksPath) ? JSON.parse(readFileSync(decksPath, 'utf8')).length : 0} колод`);
+    // Проверка: все карты существуют в общем пуле
+    for (const cid of preset.cards) {
+      if (!globalCardIds.has(cid)) {
+        console.error(
+          `✗ preset [${preset.id}]: карта "${cid}" не найдена ни в одном паке`,
+        );
+        errors++;
+      }
+    }
+
+    // Легендарки — не больше 1 копии каждой
+    const legendCounts = new Map<string, number>();
+    for (const cid of preset.cards) {
+      if (globalCardRarity.get(cid) === 'legendary') {
+        legendCounts.set(cid, (legendCounts.get(cid) ?? 0) + 1);
+      }
+    }
+    for (const [cid, n] of legendCounts) {
+      if (n > 1) {
+        console.error(`✗ preset [${preset.id}]: ${n} копий легендарки "${cid}"`);
+        errors++;
+      }
+    }
+
+    totalPresets++;
+  }
+  console.log(`  presets: ${totalPresets}`);
 }
 
 console.log('');
-console.log(`Паков:          ${readdirSync(packsDir).length}`);
+console.log(`Паков:          ${packEntries.length}`);
 console.log(`Всего карт:     ${totalCards}`);
-console.log(`Всего колод:    ${totalDecks}`);
+console.log(`Всего пресетов: ${totalPresets}`);
 console.log(`Ошибок:         ${errors}`);
 
 if (errors > 0) process.exit(1);

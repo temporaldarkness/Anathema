@@ -8,7 +8,7 @@ interface RoomInvite {
   roomCode: string;
   fromUserId: string;
   fromUsername: string;
-  packId: string;
+  series: string[];
 }
 
 let counter = 0;
@@ -36,11 +36,10 @@ export function RoomInviteToasts({
         roomCode: string;
         fromUserId: string;
         fromUsername: string;
-        packId: string;
+        series: string[];
       }) => {
         const id = ++counter;
         setInvites((arr) => [...arr, { id, ...p }]);
-        // Приглашение живёт 30 секунд.
         setTimeout(() => {
           setInvites((arr) => arr.filter((x) => x.id !== id));
         }, 30_000);

@@ -3,25 +3,34 @@ import { getCards } from '@aspects/cards';
 
 interface Props {
   cardIds: string[];
-  packId: string;
+  series: string[];
   compact?: boolean;
 }
 
-export function CostCurve({ cardIds, packId, compact = false }: Props) {
+export function CostCurve({ cardIds, series, compact = false }: Props) {
   const { bars, max, empty } = useMemo(() => {
     if (cardIds.length === 0) {
       return { bars: [], max: 1, empty: true };
     }
-    const byId = new Map(getCards(packId).map((c) => [c.id, c]));
+    const merged = new Map<string, { cost: number }>();
+    for (const s of series) {
+      try {
+        for (const c of getCards(s)) {
+          if (!merged.has(c.id)) merged.set(c.id, c);
+        }
+      } catch {
+        // неизвестная серия
+      }
+    }
     const bins = [0, 0, 0, 0, 0, 0, 0, 0];
     for (const id of cardIds) {
-      const c = byId.get(id);
+      const c = merged.get(id);
       if (!c) continue;
       const idx = Math.min(7, Math.max(0, c.cost));
       bins[idx]++;
     }
     return { bars: bins, max: Math.max(...bins, 1), empty: false };
-  }, [cardIds, packId]);
+  }, [cardIds, series]);
 
   if (empty) {
     return (

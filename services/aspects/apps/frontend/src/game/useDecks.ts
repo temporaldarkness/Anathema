@@ -5,14 +5,19 @@ import type { AuthState } from './useAuth';
 
 const LS_KEY = 'aspects.decks.v1';
 
+function migrateLocal(d: any): DeckDto {
+  const series: string[] = d.series;
+  return {
+    ...d,
+    series,
+  } as DeckDto;
+}
+
 function loadLocal(): DeckDto[] {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return [];
-    return (JSON.parse(raw) as DeckDto[]).map((d) => ({
-	  ...d,
-	  packId: d.packId ?? 'azeroth',
-	}));
+    return (JSON.parse(raw) as any[]).map(migrateLocal);
   } catch {
     return [];
   }
@@ -73,15 +78,16 @@ export function useDecks(auth: AuthState): UseDecksResult {
   const create = useCallback(
     async (dto: CreateDeckDto): Promise<DeckDto> => {
       if (isAnonymous) {
+        const now = new Date().toISOString();
         const deck: DeckDto = {
           id: makeLocalId(),
           ownerId: 'anonymous',
           name: dto.name,
           description: dto.description ?? '',
-		  packId: dto.packId ?? 'azeroth',
+          series: dto.series,
           cardIds: [...dto.cardIds],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: now,
+          updatedAt: now,
         };
         const next = [deck, ...decks];
         saveLocal(next);
@@ -105,7 +111,7 @@ export function useDecks(auth: AuthState): UseDecksResult {
           ...decks[idx],
           name: dto.name,
           description: dto.description ?? '',
-		  packId: dto.packId ?? 'azeroth',
+          series: dto.series,
           cardIds: [...dto.cardIds],
           updatedAt: new Date().toISOString(),
         };

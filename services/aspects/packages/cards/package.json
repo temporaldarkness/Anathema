@@ -6,14 +6,16 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-data.mjs",
     "dev": "tsc -p tsconfig.json --watch",
-	"validate": "tsx scripts/validate.mts",
-	"validate:only": "tsx scripts/validate.mts"
+    "validate": "tsx scripts/validate.mts",
+    "validate:only": "tsx scripts/validate.mts",
+	"test": "vitest run"
   },
   "dependencies": {
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "tsx": "^4.19.1",
     "typescript": "^5.6.3",
-    "tsx": "^4.19.1"
+    "vitest": "^2.1.3"
   }
 }

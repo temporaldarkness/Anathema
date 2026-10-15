@@ -16,6 +16,7 @@ import { MatchesModule } from '../matches/matches.module';
 import type { CommandRecord } from '@aspects/shared';
 import { EventsService } from '../common/events.service';
 import { EventsModule } from '../common/events.module';
+import { mergedCardsById } from '@aspects/cards';
 
 let redisClient: Redis | null = null;
 function getRedis(): Redis {
@@ -241,7 +242,7 @@ export function attachSocketIo(
       : null;
   
     const dto = {
-      packId: room.packId,
+	  series: room.series ?? [],
       seed: room.seed,
       player1Name: room.ownerName,
       player2Name: room.guestName ?? 'Соперник',
@@ -251,6 +252,7 @@ export function attachSocketIo(
       durationMs: Date.now() - room.createdAt,
       p1BotName: null,
       p2BotName,
+	  cardSnapshot: mergedCardsById(room.series ?? []),
       deckP1: room.deckP1,
       deckP2: room.deckP2 ?? [],
       commands: room.commands,

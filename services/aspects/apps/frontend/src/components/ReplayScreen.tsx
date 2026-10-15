@@ -8,7 +8,7 @@ import {
   type CardInstanceId,
   type PlayerId,
 } from '@aspects/engine';
-import { getPack } from '@aspects/cards';
+import { mergedCardsById } from '@aspects/cards';
 import type { MatchDetailDto } from '@aspects/shared';
 import { matchesApi } from '../game/matchesApi';
 import { Board } from './Board';
@@ -29,11 +29,13 @@ interface ReplayFrame {
 }
 
 function buildFrames(match: MatchDetailDto): ReplayFrame[] {
-  const pack = getPack(match.packId);
+  const cardDefs = match.cardSnapshot
+	? (match.cardSnapshot as Record<string, any>)
+	: mergedCardsById(match.series ?? []);
   const initial = createGame({
     seed: match.seed,
     decks: { p1: match.deckP1, p2: match.deckP2 },
-    cardDefinitions: pack.cardsById,
+    cardDefinitions: cardDefs,
     useMulligan: true,
   });
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { DeckDto } from '@aspects/shared';
-import { getCards } from '@aspects/cards';
+import { getCards, listPacks } from '@aspects/cards';
 import type { AuthState } from '../game/useAuth';
 import type { UseDecksResult } from '../game/useDecks';
 import { AuthBadge } from './AuthBadge';
@@ -18,9 +18,9 @@ interface Props {
 
 export function DecksScreen({ auth, deckStore, onBack, onEdit, onNew }: Props) {
   const { decks, loading, error, isLocal, remove } = deckStore;
-  
+
   const confirm = useConfirm();
-  
+
   const [actionError, setActionError] = useState<string | null>(null);
 
   const sortedDecks = useMemo(
@@ -36,9 +36,7 @@ export function DecksScreen({ auth, deckStore, onBack, onEdit, onNew }: Props) {
     });
     if (!ok) return;
     remove(deck.id).catch((e: unknown) => {
-      setActionError(
-        'Не удалось удалить: ' + (e as Error).message,
-      );
+      setActionError('Не удалось удалить: ' + (e as Error).message);
     });
   };
 
@@ -58,8 +56,12 @@ export function DecksScreen({ auth, deckStore, onBack, onEdit, onNew }: Props) {
           </div>
         </div>
 
-        <ErrorToast message={actionError} onClose={() => setActionError(null)} />
-		{isLocal && (
+        <ErrorToast
+          message={actionError}
+          onClose={() => setActionError(null)}
+        />
+
+        {isLocal && (
           <div className="decks-warning">
             ⚠ Вы в анонимном режиме. Колоды сохраняются только в этом браузере
             и будут потеряны при очистке кэша.
@@ -73,7 +75,11 @@ export function DecksScreen({ auth, deckStore, onBack, onEdit, onNew }: Props) {
           <div className="page-empty">
             <div className="page-empty-icon">🃏</div>
             <div className="page-empty-text">Пока нет ни одной колоды</div>
-            <button className="setup-start" onClick={onNew} style={{ maxWidth: 260, margin: '0 auto' }}>
+            <button
+              className="setup-start"
+              onClick={onNew}
+              style={{ maxWidth: 260, margin: '0 auto' }}
+            >
               Создать первую
             </button>
           </div>
@@ -105,31 +111,43 @@ function DeckCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const series = useMemo(
+    () => deck.series,
+    [deck],
+  );
+
+  const seriesNames = useMemo(() => {
+    const allPacks = listPacks();
+    return series
+      .map((id) => allPacks.find((p) => p.id === id)?.name ?? id)
+      .filter(Boolean);
+  }, [series]);
+
   const stats = useMemo(() => {
-    const byId = new Map(getCards(deck.packId ?? 'azeroth').map((c) => [c.id, c]));
+    const merged = new Map<string, ReturnType<typeof getCards>[number]>();
+    for (const s of series) {
+      try {
+        for (const c of getCards(s)) {
+          if (!merged.has(c.id)) merged.set(c.id, c);
+        }
+      } catch {
+        // неизвестная серия — пропускаем
+      }
+    }
+
     const uniqueCards = new Set(deck.cardIds).size;
     const totalCost = deck.cardIds.reduce(
-      (sum, id) => sum + (byId.get(id)?.cost ?? 0),
+      (sum, id) => sum + (merged.get(id)?.cost ?? 0),
       0,
     );
     const avgCost =
       deck.cardIds.length > 0 ? totalCost / deck.cardIds.length : 0;
     const legendaries = deck.cardIds.filter(
-      (id) => byId.get(id)?.rarity === 'legendary',
+      (id) => merged.get(id)?.rarity === 'legendary',
     ).length;
-    const tags = new Set<string>();
-    for (const id of deck.cardIds) {
-      const def = byId.get(id);
-      if (!def) continue;
-      for (const t of def.tags ?? []) tags.add(t);
-    }
-    return {
-      uniqueCards,
-      avgCost,
-      legendaries,
-      tags: [...tags].slice(0, 4),
-    };
-  }, [deck]);
+
+    return { uniqueCards, avgCost, legendaries };
+  }, [deck, series]);
 
   const updated = new Date(deck.updatedAt);
   const updatedText = updated.toLocaleDateString('ru-RU', {
@@ -173,17 +191,13 @@ function DeckCard({
         </div>
       </div>
 
-      <CostCurve
-        cardIds={deck.cardIds}
-        packId={deck.packId ?? 'azeroth'}
-        compact
-      />
+      <CostCurve cardIds={deck.cardIds} series={series} compact />
 
-      {stats.tags.length > 0 && (
+      {seriesNames.length > 0 && (
         <div className="deck-card-tags">
-          {stats.tags.map((t) => (
-            <span key={t} className="deck-card-tag">
-              {t}
+          {seriesNames.map((name) => (
+            <span key={name} className="deck-card-tag deck-card-tag-series">
+              {name}
             </span>
           ))}
         </div>

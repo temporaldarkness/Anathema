@@ -23,7 +23,8 @@ model Deck {
   ownerId     String
   name        String
   description String   @default("")
-  packId      String   @default("azeroth")
+  /** До 4 серий, из которых собрана колода. */
+  series      String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -51,7 +52,7 @@ model Match {
   player2Name  String
   winnerId     String?
   winnerReason String?
-  packId       String    @default("azeroth")
+  series       String[]  @default([])
   seed         String
   turnNumber   Int       @default(0)
   durationMs   Int       @default(0)
@@ -62,6 +63,7 @@ model Match {
 
   player1      User?          @relation("P1", fields: [player1Id], references: [id])
   player2      User?          @relation("P2", fields: [player2Id], references: [id])
+  cardSnapshot Json?
   decks        MatchDeck[]
   commands     MatchCommand[]
 
