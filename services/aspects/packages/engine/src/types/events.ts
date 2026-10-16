@@ -35,6 +35,7 @@ export type GameEvent =
   | { type: 'CARD_EXHAUSTED'; cardId: CardInstanceId }
   | { type: 'CARD_RESTORED'; cardId: CardInstanceId }
   | { type: 'CARD_HEALED'; cardId: CardInstanceId; amount: number }
+  | { type: 'CARD_SILENCED'; cardId: CardInstanceId }
   | { type: 'NEUTRAL_CAPTURED'; column: ColumnIndex; playerId: PlayerId }
   | { type: 'NEUTRAL_LOST'; column: ColumnIndex; formerOwner: PlayerId }
   | { type: 'ABILITY_TRIGGERED'; cardId: CardInstanceId; abilityId: string }

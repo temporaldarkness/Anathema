@@ -3,7 +3,7 @@ import type { GameState } from '../types/state';
 import type { ResolutionContext } from '../types/resolution';
 import type { CardInstanceId } from '../types/ids';
 import { opponentOf } from '../types/ids';
-import { columnBonuses, controlledCells, frontCount } from '../state/helpers';
+import { columnBonuses, controlledCells, frontCount, cardAbilities } from '../state/helpers';
 import { addToHand, damageGlory, killCard, promoteFromReserve } from '../state/mutations';
 import { queuePhaseTriggers } from '../abilities/triggerEngine';
 import { randomIndex } from '../state/rng';
@@ -130,9 +130,8 @@ function doRegenerate(draft: WritableDraft<GameState>, ctx: ResolutionContext): 
       if (!card) continue;
       if (card.damageTaken <= 0) continue;
 
-      const def = draft.definitions[card.definitionId];
-      if (!def) continue;
-      if (!(def.abilities ?? []).includes('regenerate')) continue;
+      const abilities = cardAbilities(draft as GameState, id);
+      if (!abilities.includes('regenerate')) continue;
 
       card.damageTaken -= 1;
       ctx.events.push({ type: 'CARD_HEALED', cardId: id, amount: 1 });

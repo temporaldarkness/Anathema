@@ -47,6 +47,7 @@ export interface CardInstance {
   sharesIdentity: boolean;
   tempTurnsLeft: number | null;
   readyForFront: boolean;
+  silenced: boolean;
 }
 
 export interface Column {
@@ -132,6 +133,7 @@ export interface GameState {
 
   seed: string;
   rngState: number;
+  firstPlayer: PlayerId;
 
   winner: PlayerId | null;
   winnerReason: string | null;

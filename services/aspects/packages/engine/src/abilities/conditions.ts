@@ -83,6 +83,12 @@ export function evaluateCondition(
       if (!card) return false;
       return card.zone === 'FRONT';
     }
+    case 'TURN_NUMBER': {
+      return compare(state.turnNumber, cond.op, cond.value);
+    }
+    case 'IS_FIRST_PLAYER': {
+      return state.firstPlayer === ownerId;
+    }
     case 'AND':
       return cond.conditions.every((c) => evaluateCondition(draft, c, ownerId, sourceId));
     case 'OR':

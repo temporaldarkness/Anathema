@@ -34,6 +34,8 @@ export const TRIGGER_TYPES = [
   'ON_KILL',
   'ON_CELL_CAPTURED',
   'ON_CELL_LOST',
+  'ON_DAMAGE_DEALT',
+  'ON_CARD_DRAWN',
 ] as const;
 
 export type TriggerType = (typeof TRIGGER_TYPES)[number];
@@ -73,6 +75,7 @@ export type Effect =
   | { kind: 'GRANT_SHIELD'; target: TargetSelector; filter?: CardFilter }
   | { kind: 'EXHAUST_TARGET'; target: TargetSelector; filter?: CardFilter }
   | { kind: 'UNEXHAUST_TARGET'; target: TargetSelector; filter?: CardFilter }
+  | { kind: 'SILENCE_TARGET'; target: TargetSelector; filter?: CardFilter }
   | { kind: 'DRAW'; count: number; who: 'SELF' | 'OPPONENT' }
   | { kind: 'GAIN_INFLUENCE'; amount: number; who: 'SELF' | 'OPPONENT' }
   | { kind: 'SPEND_INFLUENCE'; amount: number; who: 'SELF' | 'OPPONENT' }
@@ -110,6 +113,8 @@ export const CONDITION_KINDS = [
   'TOTAL_HEALTH',
   'IN_RESERVE',
   'IN_FRONT',
+  'TURN_NUMBER',
+  'IS_FIRST_PLAYER',
   'AND',
   'OR',
   'NOT',
@@ -131,6 +136,8 @@ export type Condition =
   | { kind: 'TOTAL_HEALTH'; who: ConditionSide; op: Comparator; value: number; filter?: CardFilter }
   | { kind: 'IN_RESERVE' }
   | { kind: 'IN_FRONT' }
+  | { kind: 'TURN_NUMBER'; op: Comparator; value: number }
+  | { kind: 'IS_FIRST_PLAYER' }
   | { kind: 'AND'; conditions: Condition[] }
   | { kind: 'OR'; conditions: Condition[] }
   | { kind: 'NOT'; condition: Condition };

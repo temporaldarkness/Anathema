@@ -178,7 +178,7 @@ function renderHand(state: GameState): void {
     const hp = health(card);
     const personality = getPersonalityName(def.personalityTag);
     const isAspect = def.name !== personality;
-    const ab = def.abilities.length > 0 ? ` [${def.abilities.join(',')}]` : '';
+    const ab = cardAbilities(state, cardId).length > 0 ? ` [${cardAbilities(state, cardId).join(',')}]` : '';
     const act =
       def.activatedAbilities && def.activatedAbilities.length > 0
         ? ` ⚡x${def.activatedAbilities.length}`

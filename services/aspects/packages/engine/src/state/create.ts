@@ -5,6 +5,7 @@ import type { GameEvent } from '../types/events';
 import type { CardInstanceId, PlayerId } from '../types/ids';
 import { asCardInstanceId, opponentOf } from '../types/ids';
 import { hashSeed, mulberry32, shuffle } from '../rng/mulberry';
+import { cardAbilities } from './helpers';
 
 export interface CreateGameOptions {
   seed: string;
@@ -65,6 +66,7 @@ function createInstances(
       sharesIdentity: def.isToken ? (def.sharesIdentity ?? false) : true,
       tempTurnsLeft: def.tempDuration ?? null,
       readyForFront: false,
+	  silenced: false,
     };
   });
 }
@@ -217,6 +219,7 @@ export function createGame(opts: CreateGameOptions): CreateGameResult {
     phase: useMulligan ? 'MULLIGAN' : 'RESTORE',
     seed,
     rngState: hashSeed(seed + ':runtime'),
+	firstPlayer,
     winner: null,
     winnerReason: null,
     altVictoryPending: { p1: false, p2: false },

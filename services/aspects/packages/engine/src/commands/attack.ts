@@ -12,6 +12,7 @@ import {
   strengthInBattle,
   canAttackMore,
   maxAttacksFor,
+  cardAbilities
 } from '../state/helpers';
 import { hasAbility, canAttackReserve, tauntInColumn } from '../state/abilities';
 import { damageCard } from '../state/damage';
@@ -156,8 +157,9 @@ function resolveCombat(
   const target = draft.cards[targetId];
   if (!attacker || !target) return;
 
+  const abilities = cardAbilities(draft as GameState, attackerId);
+  const hasCleave = abilities.includes('cleave');
   const attackerDef = draft.definitions[attacker.definitionId];
-  const hasCleave = (attackerDef?.abilities ?? []).includes('cleave');
   const cleaveDamage = hasCleave ? (attackerDef?.cleaveDamage ?? 1) : 0;
 
   const attStrength = strengthInBattle(draft as GameState, attackerId);

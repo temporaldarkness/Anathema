@@ -61,6 +61,7 @@ export function replaceInternal(
       const c = draft.cards[id];
       const def = draft.definitions[c.definitionId];
       if (def && def.personalityTag === personality) {
+		if (def.cantBeReplaced) continue;
         candidates.push(id);
       }
     }
@@ -121,6 +122,9 @@ export function applyReplacementInternal(
   const oldDef = draft.definitions[oldCard.definitionId];
   if (!oldDef || oldDef.personalityTag !== newDef.personalityTag) {
     return { ok: false, reason: 'target_personality_mismatch' };
+  }
+  if (oldDef.cantBeReplaced) {
+    return { ok: false, reason: 'cant_be_replaced' };
   }
 
   const oldLocation = findCardLocation(draft as GameState, targetCardId);

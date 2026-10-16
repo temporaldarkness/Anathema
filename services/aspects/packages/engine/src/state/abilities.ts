@@ -1,7 +1,7 @@
 import type { GameState, CardInstance } from '../types/state';
 import type { KeywordId } from '@aspects/cards';
 import type { ColumnIndex, PlayerId } from '../types/ids';
-import { getColumn } from './helpers';
+import { getColumn, cardAbilities } from './helpers';
 
 export function hasAbility(
   state: GameState,
@@ -12,7 +12,7 @@ export function hasAbility(
   if (!card) return false;
   const def = state.definitions[card.definitionId];
   if (!def) return false;
-  return def.abilities.includes(ability);
+  return cardAbilities(state, cardId).includes(ability);
 }
 
 export function tauntInColumn(

@@ -1,5 +1,6 @@
 import type { GameState, CardInstance, PlayerState, Column } from '../types/state';
 import type { CardInstanceId, ColumnIndex, PlayerId } from '../types/ids';
+import type { TriggeredAbility, KeywordId } from '@aspects/cards';
 import { COLUMN_INDEXES, opponentOf } from '../types/ids';
 
 export function getCard(state: GameState, id: CardInstanceId): CardInstance {
@@ -14,6 +15,30 @@ export function getPlayer(state: GameState, id: PlayerId): PlayerState {
 
 export function getOpponent(state: GameState, id: PlayerId): PlayerState {
   return state.players[opponentOf(id)];
+}
+
+/**
+ * Активные ключевые слова карты с учётом silence.
+ * Silenced карта теряет все keywords.
+ */
+export function cardAbilities(state: GameState, cardId: CardInstanceId): readonly KeywordId[] {
+  const card = state.cards[cardId];
+  if (!card) return [];
+  if (card.silenced) return [];
+  const def = state.definitions[card.definitionId];
+  return def?.abilities ?? [];
+}
+
+/**
+ * Активные триггеры карты с учётом silence.
+ * Silenced карта теряет все triggers.
+ */
+export function cardTriggers(state: GameState, cardId: CardInstanceId): readonly TriggeredAbility[] {
+  const card = state.cards[cardId];
+  if (!card) return [];
+  if (card.silenced) return [];
+  const def = state.definitions[card.definitionId];
+  return def?.triggers ?? [];
 }
 
 export function health(card: CardInstance): number {
@@ -173,22 +198,13 @@ export function allCardIds(state: GameState): CardInstanceId[] {
   return Object.keys(state.cards) as CardInstanceId[];
 }
 
-/**
- * Максимальное число атак за ход для карты.
- * frenzy → 2, иначе 1.
- */
 export function maxAttacksFor(state: GameState, cardId: CardInstanceId): number {
   const card = state.cards[cardId];
   if (!card) return 0;
-  const def = state.definitions[card.definitionId];
-  if (!def) return 1;
-  return (def.abilities ?? []).includes('frenzy') ? 2 : 1;
+  const abilities = cardAbilities(state, cardId);
+  return abilities.includes('frenzy') ? 2 : 1;
 }
 
-/**
- * Может ли карта сейчас атаковать (по счётчику атак и истощению).
- * Проверка фазы — снаружи.
- */
 export function canAttackMore(state: GameState, cardId: CardInstanceId): boolean {
   const card = state.cards[cardId];
   if (!card) return false;

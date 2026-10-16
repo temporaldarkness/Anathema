@@ -105,6 +105,17 @@ export function resolveEffect(
       }
       break;
     }
+    case 'SILENCE_TARGET': {
+      const targets = resolveTargets(draft, effect.target, effect.filter, ec, explicitTargets);
+      for (const id of targets) {
+        const card = draft.cards[id];
+        if (!card) continue;
+        if (card.silenced) continue;
+        card.silenced = true;
+        ctx.events.push({ type: 'CARD_SILENCED', cardId: id });
+      }
+      break;
+    }
     case 'DRAW': {
       const who: PlayerId = effect.who === 'SELF' ? ec.ownerId : opponentOf(ec.ownerId);
       for (let i = 0; i < effect.count; i++) {

@@ -3,6 +3,7 @@ import type { GameState } from '../types/state';
 import type { ResolutionContext } from '../types/resolution';
 import { resolveEffect } from './effectResolver';
 import { evaluateCondition } from './conditions';
+import { cardTriggers } from '../state/helpers';
 
 const MAX_TRIGGERS_PER_DRAIN = 500;
 
@@ -31,9 +32,6 @@ export function drainTriggerQueue(
 
     const onBoard = card.zone === 'FRONT' || card.zone === 'RESERVE';
 
-    // ON_EXIT — карта уже ушла в сброс, но триггер обязан сработать.
-    // ON_KILL  — карта могла убить и тут же умереть; всё равно срабатывает.
-    // Остальные — только пока карта на доске.
     if (
       trigger.triggerType !== 'ON_EXIT' &&
       trigger.triggerType !== 'ON_KILL' &&
@@ -43,9 +41,7 @@ export function drainTriggerQueue(
     }
     if (trigger.triggerType === 'ON_REINFORCE' && card.zone !== 'FRONT') continue;
 
-    const def = draft.definitions[card.definitionId];
-    if (!def) continue;
-    const triggers = def.triggers ?? [];
+    const triggers = cardTriggers(draft as GameState, trigger.cardId);
     if (triggers.length === 0) continue;
 
     const matching = triggers.filter((t) => t.trigger === trigger.triggerType);

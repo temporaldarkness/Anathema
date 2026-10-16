@@ -4,6 +4,7 @@ import type { ResolutionContext } from '../types/resolution';
 import type { CardInstanceId, ColumnIndex, PlayerId } from '../types/ids';
 import { asCardInstanceId } from '../types/ids';
 import { randomIndex } from './rng';
+import { cardAbilities } from './helpers';
 
 export type SummonDestination = 'FRONT' | 'RESERVE' | 'HAND';
 
@@ -50,6 +51,7 @@ export function summonToken(
       sharesIdentity: def.sharesIdentity ?? false,
       tempTurnsLeft: def.tempDuration ?? null,
       readyForFront: false,
+	  silenced: false,
     };
     draft.cards[instanceId] = card;
     draft.players[ownerId].hand.push(instanceId);
@@ -98,6 +100,7 @@ export function summonToken(
     sharesIdentity: def.sharesIdentity ?? false,
     tempTurnsLeft: def.tempDuration ?? null,
     readyForFront: false,
+	silenced: false,
   };
 
   draft.cards[instanceId] = card;

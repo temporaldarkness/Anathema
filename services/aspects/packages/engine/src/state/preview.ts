@@ -1,18 +1,17 @@
 import type { GameState } from '../types/state';
 import type { CardInstanceId } from '../types/ids';
-import { columnBonuses, findCardLocation, health, strength } from './helpers';
+import { cardAbilities, columnBonuses, findCardLocation, health, strength } from './helpers';
 import { getValidActions } from './validActions';
 import type { AttackTarget } from '../types/commands';
 import { applyCommand } from '../commands/applyCommand';
 import type { GameEvent } from '../types/events';
-import { randomIndex } from './rng';
 
 export interface CardAttackPreview {
   attackerDies: boolean;
   defenderDies: boolean;
-  /** Фактический урон по защитнику (после щита и защиты колонки 4). */
+  /** Фактический урон по защитнику (после щита, защиты колонки 4 и брони). */
   damageToDefender: number;
-  /** Фактический урон по атакующему (ответка после щита и защиты). */
+  /** Фактический урон по атакующему (ответка после щита, защиты и брони). */
   damageToAttacker: number;
   /** Избыток урона, уходящий в Резерв (Прорыв). 0 — если нет. */
   overkillToReserve: number;
@@ -23,24 +22,18 @@ export interface CardAttackPreview {
   defenderHpAfter: number;
   attackerHpBefore: number;
   attackerHpAfter: number;
+  /** Сколько урона поглотила броня защитника (0 или 1). */
+  defenderArmorReduction: number;
+  /** Сколько урона поглотила броня атакующего на ответке (0 или 1). */
+  attackerArmorReduction: number;
+  /** Cleave: сколько соседей цели получит урон. */
+  cleaveTargetCount: number;
+  /** Cleave: урон на каждого соседа. */
+  cleaveDamagePerTarget: number;
+  /** Cleave: сколько соседей умрёт от cleave-урона. */
+  cleaveKills: number;
 }
 
-/**
- * Предсказать исход боя между двумя картами без изменения state.
- * Возвращает null, если любая из карт не найдена на доске.
- *
- * Учитывает:
- *  - щит (поглощает первый урон — у защитника, и ответку — у атакующего);
- *  - защиту колонки 4 (снижает входящий урон на 1);
- *  - бонус колонки 2 (+1 силы во Фронте);
- *  - модификаторы (подавление, баффы);
- *  - Прорыв (избыток урона в Резерв).
- *
- * НЕ учитывает:
- *  - реакции ON_EXIT / ON_THIS_DAMAGED / ON_ALLY_* — они срабатывают
- *    ПОСЛЕ боя и могут изменить итог (например, убить атакующего);
- *  - нейтрал-клетки и гильдию (для этого используй отдельную логику).
- */
 export function previewCardAttack(
   state: GameState,
   attackerId: CardInstanceId,
@@ -53,6 +46,9 @@ export function previewCardAttack(
   const attackerLoc = findCardLocation(state, attackerId);
   const defenderLoc = findCardLocation(state, defenderId);
   if (!attackerLoc || !defenderLoc) return null;
+
+  const attAbilities = cardAbilities(state, attackerId);
+  const defAbilities = cardAbilities(state, defenderId);
 
   let attStrength = strength(attacker);
   if (attackerLoc.zone === 'FRONT') {
@@ -68,13 +64,18 @@ export function previewCardAttack(
 
   const defReduction = columnBonuses(state, defender.ownerId).damageReduction;
   const attReduction = columnBonuses(state, attacker.ownerId).damageReduction;
+  const defenderArmorReduction = defAbilities.includes('armored') ? 1 : 0;
+  const attackerArmorReduction = attAbilities.includes('armored') ? 1 : 0;
 
   let damageToDefender = 0;
   let shieldBlocks = false;
   if (defender.shieldAvailable) {
     shieldBlocks = true;
   } else {
-    damageToDefender = Math.max(0, attStrength - defReduction);
+    damageToDefender = Math.max(
+      0,
+      attStrength - defReduction - defenderArmorReduction,
+    );
   }
 
   const defenderHpBefore = health(defender);
@@ -83,7 +84,10 @@ export function previewCardAttack(
 
   let damageToAttacker = 0;
   if (!attacker.shieldAvailable) {
-    damageToAttacker = Math.max(0, defStrength - attReduction);
+    damageToAttacker = Math.max(
+      0,
+      defStrength - attReduction - attackerArmorReduction,
+    );
   }
 
   const attackerHpBefore = health(attacker);
@@ -91,10 +95,39 @@ export function previewCardAttack(
   const attackerDies = attackerHpAfter <= 0;
 
   const attackerDef = state.definitions[attacker.definitionId];
-  const hasBreakthrough = (attackerDef?.abilities ?? []).includes('breakthrough');
+  const hasBreakthrough = attAbilities.includes('breakthrough');
   let overkillToReserve = 0;
   if (hasBreakthrough && defenderDies && defenderLoc.zone === 'FRONT') {
     overkillToReserve = -defenderHpAfter;
+  }
+
+  // Cleave: соседи цели по колонкам (в той же зоне владельца цели).
+  const hasCleave = attAbilities.includes('cleave');
+  const cleaveDamagePerTarget = hasCleave ? (attackerDef?.cleaveDamage ?? 1) : 0;
+  let cleaveTargetCount = 0;
+  let cleaveKills = 0;
+  if (hasCleave && cleaveDamagePerTarget > 0) {
+    for (const delta of [-1, 1]) {
+      const c = defenderLoc.column + delta;
+      if (c < 1 || c > 5) continue;
+      const col = state.board[c - 1];
+      const id = defenderLoc.zone === 'FRONT'
+        ? (defenderLoc.ownerId === 'p1' ? col.p1Front : col.p2Front)
+        : (defenderLoc.ownerId === 'p1' ? col.p1Reserve : col.p2Reserve);
+      if (!id || id === defenderId) continue;
+      const nb = state.cards[id];
+      if (!nb) continue;
+      cleaveTargetCount++;
+      const nbAbilities = cardAbilities(state, id);
+      const nbArmor = nbAbilities.includes('armored') ? 1 : 0;
+      const nbReduction = columnBonuses(state, nb.ownerId).damageReduction;
+      let nbDamage = 0;
+      if (!nb.shieldAvailable) {
+        nbDamage = Math.max(0, cleaveDamagePerTarget - nbReduction - nbArmor);
+      }
+      const nbHpBefore = health(nb);
+      if (nbHpBefore - nbDamage <= 0) cleaveKills++;
+    }
   }
 
   return {
@@ -109,14 +142,14 @@ export function previewCardAttack(
     defenderHpAfter,
     attackerHpBefore,
     attackerHpAfter,
+    defenderArmorReduction,
+    attackerArmorReduction,
+    cleaveTargetCount,
+    cleaveDamagePerTarget,
+    cleaveKills,
   };
 }
 
-/**
- * Все валидные цели для конкретного атакующего в текущем состоянии.
- * Использует getValidActions — гарантированно возвращает только
- * команды, которые движок не отклонит.
- */
 export function getValidAttackTargets(
   state: GameState,
   attackerId: CardInstanceId,
@@ -137,21 +170,9 @@ export function getValidAttackTargets(
 export interface AttackSimResult {
   state: GameState;
   events: GameEvent[];
-  /** Установлено ли pendingChoice после атаки (реакции требовали выбора). */
   pendingChoice: boolean;
 }
 
-/**
- * Симулировать атаку без изменения текущего state.
- *
- * Возвращает:
- *   - null, если атака нелегальна или state уже в winner/pendingChoice;
- *   - новый state + events, если атака прошла.
- *
- * ВАЖНО: если после атаки установлено pendingChoice (реакция запросила
- * выбор цели или сброс), то результат считается «непростым» — обычные
- * функции оценки не смогут его обработать. Проверяй поле pendingChoice.
- */
 export function simulateAttack(
   state: GameState,
   attackerId: CardInstanceId,
@@ -181,16 +202,6 @@ export function simulateAttack(
   };
 }
 
-/**
- * Симулировать атаку + автоматически разрешить pendingChoice
- * (первым валидным вариантом). Удобно для lookahead: результат —
- * полноценный state без ожидающих решений.
- *
- * Если pendingChoice требует >1 карты (END_TURN_DISCARD),
- * автоматически сбрасываются первые N из eligible.
- *
- * Возвращает null, если атака нелегальна.
- */
 export function simulateAttackFully(
   state: GameState,
   attackerId: CardInstanceId,
@@ -211,7 +222,10 @@ export function simulateAttackFully(
         cardIds: [],
       });
       sim = { ...sim, state: r.state, events: [...sim.events, ...r.events] };
-    } else if (choice.kind === 'END_TURN_DISCARD') {
+    } else if (
+      choice.kind === 'END_TURN_DISCARD' ||
+      choice.kind === 'DISCARD_CHOSEN'
+    ) {
       const r = applyCommand(sim.state, {
         type: 'RESOLVE_CHOICE',
         playerId: choice.playerId,
@@ -219,8 +233,7 @@ export function simulateAttackFully(
       });
       sim = { ...sim, state: r.state, events: [...sim.events, ...r.events] };
     } else {
-      // REPLACE_TARGET_SELECTION — в симуляции атаки замен не бывает,
-      // но если выбор всплыл, безопаснее отменить его без трат Влияния.
+      // REPLACE_TARGET_SELECTION / ACTIVATION_DISCARD — отменяем без трат.
       const r = applyCommand(sim.state, {
         type: 'CANCEL_CHOICE',
         playerId: choice.playerId,
@@ -235,20 +248,9 @@ export function simulateAttackFully(
 export interface AttackSequenceResult {
   state: GameState;
   events: GameEvent[];
-  /** true, если на каком-то шаге атака провалилась — цепочка оборвана. */
   broken: boolean;
 }
 
-/**
- * Симулировать цепочку атак последовательно, обновляя состояние
- * между шагами. Удобно для lookahead на 2+ атаки.
- *
- * Пример:
- *   simulateAttackChain(state, [
- *     { attackerId: 'c12', target: { kind: 'CARD', cardId: 'c45' } },
- *     { attackerId: 'c13', target: { kind: 'GUILD', playerId: 'p2' } },
- *   ])
- */
 export function simulateAttackChain(
   state: GameState,
   attacks: Array<{ attackerId: CardInstanceId; target: AttackTarget }>,

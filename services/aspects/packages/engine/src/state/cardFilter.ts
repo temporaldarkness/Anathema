@@ -1,6 +1,7 @@
 import type { CardFilter } from '@aspects/cards';
 import type { GameState } from '../types/state';
 import type { CardInstanceId } from '../types/ids';
+import { cardAbilities } from './helpers';
 
 export function matchesFilter(
   state: GameState,
@@ -17,7 +18,7 @@ export function matchesFilter(
     if (!(def.tags ?? []).includes(filter.tag)) return false;
   }
   if (filter.keyword !== undefined) {
-    if (!(def.abilities ?? []).includes(filter.keyword)) return false;
+    if (!cardAbilities(state, cardId).includes(filter.keyword)) return false;
   }
   if (filter.withoutShield && card.shieldAvailable) return false;
 

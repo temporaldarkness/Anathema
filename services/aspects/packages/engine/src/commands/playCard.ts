@@ -2,10 +2,9 @@ import type { WritableDraft } from 'immer';
 import type { GameState } from '../types/state';
 import type { ResolutionContext } from '../types/resolution';
 import type { CardInstanceId, ColumnIndex, PlayerId } from '../types/ids';
-import { columnBonuses } from '../state/helpers';
+import { columnBonuses, personalityOnBoard } from '../state/helpers';
 import { changeInfluence, removeFromHand, promoteFromReserve, resetCardRuntimeState } from '../state/mutations';
 import { enqueueTrigger } from '../state/triggerEnqueue';
-import { personalityOnBoard } from '../state/helpers';
 
 export interface PlayCardParams {
   playerId: PlayerId;
@@ -55,8 +54,8 @@ export function playCardInternal(
 
   enqueueTrigger(draft, cardId, 'ON_ENTER');
 
-  const hasCharge = def.abilities.includes('charge');
-  const hasVanguard = def.abilities.includes('vanguard');
+  const hasCharge = (def.abilities ?? []).includes('charge');
+  const hasVanguard = (def.abilities ?? []).includes('vanguard');
   const controlsCell = col.neutralOwner === playerId;
   if (hasCharge || (hasVanguard && controlsCell)) {
     promoteFromReserve(draft, cardId, ctx);

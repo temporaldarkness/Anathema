@@ -15,9 +15,27 @@ import {
   columnBonuses,
   simulateAttackFully,
 } from '@aspects/engine';
-import type { Effect, TargetSelector } from '@aspects/cards';
+import type { Effect, TargetSelector, TriggeredAbility } from '@aspects/cards';
 import type { Bot } from './types';
 import { PROFILES, selectOption, type BehaviorProfile } from './profile';
+
+/**
+ * Абсолютные keyword'ы карты с учётом silence.
+ * Silenced карта теряет все keywords и триггеры.
+ */
+function readAbilities(state: GameState, cardId: CardInstanceId): readonly string[] {
+  const card = state.cards[cardId];
+  if (!card || card.silenced) return [];
+  const def = state.definitions[card.definitionId];
+  return def?.abilities ?? [];
+}
+
+function readTriggers(state: GameState, cardId: CardInstanceId): readonly TriggeredAbility[] {
+  const card = state.cards[cardId];
+  if (!card || card.silenced) return [];
+  const def = state.definitions[card.definitionId];
+  return def?.triggers ?? [];
+}
 
 type PlayCommand = Extract<Command, { type: 'PLAY_CARD' }>;
 type AttackCommand = Extract<Command, { type: 'ATTACK' }>;
@@ -240,8 +258,14 @@ export class HeuristicBot implements Bot {
     if (!choice) return null;
     if (choice.playerId !== myPlayerId) return null;
 
-    if (choice.kind === 'END_TURN_DISCARD' && this.v2SmartDiscard) {
-      return this.pickWorstForDiscard(state, choice, myPlayerId);
+    // Сбросы — умный выбор «худших» или «лучших у врага».
+    if (this.v2SmartDiscard) {
+      if (choice.kind === 'END_TURN_DISCARD' || choice.kind === 'ACTIVATION_DISCARD') {
+        return this.pickByDiscardValue(state, choice, myPlayerId, 'own');
+      }
+      if (choice.kind === 'DISCARD_CHOSEN') {
+        return this.pickByDiscardValue(state, choice, myPlayerId, 'enemy');
+      }
     }
 
     const actions = getValidActions(state, myPlayerId);
@@ -311,13 +335,18 @@ export class HeuristicBot implements Bot {
     return score;
   }
 
-  private pickWorstForDiscard(
+  private pickByDiscardValue(
     state: GameState,
-    choice: Extract<NonNullable<GameState['pendingChoice']>, { kind: 'END_TURN_DISCARD' }>,
+    choice: { count: number; eligibleCardIds: CardInstanceId[] },
     myPlayerId: PlayerId,
+    mode: 'own' | 'enemy',
   ): ResolveCommand {
     const ids = choice.eligibleCardIds.slice();
-    ids.sort((a, b) => this.cardValue(state, a) - this.cardValue(state, b));
+    ids.sort((a, b) =>
+      mode === 'own'
+        ? this.cardValue(state, a) - this.cardValue(state, b)
+        : this.cardValue(state, b) - this.cardValue(state, a),
+    );
     return {
       type: 'RESOLVE_CHOICE',
       playerId: myPlayerId,
@@ -703,6 +732,14 @@ export class HeuristicBot implements Bot {
         return eff.amount * 10;
       case 'BUFF':
         return eff.strength * 8 + eff.health * 4;
+      case 'GRANT_SHIELD':
+        return this.scoreGrantShield(state, eff, myPlayerId, sourceCardId);
+      case 'EXHAUST_TARGET':
+        return this.scoreExhaustEffect(state, eff, myPlayerId, sourceCardId, false);
+      case 'UNEXHAUST_TARGET':
+        return this.scoreExhaustEffect(state, eff, myPlayerId, sourceCardId, true);
+      case 'SILENCE_TARGET':
+        return this.scoreSilenceEffect(state, eff, myPlayerId, sourceCardId);
       case 'DRAW': {
         if (eff.who === 'SELF') {
           const handSize = state.players[myPlayerId].hand.length;
@@ -713,6 +750,8 @@ export class HeuristicBot implements Bot {
       }
       case 'GAIN_INFLUENCE':
         return eff.who === 'SELF' ? eff.amount * 15 : -eff.amount * 15;
+      case 'SPEND_INFLUENCE':
+        return eff.who === 'OPPONENT' ? eff.amount * 20 : -eff.amount * 20;
       case 'DAMAGE_GLORY':
         if (eff.who === 'OPPONENT') {
           const oppGlory = state.players[opp].glory;
@@ -730,13 +769,84 @@ export class HeuristicBot implements Bot {
         return 30;
       case 'MOVE_CARD':
         return 20;
+      case 'MOVE_TO_COLUMN':
+        return 25;
       case 'RETURN_FROM_DISCARD':
         return eff.who === 'SELF' ? eff.count * 40 : 0;
       case 'DISCARD_RANDOM':
         return eff.who === 'OPPONENT' ? eff.count * 40 : -eff.count * 40;
+      case 'DISCARD_CHOSEN':
+        return eff.who === 'OPPONENT' ? eff.count * 55 : -eff.count * 55;
       default:
         return 0;
     }
+  }
+  
+    private scoreGrantShield(
+    state: GameState,
+    eff: Extract<Effect, { kind: 'GRANT_SHIELD' }>,
+    myPlayerId: PlayerId,
+    sourceCardId?: CardInstanceId,
+  ): number {
+    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId);
+    let total = 0;
+    for (const id of targets) {
+      const card = state.cards[id];
+      if (!card) continue;
+      if (card.shieldAvailable) continue; // уже со щитом
+      if (card.controllerId === myPlayerId) total += 40;
+      else total -= 40;
+    }
+    return total;
+  }
+
+  private scoreExhaustEffect(
+    state: GameState,
+    eff: Extract<Effect, { kind: 'EXHAUST_TARGET' | 'UNEXHAUST_TARGET' }>,
+    myPlayerId: PlayerId,
+    sourceCardId: CardInstanceId | undefined,
+    unexhaust: boolean,
+  ): number {
+    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId);
+    let total = 0;
+    for (const id of targets) {
+      const card = state.cards[id];
+      if (!card) continue;
+      if (unexhaust) {
+        // Разморозка — полезна своим, вредна врагам.
+        if (!card.exhausted) continue;
+        if (card.controllerId === myPlayerId) total += 40 + strengthInBattle(state, id) * 8;
+        else total -= 30;
+      } else {
+        // Заморозка — полезна врагам, вредна своим.
+        if (card.exhausted) continue;
+        if (card.controllerId !== myPlayerId) total += 30 + strengthInBattle(state, id) * 10;
+        else total -= 20 + strengthInBattle(state, id) * 5;
+      }
+    }
+    return total;
+  }
+
+  private scoreSilenceEffect(
+    state: GameState,
+    eff: Extract<Effect, { kind: 'SILENCE_TARGET' }>,
+    myPlayerId: PlayerId,
+    sourceCardId?: CardInstanceId,
+  ): number {
+    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId);
+    let total = 0;
+    for (const id of targets) {
+      const card = state.cards[id];
+      if (!card) continue;
+      if (card.silenced) continue;
+      const abilities = readAbilities(state, id);
+      const triggers = readTriggers(state, id);
+      const value = abilities.length * 20 + triggers.length * 30;
+      if (value === 0) continue;
+      if (card.controllerId !== myPlayerId) total += 50 + value;
+      else total -= 50 + value;
+    }
+    return total;
   }
 
   private scoreDealDamage(
@@ -755,9 +865,11 @@ export class HeuristicBot implements Bot {
       return eff.amount * 15 * this.selectorMultiplier(eff.target, state, myPlayerId);
     }
 
+    const ignoreShield = eff.filter?.withoutShield === true;
+
     let totalEffective = 0;
     for (const targetId of targets) {
-      totalEffective += this.effectiveDamageToCard(state, targetId, eff.amount);
+      totalEffective += this.effectiveDamageToCard(state, targetId, eff.amount, ignoreShield);
     }
     return totalEffective * 15;
   }
@@ -766,12 +878,15 @@ export class HeuristicBot implements Bot {
     state: GameState,
     targetId: CardInstanceId,
     amount: number,
+    ignoreShield: boolean = false,
   ): number {
     const card = state.cards[targetId];
     if (!card) return 0;
-    if (card.shieldAvailable) return 0;
+    if (card.shieldAvailable && !ignoreShield) return 0;
+    const abilities = readAbilities(state, targetId);
+    const armor = abilities.includes('armored') ? 1 : 0;
     const reduction = columnBonuses(state, card.ownerId).damageReduction;
-    return Math.max(0, amount - reduction);
+    return Math.max(0, amount - reduction - armor);
   }
 
   private resolveDamageTargets(
@@ -809,11 +924,46 @@ export class HeuristicBot implements Bot {
       case 'ALL_ENEMY_FRONT':    pushFront(opp); break;
       case 'ALL_FRIENDLY_BOARD': pushBoard(myPlayerId); break;
       case 'ALL_ENEMY_BOARD':    pushBoard(opp); break;
-      case 'ALL_CARDS_ON_BOARD': {
+            case 'ALL_CARDS_ON_BOARD': {
         pushBoard(myPlayerId);
         pushBoard(opp);
         return result.filter((id) => id !== sourceCardId);
       }
+      case 'OPPOSITE': {
+        if (!sourceCardId) break;
+        const srcCard = state.cards[sourceCardId];
+        const loc = this.findLocation(state, sourceCardId);
+        if (!loc || !srcCard) break;
+        const c = state.board[loc.column - 1];
+        const oppositeSide = opponentOf(srcCard.ownerId);
+        const oppositeId = loc.zone === 'FRONT'
+          ? (oppositeSide === 'p1' ? c.p1Front : c.p2Front)
+          : (oppositeSide === 'p1' ? c.p1Reserve : c.p2Reserve);
+        if (oppositeId) result.push(oppositeId);
+        break;
+      }
+      case 'RANDOM_ENEMY_FRONT': {
+        const list: CardInstanceId[] = [];
+        for (const col of state.board) {
+          const id = opp === 'p1' ? col.p1Front : col.p2Front;
+          if (id) list.push(id);
+        }
+        if (list.length > 0) result.push(list[0]);
+        break;
+      }
+      case 'RANDOM_FRIENDLY_FRONT': {
+        const list: CardInstanceId[] = [];
+        for (const col of state.board) {
+          const id = myPlayerId === 'p1' ? col.p1Front : col.p2Front;
+          if (id) list.push(id);
+        }
+        if (list.length > 0) result.push(list[0]);
+        break;
+      }
+      case 'CHOSEN':
+      case 'ATTACKER':
+        // В скоринге не моделируем — вернём пустой список.
+        break;
       default:
         break;
     }
@@ -1000,6 +1150,11 @@ export class HeuristicBot implements Bot {
     }
     score += preview.overkillToReserve * 15;
 
+    if (preview.cleaveTargetCount > 0) {
+      score += preview.cleaveDamagePerTarget * preview.cleaveTargetCount * 25;
+      score += preview.cleaveKills * 250;
+    }
+
     if (this.v4Triggers) {
       score -= this.estimateEnemyTriggers(
         state, attack.target.cardId, myPlayerId,
@@ -1145,10 +1300,9 @@ export class HeuristicBot implements Bot {
   ): number {
     const target = state.cards[targetId];
     if (!target) return 0;
-    const targetDef = state.definitions[target.definitionId];
     let penalty = 0;
 
-    for (const tr of targetDef?.triggers ?? []) {
+    for (const tr of readTriggers(state, targetId)) {
       if (tr.trigger === 'ON_THIS_DAMAGED' || tr.trigger === 'ON_EXIT') {
         penalty += this.scoreEnemyEffect(state, tr.effects, myPlayerId);
       }
@@ -1164,8 +1318,7 @@ export class HeuristicBot implements Bot {
         if (!id || id === targetId) continue;
         const c = state.cards[id];
         if (!c) continue;
-        const d = state.definitions[c.definitionId];
-        for (const tr of d?.triggers ?? []) {
+        for (const tr of readTriggers(state, id)) {
           if (tr.trigger === 'ON_ALLY_DIED') {
             penalty += this.scoreEnemyEffect(state, tr.effects, myPlayerId);
           }
@@ -1208,6 +1361,18 @@ export class HeuristicBot implements Bot {
           break;
         case 'DISCARD_RANDOM':
           if (eff.who === 'SELF') penalty += eff.count * 30;
+          break;
+		case 'SPEND_INFLUENCE':
+          if (eff.who === 'SELF') penalty += eff.amount * 15;
+          break;
+        case 'SILENCE_TARGET':
+          penalty += 40;
+          break;
+        case 'EXHAUST_TARGET':
+          penalty += 30;
+          break;
+        case 'DISCARD_CHOSEN':
+          if (eff.who === 'SELF') penalty += eff.count * 40;
           break;
         default:
           break;

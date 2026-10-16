@@ -29,6 +29,11 @@ export function removeFromHand(
   hand.splice(idx, 1);
 }
 
+/**
+ * Добавляет карту в руку и энкьюит ON_CARD_DRAWN на всех карт
+ * игрока во Фронте. Триггерится на любой источник добора
+ * (фаза DRAW, эффект DRAW, RETURN_TO_HAND, RETURN_FROM_DISCARD и т.д.).
+ */
 export function addToHand(
   draft: WritableDraft<GameState>,
   playerId: PlayerId,
@@ -38,6 +43,11 @@ export function addToHand(
   const card = draft.cards[cardId] as WritableDraft<CardInstance>;
   card.zone = 'HAND';
   card.column = null;
+
+  for (const col of draft.board) {
+    const id = playerId === 'p1' ? col.p1Front : col.p2Front;
+    if (id) enqueueTrigger(draft, id, 'ON_CARD_DRAWN');
+  }
 }
 
 export function addToDiscard(
@@ -216,13 +226,14 @@ export function resetCardRuntimeState(
   const def = draft.definitions[card.definitionId];
   card.damageTaken = 0;
   card.modifiers = [];
-  card.exhausted = false;
-  card.shieldAvailable = def ? def.abilities.includes('shield') : false;
-  card.slowCounter = def && def.abilities.includes('slow') ? 1 : 0;
+  card.exhausted = def?.entersExhausted ?? false;
+  card.shieldAvailable = def ? (def.abilities ?? []).includes('shield') : false;
+  card.slowCounter = def && (def.abilities ?? []).includes('slow') ? 1 : 0;
   card.usedAbilitiesThisTurn = [];
   card.usedTriggerIdsThisTurn = [];
   card.attacksThisTurn = 0;
   card.readyForFront = false;
   card.tempTurnsLeft = def ? (def.tempDuration ?? null) : null;
   card.turnsOnBoard = 0;
+  card.silenced = false;
 }

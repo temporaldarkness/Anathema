@@ -56,8 +56,10 @@ function randomSeed(): string {
  * Аварийный выбор, если бот вернул null, но выбор всё ещё висит.
  * Безопасные дефолты для каждого вида:
  *   - END_TURN_DISCARD: сбрасываем первые N карт (обязательный выбор).
+ *   - DISCARD_CHOSEN:   то же самое (обязательный выбор).
  *   - EFFECT_TARGET_SELECTION: пустой ответ = отмена эффекта.
  *   - REPLACE_TARGET_SELECTION: CANCEL_CHOICE — не тратим Влияние.
+ *   - ACTIVATION_DISCARD: CANCEL_CHOICE — не тратим Влияние.
  */
 function buildFallbackChoiceCommand(state: GameState): Command | null {
   const choice = state.pendingChoice;
@@ -65,6 +67,7 @@ function buildFallbackChoiceCommand(state: GameState): Command | null {
 
   switch (choice.kind) {
     case 'END_TURN_DISCARD':
+    case 'DISCARD_CHOSEN':
       return {
         type: 'RESOLVE_CHOICE',
         playerId: choice.playerId,
@@ -77,10 +80,13 @@ function buildFallbackChoiceCommand(state: GameState): Command | null {
         cardIds: [],
       };
     case 'REPLACE_TARGET_SELECTION':
+    case 'ACTIVATION_DISCARD':
       return {
         type: 'CANCEL_CHOICE',
         playerId: choice.playerId,
       };
+    default:
+      return null;
   }
 }
 

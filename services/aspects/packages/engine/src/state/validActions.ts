@@ -7,6 +7,7 @@ import {
   findCardLocation,
   frontCount,
   personalityOnBoard,
+  cardAbilities
 } from './helpers';
 
 export function getValidActions(
@@ -156,14 +157,14 @@ export function getValidActions(
       if (!attacker || attacker.exhausted) continue;
 
       const attackerDef = state.definitions[attacker.definitionId];
-      const isFrenzy = (attackerDef?.abilities ?? []).includes('frenzy');
+      const isFrenzy = cardAbilities(state, attackerId).includes('frenzy');
       const maxAttacks = isFrenzy ? 2 : 1;
       if (attacker.attacksThisTurn >= maxAttacks) continue;
 
       const attackerCol = attacker.column as ColumnIndex | null;
       if (!attackerCol) continue;
 
-      const hasScout = attackerDef?.abilities.includes('scout') ?? false;
+      const hasScout = cardAbilities(state, attackerId).includes('scout') ?? false;
 
       let tauntId: CardInstanceId | null = null;
       if (!hasScout) {
