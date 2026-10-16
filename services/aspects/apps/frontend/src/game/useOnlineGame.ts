@@ -198,6 +198,18 @@ export function useOnlineGame(opts: Options): UseOnlineGameResult {
             text: '🚩',
             color: e.playerId === 'p1' ? '#8ec5ff' : '#ff9b9b',
           });
+        } else if (e.type === 'CARD_HEALED') {
+          const pos = resolvePos(e.cardId);
+          if (!pos) continue;
+          const key = positionKey(pos.column, pos.ownerId, pos.zone as any);
+          if (!key) continue;
+          adds.push({ id: counter++, position: key, text: `+${e.amount}`, color: '#8ee09e' });
+        } else if (e.type === 'CARD_SILENCED') {
+          const pos = resolvePos(e.cardId);
+          if (!pos) continue;
+          const key = positionKey(pos.column, pos.ownerId, pos.zone as any);
+          if (!key) continue;
+          adds.push({ id: counter++, position: key, text: '🔇', color: '#c0a0ff' });
         } else if (e.type === 'GLORY_CHANGED' && e.delta < 0) {
           adds.push({
             id: counter++,

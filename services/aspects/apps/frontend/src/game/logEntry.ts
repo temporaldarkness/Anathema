@@ -43,12 +43,14 @@ export function formatEvent(
     case 'PHASE_CHANGED':
       return null;
 
-    case 'INFLUENCE_CHANGED':
+    case 'INFLUENCE_CHANGED': {
+      const sign = e.delta >= 0 ? '+' : '';
       return {
         kind: 'glory',
         playerId: e.playerId,
-        text: `${e.playerId.toUpperCase()}: Влияние +${e.delta} → ${e.total}`,
+        text: `${e.playerId.toUpperCase()}: Влияние ${sign}${e.delta} → ${e.total}`,
       };
+    }
 
     case 'GLORY_CHANGED':
       return {
@@ -90,6 +92,18 @@ export function formatEvent(
         text: `🔄 Замена: ${cardName(state, e.oldCardId)} → ${cardName(state, e.newCardId)}`,
       };
 
+    case 'CARD_SILENCED':
+      return {
+        kind: 'play',
+        text: `🔇 ${cardName(state, e.cardId)}: способности сняты`,
+      };
+
+    case 'CARD_HEALED':
+      return {
+        kind: 'damage',
+        text: `💚 ${cardName(state, e.cardId)}: восстановлено ${e.amount} HP`,
+      };
+
     case 'DAMAGE_DEALT': {
       const src = findCardById(state, e.source);
       const srcName = src ? (state.definitions[src.definitionId]?.name ?? e.source) : e.source;
@@ -105,11 +119,14 @@ export function formatEvent(
         text: `🛡 ${cardName(state, e.cardId)}: урон поглощён щитом`,
       };
 
-    case 'DAMAGE_ABSORBED':
+    case 'DAMAGE_ABSORBED': {
+      const armor = e.reason === 'armor';
+      const label = armor ? 'бронёй' : 'защитой колонки';
       return {
         kind: 'damage',
-        text: `🛡 ${cardName(state, e.targetId)}: ${e.absorbed} урона поглощено защитой`,
+        text: `🛡 ${cardName(state, e.targetId)}: ${e.absorbed} урона поглощено ${label}`,
       };
+    }
 
     case 'NEUTRAL_CAPTURED':
       return {
@@ -141,18 +158,35 @@ export function formatEvent(
         text: `⚠ Токен ${state.definitions[e.defId]?.name ?? e.defId} потерян: ${e.reason}`,
       };
 
-    case 'CHOICE_REQUESTED':
-      return {
-        kind: 'choice',
-        playerId: e.playerId,
-        text:
-          e.kind === 'END_TURN_DISCARD'
-            ? `❓ ${e.playerId.toUpperCase()} сбрасывает ${e.count} карт`
-            : `❓ ${e.playerId.toUpperCase()} выбирает цель (${e.count})`,
-      };
+    case 'CHOICE_REQUESTED': {
+      const pid = e.playerId.toUpperCase();
+      let body: string;
+      switch (e.kind) {
+        case 'END_TURN_DISCARD':
+          body = `${pid} сбрасывает ${e.count} карт(ы)`;
+          break;
+        case 'DISCARD_CHOSEN':
+          body = `${pid} выбирает ${e.count} карт(ы) из чужой руки`;
+          break;
+        case 'ACTIVATION_DISCARD':
+          body = `${pid} сбрасывает ${e.count} карт(ы) для активации`;
+          break;
+        case 'REPLACE_TARGET_SELECTION':
+          body = `${pid} выбирает цель для замены`;
+          break;
+        case 'EFFECT_TARGET_SELECTION':
+        default:
+          body = `${pid} выбирает цель (${e.count})`;
+          break;
+      }
+      return { kind: 'choice', playerId: e.playerId, text: `❓ ${body}` };
+    }
 
     case 'CHOICE_RESOLVED':
       return { kind: 'choice', playerId: e.playerId, text: `✔ Выбор сделан` };
+
+    case 'CHOICE_CANCELLED':
+      return { kind: 'choice', playerId: e.playerId, text: `✖ Выбор отменён` };
 
     case 'MULLIGAN_DONE':
       return {

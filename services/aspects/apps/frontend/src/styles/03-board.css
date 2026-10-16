@@ -371,3 +371,56 @@
   border-color: var(--clr-danger-border);
   background: var(--clr-danger-bg);
 }
+
+/* ─── Silence ─── */
+
+.slot-silenced {
+  border-color: var(--clr-epic-border);
+  background: linear-gradient(
+    180deg,
+    var(--clr-elevated) 0%,
+    color-mix(in srgb, var(--clr-epic-bg) 40%, var(--clr-elevated)) 100%
+  );
+}
+
+.slot-silenced .slot-name {
+  color: var(--clr-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--clr-epic-border-2);
+  text-decoration-thickness: 1px;
+}
+
+.slot-silenced .slot-stats {
+  opacity: 0.75;
+}
+
+.slot-silenced-mark {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 13px;
+  line-height: 1;
+  z-index: 3;
+  filter: drop-shadow(0 0 3px var(--clr-shadow));
+  pointer-events: none;
+  color: var(--clr-epic-soft);
+}
+
+/* ─── Frenzy counter ─── */
+
+.slot-frenzy-badge {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--clr-danger-light);
+  background: color-mix(in srgb, var(--clr-danger) 22%, var(--clr-elevated));
+  border: 1px solid color-mix(in srgb, var(--clr-danger) 50%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  z-index: 3;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}

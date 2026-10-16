@@ -221,3 +221,42 @@
   color: var(--clr-text-muted);
   font-weight: 500;
 }
+
+/* ─── Silence ─── */
+
+.tooltip-silenced {
+  border-color: var(--clr-epic-border-2);
+}
+
+.tooltip-badge-silenced {
+  background: color-mix(in srgb, var(--clr-epic) 15%, transparent);
+  color: var(--clr-epic-soft);
+  border: 1px solid var(--clr-epic-border-2);
+}
+
+.tooltip-section-silenced {
+  border-top: 1px solid var(--clr-epic-border);
+}
+
+.tooltip-section-silenced .tooltip-section-title {
+  color: var(--clr-epic-soft);
+}
+
+.tooltip-section-silenced .tooltip-effects {
+  color: var(--clr-text-muted);
+  font-style: italic;
+}
+
+/* ─── Frenzy / Cleave badges ─── */
+
+.tooltip-badge-frenzy {
+  background: color-mix(in srgb, var(--clr-danger) 15%, transparent);
+  color: var(--clr-danger-light);
+  border: 1px solid color-mix(in srgb, var(--clr-danger) 40%, transparent);
+}
+
+.tooltip-badge-cleave {
+  background: color-mix(in srgb, var(--clr-accent) 15%, transparent);
+  color: var(--clr-accent-light);
+  border: 1px solid color-mix(in srgb, var(--clr-accent) 40%, transparent);
+}

@@ -21,6 +21,11 @@ export function CardTooltipDef({ def }: Props) {
   const hasTriggers = (def.triggers ?? []).length > 0;
   const hasActivated = (def.activatedAbilities ?? []).length > 0;
 
+  const cleaveDamage = (def as any).cleaveDamage;
+  const entersExhausted = (def as any).entersExhausted === true;
+  const cantBeReplaced = (def as any).cantBeReplaced === true;
+  const hasProperties = entersExhausted || cantBeReplaced;
+
   return (
     <div className="tooltip" style={{ ['--rarity-color' as string]: rarityColor }}>
       <div className="tooltip-header">
@@ -34,6 +39,11 @@ export function CardTooltipDef({ def }: Props) {
         <span className="tooltip-stat-cost">💰 {def.cost}</span>
         <span className="tooltip-stat-str">⚔ {def.strength}</span>
         <span className="tooltip-stat-hp">❤ {def.health}</span>
+        {abilities.includes('cleave') && (
+          <span className="tooltip-badge tooltip-badge-cleave">
+            🗡 Рассечение {cleaveDamage ?? 1}
+          </span>
+        )}
       </div>
 
       {def.name !== getPersonalityName(def.personalityTag) && (
@@ -44,7 +54,7 @@ export function CardTooltipDef({ def }: Props) {
           </span>
         </div>
       )}
-	  {(def.factions?.length || def.roles?.length) && (
+      {(def.factions?.length || def.roles?.length) && (
         <div className="tooltip-tags">
           {def.factions?.map((f) => {
             const info = getFactionInfo(f);
@@ -66,6 +76,18 @@ export function CardTooltipDef({ def }: Props) {
               </span>
             );
           })}
+        </div>
+      )}
+
+      {hasProperties && (
+        <div className="tooltip-section">
+          <div className="tooltip-section-title">Свойства</div>
+          {entersExhausted && (
+            <div className="tooltip-keyword">💤 Входит в игру истощённой</div>
+          )}
+          {cantBeReplaced && (
+            <div className="tooltip-keyword">🔒 Нельзя заменить другой Личностью</div>
+          )}
         </div>
       )}
 
@@ -92,7 +114,6 @@ export function CardTooltipDef({ def }: Props) {
                   <>
                     <div className="tooltip-trigger-name">{t.name}</div>
                     <div className="tooltip-trigger-when-row">
-					  {/* <span className="tooltip-trigger-icon">{icon}</span> */}
                       <span className="tooltip-trigger-when">{when}</span>
                       {t.oncePerTurn && <span className="tooltip-tag">1/ход</span>}
                     </div>
@@ -133,6 +154,9 @@ export function CardTooltipDef({ def }: Props) {
               <div key={a.id} className="tooltip-trigger">
                 <div className="tooltip-trigger-label">
                   ⚡ {name} <span className="tooltip-tag">{a.cost}💰</span>
+                  {a.discardCost ? (
+                    <span className="tooltip-tag">🗑 {a.discardCost}</span>
+                  ) : null}
                 </div>
                 {a.description ? (
                   <div className="tooltip-effects">{a.description}</div>

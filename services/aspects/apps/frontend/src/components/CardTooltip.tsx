@@ -30,15 +30,24 @@ export function CardTooltip({ state, cardId }: Props) {
   strength = Math.max(0, strength);
 
   const hasModifiers = card.modifiers.length > 0;
-  const hasKeywords = def.abilities.length > 0;
-  const hasTriggers = def.triggers && def.triggers.length > 0;
-  const hasActivated = def.activatedAbilities && def.activatedAbilities.length > 0;
+  const silenced = card.silenced;
+  const abilities = silenced ? [] : def.abilities;
+  const triggers = silenced ? [] : (def.triggers ?? []);
+  const activated = silenced ? [] : (def.activatedAbilities ?? []);
+
+  const hasKeywords = abilities.length > 0;
+  const hasTriggers = triggers.length > 0;
+  const hasActivated = activated.length > 0;
 
   const rarityColor = RARITY_COLOR[def.rarity] ?? '#6b7280';
 
+  const isFrenzy = abilities.includes('frenzy');
+  const maxAttacks = isFrenzy ? 2 : 1;
+  const attacksLeft = Math.max(0, maxAttacks - card.attacksThisTurn);
+
   return (
     <div
-      className="tooltip"
+      className={`tooltip ${silenced ? 'tooltip-silenced' : ''}`}
       style={{ ['--rarity-color' as string]: rarityColor }}
     >
       <div className="tooltip-header">
@@ -57,6 +66,19 @@ export function CardTooltip({ state, cardId }: Props) {
         {card.exhausted && (
           <span className="tooltip-badge tooltip-badge-exh">💤 Истощён</span>
         )}
+        {silenced && (
+          <span className="tooltip-badge tooltip-badge-silenced">🔇 Обезврежен</span>
+        )}
+        {isFrenzy && (
+          <span className="tooltip-badge tooltip-badge-frenzy">
+            ⚡ Атак: {attacksLeft}/{maxAttacks}
+          </span>
+        )}
+        {abilities.includes('cleave') && (
+          <span className="tooltip-badge tooltip-badge-cleave">
+            🗡 Рассечение {(def as any).cleaveDamage ?? 1}
+          </span>
+        )}
       </div>
 
       {def.name !== getPersonalityName(def.personalityTag) && (
@@ -67,7 +89,7 @@ export function CardTooltip({ state, cardId }: Props) {
           </span>
         </div>
       )}
-	  {(def.factions?.length || def.roles?.length) && (
+      {(def.factions?.length || def.roles?.length) && (
         <div className="tooltip-tags">
           {def.factions?.map((f) => {
             const info = getFactionInfo(f);
@@ -92,10 +114,19 @@ export function CardTooltip({ state, cardId }: Props) {
         </div>
       )}
 
+      {silenced && (
+        <div className="tooltip-section tooltip-section-silenced">
+          <div className="tooltip-section-title">🔇 Способности сняты</div>
+          <div className="tooltip-effects">
+            Ключевые слова и триггеры этой карты не действуют.
+          </div>
+        </div>
+      )}
+
       {hasKeywords && (
         <div className="tooltip-section">
           <div className="tooltip-section-title">Ключевые слова</div>
-          {def.abilities.map((k) => (
+          {abilities.map((k) => (
             <div key={k} className="tooltip-keyword">
               {resolveKeywordText(def, k)}
             </div>
@@ -106,7 +137,7 @@ export function CardTooltip({ state, cardId }: Props) {
       {hasTriggers && (
         <div className="tooltip-section">
           <div className="tooltip-section-title">Способности</div>
-          {def.triggers.map((t: any, i: number) => {
+          {triggers.map((t: any, i: number) => {
             const when = triggerText(t.trigger);
             const icon = TRIGGER_ICON[t.trigger] ?? '◆';
             return (
@@ -115,7 +146,6 @@ export function CardTooltip({ state, cardId }: Props) {
                   <>
                     <div className="tooltip-trigger-name">{t.name}</div>
                     <div className="tooltip-trigger-when-row">
-                      {/* <span className="tooltip-trigger-icon">{icon}</span> */}
                       <span className="tooltip-trigger-when">{when}</span>
                       {t.oncePerTurn && <span className="tooltip-tag">1/ход</span>}
                     </div>
@@ -150,12 +180,15 @@ export function CardTooltip({ state, cardId }: Props) {
       {hasActivated && (
         <div className="tooltip-section">
           <div className="tooltip-section-title">Активируемые</div>
-          {def.activatedAbilities.map((a: any) => {
+          {activated.map((a: any) => {
             const name = a.name ?? a.id;
             return (
               <div key={a.id} className="tooltip-trigger">
                 <div className="tooltip-trigger-label">
                   ⚡ {name} <span className="tooltip-tag">{a.cost}💰</span>
+                  {a.discardCost ? (
+                    <span className="tooltip-tag">🗑 {a.discardCost}</span>
+                  ) : null}
                 </div>
                 {a.description ? (
                   <div className="tooltip-effects">{a.description}</div>

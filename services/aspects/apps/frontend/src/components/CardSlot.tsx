@@ -66,6 +66,10 @@ export function CardSlot({
 
   const card = state.cards[cardId];
   const def = state.definitions[card.definitionId];
+  const silenced = card.silenced;
+
+  // Silence снимает все keywords и триггеры.
+  const abilities = silenced ? [] : (def?.abilities ?? []);
 
   let strength = card.baseStrength;
   let hp = card.baseHealth - card.damageTaken;
@@ -84,6 +88,14 @@ export function CardSlot({
   if (card.isToken) flags.push('T');
   if (card.shieldAvailable) flags.push('S');
   if (card.slowCounter > 0) flags.push('~');
+  if (abilities.includes('armored')) flags.push('B');
+  if (abilities.includes('regenerate')) flags.push('R');
+  if (abilities.includes('cleave')) flags.push('C');
+
+  const isFrenzy = abilities.includes('frenzy');
+  const maxAttacks = isFrenzy ? 2 : 1;
+  const attacksLeft = Math.max(0, maxAttacks - card.attacksThisTurn);
+  const showFrenzyBadge = isFrenzy && zone === 'FRONT';
 
   const classes = [
     ...baseClasses.split(' '),
@@ -91,6 +103,7 @@ export function CardSlot({
     hasDefense ? 'slot-defended' : '',
     `slot-rarity-${def.rarity}`,
     card.exhausted ? 'slot-exhausted' : '',
+    silenced ? 'slot-silenced' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -102,6 +115,19 @@ export function CardSlot({
       onClick={onClick}
     >
       {floating && floating.length > 0 && <FloatingLayer items={floating} />}
+      {silenced && (
+        <div className="slot-silenced-mark" title="Способности сняты">
+          🔇
+        </div>
+      )}
+      {showFrenzyBadge && (
+        <div
+          className="slot-frenzy-badge"
+          title={`Атак осталось: ${attacksLeft} из ${maxAttacks}`}
+        >
+          ⚡ {attacksLeft}/{maxAttacks}
+        </div>
+      )}
       <div className="slot-name">{def?.name ?? card.definitionId}</div>
       <div className="slot-stats">
         <span className="stat stat-str" title="Сила">⚔{strength}</span>

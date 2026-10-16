@@ -2,13 +2,6 @@ import { KEYWORD_INFO, type CardDefinition } from '@aspects/cards';
 
 // ─── Плюрализация ───
 
-/**
- * Русская плюрализация. Примеры:
- *   plural(1, 'карта', 'карты', 'карт')  → 'карта'
- *   plural(3, 'карта', 'карты', 'карт')  → 'карты'
- *   plural(7, 'карта', 'карты', 'карт')  → 'карт'
- *   plural(21, 'карта', 'карты', 'карт') → 'карта'
- */
 function plural(n: number, one: string, few: string, many: string): string {
   const abs = Math.abs(n);
   const lastTwo = abs % 100;
@@ -28,15 +21,16 @@ export const KEYWORD_ICON: Record<string, string> = {
   taunt: '🛡',
   scout: '🔍',
   breakthrough: '💥',
-  shield: '🛡',
+  shield: '🔷',
   suppress: '⬇',
   temporary: '⏱',
+  armored: '🔰',
+  regenerate: '💚',
+  cleave: '🗡',
+  frenzy: '🔥',
+  starter: '⭐',
 };
 
-/**
- * Короткий текст для тултипа/списка (с именем и кратким описанием).
- * Для `temporary` подставляет реальное число ходов из карты.
- */
 export function resolveKeyword(
   card: CardDefinition | null,
   kw: string,
@@ -48,12 +42,18 @@ export function resolveKeyword(
       description: `Исчезнет через ${n} ${plural(n, 'ход', 'хода', 'ходов')}.`,
     };
   }
+  if (kw === 'cleave') {
+    const n = (card as any)?.cleaveDamage ?? 1;
+    return {
+      name: 'Рассечение',
+      description: `При атаке по карте соседи цели по колонкам получают ${n} урона. Соседи не отвечают ударом.`,
+    };
+  }
   const shared = (KEYWORD_INFO as Record<string, { name: string; description: string }>)[kw];
   if (shared) return shared;
   return { name: kw, description: '' };
 }
 
-/** Готовая строка "Имя: описание" для компактного тултипа. */
 export function resolveKeywordText(
   card: CardDefinition | null,
   kw: string,
@@ -93,6 +93,12 @@ export const TRIGGER_ICON: Record<string, string> = {
   ON_ALLY_ATTACKED: '🛡️',
   ON_ENEMY_ATTACK: '⚔️',
   ON_ALLY_DIED: '⚰️',
+  ON_ATTACK: '🎯',
+  ON_KILL: '☠️',
+  ON_CELL_CAPTURED: '🚩',
+  ON_CELL_LOST: '⚑',
+  ON_DAMAGE_DEALT: '💢',
+  ON_CARD_DRAWN: '🃏',
 };
 
 export function triggerText(trigger: string): string {
@@ -107,6 +113,12 @@ export function triggerText(trigger: string): string {
     ON_ALLY_ATTACKED: 'Когда союзника атакуют',
     ON_ENEMY_ATTACK: 'Когда противник атакует',
     ON_ALLY_DIED: 'Когда союзник погибает',
+    ON_ATTACK: 'Перед атакой этой карты',
+    ON_KILL: 'Когда эта карта убивает другую',
+    ON_CELL_CAPTURED: 'Когда ты захватываешь нейтрал',
+    ON_CELL_LOST: 'Когда ты теряешь нейтрал',
+    ON_DAMAGE_DEALT: 'Когда эта карта наносит урон',
+    ON_CARD_DRAWN: 'Когда ты берёшь карту',
   };
   return map[trigger] ?? trigger;
 }
@@ -127,15 +139,11 @@ function targetText(target: string): string {
     RANDOM_FRIENDLY_FRONT: 'случайному союзнику',
     CHOSEN: 'выбранной цели',
     ATTACKER: 'атакующему',
+    OPPOSITE: 'карте напротив',
   };
   return map[target] ?? target;
 }
 
-/**
- * Формулировка "действие — цель" с русским стилем.
- * Для «действие себе» — только действие («Восстановить 2 здоровья»).
- * Для «действие кому-то» — действие + цель («Нанести 3 урона — всем врагам во Фронте»).
- */
 function actionWithTarget(
   action: string,
   target: string,
@@ -145,10 +153,40 @@ function actionWithTarget(
   return `${action} — ${targetText(target)}`;
 }
 
+function filterHint(filter: any): string {
+  if (!filter) return '';
+  if (filter.tag) return ` [тег «${filter.tag}»]`;
+  if (filter.keyword) return ` [${filter.keyword}]`;
+  if (filter.withoutShield) return ' [без щита]';
+  if (filter.maxCost != null) return ` [стоимость ≤ ${filter.maxCost}]`;
+  if (filter.minCost != null) return ` [стоимость ≥ ${filter.minCost}]`;
+  if (filter.minStrength != null) return ` [сила ≥ ${filter.minStrength}]`;
+  return '';
+}
+
 // ─── Условия ───
+
+function isComposite(c: any): boolean {
+  return c?.kind === 'AND' || c?.kind === 'OR' || c?.kind === 'NOT';
+}
 
 export function conditionText(cond: any): string {
   if (!cond) return '';
+
+  if (cond.kind === 'AND') {
+    return (cond.conditions ?? [])
+      .map((c: any) => (isComposite(c) ? `(${conditionText(c)})` : conditionText(c)))
+      .join(' И ');
+  }
+  if (cond.kind === 'OR') {
+    return (cond.conditions ?? [])
+      .map((c: any) => (isComposite(c) ? `(${conditionText(c)})` : conditionText(c)))
+      .join(' ИЛИ ');
+  }
+  if (cond.kind === 'NOT') {
+    return `не (${conditionText(cond.condition)})`;
+  }
+
   const kindMap: Record<string, string> = {
     CELLS: 'клеток',
     FRONT_COUNT: 'карт во Фронте',
@@ -157,6 +195,8 @@ export function conditionText(cond: any): string {
     HAND_COUNT: 'карт в руке',
     SELF_HEALTH: 'своего здоровья',
     SELF_STRENGTH: 'своей силы',
+    TOTAL_STRENGTH: 'суммарной силы',
+    TOTAL_HEALTH: 'суммарного здоровья',
   };
   const opMap: Record<string, string> = {
     AT_LEAST: '≥',
@@ -167,19 +207,28 @@ export function conditionText(cond: any): string {
     SELF: 'у тебя ',
     OPPONENT: 'у противника ',
   };
-  const who = cond.who ? whoMap[cond.who] : '';
-  return `${who}${kindMap[cond.kind] ?? cond.kind} ${opMap[cond.op] ?? cond.op} ${cond.value}`;
+
+  switch (cond.kind) {
+    case 'IN_RESERVE':
+      return 'карта в Резерве';
+    case 'IN_FRONT':
+      return 'карта во Фронте';
+    case 'IS_FIRST_PLAYER':
+      return 'ты первый игрок';
+    case 'TURN_NUMBER':
+      return `номер хода ${opMap[cond.op] ?? cond.op} ${cond.value}`;
+    case 'SELF_HEALTH':
+    case 'SELF_STRENGTH':
+      return `${kindMap[cond.kind]} ${opMap[cond.op] ?? cond.op} ${cond.value}`;
+    default: {
+      const who = cond.who ? whoMap[cond.who] ?? '' : '';
+      const fh = filterHint(cond.filter);
+      return `${who}${kindMap[cond.kind] ?? cond.kind} ${opMap[cond.op] ?? cond.op} ${cond.value}${fh}`;
+    }
+  }
 }
 
 // ─── Эффекты ───
-
-function sideText(who: string): string {
-  return who === 'SELF' ? 'себе' : 'противнику';
-}
-
-function sideSubject(who: string): string {
-  return who === 'SELF' ? 'Вы' : 'Противник';
-}
 
 function selectionText(sel: { from: string; count: number }): string {
   const fromMap: Record<string, string> = {
@@ -201,36 +250,47 @@ export function effectText(effect: any): string {
   switch (effect.kind) {
     case 'DEAL_DAMAGE': {
       const n = effect.amount;
-      const action = `Нанести ${n} ${plural(n, 'урон', 'урона', 'урона')}`;
+      const action = `Нанести ${n} ${plural(n, 'урон', 'урона', 'урона')}${filterHint(effect.filter)}`;
       return actionWithTarget(action, effect.target, 'Нанести урон себе');
     }
     case 'HEAL': {
       const n = effect.amount;
-      const action = `Восстановить ${n} ${plural(n, 'здоровье', 'здоровья', 'здоровья')}`;
+      const action = `Восстановить ${n} ${plural(n, 'здоровье', 'здоровья', 'здоровья')}${filterHint(effect.filter)}`;
       return actionWithTarget(action, effect.target);
     }
     case 'BUFF': {
       const parts: string[] = [];
-      if (effect.strength) {
-        parts.push(`${effect.strength > 0 ? '+' : ''}${effect.strength}⚔`);
-      }
-      if (effect.health) {
-        parts.push(`${effect.health > 0 ? '+' : ''}${effect.health}❤`);
-      }
-      return actionWithTarget(parts.join(' / '), effect.target);
+      if (effect.strength) parts.push(`${effect.strength > 0 ? '+' : ''}${effect.strength}⚔`);
+      if (effect.health) parts.push(`${effect.health > 0 ? '+' : ''}${effect.health}❤`);
+      const body = parts.join(' / ') + filterHint(effect.filter);
+      return actionWithTarget(body, effect.target);
     }
+    case 'GRANT_SHIELD':
+      return actionWithTarget('Дать щит', effect.target, 'Получить щит');
+    case 'EXHAUST_TARGET':
+      return actionWithTarget('Истощить (заморозить)', effect.target);
+    case 'UNEXHAUST_TARGET':
+      return actionWithTarget('Разморозить', effect.target);
+    case 'SILENCE_TARGET':
+      return actionWithTarget('Обезвредить (снять способности)', effect.target);
     case 'DRAW': {
       const n = effect.count;
       const cards = plural(n, 'карта', 'карты', 'карт');
-      if (effect.who === 'SELF') {
-        return `Взять ${n} ${cards}`;
-      }
-      return `Противник берёт ${n} ${cards}`;
+      return effect.who === 'SELF'
+        ? `Взять ${n} ${cards}`
+        : `Противник берёт ${n} ${cards}`;
     }
     case 'GAIN_INFLUENCE': {
       const n = effect.amount;
-      if (effect.who === 'SELF') return `+${n} Влияния`;
-      return `Противник получает +${n} Влияния`;
+      return effect.who === 'SELF'
+        ? `+${n} Влияния`
+        : `Противник получает +${n} Влияния`;
+    }
+    case 'SPEND_INFLUENCE': {
+      const n = effect.amount;
+      return effect.who === 'SELF'
+        ? `−${n} Влияния`
+        : `Противник теряет ${n} Влияния`;
     }
     case 'DAMAGE_GLORY': {
       const n = effect.amount;
@@ -257,19 +317,30 @@ export function effectText(effect: any): string {
       const n = effect.count;
       const cards = plural(n, 'карта', 'карты', 'карт');
       const place = effect.destination === 'HAND' ? 'в руку' : 'на верх колоды';
-      if (effect.who === 'SELF') return `Вернуть ${n} ${cards} из сброса ${place}`;
-      return `Вернуть ${n} ${cards} противника из сброса ${place}`;
+      return effect.who === 'SELF'
+        ? `Вернуть ${n} ${cards} из сброса ${place}`
+        : `Вернуть ${n} ${cards} противника из сброса ${place}`;
     }
     case 'DISCARD_RANDOM': {
       const n = effect.count;
       const cards = plural(n, 'случайную карту', 'случайные карты', 'случайных карт');
-      if (effect.who === 'SELF') return `Сбросить ${n} ${cards}`;
-      return `Противник сбрасывает ${n} ${cards}`;
+      return effect.who === 'SELF'
+        ? `Сбросить ${n} ${cards}`
+        : `Противник сбрасывает ${n} ${cards}`;
+    }
+    case 'DISCARD_CHOSEN': {
+      const n = effect.count;
+      const cards = plural(n, 'карту', 'карты', 'карт');
+      return effect.who === 'SELF'
+        ? `Сбросить ${n} ${cards} (по выбору противника)`
+        : `Противник сбрасывает ${n} ${cards} (по твоему выбору)`;
     }
     case 'MOVE_CARD': {
       const place = effect.to === 'OWN_RESERVE' ? 'в Резерв' : 'в пустую колонку';
       return actionWithTarget(`Переместить ${place}`, effect.target);
     }
+    case 'MOVE_TO_COLUMN':
+      return actionWithTarget(`Переместить в колонку ${effect.column}`, effect.target);
     case 'CHOOSE_TARGETS_THEN': {
       const sel = selectionText(effect.selection);
       const then = (effect.then ?? []).map(effectText).join(', ');
@@ -282,11 +353,6 @@ export function effectText(effect: any): string {
 
 // ─── Триггер целиком ───
 
-/**
- * Резолвит описание триггера:
- *  - если у триггера есть name/description в JSON — использует их;
- *  - иначе собирает из triggerText + effectText.
- */
 export function resolveTrigger(trig: {
   trigger: string;
   name?: string;
