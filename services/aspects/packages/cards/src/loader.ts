@@ -1,6 +1,18 @@
 import type { CardDefinition } from './schema';
 import { KEYWORD_INFO, isFactionTag, type KeywordId } from './abilities';
 
+/*===========================================================*/
+
+import activeSeriesRaw from './data/active-series.json';
+import presetsRaw from './data/presets.json';
+import personalitiesRaw from './data/personalities.json';
+import factionsRaw from './data/factions.json';
+import rolesRaw from './data/roles.json';
+
+const PERSONALITIES = personalitiesRaw as Record<string, string>;
+const FACTIONS = factionsRaw as Record<string, { name: string; color: string }>;
+const ROLES = rolesRaw as Record<string, { name: string; icon: string }>;
+
 import stormwindMeta from './data/packs/stormwind/meta.json';
 import stormwindCards from './data/packs/stormwind/cards.json';
 
@@ -22,12 +34,25 @@ import echoCards from './data/packs/echo/cards.json';
 import skyMeta from './data/packs/sky/meta.json';
 import skyCards from './data/packs/sky/cards.json';
 
-import presetsRaw from './data/presets.json';
+import classicMeta from './data/packs/classic/meta.json';
+import classicCards from './data/packs/classic/cards.json';
+
+import cradleMeta from './data/packs/cradle/meta.json';
+import cradleCards from './data/packs/cradle/cards.json';
+
+import throneMeta from './data/packs/throne/meta.json';
+import throneCards from './data/packs/throne/cards.json';
+
+import innerMeta from './data/packs/inner/meta.json';
+import innerCards from './data/packs/inner/cards.json';
+
+/*===========================================================*/
 
 export interface PackMeta {
   id: string;
   name: string;
   description: string;
+  loreHook?: string;
   version: string;
 }
 
@@ -90,7 +115,23 @@ const PACKS: Record<string, Pack> = {
   razlom: buildPack(razlomMeta as PackMeta, razlomCards),
   echo: buildPack(echoMeta as PackMeta, echoCards),
   sky: buildPack(skyMeta as PackMeta, skyCards),
+  
+  classic: buildPack(classicMeta as PackMeta, classicCards),
+  cradle: buildPack(cradleMeta as PackMeta, cradleCards),
+  throne: buildPack(throneMeta as PackMeta, throneCards),
+  inner: buildPack(innerMeta as PackMeta, innerCards),
 };
+
+
+interface ActiveSeriesFile {
+  active?: string[];
+}
+
+const ACTIVE_FILE = activeSeriesRaw as ActiveSeriesFile;
+const ACTIVE_SERIES: Set<string> =
+  ACTIVE_FILE.active && ACTIVE_FILE.active.length > 0
+    ? new Set(ACTIVE_FILE.active)
+    : new Set(Object.keys(PACKS));
 
 // ─── Legacy-алиасы ───
 
@@ -124,7 +165,17 @@ function legacyPack(
 // ─── Публичный API ───
 
 export function listPacks(): PackMeta[] {
+  return Object.values(PACKS)
+    .filter((p) => ACTIVE_SERIES.has(p.meta.id))
+    .map((p) => p.meta);
+}
+
+export function listAllPacks(): PackMeta[] {
   return Object.values(PACKS).map((p) => p.meta);
+}
+
+export function isSeriesActive(id: string): boolean {
+  return ACTIVE_SERIES.has(id);
 }
 
 export function getPack(packId: string): Pack {
@@ -176,6 +227,28 @@ export function getDecks(packId?: string): DeckPreset[] {
   const pack = getPack(packId);
   const cardIds = new Set(pack.cards.map((c) => c.id));
   return PRESETS.filter((d) => d.cards.every((cid) => cardIds.has(cid)));
+}
+
+export function decksForSeries(series: string[]): DeckPreset[] {
+  const cardIds = new Set<string>();
+  for (const s of series) {
+    let pack: Pack;
+    try {
+      pack = getPack(s);
+    } catch {
+      continue;
+    }
+    for (const c of pack.cards) cardIds.add(c.id);
+  }
+  if (cardIds.size === 0) return [];
+  return PRESETS.filter((d) => d.cards.every((cid) => cardIds.has(cid)));
+}
+
+export function listActiveDecks(): DeckPreset[] {
+  return PRESETS.filter((d) => {
+    const series = seriesOfDeck(d.cards);
+    return series.length > 0 && series.every((s) => ACTIVE_SERIES.has(s));
+  });
 }
 
 export function listAllDecks(): DeckPreset[] {
@@ -297,3 +370,19 @@ export const TOKEN_ASPECTS = [
   ...PACKS.echo.cards,
   ...PACKS.sky.cards,
 ].filter((c) => c.isToken);
+
+export function getPersonalityName(id: string): string {
+  return PERSONALITIES[id] ?? id;
+}
+
+export function getSeriesName(id: string): string {
+  return PACKS[id]?.meta.name ?? id;
+}
+
+export function getFactionInfo(id: string): { name: string; color: string } {
+  return FACTIONS[id] ?? { name: id, color: '#6b7280' };
+}
+
+export function getRoleInfo(id: string): { name: string; icon: string } {
+  return ROLES[id] ?? { name: id, icon: '•' };
+}

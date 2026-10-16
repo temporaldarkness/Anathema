@@ -11,11 +11,20 @@ interface Props {
   children: ReactNode;
   className?: string;
   onClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 type Placement = 'top' | 'bottom';
 
-export function HoverTooltip({ content, children, className, onClick }: Props) {
+export function HoverTooltip({
+  content,
+  children,
+  className,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+}: Props) {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -25,10 +34,14 @@ export function HoverTooltip({ content, children, className, onClick }: Props) {
     placement: Placement;
   } | null>(null);
 
-  const handleEnter = () => setOpen(true);
+  const handleEnter = () => {
+    setOpen(true);
+    onMouseEnter?.();
+  };
   const handleLeave = () => {
     setOpen(false);
     setPos(null);
+    onMouseLeave?.();
   };
 
   useLayoutEffect(() => {

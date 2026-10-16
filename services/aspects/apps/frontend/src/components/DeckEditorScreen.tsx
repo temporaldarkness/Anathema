@@ -6,7 +6,18 @@ import type { UseDecksResult } from '../game/useDecks';
 import { HoverTooltip } from './HoverTooltip';
 import { CardTooltipDef } from './CardTooltipDef';
 import { useConfirm } from '../game/confirmContext';
-import { RARITY_COLOR, RARITY_TEXT, triggerText } from '../game/abilityText';
+import {
+  RARITY_COLOR,
+  RARITY_TEXT,
+  triggerText,
+  resolveKeyword,
+  KEYWORD_ICON,
+  resolveKeywordText,
+  conditionText,
+  effectText,
+} from '../game/abilityText';
+
+import { getPersonalityName, getRoleInfo, getFactionInfo, getSeriesName } from '@aspects/cards';
 
 interface Props {
   deckId: string | null;
@@ -387,6 +398,9 @@ function SeriesPickerModal({
                 <div className="series-picker-check">{isSelected ? '✓' : ''}</div>
                 <div className="series-picker-name">{p.name}</div>
                 <div className="series-picker-desc">{p.description}</div>
+                {p.loreHook && (
+                  <div className="series-picker-hook">{p.loreHook}</div>
+                )}
                 <div className="series-picker-meta">
                   {getCards(p.id).length} карт
                 </div>
@@ -398,7 +412,6 @@ function SeriesPickerModal({
     </div>
   );
 }
-
 function CardDetailModal({
   card,
   onClose,
@@ -430,9 +443,14 @@ function CardDetailModal({
         <div className="theme-modal-header">
           <div className="card-detail-title-block">
             <div className="card-detail-name">{card.name}</div>
-            {card.title && (
-              <div className="card-detail-subtitle">{card.title}</div>
-            )}
+            <div className="card-detail-subtitle">
+              <span className="card-detail-personality">
+                {getPersonalityName(card.personalityTag)}
+              </span>
+              {card.title && (
+                <span className="card-detail-title-text"> · {card.title}</span>
+              )}
+            </div>
           </div>
           <button className="theme-modal-close" onClick={onClose}>
             ✕
@@ -463,19 +481,29 @@ function CardDetailModal({
             <div className="card-detail-tags">
               {card.series?.map((s) => (
                 <span key={`s-${s}`} className="card-detail-tag-series">
-                  {s}
+                  {getSeriesName(s)}
                 </span>
               ))}
-              {card.factions?.map((f) => (
-                <span key={`f-${f}`} className="card-detail-tag-faction">
-                  {f}
-                </span>
-              ))}
-              {card.roles?.map((r) => (
-                <span key={`r-${r}`} className="card-detail-tag-role">
-                  {r}
-                </span>
-              ))}
+              {card.factions?.map((f) => {
+                const info = getFactionInfo(f);
+                return (
+                  <span
+                    key={`f-${f}`}
+                    className="card-detail-tag-faction"
+                    style={{ ['--tag-color' as string]: info.color }}
+                  >
+                    {info.name}
+                  </span>
+                );
+              })}
+              {card.roles?.map((r) => {
+                const info = getRoleInfo(r);
+                return (
+                  <span key={`r-${r}`} className="card-detail-tag-role">
+                    {info.icon} {info.name}
+                  </span>
+                );
+              })}
             </div>
           )}
 
@@ -483,15 +511,13 @@ function CardDetailModal({
             <div className="card-detail-section">
               <div className="card-detail-section-title">Ключевые слова</div>
               {keywords.map((kw) => {
-                const info = card.abilityInfo?.[kw];
+                const { name, description } = resolveKeyword(card, kw);
                 return (
                   <div key={kw} className="card-detail-ability">
-                    <div className="card-detail-ability-name">
-                      {info?.name ?? kw}
-                    </div>
-                    {info?.description && (
+                    <div className="card-detail-ability-name">{name}</div>
+                    {description && (
                       <div className="card-detail-ability-desc">
-                        {info.description}
+                        {description}
                       </div>
                     )}
                   </div>
@@ -503,40 +529,63 @@ function CardDetailModal({
           {triggers.length > 0 && (
             <div className="card-detail-section">
               <div className="card-detail-section-title">Способности</div>
-              {triggers.map((t, i) => (
-                <div key={i} className="card-detail-ability">
-                  <div className="card-detail-ability-name">
-                    {t.name ?? triggerText(t.trigger)}
-                    {t.oncePerTurn && (
-                      <span className="card-detail-tag">1/ход</span>
+              {triggers.map((t: any, i: number) => {
+                const name = t.name ?? triggerText(t.trigger);
+                return (
+                  <div key={i} className="card-detail-ability">
+                    <div className="card-detail-ability-name">
+                      {name}
+                      {t.oncePerTurn && (
+                        <span className="card-detail-tag">1/ход</span>
+                      )}
+                    </div>
+                    {t.condition && (
+                      <div className="card-detail-ability-desc" style={{ fontStyle: 'italic' }}>
+                        Если {conditionText(t.condition)}
+                      </div>
+                    )}
+                    {t.description ? (
+                      <div className="card-detail-ability-desc">
+                        {t.description}
+                      </div>
+                    ) : (
+                      <div className="card-detail-ability-desc">
+                        {(t.effects ?? []).map((e: any, j: number) => (
+                          <div key={j}>{effectText(e)}</div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  {t.description && (
-                    <div className="card-detail-ability-desc">
-                      {t.description}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
           {activated.length > 0 && (
             <div className="card-detail-section">
               <div className="card-detail-section-title">Активируемые</div>
-              {activated.map((a) => (
-                <div key={a.id} className="card-detail-ability">
-                  <div className="card-detail-ability-name">
-                    ⚡ {a.name ?? a.id}
-                    <span className="card-detail-tag">{a.cost}💰</span>
-                  </div>
-                  {a.description && (
-                    <div className="card-detail-ability-desc">
-                      {a.description}
+              {activated.map((a: any) => {
+                const name = a.name ?? a.id;
+                return (
+                  <div key={a.id} className="card-detail-ability">
+                    <div className="card-detail-ability-name">
+                      ⚡ {name}
+                      <span className="card-detail-tag">{a.cost}💰</span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {a.description ? (
+                      <div className="card-detail-ability-desc">
+                        {a.description}
+                      </div>
+                    ) : (
+                      <div className="card-detail-ability-desc">
+                        {(a.effects ?? []).map((e: any, j: number) => (
+                          <div key={j}>{effectText(e)}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -551,8 +600,6 @@ function CardDetailModal({
     </div>
   );
 }
-
-// ─── Пул карт ───
 
 interface CardPoolProps {
   deck: DeckState;
@@ -571,27 +618,68 @@ function CardPool({
 }: CardPoolProps) {
   const [search, setSearch] = useState('');
   const [rarityFilter, setRarityFilter] = useState<string>('all');
-  const [tagFilter, setTagFilter] = useState<string>('all');
+  const [personalityFilter, setPersonalityFilter] = useState<string>('all');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [factionFilter, setFactionFilter] = useState<string>('all');
   const [hideUsed, setHideUsed] = useState(false);
+  const [hoverPersonality, setHoverPersonality] = useState<string | null>(null);
 
-  const allTags = useMemo(() => {
-    const s = new Set<string>();
-    for (const c of allCards) for (const t of c.tags ?? []) s.add(t);
-    return [...s].sort();
+  // Списки значений для фильтров — только из текущего пула
+  const personalitiesInPool = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of allCards) {
+      if (c.isToken) continue;
+      if (!map.has(c.personalityTag)) {
+        map.set(c.personalityTag, getPersonalityName(c.personalityTag));
+      }
+    }
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
   }, [allCards]);
+
+  const rolesInPool = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of allCards) for (const r of c.roles ?? []) set.add(r);
+    return [...set].sort((a, b) => {
+      const an = getRoleInfo(a).name;
+      const bn = getRoleInfo(b).name;
+      return an.localeCompare(bn);
+    });
+  }, [allCards]);
+
+  const factionsInPool = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of allCards) for (const f of c.factions ?? []) set.add(f);
+    return [...set].sort((a, b) => {
+      const an = getFactionInfo(a).name;
+      const bn = getFactionInfo(b).name;
+      return an.localeCompare(bn);
+    });
+  }, [allCards]);
+
+  const matchesSearch = (c: CardDefinition, q: string): boolean => {
+    const lower = q.toLowerCase();
+    if (c.name.toLowerCase().includes(lower)) return true;
+    if (c.personalityTag.toLowerCase().includes(lower)) return true;
+    if (getPersonalityName(c.personalityTag).toLowerCase().includes(lower)) return true;
+    return false;
+  };
 
   const filtered = useMemo(() => {
     const list = allCards.filter((c) => {
       if (c.isToken) return false;
       if (rarityFilter !== 'all' && c.rarity !== rarityFilter) return false;
-      if (tagFilter !== 'all' && !(c.tags ?? []).includes(tagFilter)) return false;
-      if (search) {
-        const s = search.toLowerCase();
-        if (!c.name.toLowerCase().includes(s)) return false;
+      if (personalityFilter !== 'all' && c.personalityTag !== personalityFilter) return false;
+      if (roleFilter !== 'all' && !(c.roles ?? []).includes(roleFilter)) return false;
+      if (
+        factionFilter !== 'all' &&
+        !(c.factions as readonly string[] | undefined)?.includes(factionFilter)
+      ) {
+        return false;
       }
+      if (search && !matchesSearch(c, search)) return false;
       if (hideUsed) {
-        const count = personalityCounts.get(c.personalityTag) ?? 0;
-        if (count >= 5) return false;
+        const cnt = personalityCounts.get(c.personalityTag) ?? 0;
+        if (cnt >= 5) return false;
         if (c.rarity === 'legendary' && deck.cardIds.includes(c.id)) return false;
       }
       return true;
@@ -602,7 +690,9 @@ function CardPool({
   }, [
     search,
     rarityFilter,
-    tagFilter,
+    personalityFilter,
+    roleFilter,
+    factionFilter,
     hideUsed,
     personalityCounts,
     deck.cardIds,
@@ -624,7 +714,7 @@ function CardPool({
       <div className="card-pool-filters">
         <input
           className="card-pool-search"
-          placeholder="Поиск по имени…"
+          placeholder="Поиск по имени или личности…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -642,13 +732,37 @@ function CardPool({
         </select>
         <select
           className="card-pool-select"
-          value={tagFilter}
-          onChange={(e) => setTagFilter(e.target.value)}
+          value={personalityFilter}
+          onChange={(e) => setPersonalityFilter(e.target.value)}
         >
-          <option value="all">Все теги</option>
-          {allTags.map((t) => (
-            <option key={t} value={t}>
-              {t}
+          <option value="all">Все личности</option>
+          {personalitiesInPool.map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <select
+          className="card-pool-select"
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+        >
+          <option value="all">Все роли</option>
+          {rolesInPool.map((r) => (
+            <option key={r} value={r}>
+              {getRoleInfo(r).name}
+            </option>
+          ))}
+        </select>
+        <select
+          className="card-pool-select"
+          value={factionFilter}
+          onChange={(e) => setFactionFilter(e.target.value)}
+        >
+          <option value="all">Все фракции</option>
+          {factionsInPool.map((f) => (
+            <option key={f} value={f}>
+              {getFactionInfo(f).name}
             </option>
           ))}
         </select>
@@ -666,19 +780,25 @@ function CardPool({
         {filtered.map((c) => {
           const count = personalityCounts.get(c.personalityTag) ?? 0;
           const atLimit = count >= 5;
+          const aspectCount = deck.cardIds.filter((id) => id === c.id).length;
+          const aspectAtLimit = aspectCount >= 2;
           const legendaryUsed =
-            c.rarity === 'legendary' && deck.cardIds.includes(c.id);
+            c.rarity === 'legendary' && aspectCount >= 1;
           const deckFull = deck.cardIds.length >= 30;
-          const blocked = atLimit || legendaryUsed || deckFull;
+          const blocked = atLimit || aspectAtLimit || legendaryUsed || deckFull;
+          const keywords = c.abilities ?? [];
+          const isHovered = hoverPersonality === c.personalityTag;
 
           return (
             <HoverTooltip
               key={c.id}
               className={`card-pool-card card-rarity-${c.rarity} ${
                 blocked ? 'card-pool-card-blocked' : ''
-              }`}
+              } ${isHovered ? 'card-pool-card-same-personality' : ''}`}
               content={<CardTooltipDef def={c} />}
               onClick={() => onAdd(c)}
+              onMouseEnter={() => setHoverPersonality(c.personalityTag)}
+              onMouseLeave={() => setHoverPersonality(null)}
             >
               {count > 0 && (
                 <div className="card-pool-card-count">×{count}</div>
@@ -694,6 +814,22 @@ function CardPool({
                 ⓘ
               </div>
               <div className="card-pool-card-name">{c.name}</div>
+              <div className="card-pool-card-personality">
+                {getPersonalityName(c.personalityTag)}
+              </div>
+              {keywords.length > 0 && (
+                <div className="card-pool-card-keywords">
+                  {keywords.map((kw) => (
+                    <span
+                      key={kw}
+                      className="kw-icon"
+                      title={resolveKeywordText(c, kw)}
+                    >
+                      {KEYWORD_ICON[kw] ?? '•'}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="card-pool-card-stats">
                 <span className="cpc-stat cpc-cost">💰{c.cost}</span>
                 <span className="cpc-stat cpc-str">⚔{c.strength}</span>

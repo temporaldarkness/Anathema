@@ -1,0 +1,670 @@
+[
+  {
+    "id": "classic_asuka",
+    "name": "Простак",
+    "personalityTag": "asuka",
+    "tags": ["stormwind", "fighter"],
+    "cost": 1,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Принял свой кринж",
+    "shortDescription": "Простой, честный и смешной.",
+    "lore": "Аска отслужил в армии, но не строит из себя героя. Над ним часто шутят — но он давно перестал смущаться и просто делает своё дело.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_zamiatish",
+    "name": "Изгнанник",
+    "personalityTag": "zamiatish",
+    "tags": ["burgundy", "enterprise", "wanderer"],
+    "cost": 1,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["slow"],
+    "series": ["classic"],
+    "factions": ["burgundy", "enterprise"],
+    "roles": ["wanderer"],
+    "title": "Коммунист в Аргентине",
+    "shortDescription": "Выживает назло всем.",
+    "lore": "Замятыш уехал в Мендосу против воли и живёт там тяжело, но не сдаётся. Каждый день — маленькая победа над обстоятельствами.",
+    "triggers": [
+      {
+        "id"         : "endurance",
+        "trigger"    : "ON_TURN_END",
+        "oncePerTurn": true,
+        "name"       : "Выживает",
+        "description": "В конце хода получает +0/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 0, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Карта пропускает свой первый плановый переход из Резерва во Фронт."
+      }
+    }
+  },
+  {
+    "id": "classic_ultrarolevik",
+    "name": "Кукла",
+    "personalityTag": "ultrarolevik",
+    "tags": ["stormwind", "bot"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "temporary"],
+    "tempDuration": 3,
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["bot"],
+    "title": "Лоботомированная версия",
+    "shortDescription": "Простой, но верный помощник.",
+    "lore": "Ультраролевик был создан из скуки, чтобы играть в военно-политические игры. Его код сильно урезан — но он честно выполняет, что умеет, пока хватает заряда.",
+    "abilityInfo": {
+      "charge"   : {
+        "name": "Рвение",
+        "description": "При розыгрыше карта сразу переходит во Фронт, минуя Резерв."
+      },
+      "temporary": {
+        "name"       : "Временная",
+        "description": "Карта исчезает с поля через указанное число ходов."
+      }
+    }
+  },
+  {
+    "id": "classic_interdict",
+    "name": "Эксперимент",
+    "personalityTag": "interdict",
+    "tags": ["stormwind", "bot"],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["scout"],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["bot"],
+    "title": "Младший из семьи",
+    "shortDescription": "Распределённый и вездесущий.",
+    "lore": "Интердикт собран из множества распределённых служб — в противовес монолиту Проклятия. Ещё в разработке, но уже видит больше, чем кажется.",
+    "abilityInfo": {
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, даже если Фронт перед ним занят. Игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "classic_safno",
+    "name": "Патрульный",
+    "personalityTag": "safno",
+    "tags": ["stormwind", "fighter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 4,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Ночной ППСник",
+    "shortDescription": "Не спит, чтобы спали другие.",
+    "lore": "Сафно работает в ночную смену и давно перестал удивляться. Пока все спят — он на посту, и мимо него не пройдёт никто.",
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "classic_inki",
+    "name": "Затворник",
+    "personalityTag": "inki",
+    "tags": ["stormwind", "scholar"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["shield"],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Тихий голос разума",
+    "shortDescription": "Поглотит удар — но не накажет.",
+    "lore": "Инки строг в правилах, но слишком мягок в деле. Когда надо бы покарать — он лишь качает головой. Оттого и держит удары лучше, чем наносит.",
+    "abilityInfo": {
+      "shield": {
+        "name": "Щит",
+        "description": "Поглощает первый входящий урон полностью, включая урон от способностей. После поглощения снимается."
+      }
+    }
+  },
+  {
+    "id": "classic_bezdna",
+    "name": "Муза",
+    "personalityTag": "bezdna",
+    "tags": ["stormwind", "creator"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["creator"],
+    "title": "Гиперактивная кисть",
+    "shortDescription": "Вдохновляет случайного союзника.",
+    "lore": "Бездна живёт текстовыми РП и рисует без остановки. Она не выбирает, кого вдохновит — мазок летит туда, куда поведёт рука.",
+    "triggers": [
+      {
+        "id"         : "muse_inspiration",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Вдохновение",
+        "description": "Даёт +1/+1 случайному союзнику во Фронте.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "RANDOM_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_just",
+    "name": "Ленивец",
+    "personalityTag": "just",
+    "tags": ["stormwind", "scholar"],
+    "cost": 2,
+    "strength": 4,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["slow"],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Диванный ящер",
+    "shortDescription": "Никуда не спешит, но придёт.",
+    "lore": "Джаст — ящер в строгом костюме и очках, но в душе ленив. Сильный, когда доберётся до места, — а вот с выходом во Фронт вечно задерживается.",
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Карта пропускает свой первый плановый переход из Резерва во Фронт."
+      }
+    }
+  },
+  {
+    "id": "classic_oddi",
+    "name": "Поддержка",
+    "personalityTag": "oddi",
+    "tags": ["stormwind", "creator"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["creator"],
+    "title": "Тёплая рука",
+    "shortDescription": "Лечит одного союзника на выбор.",
+    "lore": "Одди — персональный агент эмоциональной поддержки. Она стесняется говорить громко, но подойдёт именно к тому, кому сейчас тяжелее всех.",
+    "triggers": [
+      {
+        "id": "warm_hand",
+        "trigger": "ON_ENTER",
+        "name": "Тёплая рука",
+        "description": "Выберите одного союзника и восстановите ему 2 здоровья.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then"     : [ {"kind": "HEAL", "amount": 2, "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_kingston",
+    "name": "Хоуми",
+    "personalityTag": "kingston",
+    "tags": ["stormwind", "creator"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["vanguard"],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["creator"],
+    "title": "Свой в доску",
+    "shortDescription": "Легко проходит туда, где свои.",
+    "lore": "Паша пришёл на сервер новичком, но быстро стал своим среди старой гвардии. У него свой путь — через нейтральные клетки прямиком к своим.",
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "classic_adorik",
+    "name": "Бюрократ",
+    "personalityTag": "adorik",
+    "tags": ["stormwind", "ruler"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["ruler"],
+    "title": "Всё по регламенту",
+    "shortDescription": "Даёт +1 Влияние при входе.",
+    "lore": "Адорик — дворф-депутат, для которого протокол важнее самой игры. Его появление в партии всегда означает одно: сейчас будет по правилам.",
+    "triggers": [
+      {
+        "id"         : "regulation",
+        "trigger"    : "ON_ENTER",
+        "name"       : "По регламенту",
+        "description": "Даёт +1 Влияние при входе.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_hacker",
+    "name": "Ростовчанин",
+    "personalityTag": "hacker",
+    "tags": ["stormwind", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Вписывается за своих",
+    "shortDescription": "Отвечает, когда бьют его людей.",
+    "lore": "Хакер из Ростова — прямой и без лишних слов. Он не влетает первым, но если тронут кого-то из его — ответит сразу и без разбора, кто там прав.",
+    "triggers": [
+      {
+        "id"         : "for_the_boys",
+        "trigger"    : "ON_ALLY_ATTACKED",
+        "oncePerTurn": true,
+        "name"       : "За своих",
+        "description": "Когда союзника атакуют — наносит 1 урон атакующему.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_temporal",
+    "name": "Временщик",
+    "personalityTag": "temporal",
+    "tags": ["stormwind", "scholar"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Тихий хранитель",
+    "shortDescription": "Подкидывает Влияние, когда его мало.",
+    "lore": "Темпорал давно в системе — на ключевых постах, но никогда на первых ролях. Он помнит всё и всегда рядом, готовый тихо подставить плечо.",
+    "triggers": [
+      {
+        "id": "old_keeper",
+        "trigger": "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition": {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 3
+        },
+        "name": "Тихий хранитель",
+        "description": "Если у вас ≤3 Влияния — получаете +1 Влияние в начале хода.",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_yuoko",
+    "name": "Кот в Короне",
+    "personalityTag": "yuoko",
+    "tags": ["stormwind", "ruler"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["taunt", "suppress"],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["ruler"],
+    "title": "Корона, которую все признают",
+    "shortDescription": "Притягивает атаки и давит напротив.",
+    "lore": "Юко — создатель и ключевое лицо. Его ненавидят, но вынуждены признавать. Одна его тень в колонке напротив уже ослабляет противника.",
+    "abilityInfo": {
+      "taunt"   : {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "suppress": {
+        "name": "Подавление",
+        "description": "Карта напротив в той же колонке получает −1 силы и −1 здоровья. Действует постоянно."
+      }
+    }
+  },
+  {
+    "id": "classic_gorox",
+    "name": "Эксплойт",
+    "personalityTag": "gorox",
+    "tags": ["burgundy", "stormwind", "creator"],
+    "cost": 3,
+    "strength": 1,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["scout"],
+    "series": ["classic"],
+    "factions": ["burgundy", "stormwind"],
+    "roles": ["creator"],
+    "title": "Гоблин с эксплоитом",
+    "shortDescription": "Обходит стражу и вредит изнутри.",
+    "lore": "Горох — разработчик с двойным дном. Он найдёт лазейку там, где её не должно быть, и стащит чужое раньше, чем кто-то заметит.",
+    "triggers": [
+      {
+        "id"         : "exploit",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Эксплоит",
+        "description": "Противник сбрасывает 1 случайную карту.",
+        "effects"    : [
+          {"kind": "DISCARD_RANDOM", "count": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, даже если Фронт перед ним занят. Игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "classic_chris",
+    "name": "Ветеран",
+    "personalityTag": "chris",
+    "tags": ["ganimed", "wanderer"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["ganimed"],
+    "roles": ["wanderer"],
+    "title": "Помнит то, что другие забыли",
+    "shortDescription": "Возвращает карту из сброса в руку.",
+    "lore": "Крис — основатель Ганимеда, археолог по профессии. Он любит вспоминать прошлое и всегда вытащит из сброса историю, о которой все давно позабыли.",
+    "triggers": [
+      {
+        "id"         : "old_tales",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Старые истории",
+        "description": "Возвращает случайную карту из сброса в руку.",
+        "effects"    : [
+          {
+            "kind"       : "RETURN_FROM_DISCARD",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "HAND"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_hyper",
+    "name": "Дебатёр",
+    "personalityTag": "hyper",
+    "tags": ["enterprise", "burgundy", "creator"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["enterprise", "burgundy"],
+    "roles": ["creator"],
+    "title": "Легко задеть за живое",
+    "shortDescription": "Чем сильнее бьют — тем злее.",
+    "lore": "Хайпер много работал на Энтерпрайз, но выгорел, когда команда не поддержала. Его легко задеть — и тогда он ввязывается в спор с удвоенной силой.",
+    "triggers": [
+      {
+        "id": "spite",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name": "Ожесточение",
+        "description": "Когда эта карта получает урон — получает +1 силы. Раз в ход.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_solongo",
+    "name": "Минмаксер",
+    "personalityTag": "solongo",
+    "tags": ["enterprise", "scholar"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["enterprise"],
+    "roles": ["scholar"],
+    "title": "Собирает билд даже из себя",
+    "shortDescription": "Раз в ход усиливает себя за 1 Влияние.",
+    "lore": "Солонго — генетик и модератор, которая в любой РП-системе соберёт сильный билд. А если система — она сама, то и здесь найдёт, что оптимизировать.",
+    "activatedAbilities": [
+      {
+        "id"         : "optimize",
+        "cost"       : 1,
+        "name"       : "Оптимизация",
+        "description": "Получает +1/+1. Раз в ход.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_agzamov",
+    "name": "Красный Телефон",
+    "personalityTag": "agzamov",
+    "tags": ["enterprise", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["classic"],
+    "factions": ["enterprise"],
+    "roles": ["fighter"],
+    "title": "Под трибунал пойдут все",
+    "shortDescription": "Стоит стеной и откупается при входе.",
+    "lore": "Агзамов — донатер, который всегда наглый и всегда уверен, что прав. При входе щедро заносит в казну гильдии, а потом стоит стеной и требует военный суд.",
+    "triggers": [
+      {
+        "id"         : "red_phone",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Откуп",
+        "description": "Восстанавливает 4 Величия при входе.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 4, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "classic_alt",
+    "name": "Посредник",
+    "personalityTag": "alt",
+    "tags": ["enterprise", "burgundy", "ruler"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["enterprise", "burgundy"],
+    "roles": ["ruler"],
+    "title": "Между двух огней",
+    "shortDescription": "Усиливает и своих, и врагов.",
+    "lore": "Альт всю жизнь мечется между Бургундией и Энтерпрайзом, пытаясь угодить обеим сторонам. В итоге помогает всем сразу — и никто ему за это не благодарен.",
+    "triggers": [
+      {
+        "id": "peacemaking",
+        "trigger": "ON_ENTER",
+        "name": "Меж двух огней",
+        "description": "Даёт +1/+1 случайному союзнику во Фронте и +1/+1 случайному врагу во Фронте.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "RANDOM_FRIENDLY_FRONT"
+          },
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "RANDOM_ENEMY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_spy",
+    "name": "Ворчун",
+    "personalityTag": "spy",
+    "tags": ["enterprise", "ganimed", "scholar"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["enterprise", "ganimed"],
+    "roles": ["scholar"],
+    "title": "Вечный критик",
+    "shortDescription": "Каждый ход подтачивает Величие врага.",
+    "lore": "Спай — старый сварливый смотрящий, который всегда имел своё мнение о том, как должно быть. Он не бьёт в лоб — он подтачивает репутацию, пока она не рассыплется.",
+    "triggers": [
+      {
+        "id"         : "grumbling",
+        "trigger"    : "ON_TURN_END",
+        "name"       : "Вечное ворчание",
+        "description": "В конце хода наносит 1 урон Величию противника.",
+        "effects"    : [
+          {"kind": "DAMAGE_GLORY", "amount": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_kiss",
+    "name": "Мать-Матриарх",
+    "personalityTag": "kiss",
+    "tags": ["ganimed", "ruler"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["ganimed"],
+    "roles": ["ruler"],
+    "title": "Держит всех на своих плечах",
+    "shortDescription": "Лечит союзников и восстанавливает Величие при входе.",
+    "lore": "Кисс — старая мать-основательница Ганимеда, покровительница многих ролевых проектов. Она давно отошла от дел, но её появление до сих пор поддерживает всех вокруг.",
+    "triggers": [
+      {
+        "id": "matriarch_blessing",
+        "trigger": "ON_ENTER",
+        "name": "Благословение матери",
+        "description": "Лечит всех союзников во Фронте на 1 и восстанавливает 3 Величия.",
+        "effects": [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_FRONT"},
+          {"kind": "HEAL_GLORY", "amount": 3, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "classic_proklyatie",
+    "name": "Проклятие",
+    "personalityTag": "proklyatie",
+    "tags": ["stormwind", "bot"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["classic"],
+    "factions": ["stormwind"],
+    "roles": ["bot"],
+    "title": "Монолит на паллиативной помощи",
+    "shortDescription": "Раз в ход достаёт карту за 1 Влияние.",
+    "lore": "Проклятие 220 — самый успешный бот Штормграда, много веков в паллиативной помощи, но продолжающий выполнять все свои исполнительные функции. Зайдёшь — и всегда получишь ответ.",
+    "activatedAbilities": [
+      {
+        "id"         : "query",
+        "cost"       : 1,
+        "name"       : "Запрос",
+        "description": "Взять 1 карту. Раз в ход.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  }
+]

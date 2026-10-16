@@ -1,0 +1,508 @@
+[
+  {
+    "id": "cradle_rori_empress",
+    "name": "Та, что зажгла Ганимед",
+    "personalityTag": "rori",
+    "tags": ["ganimed", "ruler"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["ruler"],
+    "title": "Императрица и идеолог",
+    "shortDescription": "Вдохновляет всех во Фронте каждый ход.",
+    "lore": "Рори пришла на Ганимед как идеолог и сразу стала его лицом. Она умела зажечь — и этим держала проект, пока идея была общей. Позже та же энергия превратится в тиранию, но сейчас — она ведёт всех за собой.",
+    "triggers": [
+      {
+        "id"         : "inspiration",
+        "trigger"    : "ON_TURN_START",
+        "name"       : "Вдохновение",
+        "description": "Все союзники во Фронте получают +1 силы.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_rori_despot",
+    "name": "Деспот",
+    "personalityTag": "rori",
+    "tags": ["ganimed", "ruler"],
+    "cost": 5,
+    "strength": 5,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["ruler"],
+    "title": "Та, что требовала всё",
+    "shortDescription": "Казнит одну цель при входе.",
+    "lore": "Власть сделала Рори глухой к чужим словам. Она требовала жёстко и позволяла себе «делать что хочу». Дружба с Темпоралом кончилась — и это стало началом конца.",
+    "triggers": [
+      {
+        "id"         : "execution",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Казнь",
+        "description": "Наносит 4 урона выбранной цели.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_spy_witness",
+    "name": "Свидетель",
+    "personalityTag": "spy",
+    "tags": ["ganimed", "scholar"],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["scholar"],
+    "title": "Всё видел, но не действовал",
+    "shortDescription": "Убирает одну цель и стабилизирует Влияние.",
+    "lore": "Спай вместе с Темпом основал Ганимед и стал первым админом после него. Он видел всё и не мешал, пока не настал момент. Свидетель эпохи, который переживёт её.",
+    "triggers": [
+      {
+        "id"         : "when_the_time_comes",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Когда настал момент",
+        "description": "Наносит 3 урона выбранной цели.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 3, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "patient_work",
+        "trigger": "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition": {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 3
+        },
+        "name": "Тихая работа",
+        "description": "Если у вас ≤3 Влияния — получаете +1 Влияние в начале хода.",
+        "effects": [ {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_temporal_first_out",
+    "name": "Тот, кто ушёл первым",
+    "personalityTag": "temporal",
+    "tags": ["ganimed", "scholar"],
+    "cost": 4,
+    "strength": 4,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["scholar"],
+    "title": "Лез из кожи вон",
+    "shortDescription": "Даже уходя, поддерживает своих.",
+    "lore": "Темпорал лез из кожи вон, чтобы поддерживать проект. А когда Рори сняла его — лез из кожи вон, чтобы переворот не провалился. Он ушёл первым, но не бросил.",
+    "triggers": [
+      {
+        "id"         : "last_gift",
+        "trigger"    : "ON_EXIT",
+        "name"       : "Последний дар",
+        "description": "Все союзники во Фронте получают +1/+1.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_yuoko_parvenu",
+    "name": "Выскочка",
+    "personalityTag": "yuoko",
+    "tags": ["ganimed", "ruler"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["vanguard"],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["ruler"],
+    "title": "Взлетел за один день",
+    "shortDescription": "Входит сразу во Фронт и получает Влияние.",
+    "lore": "Юко пришёл новичком и в первый же вечер после разговора с Рори стал одним из глав. Темпорал его тогда не выносил — а теперь они лучшие друзья.",
+    "triggers": [
+      {
+        "id"         : "instant_rise",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Быстрый взлёт",
+        "description": "Получает +1 Влияние при входе.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "cradle_krom_warchief",
+    "name": "Орочий Вождь",
+    "personalityTag": "crom",
+    "tags": ["burgundy", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["charge"],
+    "series": ["cradle"],
+    "factions": ["burgundy"],
+    "roles": ["fighter"],
+    "title": "Набег на проект",
+    "shortDescription": "Врывается и бьёт по гильдии.",
+    "lore": "Кром — безликий вождь орочей массы, решивший потыкать на прочность крепость проекта Ганимеда набегом. Его набеги — не война, а образ жизни.",
+    "triggers": [
+      {
+        "id"         : "raid",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Набег",
+        "description": "Наносит 2 урона Величию противника.",
+        "effects"    : [
+          {"kind": "DAMAGE_GLORY", "amount": 2, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "При розыгрыше карта сразу переходит во Фронт, минуя Резерв."
+      }
+    }
+  },
+  {
+    "id": "cradle_chris_evening_star",
+    "name": "Звезда Вечера",
+    "personalityTag": "chris",
+    "tags": ["ganimed", "creator"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["creator"],
+    "title": "Заводила и душа компании",
+    "shortDescription": "Укрепляет случайного союзника каждый ход.",
+    "lore": "Крис был заводилой задолго до Ганимеда — он собрал вокруг себя Хакера, Спая, Темпорала и других. Он до последнего вносил свой вклад и решал конфликты, пока всё не начало рушиться.",
+    "triggers": [
+      {
+        "id"         : "host",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "name"       : "Заводила",
+        "description": "Случайный союзник во Фронте получает +1/+1.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "RANDOM_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_kiss_hearth",
+    "name": "Очаг",
+    "personalityTag": "kiss",
+    "tags": ["ganimed", "creator"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["creator"],
+    "title": "Поддерживает РП-атмосферу",
+    "shortDescription": "Восстанавливает 1 Величие гильдии каждый ход.",
+    "lore": "Кисс была главным художником проекта и держала РП-атмосферу. Она запомнилась как хороший игрок, вокруг которого собирались люди.",
+    "triggers": [
+      {
+        "id"         : "warm_hearth",
+        "trigger"    : "ON_TURN_END",
+        "name"       : "Очаг",
+        "description": "Восстанавливает 1 Величие гильдии.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_sephira_talisman",
+    "name": "Талисман",
+    "personalityTag": "sephira",
+    "tags": ["ganimed", "fighter"],
+    "cost": 2,
+    "strength": 0,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["charge", "taunt"],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["fighter"],
+    "title": "Беззубый, кроме конфликтов",
+    "shortDescription": "Врывается, притягивает удар и взрывается.",
+    "lore": "Сефирот — взрывной подросток и талисман проекта. Кажется, всё хорошо, пока не начнётся конфликт — и тогда задевает всех вокруг.",
+    "triggers": [
+      {
+        "id": "outburst",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name": "Вспышка",
+        "description": "Когда эта карта получает урон — наносит 1 урон всем врагам во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "При розыгрыше карта сразу переходит во Фронт, минуя Резерв."
+      },
+      "taunt" : {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "cradle_inanis_professional",
+    "name": "Профессионал",
+    "personalityTag": "inanis",
+    "tags": ["ganimed", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["fighter"],
+    "title": "Самый нормальный",
+    "shortDescription": "Восстанавливает 3 Величия при входе.",
+    "lore": "Инанис — строгий и нравственный РП-игрок, обращавшийся ко всем на «Вы». Серый, но придавал жизни проекту. Любил медицинский отдел и играл обычного медика.",
+    "triggers": [
+      {
+        "id"         : "restore_normalcy",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Восстановление",
+        "description": "Восстанавливает 3 Величия гильдии.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 3, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_qlax_poet",
+    "name": "Поэт",
+    "personalityTag": "qlax",
+    "tags": ["ganimed", "wanderer"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["wanderer"],
+    "title": "Готичный дединсайд",
+    "shortDescription": "Просто стоит и смотрит в пустоту.",
+    "lore": "Клакс — оффник-дединсайд, ищущий «тяночку». Его РП-идеи были не по душе многим, но он оставался собой — тихо и упорно.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_zamiatish_correspondent",
+    "name": "Корреспондент",
+    "personalityTag": "zamiatish",
+    "tags": ["burgundy", "ganimed", "wanderer"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["scout"],
+    "series": ["cradle"],
+    "factions": ["burgundy", "ganimed"],
+    "roles": ["wanderer"],
+    "title": "Взгляд с обеих сторон",
+    "shortDescription": "Всё видит и берёт карту при входе.",
+    "lore": "Замятыш в момент раскола был посредине — он брал интервью у Спая, Темпа и Юко про переворот и пытался донести до народа правду. Молодой бургундец, ходивший между двумя лагерями.",
+    "triggers": [
+      {
+        "id"         : "interview",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Интервью",
+        "description": "Берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, даже если Фронт перед ним занят. Игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "cradle_alt_party_man",
+    "name": "Партиец",
+    "personalityTag": "alt",
+    "tags": ["burgundy", "ganimed", "ruler"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["burgundy", "ganimed"],
+    "roles": ["ruler"],
+    "title": "Страстный политик",
+    "shortDescription": "Получает 2 Влияния при переходе во Фронт.",
+    "lore": "Альт в те годы страстно любил политику и был наполовину бургундцем, наполовину ганимедцем. Добрый, но увлечённый — он верил в идеи и людей.",
+    "triggers": [
+      {
+        "id"         : "party_line",
+        "trigger"    : "ON_REINFORCE",
+        "name"       : "Линия партии",
+        "description": "Получает +2 Влияния при переходе во Фронт.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_hyper_scandalist",
+    "name": "Скандалист",
+    "personalityTag": "hyper",
+    "tags": ["burgundy", "creator"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["charge", "temporary"],
+    "tempDuration": 2,
+    "series": ["cradle"],
+    "factions": ["burgundy"],
+    "roles": ["creator"],
+    "title": "Вспыхнул и сгорел",
+    "shortDescription": "Врывается и быстро исчезает.",
+    "lore": "В эпоху Ганимеда Хайпер был ещё вспыльчивее, чем позже. Он загорался моментально — и так же быстро выгорал.",
+    "abilityInfo": {
+      "charge"   : {
+        "name": "Рвение",
+        "description": "При розыгрыше карта сразу переходит во Фронт, минуя Резерв."
+      },
+      "temporary": {
+        "name"       : "Временная",
+        "description": "Карта исчезает с поля через указанное число ходов."
+      }
+    }
+  },
+  {
+    "id": "cradle_hacker_holiday",
+    "name": "Праздник",
+    "personalityTag": "hacker",
+    "tags": ["ganimed", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["fighter"],
+    "title": "Проводит ивенты",
+    "shortDescription": "Лечит одного союзника за Влияние.",
+    "lore": "В эпоху Ганимеда Хакер был ивентологом — тем, кто устраивал события для проекта. Ровный парень, свой в доску. Позже он займёт место Спая в триумвирате.",
+    "activatedAbilities": [
+      {
+        "id": "event_heal",
+        "cost": 1,
+        "name": "Организация",
+        "description": "Восстанавливает 2 здоровья выбранному союзнику. Раз в ход.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then"     : [ {"kind": "HEAL", "amount": 2, "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cradle_asuka_recruit",
+    "name": "Новобранец",
+    "personalityTag": "asuka",
+    "tags": ["ganimed", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["cradle"],
+    "factions": ["ganimed"],
+    "roles": ["fighter"],
+    "title": "Таким же и остался",
+    "shortDescription": "Простой и крепкий — как всегда.",
+    "lore": "Асочка был на сервере с самого начала — и, удивительно, совсем не изменился. Позже он станет «Простаком». Пока — просто новобранец.",
+    "abilityInfo": {}
+  }
+]

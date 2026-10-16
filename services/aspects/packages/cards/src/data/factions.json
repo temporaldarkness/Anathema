@@ -1,0 +1,6 @@
+{
+  "stormwind":  { "name": "Штормград",  "color": "#fbbf24" },
+  "enterprise": { "name": "Энтерпрайз", "color": "#3b82f6" },
+  "ganimed":    { "name": "Ганимед",    "color": "#a855f7" },
+  "burgundy":   { "name": "Бургундия",  "color": "#22c55e" }
+}

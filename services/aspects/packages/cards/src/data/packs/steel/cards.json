@@ -3,531 +3,576 @@
     "id": "st_private",
     "name": "Рядовой",
     "personalityTag": "st_private",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 1,
     "strength": 1,
     "health": 2,
     "rarity": "common",
-    "abilities": []
+    "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Первая ступень",
+    "shortDescription": "Дешёвый и надёжный боец.",
+    "lore": "У него нет ни регалий, ни позывного. Просто рядовой. Именно они держат строй, пока остальные рисуют схемы.",
+    "abilityInfo": {}
   },
   {
     "id": "st_runner",
     "name": "Вестовой",
     "personalityTag": "st_runner",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 1,
     "strength": 1,
     "health": 1,
     "rarity": "common",
-    "abilities": [
-      "charge"
-    ]
+    "abilities": ["charge"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Быстрее связи",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Пока штаб пишет приказ, вестовой уже рядом с целью. Иногда этим и заканчивается.",
+    "abilityInfo": {}
   },
   {
     "id": "st_rifleman",
     "name": "Автоматчик",
     "personalityTag": "st_rifleman",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 2,
     "strength": 3,
     "health": 2,
     "rarity": "common",
-    "abilities": []
+    "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Держит очередью",
+    "shortDescription": "Обычный стрелок.",
+    "lore": "Он не задаёт вопросов. Приказ — значит стрелять. Всё остальное — не его.",
+    "abilityInfo": {}
   },
   {
     "id": "st_mg",
     "name": "Пулемётчик",
     "personalityTag": "st_mg",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 2,
     "strength": 1,
     "health": 5,
     "rarity": "common",
-    "abilities": [
-      "taunt"
-    ]
+    "abilities": ["taunt"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Пять в ряд",
+    "shortDescription": "Держит позицию.",
+    "lore": "У него две цели в жизни: чистить пулемёт и не дать продвинуться. Вторая важнее.",
+    "abilityInfo": {}
   },
   {
     "id": "st_sapper",
     "name": "Сапёр",
     "personalityTag": "st_sapper",
-    "tags": [
-      "steel",
-      "engineer"
-    ],
+    "tags": ["steel", "creator"],
     "cost": 2,
     "strength": 2,
     "health": 2,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["creator"],
+    "title": "Считает шаги",
+    "shortDescription": "Взрывает по входу.",
+    "lore": "Он работает с тем, что не должен взорваться раньше времени. Уже три года — ничего.",
     "triggers": [
       {
-        "id": "demo_charge",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "RANDOM_ENEMY_FRONT"
-          }
+        "id"         : "demo_charge",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Заряд",
+        "description": "Наносит 1 урона случайной карте противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_medic",
     "name": "Санитар",
     "personalityTag": "st_medic",
-    "tags": [
-      "steel",
-      "medical"
-    ],
+    "tags": ["steel", "scholar"],
     "cost": 2,
     "strength": 1,
     "health": 3,
     "rarity": "common",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["scholar"],
+    "title": "Сумка и руки",
+    "shortDescription": "Лечит фронт.",
+    "lore": "У него нет присяги. Есть только правило: если дышит — тащи.",
     "triggers": [
       {
-        "id": "first_aid",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "HEAL",
-            "amount": 2,
-            "target": "ALL_FRIENDLY_FRONT"
-          }
+        "id"         : "first_aid",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Первая помощь",
+        "description": "Восстанавливает 2 здоровья всем союзникам во Фронте.",
+        "effects"    : [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_scout",
     "name": "Разведчик",
     "personalityTag": "st_scout",
-    "tags": [
-      "steel",
-      "sniper"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 2,
     "strength": 2,
     "health": 1,
     "rarity": "common",
-    "abilities": [
-      "charge",
-      "scout"
-    ]
+    "abilities": ["charge", "scout"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Впереди колонны",
+    "shortDescription": "Бьёт в резерв.",
+    "lore": "Он приходит за день до главных сил. Уходит за час до того, как они начнут падать.",
+    "abilityInfo": {}
   },
   {
     "id": "st_engineer",
     "name": "Инженер",
     "personalityTag": "st_engineer",
-    "tags": [
-      "steel",
-      "engineer"
-    ],
+    "tags": ["steel", "creator"],
     "cost": 2,
     "strength": 1,
     "health": 3,
     "rarity": "common",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["creator"],
+    "title": "Окапывается на ходу",
+    "shortDescription": "Крепнет во Фронте.",
+    "lore": "Он не ждёт команды. Дошёл — окопался. Остальное пусть делают те, кто любит говорить.",
     "triggers": [
       {
-        "id": "dig_in",
-        "trigger": "ON_REINFORCE",
-        "effects": [
-          {
-            "kind": "BUFF",
-            "strength": 0,
-            "health": 2,
-            "target": "SELF"
-          }
+        "id"         : "dig_in",
+        "trigger"    : "ON_REINFORCE",
+        "name"       : "Окоп",
+        "description": "При переходе во Фронт получает +2 здоровья.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 0, "health": 2, "target": "SELF"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_intel",
     "name": "Разведсвязной",
     "personalityTag": "st_intel",
-    "tags": [
-      "steel",
-      "intel"
-    ],
+    "tags": ["steel", "wanderer"],
     "cost": 2,
     "strength": 2,
     "health": 2,
     "rarity": "common",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["wanderer"],
+    "title": "Приносит данные",
+    "shortDescription": "Тянет карту.",
+    "lore": "Он не сообщает сводки — он их носит. Разница принципиальная: сводки можно переписать, его — нет.",
     "triggers": [
       {
-        "id": "intel_report",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "DRAW",
-            "count": 1,
-            "who": "SELF"
-          }
-        ]
+        "id"         : "intel_report",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Донесение",
+        "description": "Берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_sgt",
     "name": "Сержант",
     "personalityTag": "st_sgt",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 3,
     "strength": 3,
     "health": 3,
     "rarity": "uncommon",
-    "abilities": [
-      "charge"
-    ]
+    "abilities": ["charge"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Первый в атаку",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Он никогда не говорит «вперёд». Он просто идёт. Остальные — за ним.",
+    "abilityInfo": {}
   },
   {
     "id": "st_marksman",
     "name": "Снайпер",
     "personalityTag": "st_marksman",
-    "tags": [
-      "steel",
-      "sniper"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 3,
     "strength": 3,
     "health": 2,
     "rarity": "uncommon",
-    "abilities": [
-      "breakthrough"
-    ]
+    "abilities": ["breakthrough"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Пробивает насквозь",
+    "shortDescription": "Урон переходит дальше.",
+    "lore": "Одна пуля — две цели. Не потому что рикошет, а потому что цель стояла слишком ровно.",
+    "abilityInfo": {}
   },
   {
     "id": "st_grenadier",
     "name": "Гранатомётчик",
     "personalityTag": "st_grenadier",
-    "tags": [
-      "steel",
-      "specialist"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 3,
     "strength": 3,
     "health": 3,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Два выстрела",
+    "shortDescription": "Бросает гранаты за Влияние.",
+    "lore": "Он не любит работать вплотную. На расстоянии меньше ошибок.",
     "activatedAbilities": [
       {
-        "id": "throw_grenade",
-        "cost": 1,
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 2,
-            "target": "RANDOM_ENEMY_FRONT"
-          }
+        "id"         : "throw_grenade",
+        "cost"       : 1,
+        "name"       : "Бросок гранаты",
+        "description": "Наносит 2 урона случайной карте противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_apc",
     "name": "БТР",
     "personalityTag": "st_apc",
-    "tags": [
-      "steel",
-      "armored"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 3,
     "strength": 2,
     "health": 5,
     "rarity": "uncommon",
-    "abilities": [
-      "taunt"
-    ]
+    "abilities": ["taunt"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Везёт и держит",
+    "shortDescription": "Стена на колёсах.",
+    "lore": "Он не герой. Он — тот, кто довозит героев до места, где им положено погибнуть.",
+    "abilityInfo": {}
   },
   {
     "id": "st_barrage",
     "name": "Миномётный обстрел",
     "personalityTag": "st_barrage",
-    "tags": [
-      "steel",
-      "artillery"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 3,
     "strength": 1,
     "health": 3,
     "rarity": "rare",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Работает вслепую",
+    "shortDescription": "Накрывает фронт залпом.",
+    "lore": "Он не видит целей. Он видит квадрат на карте и накрывает его.",
     "triggers": [
       {
-        "id": "barrage",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 2,
-            "target": "ALL_ENEMY_FRONT"
-          }
+        "id"         : "barrage",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Залп",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_officer",
     "name": "Офицер",
     "personalityTag": "st_officer",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 4,
     "strength": 3,
     "health": 4,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Держит карту",
+    "shortDescription": "Усиливает фронт при входе.",
+    "lore": "Он единственный, кто смотрит на карту, а не в прицел. Иногда это и решает исход.",
     "triggers": [
       {
-        "id": "battle_plan",
-        "trigger": "ON_ENTER",
-        "effects": [
+        "id"         : "battle_plan",
+        "trigger"    : "ON_ENTER",
+        "name"       : "План боя",
+        "description": "При входе все союзники во Фронте получают +2 силы.",
+        "effects"    : [
           {
-            "kind": "BUFF",
+            "kind"    : "BUFF",
             "strength": 2,
-            "health": 0,
-            "target": "ALL_FRIENDLY_FRONT"
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
           }
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_howitzer",
     "name": "Гаубица",
     "personalityTag": "st_howitzer",
-    "tags": [
-      "steel",
-      "artillery"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 4,
     "strength": 2,
     "health": 4,
     "rarity": "rare",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Медленно и точно",
+    "shortDescription": "Накрывает фронт залпом.",
+    "lore": "Пока её наводят, враг успевает заскучать. Потом ему уже не до скуки.",
     "triggers": [
       {
-        "id": "bombardment",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 2,
-            "target": "ALL_ENEMY_FRONT"
-          }
+        "id"         : "bombardment",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Обстрел",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
-    "id": "st_tank",
-    "name": "Танк",
-    "personalityTag": "st_tank",
-    "tags": [
-      "steel",
-      "armored"
-    ],
-    "cost": 5,
-    "strength": 5,
-    "health": 5,
-    "rarity": "rare",
-    "abilities": [
-      "breakthrough"
-    ]
+    "id"              : "st_tank",
+    "name"            : "Танк",
+    "personalityTag"  : "st_tank",
+    "tags"            : ["steel", "fighter"],
+    "cost"            : 5,
+    "strength"        : 5,
+    "health"          : 5,
+    "rarity"          : "rare",
+    "abilities"       : ["breakthrough"],
+    "series"          : ["steel"],
+    "factions"        : ["steel"],
+    "roles"           : ["fighter"],
+    "title"           : "Проламывает строй",
+    "shortDescription": "Урон идёт дальше.",
+    "lore"            : "Он не ищет слабое место. Он его создаёт.",
+    "abilityInfo"     : {}
   },
   {
     "id": "st_veteran",
     "name": "Ветеран",
     "personalityTag": "st_veteran",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 5,
     "strength": 4,
     "health": 5,
     "rarity": "rare",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Считает потери",
+    "shortDescription": "Растёт от гибели союзников.",
+    "lore": "Он помнит всех, кто не вернулся. Из этого и состоит его сила.",
     "triggers": [
       {
-        "id": "no_man_left",
-        "trigger": "ON_ALLY_DIED",
+        "id"         : "no_man_left",
+        "trigger"    : "ON_ALLY_DIED",
         "oncePerTurn": true,
-        "effects": [
-          {
-            "kind": "BUFF",
-            "strength": 1,
-            "health": 1,
-            "target": "SELF"
-          }
+        "name"       : "Пока не осталось никого",
+        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_general",
     "name": "Генерал",
     "personalityTag": "st_general",
-    "tags": [
-      "steel",
-      "infantry"
-    ],
+    "tags": ["steel", "fighter"],
     "cost": 6,
     "strength": 4,
     "health": 6,
     "rarity": "rare",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Приказы пишет сам",
+    "shortDescription": "Каждый ход усиливает фронт.",
+    "lore": "Он не любит парады. Говорит, что настоящая война начинается там, где знамёна уже сгорели.",
     "triggers": [
       {
         "id": "tactical_command",
         "trigger": "ON_TURN_START",
+        "name": "Тактический приказ",
+        "description": "В начале хода все союзники во Фронте получают +1 силы.",
         "effects": [
           {
-            "kind": "BUFF",
+            "kind"    : "BUFF",
             "strength": 1,
-            "health": 0,
-            "target": "ALL_FRIENDLY_FRONT"
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
           }
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_ghost_lead",
     "name": "Призрачный Лидер",
     "personalityTag": "st_ghost_lead",
-    "tags": [
-      "steel",
-      "legend"
-    ],
+    "tags": ["steel", "ruler"],
     "cost": 7,
     "strength": 5,
     "health": 7,
     "rarity": "legendary",
-    "abilities": [
-      "slow"
-    ],
+    "abilities": ["slow"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["ruler"],
+    "title": "Ведёт даже мёртвый",
+    "shortDescription": "Усиливает фронт при входе и каждый ход.",
+    "lore": "Никто не знает его имени. Все знают только, что когда он говорит — строй идёт. Даже когда его нет.",
     "triggers": [
       {
-        "id": "hold_the_line",
-        "trigger": "ON_ENTER",
-        "effects": [
+        "id"         : "hold_the_line",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Держать строй",
+        "description": "Все союзники во Фронте получают +2/+2.",
+        "effects"    : [
           {
-            "kind": "BUFF",
+            "kind"    : "BUFF",
             "strength": 2,
-            "health": 2,
-            "target": "ALL_FRIENDLY_FRONT"
+            "health"  : 2,
+            "target"  : "ALL_FRIENDLY_FRONT"
           }
         ]
       },
       {
         "id": "command_presence",
         "trigger": "ON_TURN_START",
+        "name": "Присутствие",
+        "description": "В начале хода все союзники во Фронте получают +1 силы.",
         "effects": [
           {
-            "kind": "BUFF",
+            "kind"    : "BUFF",
             "strength": 1,
-            "health": 0,
-            "target": "ALL_FRIENDLY_FRONT"
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
           }
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_bulwark",
     "name": "Майор Тайтус Кросс",
     "personalityTag": "st_bulwark",
-    "tags": [
-      "steel",
-      "legend"
-    ],
+    "tags": ["steel", "ruler"],
     "cost": 6,
     "strength": 4,
     "health": 6,
     "rarity": "legendary",
-    "abilities": [
-      "taunt"
-    ],
+    "abilities": ["taunt"],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["ruler"],
+    "title": "Опора на поле",
+    "shortDescription": "Лечит фронт и берёт карту при уроне.",
+    "lore": "Он подписывает контракт на каждую операцию. И приписывает внизу: «за себя не отвечаю». Все знают — это не так.",
     "triggers": [
       {
-        "id": "field_triage",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "HEAL",
-            "amount": 4,
-            "target": "ALL_FRIENDLY_FRONT"
-          }
+        "id"         : "field_triage",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Полевой триаж",
+        "description": "Восстанавливает 4 здоровья всем союзникам во Фронте.",
+        "effects"    : [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"}
         ]
       },
       {
-        "id": "battle_hardened",
-        "trigger": "ON_THIS_DAMAGED",
+        "id"         : "battle_hardened",
+        "trigger"    : "ON_THIS_DAMAGED",
         "oncePerTurn": true,
-        "effects": [
-          {
-            "kind": "DRAW",
-            "count": 1,
-            "who": "SELF"
-          }
-        ]
+        "name"       : "Закалка",
+        "description": "Раз в ход, когда получает урон — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "st_polaris",
     "name": "Полярис",
     "personalityTag": "st_polaris",
-    "tags": [
-      "steel",
-      "legend"
-    ],
+    "tags": ["steel", "ruler"],
     "cost": 5,
     "strength": 3,
     "health": 5,
     "rarity": "legendary",
     "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["ruler"],
+    "title": "Позывной вместо имени",
+    "shortDescription": "Снимает одну цель и накрывает фронт.",
+    "lore": "Он не показывает лица. Говорит, что после четвёртой операции оно уже не имеет значения.",
     "triggers": [
       {
-        "id": "precision_strike",
-        "trigger": "ON_ENTER",
-        "effects": [
+        "id"         : "precision_strike",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Точный удар",
+        "description": "Наносит 4 урона выбранной карте противника на столе.",
+        "effects"    : [
           {
-            "kind": "CHOOSE_TARGETS_THEN",
-            "selection": {
-              "from": "ENEMY_BOARD",
-              "count": 1
-            },
-            "then": [
-              {
-                "kind": "DEAL_DAMAGE",
-                "amount": 4,
-                "target": "CHOSEN"
-              }
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
             ]
           }
         ]
@@ -535,32 +580,34 @@
     ],
     "activatedAbilities": [
       {
-        "id": "suppressive_fire",
-        "cost": 2,
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "ALL_ENEMY_FRONT"
-          }
+        "id"         : "suppressive_fire",
+        "cost"       : 2,
+        "name"       : "Подавляющий огонь",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
-    "id": "tk_bunker",
-    "name": "Блокпост",
-    "personalityTag": "tk_bunker",
-    "tags": [
-      "token"
-    ],
-    "cost": 0,
-    "strength": 0,
-    "health": 3,
-    "rarity": "common",
-    "abilities": [
-      "taunt"
-    ],
-    "isToken": true
+    "id"              : "tk_bunker",
+    "name"            : "Блокпост",
+    "personalityTag"  : "tk_bunker",
+    "tags"            : ["token"],
+    "cost"            : 0,
+    "strength"        : 0,
+    "health"          : 3,
+    "rarity"          : "common",
+    "abilities"       : ["taunt"],
+    "series"          : ["steel"],
+    "factions"        : [],
+    "roles"           : [],
+    "title"           : "Полуготовый",
+    "shortDescription": "Стоит и держит.",
+    "lore"            : "Собирается за пять минут, разбирается за одну. Работает как надо — и довольно.",
+    "isToken"         : true,
+    "abilityInfo"     : {}
   }
 ]

@@ -2,7 +2,7 @@ import type { GameState, CardInstanceId } from '@aspects/engine';
 import { personalityOnBoard, columnBonuses } from '@aspects/engine';
 import { HoverTooltip } from './HoverTooltip';
 import { CardTooltip } from './CardTooltip';
-import { KEYWORD_ICON, KEYWORD_TEXT } from '../game/abilityText';
+import { KEYWORD_ICON, resolveKeywordText } from '../game/abilityText';
 
 interface Props {
   state: GameState;
@@ -75,7 +75,7 @@ export function Hand({ state, playerId, onPlay, onReplace, selectedCardId, disab
             {def.abilities.length > 0 && (
 			  <div className="hand-card-keywords">
 			    {def.abilities.map((k) => (
-			      <span key={k} className="kw-icon" title={KEYWORD_TEXT[k] ?? k}>
+			      <span key={k} className="kw-icon" title={resolveKeywordText(def, k)}>
 			        {KEYWORD_ICON[k] ?? '•'}
 			      </span>
 			    ))}

@@ -141,6 +141,7 @@
 
 .tooltip-personality {
   display: flex;
+  align-items: baseline;
   gap: 6px;
   font-size: 10px;
   color: var(--clr-text-dim);
@@ -149,8 +150,8 @@
   border-top: 1px solid var(--clr-surface-active);
 }
 
-.tooltip-personality-label { text-transform: uppercase; letter-spacing: 0.5px; }
-.tooltip-personality-value { color: var(--clr-epic-light); font-family: ui-monospace, monospace; }
+.tooltip-personality-label { text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
+.tooltip-personality-value { color: var(--clr-epic-light); font-weight: 600; line-height: 1.4; }
 
 .tooltip-condition {
   font-size: 10px;
@@ -159,4 +160,34 @@
   margin: 2px 0 4px 6px;
   padding-left: 6px;
   border-left: 2px solid var(--clr-warning-border);
+}
+
+.tooltip-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--clr-surface-active);
+}
+
+.tooltip-tag-faction {
+  --tag-color: var(--clr-text-muted);
+  color: var(--tag-color);
+  background: color-mix(in srgb, var(--tag-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tag-color) 30%, transparent);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.tooltip-tag-role {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--clr-surface-active);
+  color: var(--clr-text-muted);
+  font-weight: 500;
 }

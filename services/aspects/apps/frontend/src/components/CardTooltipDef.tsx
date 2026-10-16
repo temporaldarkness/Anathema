@@ -1,6 +1,7 @@
 import type { CardDefinition } from '@aspects/cards';
+import { getPersonalityName, getFactionInfo, getRoleInfo } from '@aspects/cards';
 import {
-  KEYWORD_TEXT,
+  resolveKeywordText,
   RARITY_TEXT,
   RARITY_COLOR,
   triggerText,
@@ -34,12 +35,45 @@ export function CardTooltipDef({ def }: Props) {
         <span className="tooltip-stat-hp">❤ {def.health}</span>
       </div>
 
+      {def.name !== getPersonalityName(def.personalityTag) && (
+        <div className="tooltip-personality">
+          <span className="tooltip-personality-label">Личность:</span>
+          <span className="tooltip-personality-value">
+            {getPersonalityName(def.personalityTag)}
+          </span>
+        </div>
+      )}
+	  {(def.factions?.length || def.roles?.length) && (
+        <div className="tooltip-tags">
+          {def.factions?.map((f) => {
+            const info = getFactionInfo(f);
+            return (
+              <span
+                key={`f-${f}`}
+                className="tooltip-tag-faction"
+                style={{ ['--tag-color' as string]: info.color }}
+              >
+                {info.name}
+              </span>
+            );
+          })}
+          {def.roles?.map((r) => {
+            const info = getRoleInfo(r);
+            return (
+              <span key={`r-${r}`} className="tooltip-tag-role">
+                {info.icon} {info.name}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
       {hasKeywords && (
         <div className="tooltip-section">
           <div className="tooltip-section-title">Ключевые слова</div>
           {abilities.map((k) => (
             <div key={k} className="tooltip-keyword">
-              {KEYWORD_TEXT[k] ?? k}
+              {resolveKeywordText(def, k)}
             </div>
           ))}
         </div>
@@ -48,42 +82,56 @@ export function CardTooltipDef({ def }: Props) {
       {hasTriggers && (
         <div className="tooltip-section">
           <div className="tooltip-section-title">Способности</div>
-          {(def.triggers ?? []).map((t: any, i: number) => (
-            <div key={i} className="tooltip-trigger">
-              <div className="tooltip-trigger-label">
-                {triggerText(t.trigger)}
-                {t.oncePerTurn && <span className="tooltip-tag">1/ход</span>}
-              </div>
-              {t.condition && (
-                <div className="tooltip-condition">
-                  если {conditionText(t.condition)}
+          {(def.triggers ?? []).map((t: any, i: number) => {
+            const name = t.name ?? triggerText(t.trigger);
+            return (
+              <div key={i} className="tooltip-trigger">
+                <div className="tooltip-trigger-label">
+                  {name}
+                  {t.oncePerTurn && <span className="tooltip-tag">1/ход</span>}
                 </div>
-              )}
-              <div className="tooltip-effects">
-                {(t.effects ?? []).map((e: any, j: number) => (
-                  <div key={j}>{effectText(e)}</div>
-                ))}
+                {t.condition && (
+                  <div className="tooltip-condition">
+                    если {conditionText(t.condition)}
+                  </div>
+                )}
+                {t.description ? (
+                  <div className="tooltip-effects">{t.description}</div>
+                ) : (
+                  <div className="tooltip-effects">
+                    {(t.effects ?? []).map((e: any, j: number) => (
+                      <div key={j}>{effectText(e)}</div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {hasActivated && (
         <div className="tooltip-section">
           <div className="tooltip-section-title">Активируемые</div>
-          {(def.activatedAbilities ?? []).map((a: any) => (
-            <div key={a.id} className="tooltip-trigger">
-              <div className="tooltip-trigger-label">
-                ⚡ {a.id} <span className="tooltip-tag">{a.cost}💰</span>
+          {(def.activatedAbilities ?? []).map((a: any) => {
+            const name = a.name ?? a.id;
+            return (
+              <div key={a.id} className="tooltip-trigger">
+                <div className="tooltip-trigger-label">
+                  ⚡ {name} <span className="tooltip-tag">{a.cost}💰</span>
+                </div>
+                {a.description ? (
+                  <div className="tooltip-effects">{a.description}</div>
+                ) : (
+                  <div className="tooltip-effects">
+                    {(a.effects ?? []).map((e: any, j: number) => (
+                      <div key={j}>{effectText(e)}</div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="tooltip-effects">
-                {(a.effects ?? []).map((e: any, j: number) => (
-                  <div key={j}>{effectText(e)}</div>
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

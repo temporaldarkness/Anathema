@@ -1,0 +1,8 @@
+{
+  "bot":      { "name": "Бот",       "icon": "🤖" },
+  "creator":  { "name": "Творец",    "icon": "🎨" },
+  "fighter":  { "name": "Боец",      "icon": "⚔" },
+  "ruler":    { "name": "Правитель", "icon": "👑" },
+  "scholar":  { "name": "Учёный",    "icon": "📚" },
+  "wanderer": { "name": "Странник",  "icon": "🧭" }
+}

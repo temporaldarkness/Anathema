@@ -3,591 +3,613 @@
     "id": "rl_firestarter",
     "name": "Поджигатель",
     "personalityTag": "rl_firestarter",
-    "tags": [
-      "razlom",
-      "cell"
-    ],
+    "tags": ["razlom", "fighter"],
     "cost": 1,
     "strength": 1,
     "health": 1,
     "rarity": "common",
-    "abilities": [
-      "charge"
-    ]
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Одна спичка",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Он умеет делать только одно — но делает это по ночам, и каждую неделю.",
+    "abilityInfo": {}
   },
   {
     "id": "rl_martyr",
     "name": "Смертник",
     "personalityTag": "rl_martyr",
-    "tags": [
-      "razlom",
-      "fanatic"
-    ],
+    "tags": ["razlom", "fighter"],
     "cost": 1,
     "strength": 1,
     "health": 1,
     "rarity": "common",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Уже решил",
+    "shortDescription": "Лечит Величие, уходя.",
+    "lore": "Он не хочет умирать. Просто знает, что уже не вернётся.",
     "triggers": [
       {
-        "id": "final_sacrifice",
-        "trigger": "ON_EXIT",
-        "effects": [
-          {
-            "kind": "HEAL_GLORY",
-            "amount": 2,
-            "who": "SELF"
-          }
-        ]
+        "id"         : "final_sacrifice",
+        "trigger"    : "ON_EXIT",
+        "name"       : "Последняя жертва",
+        "description": "Восстанавливает 2 Величия гильдии при уходе.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "rl_desperate",
     "name": "Отчаявшийся",
     "personalityTag": "rl_desperate",
-    "tags": [
-      "razlom",
-      "assault"
-    ],
+    "tags": ["razlom", "fighter"],
     "cost": 1,
     "strength": 1,
     "health": 1,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Уже нечего терять",
+    "shortDescription": "Даёт Влияние, если ты пуст.",
+    "lore": "Он пришёл сюда, потому что дома ничего не осталось. Здесь хотя бы что-то есть.",
     "triggers": [
       {
-        "id": "second_wind",
-        "trigger": "ON_ENTER",
-        "condition": {
-          "kind": "INFLUENCE",
-          "who": "SELF",
-          "op": "EQUAL",
+        "id"         : "second_wind",
+        "trigger"    : "ON_ENTER",
+        "condition"  : {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "EQUAL",
           "value": 0
         },
-        "effects": [
-          {
-            "kind": "GAIN_INFLUENCE",
-            "amount": 2,
-            "who": "SELF"
-          }
+        "name"       : "Второе дыхание",
+        "description": "Если у тебя 0 Влияния — получаешь +2 Влияния.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "rl_opportunist",
     "name": "Стяжатель",
     "personalityTag": "rl_opportunist",
-    "tags": [
-      "razlom",
-      "intel"
-    ],
+    "tags": ["razlom", "wanderer"],
     "cost": 1,
     "strength": 1,
     "health": 1,
     "rarity": "common",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["wanderer"],
+    "title": "Работает по слабым",
+    "shortDescription": "Тянет карту, если враг пуст.",
+    "lore": "Он приходит к тем, кому уже нечего защищать. И забирает.",
     "triggers": [
       {
-        "id": "loot",
-        "trigger": "ON_ENTER",
-        "condition": {
-          "kind": "FRONT_COUNT",
-          "who": "OPPONENT",
-          "op": "AT_MOST",
+        "id"         : "loot",
+        "trigger"    : "ON_ENTER",
+        "condition"  : {
+          "kind" : "FRONT_COUNT",
+          "who"  : "OPPONENT",
+          "op"   : "AT_MOST",
           "value": 1
         },
-        "effects": [
-          {
-            "kind": "DRAW",
-            "count": 1,
-            "who": "SELF"
-          }
-        ]
+        "name"       : "Добыча",
+        "description": "Если у противника ≤1 карты во Фронте — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
-    "id": "rl_militant",
-    "name": "Боевик",
-    "personalityTag": "rl_militant",
-    "tags": [
-      "razlom",
-      "fanatic"
-    ],
-    "cost": 2,
-    "strength": 2,
-    "health": 2,
-    "rarity": "common",
-    "abilities": []
+    "id"              : "rl_militant",
+    "name"            : "Боевик",
+    "personalityTag"  : "rl_militant",
+    "tags"            : ["razlom", "fighter"],
+    "cost"            : 2,
+    "strength"        : 2,
+    "health"          : 2,
+    "rarity"          : "common",
+    "abilities"       : [],
+    "series"          : ["razlom"],
+    "factions"        : ["razlom"],
+    "roles"           : ["fighter"],
+    "title"           : "Обычный исполнитель",
+    "shortDescription": "Простой исполнитель.",
+    "lore"            : "Он не читает листовок. Он их расклеивает.",
+    "abilityInfo"     : {}
   },
   {
     "id": "rl_sniper",
     "name": "Городской стрелок",
     "personalityTag": "rl_sniper",
-    "tags": [
-      "razlom",
-      "sniper"
-    ],
+    "tags": ["razlom", "fighter"],
     "cost": 2,
     "strength": 1,
     "health": 1,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "С крыши",
+    "shortDescription": "Бьёт на 2 по выбранной цели.",
+    "lore": "Он стреляет из окон домов, которых уже нет. Стены помнят лучше, чем люди.",
     "triggers": [
       {
-        "id": "headshot",
-        "trigger": "ON_ENTER",
-        "effects": [
+        "id"         : "headshot",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Выстрел в голову",
+        "description": "Наносит 2 урона выбранной карте противника во Фронте.",
+        "effects"    : [
           {
-            "kind": "CHOOSE_TARGETS_THEN",
-            "selection": {
-              "from": "ENEMY_FRONT",
-              "count": 1
-            },
-            "then": [
-              {
-                "kind": "DEAL_DAMAGE",
-                "amount": 2,
-                "target": "CHOSEN"
-              }
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
             ]
           }
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
-    "id": "rl_ied",
-    "name": "СВУ",
-    "personalityTag": "rl_ied",
-    "tags": [
-      "razlom",
-      "cell"
-    ],
-    "cost": 2,
-    "strength": 2,
-    "health": 2,
-    "rarity": "uncommon",
-    "abilities": [],
-    "triggers": [
+    "id"              : "rl_ied",
+    "name"            : "СВУ",
+    "personalityTag"  : "rl_ied",
+    "tags"            : ["razlom", "fighter"],
+    "cost"            : 2,
+    "strength"        : 2,
+    "health"          : 2,
+    "rarity"          : "uncommon",
+    "abilities"       : [],
+    "series"          : ["razlom"],
+    "factions"        : ["razlom"],
+    "roles"           : ["fighter"],
+    "title"           : "Самодельное",
+    "shortDescription": "Взрывается при входе.",
+    "lore"            : "Она собрана из того, что нашлось. Этого хватило.",
+    "triggers"        : [
       {
-        "id": "detonate",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "RANDOM_ENEMY_FRONT"
-          }
+        "id"         : "detonate",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Срабатывание",
+        "description": "Наносит 1 урона случайной карте противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo"     : {}
   },
   {
-    "id": "rl_living_bomb",
-    "name": "Живая бомба",
-    "personalityTag": "rl_living_bomb",
-    "tags": [
-      "razlom",
-      "fanatic"
-    ],
-    "cost": 2,
-    "strength": 0,
-    "health": 1,
-    "rarity": "common",
-    "abilities": [
-      "charge"
-    ],
-    "triggers": [
+    "id"              : "rl_living_bomb",
+    "name"            : "Живая бомба",
+    "personalityTag"  : "rl_living_bomb",
+    "tags"            : ["razlom", "fighter"],
+    "cost"            : 2,
+    "strength"        : 0,
+    "health"          : 1,
+    "rarity"          : "common",
+    "abilities"       : ["charge"],
+    "series"          : ["razlom"],
+    "factions"        : ["razlom"],
+    "roles"           : ["fighter"],
+    "title"           : "Идёт вперёд",
+    "shortDescription": "Взрывается при уходе.",
+    "lore"            : "Она знает, куда идёт. Улыбается всю дорогу.",
+    "triggers"        : [
       {
-        "id": "self_destruct",
-        "trigger": "ON_EXIT",
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "ALL_ENEMY_FRONT"
-          }
+        "id"         : "self_destruct",
+        "trigger"    : "ON_EXIT",
+        "name"       : "Подрыв",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo"     : {}
   },
   {
-    "id": "rl_ghostwire",
-    "name": "Радист",
-    "personalityTag": "rl_ghostwire",
-    "tags": [
-      "razlom",
-      "intel"
-    ],
-    "cost": 2,
-    "strength": 2,
-    "health": 2,
-    "rarity": "rare",
-    "abilities": [],
-    "triggers": [
+    "id"              : "rl_ghostwire",
+    "name"            : "Радист",
+    "personalityTag"  : "rl_ghostwire",
+    "tags"            : ["razlom", "wanderer"],
+    "cost"            : 2,
+    "strength"        : 2,
+    "health"          : 2,
+    "rarity"          : "rare",
+    "abilities"       : [],
+    "series"          : ["razlom"],
+    "factions"        : ["razlom"],
+    "roles"           : ["wanderer"],
+    "title"           : "Слышит частоты",
+    "shortDescription": "Тянет карту при уроне.",
+    "lore"            : "Он знает все позывные в городе — и ни одного своего.",
+    "triggers"        : [
       {
-        "id": "data_leak",
-        "trigger": "ON_THIS_DAMAGED",
+        "id"         : "data_leak",
+        "trigger"    : "ON_THIS_DAMAGED",
         "oncePerTurn": true,
-        "effects": [
-          {
-            "kind": "DRAW",
-            "count": 1,
-            "who": "SELF"
-          }
-        ]
+        "name"       : "Утечка",
+        "description": "Раз в ход, когда получает урон — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
       }
-    ]
+    ],
+    "abilityInfo"     : {}
   },
   {
     "id": "rl_berserker",
     "name": "Берсерк",
     "personalityTag": "rl_berserker",
-    "tags": [
-      "razlom",
-      "assault"
-    ],
+    "tags": ["razlom", "fighter"],
     "cost": 4,
     "strength": 4,
     "health": 3,
     "rarity": "uncommon",
-    "abilities": [
-      "charge"
-    ]
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Просто бьёт",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Он не помнит, за что воюет. Помнит только, что останавливаться нельзя.",
+    "abilityInfo": {}
   },
   {
     "id": "rl_raider",
     "name": "Налётчик",
     "personalityTag": "rl_raider",
-    "tags": [
-      "razlom",
-      "assault"
-    ],
+    "tags": ["razlom", "fighter"],
     "cost": 4,
     "strength": 4,
     "health": 3,
     "rarity": "rare",
-    "abilities": [
-      "charge"
-    ]
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Первый в проломе",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Он всегда заходит в дом первым. Выходит — тоже часто первым. Только это уже другой вопрос.",
+    "abilityInfo": {}
   },
   {
-    "id": "rl_fanatic",
-    "name": "Фанатик",
-    "personalityTag": "rl_fanatic",
-    "tags": [
-      "razlom",
-      "fanatic"
-    ],
-    "cost": 3,
-    "strength": 2,
-    "health": 1,
-    "rarity": "uncommon",
-    "abilities": [
-      "charge"
-    ]
+    "id"              : "rl_fanatic",
+    "name"            : "Фанатик",
+    "personalityTag"  : "rl_fanatic",
+    "tags"            : ["razlom", "fighter"],
+    "cost"            : 3,
+    "strength"        : 2,
+    "health"          : 1,
+    "rarity"          : "uncommon",
+    "abilities"       : ["charge"],
+    "series"          : ["razlom"],
+    "factions"        : ["razlom"],
+    "roles"           : ["fighter"],
+    "title"           : "Уже не боится",
+    "shortDescription": "Бьёт с ходу.",
+    "lore"            : "Он верит до конца. Поэтому конец наступает быстро.",
+    "abilityInfo"     : {}
   },
   {
     "id": "rl_incendiary",
     "name": "Огнемётчик",
     "personalityTag": "rl_incendiary",
-    "tags": [
-      "razlom",
-      "saboteur"
-    ],
+    "tags": ["razlom", "wanderer"],
     "cost": 3,
     "strength": 2,
     "health": 4,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["wanderer"],
+    "title": "Выжигает квартал",
+    "shortDescription": "Поджигает фронт за Влияние.",
+    "lore": "Он не разбирает, чей это дом. Домов всё равно больше нет.",
     "activatedAbilities": [
       {
-        "id": "flame_wave",
-        "cost": 1,
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "ALL_ENEMY_FRONT"
-          }
+        "id"         : "flame_wave",
+        "cost"       : 1,
+        "name"       : "Волна огня",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "rl_cell_leader",
     "name": "Главарь ячейки",
     "personalityTag": "rl_cell_leader",
-    "tags": [
-      "razlom",
-      "ideologue"
-    ],
+    "tags": ["razlom", "scholar"],
     "cost": 3,
     "strength": 2,
     "health": 3,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["scholar"],
+    "title": "Знает только своих",
+    "shortDescription": "Ведёт за собой и крепнет от потерь.",
+    "lore": "Он никогда не называет своего имени. Ячейка знает его только как «Главу».",
     "triggers": [
       {
-        "id": "recruit_militant",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "SUMMON",
-            "defId": "tk_looter",
-            "count": 1,
-            "who": "SELF"
-          }
+        "id"         : "recruit_militant",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Набор",
+        "description": "Призывает Мародёра.",
+        "effects"    : [
+          {"kind": "SUMMON", "defId": "tk_looter", "count": 1, "who": "SELF"}
         ]
       },
       {
-        "id": "ruthless",
-        "trigger": "ON_ALLY_DIED",
+        "id"         : "ruthless",
+        "trigger"    : "ON_ALLY_DIED",
         "oncePerTurn": true,
-        "effects": [
-          {
-            "kind": "BUFF",
-            "strength": 1,
-            "health": 1,
-            "target": "SELF"
-          }
+        "name"       : "Безжалостность",
+        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "rl_agitator",
     "name": "Агитатор",
     "personalityTag": "rl_agitator",
-    "tags": [
-      "razlom",
-      "intel"
-    ],
+    "tags": ["razlom", "wanderer"],
     "cost": 2,
     "strength": 1,
     "health": 1,
     "rarity": "uncommon",
-    "abilities": [
-      "charge"
-    ],
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["wanderer"],
+    "title": "Говорит на площадях",
+    "shortDescription": "Бьёт, если держите нейтралы.",
+    "lore": "Он умеет говорить так, что даже те, кто не хотел, идут за ним.",
     "triggers": [
       {
         "id": "propaganda",
         "trigger": "ON_ENTER",
         "condition": {
-          "kind": "CELLS",
-          "who": "SELF",
-          "op": "AT_LEAST",
+          "kind" : "CELLS",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
           "value": 2
         },
+        "name": "Пропаганда",
+        "description": "Если контролируешь ≥2 нейтралов — наносит 2 урона всем картам противника во Фронте.",
         "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 2,
-            "target": "ALL_ENEMY_FRONT"
-          }
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "rl_bomber",
     "name": "Подрывник",
     "personalityTag": "rl_bomber",
-    "tags": [
-      "razlom",
-      "saboteur"
-    ],
+    "tags": ["razlom", "wanderer"],
     "cost": 4,
     "strength": 3,
     "health": 2,
     "rarity": "uncommon",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["wanderer"],
+    "title": "Взрывает мосты",
+    "shortDescription": "Накрывает фронт при входе.",
+    "lore": "Он оставляет за собой обрушенные переходы. Так надёжнее — никто не догонит.",
     "triggers": [
       {
-        "id": "shockwave",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "ALL_ENEMY_FRONT"
-          }
+        "id"         : "shockwave",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Ударная волна",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "rl_commissar",
     "name": "Комиссар",
     "personalityTag": "rl_commissar",
-    "tags": [
-      "razlom",
-      "ideologue"
-    ],
+    "tags": ["razlom", "scholar"],
     "cost": 5,
     "strength": 3,
     "health": 5,
     "rarity": "rare",
     "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["scholar"],
+    "title": "Стоит позади",
+    "shortDescription": "Каждый ход бьёт случайную цель.",
+    "lore": "Он не идёт в атаку. Он просто смотрит, как идут остальные.",
     "triggers": [
       {
         "id": "terror_aura",
         "trigger": "ON_TURN_START",
+        "name": "Аура страха",
+        "description": "В начале хода наносит 1 урона случайной карте противника во Фронте.",
         "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "RANDOM_ENEMY_FRONT"
-          }
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
-    "id": "rl_champion",
-    "name": "Полевой командир",
-    "personalityTag": "rl_champion",
-    "tags": [
-      "razlom",
-      "assault"
-    ],
-    "cost": 5,
-    "strength": 4,
-    "health": 4,
-    "rarity": "rare",
-    "abilities": [],
-    "triggers": [
+    "id"              : "rl_champion",
+    "name"            : "Полевой командир",
+    "personalityTag"  : "rl_champion",
+    "tags"            : ["razlom", "fighter"],
+    "cost"            : 5,
+    "strength"        : 4,
+    "health"          : 4,
+    "rarity"          : "rare",
+    "abilities"       : [],
+    "series"          : ["razlom"],
+    "factions"        : ["razlom"],
+    "roles"           : ["fighter"],
+    "title"           : "Идёт вместе со всеми",
+    "shortDescription": "Растёт от гибели своих.",
+    "lore"            : "Он не отдаёт приказов из укрытия. Он идёт первым.",
+    "triggers"        : [
       {
-        "id": "survival_instinct",
-        "trigger": "ON_ALLY_DIED",
+        "id"         : "survival_instinct",
+        "trigger"    : "ON_ALLY_DIED",
         "oncePerTurn": true,
-        "effects": [
-          {
-            "kind": "BUFF",
-            "strength": 1,
-            "health": 1,
-            "target": "SELF"
-          }
+        "name"       : "Инстинкт выживания",
+        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
         ]
       }
-    ]
+    ],
+    "abilityInfo"     : {}
   },
   {
     "id": "rl_killer",
     "name": "Ликвидатор",
     "personalityTag": "rl_killer",
-    "tags": [
-      "razlom",
-      "assault"
-    ],
+    "tags": ["razlom", "fighter"],
     "cost": 7,
     "strength": 4,
     "health": 4,
     "rarity": "rare",
-    "abilities": [
-      "charge"
-    ]
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Приходит тихо",
+    "shortDescription": "Врывается и убивает.",
+    "lore": "Он не говорит на суде. Ему нечего сказать — он всё уже сделал.",
+    "abilityInfo": {}
   },
   {
     "id": "rl_butcher",
     "name": "Бородач",
     "personalityTag": "rl_butcher",
-    "tags": [
-      "razlom",
-      "legend"
-    ],
+    "tags": ["razlom", "ruler"],
     "cost": 6,
     "strength": 4,
     "health": 7,
     "rarity": "legendary",
-    "abilities": [
-      "slow"
-    ],
+    "abilities": ["slow"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["ruler"],
+    "title": "Помнит город до Разлома",
+    "shortDescription": "Усиливает всех и бьёт каждым ходом.",
+    "lore": "Он был простым мясником, пока улицу не разорвало пополам. С тех пор режет уже не свиней — но так же спокойно.",
     "triggers": [
       {
-        "id": "butcher_call",
-        "trigger": "ON_ENTER",
-        "effects": [
+        "id"         : "butcher_call",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Призыв",
+        "description": "Все союзники во Фронте получают +1/+1.",
+        "effects"    : [
           {
-            "kind": "BUFF",
+            "kind"    : "BUFF",
             "strength": 1,
-            "health": 1,
-            "target": "ALL_FRIENDLY_FRONT"
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
           }
         ]
       },
       {
         "id": "bloodlust",
         "trigger": "ON_TURN_START",
+        "name": "Жажда крови",
+        "description": "В начале хода наносит 1 урона случайной карте противника во Фронте.",
         "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 1,
-            "target": "RANDOM_ENEMY_FRONT"
-          }
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
     "id": "rl_hollow_voice",
     "name": "Пустой Голос",
     "personalityTag": "rl_hollow_voice",
-    "tags": [
-      "razlom",
-      "legend"
-    ],
+    "tags": ["razlom", "ruler"],
     "cost": 6,
     "strength": 5,
     "health": 8,
     "rarity": "legendary",
-    "abilities": [
-      "slow"
-    ],
+    "abilities": ["slow"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["ruler"],
+    "title": "Уже не человек",
+    "shortDescription": "Тянет карты и рвёт всех на столе.",
+    "lore": "Никто не помнит его прежнего имени. Только то, что оно было — и что теперь его нет.",
     "triggers": [
       {
-        "id": "interrogation",
-        "trigger": "ON_ENTER",
-        "effects": [
-          {
-            "kind": "DRAW",
-            "count": 3,
-            "who": "SELF"
-          }
-        ]
+        "id"         : "interrogation",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Допрос",
+        "description": "Берёт 3 карты при входе.",
+        "effects"    : [ {"kind": "DRAW", "count": 3, "who": "SELF"} ]
       },
       {
-        "id": "terror_wave",
-        "trigger": "ON_TURN_START",
-        "effects": [
-          {
-            "kind": "DEAL_DAMAGE",
-            "amount": 2,
-            "target": "ALL_CARDS_ON_BOARD"
-          }
+        "id"         : "terror_wave",
+        "trigger"    : "ON_TURN_START",
+        "name"       : "Волна ужаса",
+        "description": "В начале хода наносит 2 урона всем картам на столе.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_CARDS_ON_BOARD"}
         ]
       }
-    ]
+    ],
+    "abilityInfo": {}
   },
   {
-    "id": "tk_looter",
-    "name": "Мародёр",
-    "personalityTag": "tk_looter",
-    "tags": [
-      "token",
-      "militant"
-    ],
-    "cost": 0,
-    "strength": 2,
-    "health": 2,
-    "rarity": "common",
-    "abilities": [
-      "slow"
-    ],
-    "isToken": true
+    "id"              : "tk_looter",
+    "name"            : "Мародёр",
+    "personalityTag"  : "tk_looter",
+    "tags"            : ["token", "militant"],
+    "cost"            : 0,
+    "strength"        : 2,
+    "health"          : 2,
+    "rarity"          : "common",
+    "abilities"       : ["slow"],
+    "series"          : ["razlom"],
+    "factions"        : [],
+    "roles"           : [],
+    "title"           : "Идёт за своими",
+    "shortDescription": "Подбирает после боя.",
+    "lore"            : "Приходит туда, где уже всё случилось, — и берёт, что осталось.",
+    "isToken"         : true,
+    "abilityInfo"     : {}
   }
 ]

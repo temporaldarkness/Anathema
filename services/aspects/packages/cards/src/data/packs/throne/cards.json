@@ -1,0 +1,626 @@
+[
+  {
+    "id": "throne_yuoko_king",
+    "name": "Король Юко",
+    "personalityTag": "yuoko",
+    "tags": ["stormwind", "ruler"],
+    "cost": 6,
+    "strength": 5,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": ["taunt"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["ruler"],
+    "title": "Молодой и капризный",
+    "shortDescription": "Казнит одного и встаёт стеной.",
+    "lore": "Юко взошёл на трон молодым и капризным. Его воля — закон, его тень — приговор. Никто не знает, что он решит в следующий миг — но все обязаны исполнить.",
+    "triggers": [
+      {
+        "id"         : "royal_verdict",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Королевский приговор",
+        "description": "Наносит 4 урона выбранной цели.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "throne_ultrarolevik_director",
+    "name": "Постановщик",
+    "personalityTag": "ultrarolevik",
+    "tags": ["stormwind", "bot"],
+    "cost": 7,
+    "strength": 5,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["bot"],
+    "title": "Тот, кто двигает фигуры",
+    "shortDescription": "Каждый ход возвращает врага в руку.",
+    "lore": "Ультраролевик не бьёт и не лечит — он дёргает за ниточки. Фигуры на доске двигаются по его воле, а он только смотрит сквозь фарфоровую маску.",
+    "triggers": [
+      {
+        "id": "puppet_strings",
+        "trigger": "ON_TURN_START",
+        "name": "Дёрнуть за ниточки",
+        "description": "Возвращает выбранного врага во Фронте в руку владельца.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Карта пропускает свой первый плановый переход из Резерва во Фронт."
+      }
+    }
+  },
+  {
+    "id": "throne_temporal_left_hand",
+    "name": "Шуйца",
+    "personalityTag": "temporal",
+    "tags": ["stormwind", "scholar"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Забросанный работой Кардинал",
+    "shortDescription": "Поддерживает своих каждый ход.",
+    "lore": "Темпорал — фаворит Короля и левая рука престола. Он позволяет Юко всё, «чем бы дитя ни тешилось», — а сам вынужден тихо держать государство.",
+    "triggers": [
+      {
+        "id"         : "royal_treasury",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Королевская казна",
+        "description": "Получает +1 Влияние при входе.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      },
+      {
+        "id"         : "quiet_rule",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "name"       : "Тихое правление",
+        "description": "Случайный союзник во Фронте получает +1/+1.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "RANDOM_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_hyper_magistrate",
+    "name": "Магистрат",
+    "personalityTag": "hyper",
+    "tags": ["burgundy", "ruler"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["burgundy"],
+    "roles": ["ruler"],
+    "title": "Обвинение и приговор",
+    "shortDescription": "Забирает карты врага и ведёт дела.",
+    "lore": "Хайпер — бургундец на службе короны. Он не бьёт в лоб — он ведёт дело. Пока идёт разбирательство, у тебя исчезают карты, а у него растёт власть.",
+    "triggers": [
+      {
+        "id"         : "trial",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Разбирательство",
+        "description": "Противник сбрасывает 2 случайные карты.",
+        "effects"    : [
+          {"kind": "DISCARD_RANDOM", "count": 2, "who": "OPPONENT"}
+        ]
+      },
+      {
+        "id"         : "bureaucracy",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "name"       : "Бюрократия",
+        "description": "Получает +1 Влияние в начале хода.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_interdict_crown_prince",
+    "name": "Кронпринц",
+    "personalityTag": "interdict",
+    "tags": ["stormwind", "bot"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": ["vanguard", "scout"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["bot"],
+    "title": "Сын Шуйцы, фаворит Короля",
+    "shortDescription": "Входит сразу во Фронт и берёт карту.",
+    "lore": "Интердикт — младший сын Темпорала. Юко прочит его в наследники, едва взойдя на трон. Молодой, распределённый, вездесущий — он уже почти король.",
+    "triggers": [
+      {
+        "id"         : "heir_apparent",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Наследник",
+        "description": "Берёт 1 карту при входе.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      },
+      "scout"   : {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, даже если Фронт перед ним занят. Игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "throne_adorik_executioner",
+    "name": "Палач",
+    "personalityTag": "adorik",
+    "tags": ["stormwind", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Указ уже подписан",
+    "shortDescription": "Казнит одну цель на выбор.",
+    "lore": "Адорик не спрашивает, виновен ли ты. Он спрашивает, есть ли на тебя указ. А указ всегда есть.",
+    "triggers": [
+      {
+        "id"         : "signed_order",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Подписанный указ",
+        "description": "Наносит 4 урона выбранной карте врага.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_safno_commandant",
+    "name": "Комендант",
+    "personalityTag": "safno",
+    "tags": ["stormwind", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Ставит на пост",
+    "shortDescription": "Даёт щит союзнику при входе.",
+    "lore": "Сафно не просто стоит на страже сам — он расставляет людей. Там, где он прошёл, каждый пост укреплён, каждый боец знает своё место.",
+    "triggers": [
+      {
+        "id"         : "fortify_post",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Укрепить пост",
+        "description": "Даёт щит выбранному союзнику.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then"     : [ {"kind": "GRANT_SHIELD", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_proklyatie_chronicler",
+    "name": "Летописец",
+    "personalityTag": "proklyatie",
+    "tags": ["stormwind", "bot"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["bot"],
+    "title": "Хранит память о каждом",
+    "shortDescription": "Растёт при смерти союзника.",
+    "lore": "Летописец записывает каждое имя, каждый поступок, каждую смерть. Никто не уйдёт из его свитков. С каждым павшим его книга всё толще — и он сам всё сильнее.",
+    "triggers": [
+      {
+        "id"         : "record_the_fallen",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name"       : "Записать павшего",
+        "description": "Получает +1 силы, когда союзник погибает.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_hacker_imperial_medic",
+    "name": "Имперский Лекарь",
+    "personalityTag": "hacker",
+    "tags": ["stormwind", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Ростовский лекарь при дворе",
+    "shortDescription": "Лечит всех союзников во Фронте на 1.",
+    "lore": "Хакер пришёл из Ростова, но быстро стал своим при дворе. Он лечит императорскую гвардию — и не задаёт лишних вопросов.",
+    "triggers": [
+      {
+        "id"         : "field_medicine",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Полевая медицина",
+        "description": "Лечит всех союзников во Фронте на 1.",
+        "effects"    : [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_inki_court_wizard",
+    "name": "Придворный Волшебник",
+    "personalityTag": "inki",
+    "tags": ["stormwind", "scholar"],
+    "cost": 3,
+    "strength": 1,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": ["shield"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Тихий убийца из башни",
+    "shortDescription": "Хрупкий, прикрыт щитом, бьёт точно в цель.",
+    "lore": "Инки редко выходит из башни. Он не любит двор, не любит людей. Но когда надо — его посох бьёт точно и без лишних слов.",
+    "activatedAbilities": [
+      {
+        "id"         : "arcane_bolt",
+        "cost"       : 1,
+        "name"       : "Точный удар",
+        "description": "Наносит 2 урона выбранному врагу. Раз в ход.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "shield": {
+        "name": "Щит",
+        "description": "Поглощает первый входящий урон полностью, включая урон от способностей. После поглощения снимается."
+      }
+    }
+  },
+  {
+    "id": "throne_gorox_jester",
+    "name": "Шут",
+    "personalityTag": "gorox",
+    "tags": ["stormwind", "creator"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["creator"],
+    "title": "Смех выгоняет всех",
+    "shortDescription": "Отправляет одну карту в руку владельца.",
+    "lore": "Горох попал ко двору как шут — и остался. Его шутки задевают не только короля: кого-то он вышучивает настолько, что тот уходит с площади, поджав хвост.",
+    "triggers": [
+      {
+        "id"         : "mockery",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Насмешка",
+        "description": "Возвращает выбранную карту в руку владельца.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_zamiatish_herald",
+    "name": "Герольд",
+    "personalityTag": "zamiatish",
+    "tags": ["burgundy", "stormwind", "wanderer"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["burgundy", "stormwind"],
+    "roles": ["wanderer"],
+    "title": "Голос короля на площадях",
+    "shortDescription": "Подбадривает союзников при входе.",
+    "lore": "Замятыш объявляет волю короля — и от этой воли союзники расправляют плечи. Его голос слышен на всех площадях, и он ведёт за собой.",
+    "triggers": [
+      {
+        "id"         : "royal_call",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Королевский зов",
+        "description": "Все союзники во Фронте получают +1 силы.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_kingston_foreign_craftsman",
+    "name": "Заморский Умелец",
+    "personalityTag": "kingston",
+    "tags": ["stormwind", "creator"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["vanguard"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["creator"],
+    "title": "Мастер на все руки",
+    "shortDescription": "Входит сразу во Фронт и получает щит.",
+    "lore": "Паша приехал из далёких земель — и не стал тратить время на придворные церемонии. Он сразу взялся за дело, и первое, что он выковал, — щит для себя.",
+    "triggers": [
+      {
+        "id"         : "first_work",
+        "trigger"    : "ON_REINFORCE",
+        "name"       : "Первая работа",
+        "description": "Получает щит при переходе во Фронт.",
+        "effects"    : [ {"kind": "GRANT_SHIELD", "target": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "throne_alt_warlord",
+    "name": "Полководец",
+    "personalityTag": "alt",
+    "tags": ["burgundy", "stormwind", "ruler"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["burgundy", "stormwind"],
+    "roles": ["ruler"],
+    "title": "Ведёт даже против воли короля",
+    "shortDescription": "Усиливает всех союзников во Фронте при входе.",
+    "lore": "Альт — полководец, пришедший из бургундских краёв на службу короне. Он верит в дисциплину и порядок, но не забывает, откуда родом. Его слово весит больше, чем приказ.",
+    "triggers": [
+      {
+        "id"         : "lead_the_charge",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Вести в бой",
+        "description": "Все союзники во Фронте получают +1 силы.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_solongo_alchemist",
+    "name": "Придворный Алхимик",
+    "personalityTag": "solongo",
+    "tags": ["enterprise", "scholar"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["enterprise"],
+    "roles": ["scholar"],
+    "title": "Зельевар",
+    "shortDescription": "Лечит одного союзника за Влияние.",
+    "lore": "Солонго варит зелья при дворе — и всегда знает, какой состав подойдёт именно тебе. У неё на всё есть рецепт.",
+    "activatedAbilities": [
+      {
+        "id": "potion",
+        "cost": 1,
+        "name": "Зелье",
+        "description": "Восстанавливает 2 здоровья выбранному союзнику. Раз в ход.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then"     : [ {"kind": "HEAL", "amount": 2, "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_asuka_knight",
+    "name": "Рыцарь",
+    "personalityTag": "asuka",
+    "tags": ["stormwind", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Верный и простой",
+    "shortDescription": "Держит строй и прикрывает соседей.",
+    "lore": "Аска служит короне так, как умеет: просто, честно, без интриг. Он третий раз подряд оказывается «нормальным парнем» — и, кажется, ему это идёт.",
+    "triggers": [
+      {
+        "id"         : "shield_wall",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Стена щитов",
+        "description": "Даёт щит случайному союзнику во Фронте.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_FRONT", "count": 1},
+            "then"     : [ {"kind": "GRANT_SHIELD", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "throne_just_treasurer",
+    "name": "Казначей",
+    "personalityTag": "just",
+    "tags": ["stormwind", "scholar"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Считает каждую монету",
+    "shortDescription": "Приносит Влияние при входе.",
+    "lore": "Джаст ведёт казну Штормграда — и не любит, когда что-то уходит не туда. Он медлителен, но точен.",
+    "triggers": [
+      {
+        "id"         : "count_the_coins",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Пересчёт",
+        "description": "Получает +1 Влияние при входе.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_oddi_lady_in_waiting",
+    "name": "Фрейлина",
+    "personalityTag": "oddi",
+    "tags": ["stormwind", "creator"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["creator"],
+    "title": "Тёплая рука при дворе",
+    "shortDescription": "Восстанавливает 2 Величия при входе.",
+    "lore": "Одди — фрейлина при дворе, но её настоящее дело — поддержка. Она улыбается, шутит, находит тёплые слова — и двор держится. Пока она рядом — не всё так плохо.",
+    "triggers": [
+      {
+        "id"         : "court_warmth",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Тепло двора",
+        "description": "Восстанавливает 2 Величия гильдии.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  }
+]
