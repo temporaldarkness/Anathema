@@ -210,54 +210,54 @@
 /* ─── Slot rarity ─── */
 
 .slot-rarity-common {
-  border-top-color: var(--clr-border-strong);
-  border-right-color: var(--clr-border-strong);
-  border-bottom-color: var(--clr-border-strong);
+  border-top-color: var(--clr-rarity-common);
+  border-right-color: var(--clr-rarity-common);
+  border-bottom-color: var(--clr-rarity-common);
 }
 
 .slot-rarity-uncommon {
-  border-top-color: var(--clr-success);
-  border-right-color: var(--clr-success);
-  border-bottom-color: var(--clr-success);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3) inset;
+  border-top-color: var(--clr-rarity-uncommon);
+  border-right-color: var(--clr-rarity-uncommon);
+  border-bottom-color: var(--clr-rarity-uncommon);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--clr-rarity-uncommon) 30%, transparent) inset;
 }
 
 .slot-rarity-rare {
-  border-top-color: var(--clr-accent);
-  border-right-color: var(--clr-accent);
-  border-bottom-color: var(--clr-accent);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4) inset,
-              0 0 4px rgba(59, 130, 246, 0.2);
+  border-top-color: var(--clr-rarity-rare);
+  border-right-color: var(--clr-rarity-rare);
+  border-bottom-color: var(--clr-rarity-rare);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--clr-rarity-rare) 40%, transparent) inset,
+              0 0 4px color-mix(in srgb, var(--clr-rarity-rare) 20%, transparent);
 }
 
 .slot-rarity-epic {
-  border-top-color: var(--clr-epic);
-  border-right-color: var(--clr-epic);
-  border-bottom-color: var(--clr-epic);
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.5) inset,
-              0 0 6px rgba(168, 85, 247, 0.25);
+  border-top-color: var(--clr-rarity-epic);
+  border-right-color: var(--clr-rarity-epic);
+  border-bottom-color: var(--clr-rarity-epic);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--clr-rarity-epic) 50%, transparent) inset,
+              0 0 6px color-mix(in srgb, var(--clr-rarity-epic) 25%, transparent);
 }
 
 .slot-rarity-legendary {
   border-top-color: var(--clr-rarity-legendary);
   border-right-color: var(--clr-rarity-legendary);
   border-bottom-color: var(--clr-rarity-legendary);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.4) inset,
-              0 0 8px rgba(245, 158, 11, 0.2),
-              0 0 16px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--clr-rarity-legendary) 40%, transparent) inset,
+              0 0 8px color-mix(in srgb, var(--clr-rarity-legendary) 20%, transparent),
+              0 0 16px color-mix(in srgb, var(--clr-rarity-legendary) 10%, transparent);
   animation: legendary-glow 2.5s ease-in-out infinite;
 }
 
 @keyframes legendary-glow {
   0%, 100% {
-    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.4) inset,
-                0 0 8px rgba(245, 158, 11, 0.2),
-                0 0 16px rgba(245, 158, 11, 0.1);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--clr-rarity-legendary) 40%, transparent) inset,
+                0 0 8px color-mix(in srgb, var(--clr-rarity-legendary) 20%, transparent),
+                0 0 16px color-mix(in srgb, var(--clr-rarity-legendary) 10%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.5) inset,
-                0 0 10px rgba(245, 158, 11, 0.4),
-                0 0 20px rgba(245, 158, 11, 0.2);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--clr-rarity-legendary) 50%, transparent) inset,
+                0 0 10px color-mix(in srgb, var(--clr-rarity-legendary) 40%, transparent),
+                0 0 20px color-mix(in srgb, var(--clr-rarity-legendary) 20%, transparent);
   }
 }
 

@@ -111,6 +111,36 @@
 .tooltip-trigger { margin-bottom: 8px; }
 .tooltip-trigger:last-child { margin-bottom: 0; }
 
+.tooltip-trigger-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--clr-text, #e6e6e6);
+  margin: 0 0 3px 0;
+  line-height: 1.3;
+}
+
+.tooltip-trigger-when-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.tooltip-trigger-icon {
+  font-size: 13px;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
+}
+
+.tooltip-trigger-when {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--clr-accent-light, #8ec5ff);
+  flex: 1;
+  min-width: 0;
+}
+
 .tooltip-trigger-label {
   font-size: 11px;
   color: var(--clr-accent-light);

@@ -2259,6 +2259,28 @@
   color: var(--clr-text);
 }
 
+.card-detail-ability-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.card-detail-ability-icon {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
+}
+
+.card-detail-ability-when {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--clr-accent-light, #8ec5ff);
+  flex: 1;
+  min-width: 0;
+}
+
 .card-detail-ability-desc {
   font-size: 12px;
   color: var(--clr-text-soft);
@@ -2329,7 +2351,7 @@
 
 .card-detail-stripe {
   height: 4px;
-  background: var(--rarity-color, var(--clr-accent));
+  background: var(--rarity-color, var(--clr-rarity-common));
 }
 
 .card-detail-title-block {

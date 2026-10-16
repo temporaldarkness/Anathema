@@ -5,6 +5,7 @@ import {
   RARITY_TEXT,
   RARITY_COLOR,
   triggerText,
+  TRIGGER_ICON,
   effectText,
   conditionText,
 } from '../game/abilityText';
@@ -83,13 +84,26 @@ export function CardTooltipDef({ def }: Props) {
         <div className="tooltip-section">
           <div className="tooltip-section-title">Способности</div>
           {(def.triggers ?? []).map((t: any, i: number) => {
-            const name = t.name ?? triggerText(t.trigger);
+            const when = triggerText(t.trigger);
+            const icon = TRIGGER_ICON[t.trigger] ?? '◆';
             return (
               <div key={i} className="tooltip-trigger">
-                <div className="tooltip-trigger-label">
-                  {name}
-                  {t.oncePerTurn && <span className="tooltip-tag">1/ход</span>}
-                </div>
+                {t.name ? (
+                  <>
+                    <div className="tooltip-trigger-name">{t.name}</div>
+                    <div className="tooltip-trigger-when-row">
+					  {/* <span className="tooltip-trigger-icon">{icon}</span> */}
+                      <span className="tooltip-trigger-when">{when}</span>
+                      {t.oncePerTurn && <span className="tooltip-tag">1/ход</span>}
+                    </div>
+                  </>
+                ) : (
+                  <div className="tooltip-trigger-when-row">
+                    <span className="tooltip-trigger-icon">{icon}</span>
+                    <span className="tooltip-trigger-when">{when}</span>
+                    {t.oncePerTurn && <span className="tooltip-tag">1/ход</span>}
+                  </div>
+                )}
                 {t.condition && (
                   <div className="tooltip-condition">
                     если {conditionText(t.condition)}

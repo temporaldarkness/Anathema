@@ -584,10 +584,10 @@
   z-index: 1;
 }
 
-.card-pool-card.card-rarity-common    { border-left: 4px solid var(--clr-border-strong); }
-.card-pool-card.card-rarity-uncommon  { border-left: 4px solid var(--clr-success); }
-.card-pool-card.card-rarity-rare      { border-left: 4px solid var(--clr-accent); }
-.card-pool-card.card-rarity-epic      { border-left: 4px solid var(--clr-epic); }
+.card-pool-card.card-rarity-common    { border-left: 4px solid var(--clr-rarity-common); }
+.card-pool-card.card-rarity-uncommon  { border-left: 4px solid var(--clr-rarity-uncommon); }
+.card-pool-card.card-rarity-rare      { border-left: 4px solid var(--clr-rarity-rare); }
+.card-pool-card.card-rarity-epic      { border-left: 4px solid var(--clr-rarity-epic); }
 .card-pool-card.card-rarity-legendary { border-left: 4px solid var(--clr-rarity-legendary); }
 
 /* ─── Deck content (editor) ─── */
@@ -722,10 +722,10 @@
   color: var(--clr-danger-light-2);
 }
 
-.deck-item.deck-item-rarity-common    { border-left: 4px solid var(--clr-border-strong); }
-.deck-item.deck-item-rarity-uncommon  { border-left: 4px solid var(--clr-success); }
-.deck-item.deck-item-rarity-rare      { border-left: 4px solid var(--clr-accent); }
-.deck-item.deck-item-rarity-epic      { border-left: 4px solid var(--clr-epic); }
+.deck-item.deck-item-rarity-common    { border-left: 4px solid var(--clr-rarity-common); }
+.deck-item.deck-item-rarity-uncommon  { border-left: 4px solid var(--clr-rarity-uncommon); }
+.deck-item.deck-item-rarity-rare      { border-left: 4px solid var(--clr-rarity-rare); }
+.deck-item.deck-item-rarity-epic      { border-left: 4px solid var(--clr-rarity-epic); }
 .deck-item.deck-item-rarity-legendary { border-left: 4px solid var(--clr-rarity-legendary); }
 
 /* ─── Matches screen ─── */

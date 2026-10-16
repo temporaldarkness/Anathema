@@ -10,6 +10,7 @@ import {
   RARITY_COLOR,
   RARITY_TEXT,
   triggerText,
+  TRIGGER_ICON,
   resolveKeyword,
   KEYWORD_ICON,
   resolveKeywordText,
@@ -530,24 +531,31 @@ function CardDetailModal({
             <div className="card-detail-section">
               <div className="card-detail-section-title">Способности</div>
               {triggers.map((t: any, i: number) => {
-                const name = t.name ?? triggerText(t.trigger);
+                const when = triggerText(t.trigger);
+                const icon = TRIGGER_ICON[t.trigger] ?? '◆';
+                const hasCustomName = !!t.name;
                 return (
                   <div key={i} className="card-detail-ability">
-                    <div className="card-detail-ability-name">
-                      {name}
+                    {hasCustomName && (
+                      <div className="card-detail-ability-name">{t.name}</div>
+                    )}
+                    <div className="card-detail-ability-header">
+                      {/* <span className="card-detail-ability-icon">{icon}</span> */}
+                      <span className="card-detail-ability-when">{when}</span>
                       {t.oncePerTurn && (
                         <span className="card-detail-tag">1/ход</span>
                       )}
                     </div>
                     {t.condition && (
-                      <div className="card-detail-ability-desc" style={{ fontStyle: 'italic' }}>
+                      <div
+                        className="card-detail-ability-desc"
+                        style={{ fontStyle: 'italic' }}
+                      >
                         Если {conditionText(t.condition)}
                       </div>
                     )}
                     {t.description ? (
-                      <div className="card-detail-ability-desc">
-                        {t.description}
-                      </div>
+                      <div className="card-detail-ability-desc">{t.description}</div>
                     ) : (
                       <div className="card-detail-ability-desc">
                         {(t.effects ?? []).map((e: any, j: number) => (

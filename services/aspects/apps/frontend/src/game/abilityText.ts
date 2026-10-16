@@ -82,17 +82,30 @@ export const RARITY_COLOR: Record<string, string> = {
 
 // ─── Триггеры ───
 
+export const TRIGGER_ICON: Record<string, string> = {
+  ON_ENTER: '🚪',
+  ON_EXIT: '💨',
+  ON_REINFORCE: '⬆️',
+  ON_REPLACE: '🔄',
+  ON_TURN_START: '🌅',
+  ON_TURN_END: '🌙',
+  ON_THIS_DAMAGED: '🩸',
+  ON_ALLY_ATTACKED: '🛡️',
+  ON_ENEMY_ATTACK: '⚔️',
+  ON_ALLY_DIED: '⚰️',
+};
+
 export function triggerText(trigger: string): string {
   const map: Record<string, string> = {
-    ON_ENTER: 'При входе',
-    ON_EXIT: 'При уходе',
-    ON_REINFORCE: 'При переходе во Фронт',
-    ON_REPLACE: 'При замене',
-    ON_TURN_START: 'В начале хода',
-    ON_TURN_END: 'В конце хода',
-    ON_THIS_DAMAGED: 'Когда получает урон',
+    ON_ENTER: 'При входе на поле',
+    ON_EXIT: 'При уходе с поля',
+    ON_REINFORCE: 'При переходе из Резерва во Фронт',
+    ON_REPLACE: 'Когда эта карта заменяет другую',
+    ON_TURN_START: 'В начале своего хода',
+    ON_TURN_END: 'В конце своего хода',
+    ON_THIS_DAMAGED: 'Когда эта карта получает урон',
     ON_ALLY_ATTACKED: 'Когда союзника атакуют',
-    ON_ENEMY_ATTACK: 'Когда враг атакует',
+    ON_ENEMY_ATTACK: 'Когда противник атакует',
     ON_ALLY_DIED: 'Когда союзник погибает',
   };
   return map[trigger] ?? trigger;
