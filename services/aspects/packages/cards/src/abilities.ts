@@ -124,6 +124,12 @@ export interface ActivatedAbility {
 }
 
 export const FACTION_IDS = [
+  'sky',
+  'echo',
+  'razlom',
+  'steel',
+  'apocryph',
+  'voidflame',
   'stormwind',
   'enterprise',
   'ganimed',
