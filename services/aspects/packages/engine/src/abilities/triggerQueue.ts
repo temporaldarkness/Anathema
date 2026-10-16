@@ -30,7 +30,17 @@ export function drainTriggerQueue(
     if (!card) continue;
 
     const onBoard = card.zone === 'FRONT' || card.zone === 'RESERVE';
-    if (trigger.triggerType !== 'ON_EXIT' && !onBoard) continue;
+
+    // ON_EXIT — карта уже ушла в сброс, но триггер обязан сработать.
+    // ON_KILL  — карта могла убить и тут же умереть; всё равно срабатывает.
+    // Остальные — только пока карта на доске.
+    if (
+      trigger.triggerType !== 'ON_EXIT' &&
+      trigger.triggerType !== 'ON_KILL' &&
+      !onBoard
+    ) {
+      continue;
+    }
     if (trigger.triggerType === 'ON_REINFORCE' && card.zone !== 'FRONT') continue;
 
     const def = draft.definitions[card.definitionId];
@@ -41,28 +51,28 @@ export function drainTriggerQueue(
     const matching = triggers.filter((t) => t.trigger === trigger.triggerType);
 
     for (const ability of matching) {
-	  const liveCard = draft.cards[trigger.cardId];
-	  if (!liveCard) break;
-	  
-	  if (
+      const liveCard = draft.cards[trigger.cardId];
+      if (!liveCard) break;
+
+      if (
         ability.oncePerTurn &&
         ability.id &&
         liveCard.usedTriggerIdsThisTurn.includes(ability.id)
       ) {
         continue;
       }
-	  
+
       if (
         ability.condition &&
         !evaluateCondition(draft, ability.condition, card.ownerId, trigger.cardId)
       ) {
         continue;
       }
-	  
-	  if (ability.oncePerTurn && ability.id) {
+
+      if (ability.oncePerTurn && ability.id) {
         liveCard.usedTriggerIdsThisTurn.push(ability.id);
       }
-	  
+
       for (const effect of ability.effects) {
         if (!draft.cards[trigger.cardId]) break;
         resolveEffect(

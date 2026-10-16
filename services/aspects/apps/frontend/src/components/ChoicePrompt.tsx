@@ -4,10 +4,6 @@ import type { GameState, CardInstanceId } from '@aspects/engine';
 interface Props {
   state: GameState;
   onSubmit: (cardIds: CardInstanceId[]) => void;
-  /**
-   * Отмена. Что именно отправить (RESOLVE_CHOICE([]) или CANCEL_CHOICE)
-   * решает вызывающий компонент в зависимости от kind.
-   */
   onCancel: () => void;
 }
 
@@ -15,7 +11,6 @@ export function ChoicePrompt({ state, onSubmit, onCancel }: Props) {
   const choice = state.pendingChoice;
   const [selected, setSelected] = useState<Set<number>>(new Set());
 
-  // Сбрасываем выбор при смене pendingChoice.
   useEffect(() => {
     setSelected(new Set());
   }, [choice?.kind, choice?.playerId, choice?.eligibleCardIds.length]);
@@ -24,20 +19,34 @@ export function ChoicePrompt({ state, onSubmit, onCancel }: Props) {
 
   const isDiscard = choice.kind === 'END_TURN_DISCARD';
   const isReplace = choice.kind === 'REPLACE_TARGET_SELECTION';
+  const isDiscardChosen = choice.kind === 'DISCARD_CHOSEN';
+  const isActivationDiscard = choice.kind === 'ACTIVATION_DISCARD';
   const count = isReplace ? 1 : choice.count;
-  const canCancel = !isDiscard;
+  const canCancel = !isDiscard && !isDiscardChosen;
 
-  const title = isDiscard
-    ? `${choice.playerId.toUpperCase()} должен сбросить ${count} карт(ы)`
-    : isReplace
-      ? `${choice.playerId.toUpperCase()} — какую карту заменить?`
-      : `${choice.playerId.toUpperCase()} должен выбрать цель (${count})`;
+  let title: string;
+  if (isDiscard) {
+    title = `${choice.playerId.toUpperCase()} должен сбросить ${count} карт(ы)`;
+  } else if (isDiscardChosen) {
+    const targetLabel =
+      choice.targetPlayerId === choice.playerId
+        ? 'из своей руки'
+        : `из руки ${choice.targetPlayerId.toUpperCase()}`;
+    title = `Выберите ${count} карт(ы) ${targetLabel} для сброса`;
+  } else if (isReplace) {
+    title = `${choice.playerId.toUpperCase()} — какую карту заменить?`;
+  } else if (isActivationDiscard) {
+    title = `Сбросьте ${count} карт(ы) для активации способности`;
+  } else {
+    title = `${choice.playerId.toUpperCase()} должен выбрать цель (${count})`;
+  }
 
-  const subtitle = isDiscard
-    ? 'Сброс обязателен — отмена недоступна'
-    : isReplace
-      ? 'Выберите карту для замены. Отмена — замена не сработает.'
-      : 'Отмена — эффект не сработает';
+  let subtitle: string | null = null;
+  if (isDiscard) subtitle = 'Сброс обязателен — отмена недоступна';
+  else if (isDiscardChosen) subtitle = 'Сброс обязателен — отмена недоступна';
+  else if (isReplace) subtitle = 'Выберите карту для замены. Отмена — замена не сработает.';
+  else if (isActivationDiscard) subtitle = 'Отмена — способность не сработает, ничего не потрачено.';
+  else subtitle = 'Отмена — эффект не сработает';
 
   const toggle = (idx: number) => {
     setSelected((prev) => {

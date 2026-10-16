@@ -10,12 +10,16 @@ import {
   frontCount,
   getColumn,
   strengthInBattle,
+  canAttackMore,
+  maxAttacksFor,
 } from '../state/helpers';
 import { hasAbility, canAttackReserve, tauntInColumn } from '../state/abilities';
 import { damageCard } from '../state/damage';
 import { damageGlory, killCard } from '../state/mutations';
+import { enqueueTrigger } from '../state/triggerEnqueue';
 import { drainTriggerQueue } from '../abilities/triggerQueue';
 import { notifyAllyAttacked, notifyEnemyAttack } from '../abilities/reactions';
+import { notifyCellCaptured, notifyCellLost } from '../abilities/cellEvents';
 
 export interface AttackParams {
   playerId: PlayerId;
@@ -39,7 +43,9 @@ export function attackInternal(
 
   const loc = findCardLocation(draft as GameState, attackerId);
   if (!loc || loc.zone !== 'FRONT') return { ok: false, reason: 'attacker_not_in_front' };
-  if (attacker.exhausted) return { ok: false, reason: 'attacker_exhausted' };
+  if (!canAttackMore(draft as GameState, attackerId)) {
+    return { ok: false, reason: 'attacker_exhausted' };
+  }
 
   const defender: PlayerId = opponentOf(playerId);
 
@@ -79,17 +85,65 @@ function attackCard(
       return { ok: false, reason: 'front_blocks_reserve' };
     }
   }
-  
+
+  enqueueTrigger(draft, attackerId, 'ON_ATTACK');
+  drainTriggerQueue(draft, ctx);
+
+  const liveAttacker = draft.cards[attackerId];
+  if (!liveAttacker || liveAttacker.zone === 'DISCARD') {
+    return { ok: true };
+  }
+
   notifyEnemyAttack(draft, attackerId);
   notifyAllyAttacked(draft, targetId, attackerId);
 
   resolveCombat(draft, attackerId, targetId, ctx);
 
-  if (draft.cards[attackerId] && draft.cards[attackerId].zone === 'FRONT') {
-    draft.cards[attackerId].exhausted = true;
+  consumeAttack(draft, attackerId, ctx);
+  return { ok: true };
+}
+
+function consumeAttack(
+  draft: WritableDraft<GameState>,
+  attackerId: CardInstanceId,
+  ctx: ResolutionContext,
+): void {
+  const card = draft.cards[attackerId];
+  if (!card) return;
+  if (card.zone !== 'FRONT') return;
+  card.attacksThisTurn += 1;
+  const max = maxAttacksFor(draft as GameState, attackerId);
+  if (card.attacksThisTurn >= max && !card.exhausted) {
+    card.exhausted = true;
     ctx.events.push({ type: 'CARD_EXHAUSTED', cardId: attackerId });
   }
-  return { ok: true };
+}
+
+/**
+ * Собирает соседей цели по колонкам (column ± 1) в той же зоне.
+ * Возвращает только тех, кто на момент вызова жив и на доске.
+ */
+function collectCleaveTargets(
+  draft: WritableDraft<GameState>,
+  targetLoc: { column: ColumnIndex; zone: 'FRONT' | 'RESERVE'; ownerId: PlayerId },
+): CardInstanceId[] {
+  const result: CardInstanceId[] = [];
+  const zone = targetLoc.zone;
+  const owner = targetLoc.ownerId;
+
+  for (const delta of [-1, 1]) {
+    const c = targetLoc.column + delta;
+    if (c < 1 || c > 5) continue;
+    const col = draft.board[c - 1];
+    let id: CardInstanceId | null = null;
+    if (zone === 'FRONT') {
+      id = owner === 'p1' ? col.p1Front : col.p2Front;
+    } else {
+      id = owner === 'p1' ? col.p1Reserve : col.p2Reserve;
+    }
+    if (id) result.push(id);
+  }
+  return result;
 }
 
 function resolveCombat(
@@ -102,10 +156,20 @@ function resolveCombat(
   const target = draft.cards[targetId];
   if (!attacker || !target) return;
 
+  const attackerDef = draft.definitions[attacker.definitionId];
+  const hasCleave = (attackerDef?.abilities ?? []).includes('cleave');
+  const cleaveDamage = hasCleave ? (attackerDef?.cleaveDamage ?? 1) : 0;
+
   const attStrength = strengthInBattle(draft as GameState, attackerId);
   const defStrength = strengthInBattle(draft as GameState, targetId);
   const attackerHasBreakthrough = hasAbility(draft as GameState, attackerId, 'breakthrough');
   const targetLoc = findCardLocation(draft as GameState, targetId);
+
+  // Соседей собираем ДО основного урона: target может умереть, слот опустеет.
+  const cleaveTargets =
+    hasCleave && cleaveDamage > 0 && targetLoc
+      ? collectCleaveTargets(draft, targetLoc)
+      : [];
 
   const targetResult = damageCard(draft, targetId, attStrength, attackerId, ctx);
 
@@ -115,11 +179,29 @@ function resolveCombat(
     const reserveId = (col as any)[reserveKey];
     if (reserveId && targetResult.overflow > 0) {
       const reserveResult = damageCard(draft, reserveId, targetResult.overflow, attackerId, ctx);
-      if (reserveResult.killed) killCard(draft, reserveId, ctx);
+      if (reserveResult.killed) {
+        enqueueTrigger(draft, attackerId, 'ON_KILL');
+        killCard(draft, reserveId, ctx);
+      }
     }
   }
 
-  if (targetResult.killed) killCard(draft, targetId, ctx);
+  if (targetResult.killed) {
+    enqueueTrigger(draft, attackerId, 'ON_KILL');
+    killCard(draft, targetId, ctx);
+  }
+
+  // Cleave-урон по соседям. Не активирует breakthrough, соседи
+  // не отвечают ответным ударом.
+  for (const sid of cleaveTargets) {
+    const sc = draft.cards[sid];
+    if (!sc || sc.zone === 'DISCARD') continue;
+    const r = damageCard(draft, sid, cleaveDamage, attackerId, ctx);
+    if (r.killed) {
+      enqueueTrigger(draft, attackerId, 'ON_KILL');
+      killCard(draft, sid, ctx);
+    }
+  }
 
   const attackerResult = damageCard(draft, attackerId, defStrength, targetId, ctx);
   if (attackerResult.killed) killCard(draft, attackerId, ctx);
@@ -152,6 +234,14 @@ function attackNeutral(
   const defFrontKey = defender === 'p1' ? 'p1Front' : 'p2Front';
   const defFrontId = (col as any)[defFrontKey] as CardInstanceId | null;
 
+  enqueueTrigger(draft, attackerId, 'ON_ATTACK');
+  drainTriggerQueue(draft, ctx);
+
+  const liveAttacker0 = draft.cards[attackerId];
+  if (!liveAttacker0 || liveAttacker0.zone === 'DISCARD') {
+    return { ok: true };
+  }
+
   if (!defFrontId) {
     captureNeutral(draft, column, attacker.ownerId, ctx);
   } else {
@@ -163,7 +253,10 @@ function attackNeutral(
       const defStr = strengthInBattle(draft as GameState, defFrontId);
 
       const targetResult = damageCard(draft, defFrontId, attStr, attackerId, ctx);
-      if (targetResult.killed) killCard(draft, defFrontId, ctx);
+      if (targetResult.killed) {
+        enqueueTrigger(draft, attackerId, 'ON_KILL');
+        killCard(draft, defFrontId, ctx);
+      }
 
       const attResult = damageCard(draft, attackerId, defStr, defFrontId, ctx);
       if (attResult.killed) killCard(draft, attackerId, ctx);
@@ -187,11 +280,7 @@ function attackNeutral(
     }
   }
 
-  const liveAtt = draft.cards[attackerId];
-  if (liveAtt && liveAtt.zone === 'FRONT' && !liveAtt.exhausted) {
-    liveAtt.exhausted = true;
-    ctx.events.push({ type: 'CARD_EXHAUSTED', cardId: attackerId });
-  }
+  consumeAttack(draft, attackerId, ctx);
 
   drainTriggerQueue(draft, ctx);
   return { ok: true };
@@ -206,9 +295,15 @@ function captureNeutral(
   const col = draft.board[column - 1];
   const oldOwner = col.neutralOwner;
   if (oldOwner === newOwner) return;
+
   col.neutralOwner = newOwner;
-  if (oldOwner) ctx.events.push({ type: 'NEUTRAL_LOST', column, formerOwner: oldOwner });
+
+  if (oldOwner) {
+    ctx.events.push({ type: 'NEUTRAL_LOST', column, formerOwner: oldOwner });
+    notifyCellLost(draft, column, oldOwner);
+  }
   ctx.events.push({ type: 'NEUTRAL_CAPTURED', column, playerId: newOwner });
+  notifyCellCaptured(draft, column, newOwner);
 }
 
 function attackGuild(
@@ -223,13 +318,18 @@ function attackGuild(
     return { ok: false, reason: 'front_not_empty' };
   }
 
+  enqueueTrigger(draft, attackerId, 'ON_ATTACK');
+  drainTriggerQueue(draft, ctx);
+
+  const liveAttacker = draft.cards[attackerId];
+  if (!liveAttacker || liveAttacker.zone === 'DISCARD') {
+    return { ok: true };
+  }
+
   const dmg = strengthInBattle(draft as GameState, attackerId);
   damageGlory(draft, defender, dmg, ctx);
 
-  if (!attacker.exhausted) {
-    attacker.exhausted = true;
-    ctx.events.push({ type: 'CARD_EXHAUSTED', cardId: attackerId });
-  }
+  consumeAttack(draft, attackerId, ctx);
 
   return { ok: true };
 }

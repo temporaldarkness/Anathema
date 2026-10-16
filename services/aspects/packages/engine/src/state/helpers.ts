@@ -172,3 +172,26 @@ export function findCardById(
 export function allCardIds(state: GameState): CardInstanceId[] {
   return Object.keys(state.cards) as CardInstanceId[];
 }
+
+/**
+ * Максимальное число атак за ход для карты.
+ * frenzy → 2, иначе 1.
+ */
+export function maxAttacksFor(state: GameState, cardId: CardInstanceId): number {
+  const card = state.cards[cardId];
+  if (!card) return 0;
+  const def = state.definitions[card.definitionId];
+  if (!def) return 1;
+  return (def.abilities ?? []).includes('frenzy') ? 2 : 1;
+}
+
+/**
+ * Может ли карта сейчас атаковать (по счётчику атак и истощению).
+ * Проверка фазы — снаружи.
+ */
+export function canAttackMore(state: GameState, cardId: CardInstanceId): boolean {
+  const card = state.cards[cardId];
+  if (!card) return false;
+  if (card.exhausted) return false;
+  return card.attacksThisTurn < maxAttacksFor(state, cardId);
+}

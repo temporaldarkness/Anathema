@@ -46,6 +46,25 @@ export function getValidActions(
           },
         ];
       }
+      case 'DISCARD_CHOSEN': {
+        return [
+          {
+            type: 'RESOLVE_CHOICE',
+            playerId,
+            cardIds: choice.eligibleCardIds.slice(0, choice.count),
+          },
+        ];
+      }
+      case 'ACTIVATION_DISCARD': {
+        return [
+          {
+            type: 'RESOLVE_CHOICE',
+            playerId,
+            cardIds: choice.eligibleCardIds.slice(0, choice.count),
+          },
+          { type: 'CANCEL_CHOICE', playerId },
+        ];
+      }
     }
   }
 
@@ -135,10 +154,15 @@ export function getValidActions(
       if (!attackerId) continue;
       const attacker = state.cards[attackerId];
       if (!attacker || attacker.exhausted) continue;
+
+      const attackerDef = state.definitions[attacker.definitionId];
+      const isFrenzy = (attackerDef?.abilities ?? []).includes('frenzy');
+      const maxAttacks = isFrenzy ? 2 : 1;
+      if (attacker.attacksThisTurn >= maxAttacks) continue;
+
       const attackerCol = attacker.column as ColumnIndex | null;
       if (!attackerCol) continue;
 
-      const attackerDef = state.definitions[attacker.definitionId];
       const hasScout = attackerDef?.abilities.includes('scout') ?? false;
 
       let tauntId: CardInstanceId | null = null;

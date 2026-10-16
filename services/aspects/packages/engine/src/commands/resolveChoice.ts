@@ -10,6 +10,7 @@ import { advancePhaseInternal } from './advancePhase';
 import { processTemporaryCards } from './advancePhase';
 import { controlledCells } from '../state/helpers';
 import { applyReplacementInternal } from './replace';
+import { applyActivationDiscard } from './useAbility';
 
 export interface ResolveChoiceParams {
   playerId: PlayerId;
@@ -173,8 +174,6 @@ export function resolveChoiceInternal(
         ctx,
       );
       if (!res.ok) {
-        // Теоретически недостижимо: все проверки пройдены в replaceInternal,
-        // между постановкой выбора и резолвом ничего не меняется.
         ctx.events.push({
           type: 'COMMAND_REJECTED',
           playerId: choice.playerId,
@@ -182,6 +181,64 @@ export function resolveChoiceInternal(
         });
       }
       return { ok: true };
+    }
+
+    case 'DISCARD_CHOSEN': {
+      const target = choice.targetPlayerId;
+      for (const id of params.cardIds) {
+        const hand = draft.players[target].hand;
+        const idx = hand.indexOf(id);
+        if (idx < 0) continue;
+        hand.splice(idx, 1);
+        const card = draft.cards[id];
+        if (card) {
+          card.zone = 'DISCARD';
+          card.column = null;
+        }
+        if (!card?.isToken) draft.players[target].discard.push(id);
+        ctx.events.push({ type: 'CARD_DISCARDED', playerId: target, cardId: id });
+      }
+      draft.pendingChoice = null;
+      ctx.events.push({
+        type: 'CHOICE_RESOLVED',
+        playerId: choice.playerId,
+        kind: 'DISCARD_CHOSEN',
+      });
+      return { ok: true };
+    }
+
+    case 'ACTIVATION_DISCARD': {
+      const sourceCardId = choice.sourceCardId;
+      const abilityIndex = choice.abilityIndex;
+      draft.pendingChoice = null;
+      ctx.events.push({
+        type: 'CHOICE_RESOLVED',
+        playerId: choice.playerId,
+        kind: 'ACTIVATION_DISCARD',
+      });
+
+      const res = applyActivationDiscard(
+        draft,
+        {
+          playerId: choice.playerId,
+          sourceCardId,
+          abilityIndex,
+          discardCardIds: params.cardIds,
+        },
+        ctx,
+      );
+      if (!res.ok) {
+        ctx.events.push({
+          type: 'COMMAND_REJECTED',
+          playerId: choice.playerId,
+          reason: `activation_failed:${res.reason}`,
+        });
+      }
+      return { ok: true };
+    }
+
+    default: {
+      return { ok: false, reason: 'unhandled_choice_kind' };
     }
   }
 }

@@ -3,7 +3,8 @@ import type { GameState } from '../types/state';
 import type { Condition, Comparator } from '@aspects/cards';
 import type { CardInstanceId, PlayerId } from '../types/ids';
 import { opponentOf } from '../types/ids';
-import { controlledCells, frontCount, health, strength } from '../state/helpers';
+import { cardsInZone, controlledCells, health, strength } from '../state/helpers';
+import { matchesFilter } from '../state/cardFilter';
 
 export function evaluateCondition(
   draft: WritableDraft<GameState>,
@@ -20,7 +21,11 @@ export function evaluateCondition(
     }
     case 'FRONT_COUNT': {
       const who = cond.who === 'SELF' ? ownerId : opponentOf(ownerId);
-      return compare(frontCount(state, who), cond.op, cond.value);
+      const list = cardsInZone(state, who, 'FRONT');
+      const n = cond.filter
+        ? list.filter((c) => matchesFilter(state, c.instanceId, cond.filter)).length
+        : list.length;
+      return compare(n, cond.op, cond.value);
     }
     case 'GLORY': {
       const who = cond.who === 'SELF' ? ownerId : opponentOf(ownerId);
@@ -32,7 +37,11 @@ export function evaluateCondition(
     }
     case 'HAND_COUNT': {
       const who = cond.who === 'SELF' ? ownerId : opponentOf(ownerId);
-      return compare(state.players[who].hand.length, cond.op, cond.value);
+      const list = state.players[who].hand;
+      const n = cond.filter
+        ? list.filter((id) => matchesFilter(state, id, cond.filter)).length
+        : list.length;
+      return compare(n, cond.op, cond.value);
     }
     case 'SELF_HEALTH': {
       const card = state.cards[sourceId];
@@ -44,6 +53,42 @@ export function evaluateCondition(
       if (!card) return false;
       return compare(strength(card), cond.op, cond.value);
     }
+    case 'TOTAL_STRENGTH': {
+      const who = cond.who === 'SELF' ? ownerId : opponentOf(ownerId);
+      const list = cardsInZone(state, who, 'FRONT');
+      let total = 0;
+      for (const c of list) {
+        if (cond.filter && !matchesFilter(state, c.instanceId, cond.filter)) continue;
+        total += strength(c);
+      }
+      return compare(total, cond.op, cond.value);
+    }
+    case 'TOTAL_HEALTH': {
+      const who = cond.who === 'SELF' ? ownerId : opponentOf(ownerId);
+      const list = cardsInZone(state, who, 'FRONT');
+      let total = 0;
+      for (const c of list) {
+        if (cond.filter && !matchesFilter(state, c.instanceId, cond.filter)) continue;
+        total += health(c);
+      }
+      return compare(total, cond.op, cond.value);
+    }
+    case 'IN_RESERVE': {
+      const card = state.cards[sourceId];
+      if (!card) return false;
+      return card.zone === 'RESERVE';
+    }
+    case 'IN_FRONT': {
+      const card = state.cards[sourceId];
+      if (!card) return false;
+      return card.zone === 'FRONT';
+    }
+    case 'AND':
+      return cond.conditions.every((c) => evaluateCondition(draft, c, ownerId, sourceId));
+    case 'OR':
+      return cond.conditions.some((c) => evaluateCondition(draft, c, ownerId, sourceId));
+    case 'NOT':
+      return !evaluateCondition(draft, cond.condition, ownerId, sourceId);
   }
 }
 

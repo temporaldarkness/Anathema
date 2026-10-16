@@ -136,6 +136,7 @@ export function applyReplacementInternal(
   if (cost > 0) changeInfluence(draft, playerId, -cost, ctx);
 
   const wasExhausted = oldCard.exhausted;
+  const wasAttacksThisTurn = oldCard.attacksThisTurn;
   const oldColumn = oldLocation.column;
 
   killCardNoExit(draft, targetCardId);
@@ -161,6 +162,7 @@ export function applyReplacementInternal(
   }
 
   newCard.exhausted = wasExhausted;
+  newCard.attacksThisTurn = wasAttacksThisTurn;
   draft.players[playerId].replacementUsedThisTurn = true;
 
   ctx.events.push({

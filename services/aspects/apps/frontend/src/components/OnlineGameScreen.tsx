@@ -445,11 +445,13 @@ function OnlineGameInner({
   };
   
   const handleCancelChoice = () => {
-    if (isSpectator || !mySide) return;
+	if (isSpectator || !mySide) return;
     const choice = state.pendingChoice;
     if (!choice) return;
-    if (choice.playerId !== mySide) return;
-    if (choice.kind === 'REPLACE_TARGET_SELECTION') {
+    if (
+      choice.kind === 'REPLACE_TARGET_SELECTION' ||
+      choice.kind === 'ACTIVATION_DISCARD'
+    ) {
       dispatch({ type: 'CANCEL_CHOICE', playerId: choice.playerId });
     } else {
       dispatch({

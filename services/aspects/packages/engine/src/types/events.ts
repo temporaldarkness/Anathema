@@ -29,11 +29,12 @@ export type GameEvent =
       type: 'DAMAGE_ABSORBED';
       targetId: CardInstanceId;
       absorbed: number;
-      reason: 'shield' | 'defense';
+      reason: 'shield' | 'defense' | 'armor';
     }
   | { type: 'CARD_DIED'; cardId: CardInstanceId; zone: Zone }
   | { type: 'CARD_EXHAUSTED'; cardId: CardInstanceId }
   | { type: 'CARD_RESTORED'; cardId: CardInstanceId }
+  | { type: 'CARD_HEALED'; cardId: CardInstanceId; amount: number }
   | { type: 'NEUTRAL_CAPTURED'; column: ColumnIndex; playerId: PlayerId }
   | { type: 'NEUTRAL_LOST'; column: ColumnIndex; formerOwner: PlayerId }
   | { type: 'ABILITY_TRIGGERED'; cardId: CardInstanceId; abilityId: string }

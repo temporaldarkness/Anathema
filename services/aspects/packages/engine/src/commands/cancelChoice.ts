@@ -16,6 +16,11 @@ export function cancelChoiceInternal(
   if (!choice) return { ok: false, reason: 'no_pending_choice' };
   if (choice.playerId !== params.playerId) return { ok: false, reason: 'not_your_choice' };
 
+  // Обязательные выборы отменить нельзя.
+  if (choice.kind === 'END_TURN_DISCARD' || choice.kind === 'DISCARD_CHOSEN') {
+    return { ok: false, reason: 'mandatory_choice' };
+  }
+
   const kind = choice.kind;
   draft.pendingChoice = null;
   ctx.events.push({

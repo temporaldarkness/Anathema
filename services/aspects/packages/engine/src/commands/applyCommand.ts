@@ -13,6 +13,7 @@ import { cancelChoiceInternal } from './cancelChoice';
 import { useAbilityInternal } from './useAbility';
 import { mulliganInternal } from './mulligan';
 import { drainTriggerQueue } from '../abilities/triggerQueue';
+import { notifyCellCaptured, notifyCellLost } from '../abilities/cellEvents';
 import { recomputeSuppression, checkSuppressionDeaths } from '../state/suppression';
 import { killCard } from '../state/mutations';
 
@@ -189,13 +190,20 @@ export function applyCommand(state: GameState, cmd: Command): ApplyResult {
           column: cap.column,
           formerOwner: oldOwner,
         });
+        notifyCellLost(draft, cap.column, oldOwner);
       }
       ctx.events.push({
         type: 'NEUTRAL_CAPTURED',
         column: cap.column,
         playerId: cap.playerId,
       });
+      notifyCellCaptured(draft, cap.column, cap.playerId);
     }
+
+    // Отложенные захваты могли энкьюить ON_CELL_CAPTURED / ON_CELL_LOST.
+    // Дрейним их до конца команды, чтобы состояние вернулось к клиенту
+    // уже с разрешёнными триггерами.
+    drainTriggerQueue(draft, ctx);
   });
 
   return { state: nextState, events: ctx.events };

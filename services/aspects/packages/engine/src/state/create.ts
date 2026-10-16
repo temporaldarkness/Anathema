@@ -58,15 +58,52 @@ function createInstances(
       slowCounter: (def.abilities ?? []).includes('slow') ? 1 : 0,
       shieldAvailable: (def.abilities ?? []).includes('shield'),
       turnsOnBoard: 0,
-	  
-	  usedAbilitiesThisTurn: [],
-	  usedTriggerIdsThisTurn: [],
-	  isToken: def.isToken ?? false,
-	  sharesIdentity: def.isToken ? (def.sharesIdentity ?? false) : true,
-	  tempTurnsLeft: def.tempDuration ?? null,
-	  readyForFront: false,
+      usedAbilitiesThisTurn: [],
+      usedTriggerIdsThisTurn: [],
+      attacksThisTurn: 0,
+      isToken: def.isToken ?? false,
+      sharesIdentity: def.isToken ? (def.sharesIdentity ?? false) : true,
+      tempTurnsLeft: def.tempDuration ?? null,
+      readyForFront: false,
     };
   });
+}
+
+/**
+ * Гарантирует, что одна карта с keyword `starter` попадёт в стартовую
+ * руку (позиция `handSize - 1` в перемешанной колоде).
+ *
+ * Если в колоде нет starter'ов — ничего не делает.
+ * Если starter'ов несколько — выбирает случайного.
+ * Если выбранный уже в стартовой руке — swap всё равно выполняется
+ * (состав руки не изменится), но RNG не тратится впустую за зря.
+ */
+function injectStarter(
+  deck: CardInstanceId[],
+  handSize: number,
+  cards: Record<CardInstanceId, CardInstance>,
+  cardDefinitions: Record<string, CardDefinition>,
+  rng: () => number,
+): void {
+  if (handSize <= 0 || deck.length < handSize) return;
+
+  const candidateIdxs: number[] = [];
+  for (let i = 0; i < deck.length; i++) {
+    const inst = cards[deck[i]];
+    if (!inst) continue;
+    const def = cardDefinitions[inst.definitionId];
+    if (!def) continue;
+    if ((def.abilities ?? []).includes('starter')) candidateIdxs.push(i);
+  }
+  if (candidateIdxs.length === 0) return;
+
+  const targetIdx = handSize - 1;
+  const chosenIdx = candidateIdxs[Math.floor(rng() * candidateIdxs.length)];
+  if (chosenIdx === targetIdx) return;
+
+  const tmp = deck[targetIdx];
+  deck[targetIdx] = deck[chosenIdx];
+  deck[chosenIdx] = tmp;
 }
 
 export function createGame(opts: CreateGameOptions): CreateGameResult {
@@ -76,13 +113,13 @@ export function createGame(opts: CreateGameOptions): CreateGameResult {
     cardDefinitions,
     startingGlory = 30,
     startingHandSize = 4,
-	useMulligan = false,
+    useMulligan = false,
   } = opts;
 
   if (decks.p1.length !== 30 || decks.p2.length !== 30) {
     throw new Error('Each deck must have exactly 30 cards');
   }
-  
+
   for (const pid of ['p1', 'p2'] as const) {
     const counts = new Map<string, number>();
     for (const defId of decks[pid]) {
@@ -120,6 +157,10 @@ export function createGame(opts: CreateGameOptions): CreateGameResult {
     p2Instances.map((c) => c.instanceId),
     rng,
   );
+
+  // Гарантированный стартер в стартовой руке (до Mulligan).
+  injectStarter(p1Deck, startingHandSize, cards, cardDefinitions, rng);
+  injectStarter(p2Deck, startingHandSize, cards, cardDefinitions, rng);
 
   const firstPlayer: PlayerId = rng() < 0.5 ? 'p1' : 'p2';
   const secondPlayer = opponentOf(firstPlayer);
@@ -165,7 +206,6 @@ export function createGame(opts: CreateGameOptions): CreateGameResult {
       usedDefs[id] = CardDefinitionSchema.parse(def);
     }
   }
-  
 
   const state: GameState = {
     definitions: usedDefs,
@@ -181,14 +221,14 @@ export function createGame(opts: CreateGameOptions): CreateGameResult {
     winnerReason: null,
     altVictoryPending: { p1: false, p2: false },
     pendingChoice: null,
-	pendingTriggers: [],
-	instanceCounter: counter.value,
-	mulliganDone: useMulligan ? { p1: false, p2: false } : { p1: true, p2: true },
-	mulliganReplaced: { p1: 0, p2: 0 },
+    pendingTriggers: [],
+    instanceCounter: counter.value,
+    mulliganDone: useMulligan ? { p1: false, p2: false } : { p1: true, p2: true },
+    mulliganReplaced: { p1: 0, p2: 0 },
   };
 
   events.push({ type: 'GAME_STARTED', seed, firstPlayer });
-  
+
   if (!useMulligan) {
     events.push({
       type: 'TURN_STARTED',

@@ -221,6 +221,7 @@ export function resetCardRuntimeState(
   card.slowCounter = def && def.abilities.includes('slow') ? 1 : 0;
   card.usedAbilitiesThisTurn = [];
   card.usedTriggerIdsThisTurn = [];
+  card.attacksThisTurn = 0;
   card.readyForFront = false;
   card.tempTurnsLeft = def ? (def.tempDuration ?? null) : null;
   card.turnsOnBoard = 0;

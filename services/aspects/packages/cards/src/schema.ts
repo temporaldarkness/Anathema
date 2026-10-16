@@ -10,24 +10,70 @@ import {
 
 export const RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary'] as const;
 
-const ConditionSchema: z.ZodType<import('./abilities').Condition> = z.union([
-  z.object({ kind: z.literal('CELLS'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
-  z.object({ kind: z.literal('FRONT_COUNT'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
-  z.object({ kind: z.literal('GLORY'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
-  z.object({ kind: z.literal('INFLUENCE'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
-  z.object({ kind: z.literal('HAND_COUNT'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
-  z.object({ kind: z.literal('SELF_HEALTH'), op: z.enum(COMPARATORS), value: z.number().int() }),
-  z.object({ kind: z.literal('SELF_STRENGTH'), op: z.enum(COMPARATORS), value: z.number().int() }),
-]) as any;
+const CardFilterSchema = z.object({
+  tag: z.string().optional(),
+  keyword: z.enum(KEYWORD_IDS).optional(),
+  minStrength: z.number().int().optional(),
+  maxStrength: z.number().int().optional(),
+  minCost: z.number().int().min(0).optional(),
+  maxCost: z.number().int().min(0).optional(),
+  withoutShield: z.boolean().optional(),
+});
+
+const ConditionSchema: z.ZodType<import('./abilities').Condition> = z.lazy(() =>
+  z.union([
+    z.object({ kind: z.literal('CELLS'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+    z.object({
+      kind: z.literal('FRONT_COUNT'),
+      who: z.enum(CONDITION_SIDES),
+      op: z.enum(COMPARATORS),
+      value: z.number().int().min(0),
+      filter: CardFilterSchema.optional(),
+    }),
+    z.object({ kind: z.literal('GLORY'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+    z.object({ kind: z.literal('INFLUENCE'), who: z.enum(CONDITION_SIDES), op: z.enum(COMPARATORS), value: z.number().int().min(0) }),
+    z.object({
+      kind: z.literal('HAND_COUNT'),
+      who: z.enum(CONDITION_SIDES),
+      op: z.enum(COMPARATORS),
+      value: z.number().int().min(0),
+      filter: CardFilterSchema.optional(),
+    }),
+    z.object({ kind: z.literal('SELF_HEALTH'), op: z.enum(COMPARATORS), value: z.number().int() }),
+    z.object({ kind: z.literal('SELF_STRENGTH'), op: z.enum(COMPARATORS), value: z.number().int() }),
+    z.object({
+      kind: z.literal('TOTAL_STRENGTH'),
+      who: z.enum(CONDITION_SIDES),
+      op: z.enum(COMPARATORS),
+      value: z.number().int().min(0),
+      filter: CardFilterSchema.optional(),
+    }),
+    z.object({
+      kind: z.literal('TOTAL_HEALTH'),
+      who: z.enum(CONDITION_SIDES),
+      op: z.enum(COMPARATORS),
+      value: z.number().int().min(0),
+      filter: CardFilterSchema.optional(),
+    }),
+    z.object({ kind: z.literal('IN_RESERVE') }),
+    z.object({ kind: z.literal('IN_FRONT') }),
+    z.object({ kind: z.literal('AND'), conditions: z.array(ConditionSchema).min(1) }),
+    z.object({ kind: z.literal('OR'), conditions: z.array(ConditionSchema).min(1) }),
+    z.object({ kind: z.literal('NOT'), condition: ConditionSchema }),
+  ]),
+) as any;
 
 const EffectSchema: z.ZodType<import('./abilities').Effect> = z.lazy(() =>
   z.union([
-    z.object({ kind: z.literal('DEAL_DAMAGE'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS) }),
-    z.object({ kind: z.literal('HEAL'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS) }),
-    z.object({ kind: z.literal('BUFF'), strength: z.number().int(), health: z.number().int(), target: z.enum(TARGET_SELECTORS) }),
-	z.object({ kind: z.literal('GRANT_SHIELD'), target: z.enum(TARGET_SELECTORS) }),
+    z.object({ kind: z.literal('DEAL_DAMAGE'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS), filter: CardFilterSchema.optional() }),
+    z.object({ kind: z.literal('HEAL'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS), filter: CardFilterSchema.optional() }),
+    z.object({ kind: z.literal('BUFF'), strength: z.number().int(), health: z.number().int(), target: z.enum(TARGET_SELECTORS), filter: CardFilterSchema.optional() }),
+    z.object({ kind: z.literal('GRANT_SHIELD'), target: z.enum(TARGET_SELECTORS), filter: CardFilterSchema.optional() }),
+    z.object({ kind: z.literal('EXHAUST_TARGET'), target: z.enum(TARGET_SELECTORS), filter: CardFilterSchema.optional() }),
+    z.object({ kind: z.literal('UNEXHAUST_TARGET'), target: z.enum(TARGET_SELECTORS), filter: CardFilterSchema.optional() }),
     z.object({ kind: z.literal('DRAW'), count: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
     z.object({ kind: z.literal('GAIN_INFLUENCE'), amount: z.number().int(), who: z.enum(['SELF', 'OPPONENT']) }),
+    z.object({ kind: z.literal('SPEND_INFLUENCE'), amount: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
     z.object({ kind: z.literal('DAMAGE_GLORY'), amount: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
     z.object({ kind: z.literal('HEAL_GLORY'), amount: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
     z.object({
@@ -48,11 +94,19 @@ const EffectSchema: z.ZodType<import('./abilities').Effect> = z.lazy(() =>
     z.object({
       kind: z.literal('RETURN_TO_HAND'),
       target: z.enum(TARGET_SELECTORS),
+      filter: CardFilterSchema.optional(),
     }),
     z.object({
       kind: z.literal('MOVE_CARD'),
       target: z.enum(TARGET_SELECTORS),
+      filter: CardFilterSchema.optional(),
       to: z.enum(['RANDOM_OWN_EMPTY', 'OWN_RESERVE']),
+    }),
+    z.object({
+      kind: z.literal('MOVE_TO_COLUMN'),
+      target: z.enum(TARGET_SELECTORS),
+      filter: CardFilterSchema.optional(),
+      column: z.number().int().min(1).max(5),
     }),
     z.object({
       kind: z.literal('RETURN_FROM_DISCARD'),
@@ -62,6 +116,11 @@ const EffectSchema: z.ZodType<import('./abilities').Effect> = z.lazy(() =>
     }),
     z.object({
       kind: z.literal('DISCARD_RANDOM'),
+      count: z.number().int().min(1).max(5),
+      who: z.enum(['SELF', 'OPPONENT']),
+    }),
+    z.object({
+      kind: z.literal('DISCARD_CHOSEN'),
       count: z.number().int().min(1).max(5),
       who: z.enum(['SELF', 'OPPONENT']),
     }),
@@ -82,6 +141,7 @@ const ActivatedAbilitySchema = z.object({
   id: z.string(),
   cost: z.number().int().min(0),
   effects: z.array(EffectSchema),
+  discardCost: z.number().int().min(0).max(5).optional(),
   name: z.string().optional(),
   description: z.string().optional(),
 });
@@ -108,6 +168,7 @@ export const CardDefinitionSchema = z.object({
   isToken: z.boolean().default(false),
   sharesIdentity: z.boolean().default(false),
   tempDuration: z.number().int().min(1).max(10).optional(),
+  cleaveDamage: z.number().int().min(1).max(10).optional(),
 
   series: z.array(z.string()).optional(),
   factions: z.array(z.enum(FACTION_IDS)).optional(),

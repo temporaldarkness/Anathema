@@ -33,6 +33,9 @@ function doRestore(draft: WritableDraft<GameState>, ctx: ResolutionContext): voi
         card.exhausted = false;
         ctx.events.push({ type: 'CARD_RESTORED', cardId: id });
       }
+      if (card.attacksThisTurn > 0) {
+        card.attacksThisTurn = 0;
+      }
     }
   }
 }
@@ -111,11 +114,37 @@ function doInfluence(draft: WritableDraft<GameState>, ctx: ResolutionContext): v
   }
 }
 
+/**
+ * Восстанавливает 1 HP картам с regenerate во всех зонах доски
+ * (FRONT + RESERVE). Не воскрешает мёртвых (они уже в DISCARD и не
+ * участвуют в цикле по board).
+ */
+function doRegenerate(draft: WritableDraft<GameState>, ctx: ResolutionContext): void {
+  const player = draft.activePlayer;
+  for (const col of draft.board) {
+    const ids: (CardInstanceId | null)[] =
+      player === 'p1' ? [col.p1Front, col.p1Reserve] : [col.p2Front, col.p2Reserve];
+    for (const id of ids) {
+      if (!id) continue;
+      const card = draft.cards[id];
+      if (!card) continue;
+      if (card.damageTaken <= 0) continue;
+
+      const def = draft.definitions[card.definitionId];
+      if (!def) continue;
+      if (!(def.abilities ?? []).includes('regenerate')) continue;
+
+      card.damageTaken -= 1;
+      ctx.events.push({ type: 'CARD_HEALED', cardId: id, amount: 1 });
+    }
+  }
+}
+
 function doEndOfTurnStart(draft: WritableDraft<GameState>, ctx: ResolutionContext): void {
   const player = draft.activePlayer;
 
   queuePhaseTriggers(draft, 'ON_TURN_END', player, ctx);
-  
+
   const toDestroy: CardInstanceId[] = [];
   for (const col of draft.board) {
     const ids = player === 'p1'
@@ -134,6 +163,10 @@ function doEndOfTurnStart(draft: WritableDraft<GameState>, ctx: ResolutionContex
   for (const id of toDestroy) {
     killCard(draft, id, ctx);
   }
+
+  // Regenerate применяется после временных смертей: если карта
+  // должна была уйти от temporary — она уже ушла, regen её не спасёт.
+  doRegenerate(draft, ctx);
 
   const hand = draft.players[player].hand;
   if (hand.length > 10) {

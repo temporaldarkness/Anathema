@@ -394,7 +394,10 @@ function AppMain({
   const handleCancelChoice = () => {
     const choice = state.pendingChoice;
     if (!choice) return;
-    if (choice.kind === 'REPLACE_TARGET_SELECTION') {
+    if (
+      choice.kind === 'REPLACE_TARGET_SELECTION' ||
+      choice.kind === 'ACTIVATION_DISCARD'
+    ) {
       dispatch({ type: 'CANCEL_CHOICE', playerId: choice.playerId });
     } else {
       dispatch({

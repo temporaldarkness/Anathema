@@ -41,6 +41,7 @@ export interface CardInstance {
 
   usedAbilitiesThisTurn: number[];
   usedTriggerIdsThisTurn: string[];
+  attacksThisTurn: number;
 
   isToken: boolean;
   sharesIdentity: boolean;
@@ -100,6 +101,21 @@ export type PendingChoice =
       kind: 'REPLACE_TARGET_SELECTION';
       playerId: PlayerId;
       newCardId: CardInstanceId;
+      eligibleCardIds: CardInstanceId[];
+    }
+  | {
+      kind: 'DISCARD_CHOSEN';
+      playerId: PlayerId;
+      targetPlayerId: PlayerId;
+      count: number;
+      eligibleCardIds: CardInstanceId[];
+    }
+  | {
+      kind: 'ACTIVATION_DISCARD';
+      playerId: PlayerId;
+      sourceCardId: CardInstanceId;
+      abilityIndex: number;
+      count: number;
       eligibleCardIds: CardInstanceId[];
     };
 
