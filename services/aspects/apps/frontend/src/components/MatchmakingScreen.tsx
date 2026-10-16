@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { getDecks, listPacks, getCards, seriesOfDeck } from '@aspects/cards';
+import { listActiveDecks, listPacks, getCards, seriesOfDeck } from '@aspects/cards';
 import { generateRandomDeck } from '@aspects/shared';
 import type { DeckDto } from '@aspects/shared';
 import type { AuthState } from '../game/useAuth';
@@ -33,7 +33,7 @@ function randomSeries(): string[] {
 }
 
 export function MatchmakingScreen({ auth, savedDecks, onBack, onMatched }: Props) {
-  const allPresets = useMemo(() => getDecks(), []);
+  const allPresets = useMemo(() => listActiveDecks(), []);
   const [deck, setDeck] = useState<DeckValue>(() =>
     allPresets[0]
       ? { kind: 'preset', id: allPresets[0].id }

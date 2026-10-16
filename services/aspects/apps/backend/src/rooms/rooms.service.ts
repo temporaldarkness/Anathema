@@ -10,16 +10,18 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { createGame } from '@aspects/engine';
 import {
-  getCards,
+  decksForSeries,
   getDecks,
+  getCards,
   getPack,
   mergedCardsById,
 } from '@aspects/cards';
-import type {
-  RoomState,
-  RoomPublicInfo,
-  CreateRoomDto,
-  JoinRoomDto,
+import {
+  generateRandomDeck,
+  type RoomState,
+  type RoomPublicInfo,
+  type CreateRoomDto,
+  type JoinRoomDto,
 } from '@aspects/shared';
 import { REDIS_CLIENT } from './redis.provider';
 import type { GameState, PlayerId } from '@aspects/engine';
@@ -692,20 +694,25 @@ export class RoomsService {
     botId: string,
     botName: string,
   ): Promise<RoomState> {
+    const series = dto.series;
+    if (series.length === 0 || series.length > 4) {
+      throw new BadRequestException('series must have 1..4 entries');
+    }
+  
+    const cardDefs = mergedCardsById(series);
+    if (Object.keys(cardDefs).length === 0) {
+      throw new BadRequestException('No cards found for the given series');
+    }
+  
+    const botDeck = this.buildBotDeck(cardDefs);
+    if (!botDeck) {
+      throw new BadRequestException(
+        'Cannot build bot deck: not enough cards in the selected series',
+      );
+    }
+  
     const room = await this.create(userId, username, dto);
-
-    const roomSeries = room.series ?? [];
-    const cardDefs = mergedCardsById(roomSeries);
-    const decks = getDecks(roomSeries[0]);
-    if (decks.length === 0) {
-      throw new BadRequestException('Pack has no preset decks for bot');
-    }
-
-    const botDeck = decks[Math.floor(Math.random() * decks.length)].cards;
-    if (botDeck.length !== 30) {
-      throw new BadRequestException('Bot deck must have 30 cards');
-    }
-
+  
     const seed = `bot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const initial = createGame({
       seed,
@@ -713,7 +720,7 @@ export class RoomsService {
       cardDefinitions: cardDefs,
       useMulligan: true,
     });
-
+  
     room.guestId = `anon:bot:${botId}`;
     room.guestName = botName;
     room.deckP2 = botDeck;
@@ -722,10 +729,52 @@ export class RoomsService {
     room.commands = [];
     room.matchSaved = false;
     room.version += 1;
-
+  
     this.updateTurnDeadline(room);
     await this.save(room);
-
+  
     return room;
+  }
+  
+  /**
+   * Собирает 30-картовую колоду для бота из пула комнаты.
+   *
+   * Сначала пытается найти готовый пресет, все карты которого доступны
+   * в пуле. Если такого нет — генерирует случайную колоду из пула.
+   * Возвращает null, если собрать 30 карт невозможно.
+   */
+  private buildBotDeck(
+    cardDefs: Record<string, unknown>,
+  ): string[] | null {
+    // 1) Пресет, полностью совместимый с пулом комнаты.
+    const compatible = decksForSeries(Object.keys(cardDefs).length > 0
+      ? this.seriesOfPool(cardDefs)
+      : []);
+    if (compatible.length > 0) {
+      const pick = compatible[Math.floor(Math.random() * compatible.length)];
+      if (pick.cards.length === 30) return pick.cards;
+    }
+  
+    const pool = Object.values(cardDefs) as Array<{
+      id: string;
+      personalityTag: string;
+      rarity: string;
+      isToken?: boolean;
+      series?: string[];
+    }>;
+    const generated = generateRandomDeck(pool, { size: 30 });
+    return generated;
+  }
+  
+  /**
+   * Достаёт список серий, к которым относятся карты пула.
+   * Нужен, чтобы отфильтровать пресеты на шаге 1.
+   */
+  private seriesOfPool(cardDefs: Record<string, unknown>): string[] {
+    const set = new Set<string>();
+    for (const c of Object.values(cardDefs) as Array<{ series?: string[] }>) {
+      for (const s of c.series ?? []) set.add(s);
+    }
+    return [...set];
   }
 }

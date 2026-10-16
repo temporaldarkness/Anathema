@@ -8,7 +8,7 @@ import {
   type CardInstanceId,
   type PlayerId,
 } from '@aspects/engine';
-import { getDecks, mergedCardsById, listPacks, seriesOfDeck, type DeckPreset } from '@aspects/cards';
+import { getDecks, mergedCardsById, getSeriesName, seriesOfDeck, type DeckPreset } from '@aspects/cards';
 import { makeBot, type Bot } from '@aspects/bot';
 import type { CommandRecord, SaveMatchDto } from '@aspects/shared';
 import { makeLogEntry, resetLogIdCounter, type LogEntry } from './logEntry';
@@ -321,9 +321,7 @@ export function useGame(initial: ResetParams): UseGameResult {
     if (params.p1BotName) labels.push(`P1 — ${params.p1BotName}`);
     if (params.p2BotName) labels.push(`P2 — ${params.p2BotName}`);
   
-    const packs = listPacks();
-    const nameOfSeries = (id: string) =>
-      packs.find((p) => p.id === id)?.name ?? id;
+    const nameOfSeries = (id: string) => getSeriesName(id);
   
     const p1Series = seriesOfDeck(p1Cards);
     const p2Series = seriesOfDeck(p2Cards);

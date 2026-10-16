@@ -7,6 +7,8 @@ import type { MatchmakingStatusDto } from '@aspects/shared';
 import { botDisplayName } from '@aspects/bot';
 import { BotRatingService } from '../rating/bot-rating.service';
 import { RatingService } from '../rating/rating.service';
+import { decksForSeries, mergedCardsById } from '@aspects/cards';
+import { generateRandomDeck } from '@aspects/shared';
 
 const ENTRY_TTL_SECONDS = 5 * 60;
 const QUEUE_PREFIX = 'aspects:mm:queue:';
@@ -68,6 +70,14 @@ export class MatchmakingService {
   ): Promise<MatchmakingStatusDto> {
     if (deckCards.length !== 30) {
       throw new BadRequestException('Deck must have exactly 30 cards');
+    }
+    const pool = Object.values(mergedCardsById(series));
+    const botPreview = generateRandomDeck(pool, { size: 30 });
+    const hasPreset = decksForSeries(series).length > 0;
+    if (!botPreview && !hasPreset) {
+      throw new BadRequestException(
+        'Too few cards in the selected series: cannot build a bot opponent',
+      );
     }
     if (series.length === 0 || series.length > 4) {
       throw new BadRequestException('series must have 1..4 entries');

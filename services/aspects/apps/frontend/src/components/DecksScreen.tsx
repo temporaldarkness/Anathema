@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { DeckDto } from '@aspects/shared';
-import { getCards, listPacks } from '@aspects/cards';
+import { getCards, listPacks, getSeriesName } from '@aspects/cards';
 import type { AuthState } from '../game/useAuth';
 import type { UseDecksResult } from '../game/useDecks';
 import { AuthBadge } from './AuthBadge';
@@ -116,12 +116,10 @@ function DeckCard({
     [deck],
   );
 
-  const seriesNames = useMemo(() => {
-    const allPacks = listPacks();
-    return series
-      .map((id) => allPacks.find((p) => p.id === id)?.name ?? id)
-      .filter(Boolean);
-  }, [series]);
+  const seriesNames = useMemo(
+    () => series.map(getSeriesName),
+    [series],
+  );
 
   const stats = useMemo(() => {
     const merged = new Map<string, ReturnType<typeof getCards>[number]>();

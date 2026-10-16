@@ -5,7 +5,7 @@ import type {
   JoinRoomDto,
   DeckDto,
 } from '@aspects/shared';
-import { getDecks, listPacks, seriesOfDeck } from '@aspects/cards';
+import { listActiveDecks, listPacks, seriesOfDeck } from '@aspects/cards';
 import type { AuthState } from '../game/useAuth';
 import { onlineApi } from '../game/onlineApi';
 import { AuthBadge } from './AuthBadge';
@@ -61,7 +61,7 @@ export function OnlineLobbyScreen({
 
   // ─── Create ───
   const [deckId, setDeckId] = useState(() => {
-    const d = getDecks()[0];
+    const d = listActiveDecks()[0];
     return d ? `preset:${d.id}` : '';
   });
 
@@ -104,7 +104,7 @@ export function OnlineLobbyScreen({
   useEffect(() => {
     if (!roomLookup) return;
     if (joinDeckId) return;
-    const d = getDecks()[0];
+    const d = listActiveDecks()[0];
     if (d) setJoinDeckId(`preset:${d.id}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomLookup]);
@@ -154,7 +154,7 @@ export function OnlineLobbyScreen({
     }
     if (deckValue.startsWith('preset:')) {
       const id = deckValue.slice('preset:'.length);
-      return getDecks().find((x) => x.id === id)?.cards ?? null;
+      return listActiveDecks().find((x) => x.id === id)?.cards ?? null;
     }
     return null;
   };
@@ -271,7 +271,7 @@ export function OnlineLobbyScreen({
     }
   };
 
-  const allDecks = getDecks();
+  const allDecks = listActiveDecks();
   const allPresets = allDecks;
 
   return (

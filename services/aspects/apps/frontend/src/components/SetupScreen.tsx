@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { listPacks, getDecks, getCards, seriesOfDeck } from '@aspects/cards'
+import { listPacks, listActiveDecks, getCards, seriesOfDeck } from '@aspects/cards'
 import type { DeckDto } from '@aspects/shared';
 import { generateRandomDeck } from '@aspects/shared';
 import type { AuthState } from '../game/useAuth';
@@ -129,7 +129,7 @@ function DeckChooser({
   cardIds,
   series,
 }: DeckChooserProps) {
-  const presets = getDecks();
+  const presets = listActiveDecks();
   const currentKey = value ? choiceKey(value) : '';
 
   return (
@@ -208,13 +208,13 @@ export function SetupScreen({
 }: Props) {
   const [p1Deck, setP1Deck] = useState<DeckChoice | null>(() => {
     if (initial.deckP1Id) return { kind: 'preset', id: initial.deckP1Id };
-    const ds = getDecks();
+    const ds = listActiveDecks();
     return ds[0] ? { kind: 'preset', id: ds[0].id } : null;
   });
 
   const [p2Deck, setP2Deck] = useState<DeckChoice | null>(() => {
     if (initial.deckP2Id) return { kind: 'preset', id: initial.deckP2Id };
-    const ds = getDecks();
+    const ds = listActiveDecks();
     return ds[1]
       ? { kind: 'preset', id: ds[1].id }
       : ds[0]
@@ -241,7 +241,7 @@ export function SetupScreen({
       const found = savedDecks.find((d) => d.id === choice.id);
       return found ? found.cardIds : null;
     }
-    const p = getDecks().find((x) => x.id === choice.id);
+    const p = listActiveDecks().find((x) => x.id === choice.id);
     return p?.cards ?? null;
   };
 
@@ -252,7 +252,7 @@ export function SetupScreen({
       if (choice.kind === 'saved') {
         return savedDecks.find((d) => d.id === choice.id)?.cardIds ?? [];
       }
-      const d = getDecks().find((x) => x.id === choice.id);
+      const d = listActiveDecks().find((x) => x.id === choice.id);
       return d?.cards ?? [];
     },
     [savedDecks],
