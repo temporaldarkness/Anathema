@@ -211,12 +211,19 @@ export function simulateAttackFully(
         cardIds: [],
       });
       sim = { ...sim, state: r.state, events: [...sim.events, ...r.events] };
-    } else {
-      // END_TURN_DISCARD — сбрасываем первые N.
+    } else if (choice.kind === 'END_TURN_DISCARD') {
       const r = applyCommand(sim.state, {
         type: 'RESOLVE_CHOICE',
         playerId: choice.playerId,
         cardIds: choice.eligibleCardIds.slice(0, choice.count),
+      });
+      sim = { ...sim, state: r.state, events: [...sim.events, ...r.events] };
+    } else {
+      // REPLACE_TARGET_SELECTION — в симуляции атаки замен не бывает,
+      // но если выбор всплыл, безопаснее отменить его без трат Влияния.
+      const r = applyCommand(sim.state, {
+        type: 'CANCEL_CHOICE',
+        playerId: choice.playerId,
       });
       sim = { ...sim, state: r.state, events: [...sim.events, ...r.events] };
     }

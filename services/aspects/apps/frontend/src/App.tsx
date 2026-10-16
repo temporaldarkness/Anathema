@@ -391,6 +391,19 @@ function AppMain({
       cardIds,
     });
   };
+  const handleCancelChoice = () => {
+    const choice = state.pendingChoice;
+    if (!choice) return;
+    if (choice.kind === 'REPLACE_TARGET_SELECTION') {
+      dispatch({ type: 'CANCEL_CHOICE', playerId: choice.playerId });
+    } else {
+      dispatch({
+        type: 'RESOLVE_CHOICE',
+        playerId: choice.playerId,
+        cardIds: [],
+      });
+    }
+  };
 
   const startNewGame = (opts: Partial<ResetParams> = {}) => {
     const merged: ResetParams = { ...resetParams, ...opts, seed: `game-${Date.now()}` };
@@ -830,7 +843,13 @@ function AppMain({
         const pid = state.pendingChoice.playerId;
         const pidIsBot = pid === 'p1' ? p1IsBot : p2IsBot;
         if (pidIsBot) return null;
-        return <ChoicePrompt state={state} onSubmit={handleChoice} />;
+        return (
+          <ChoicePrompt
+            state={state}
+            onSubmit={handleChoice}
+            onCancel={handleCancelChoice}
+          />
+        );
       })()}
 
       {passOverlay &&

@@ -250,6 +250,10 @@ export class HeuristicBot implements Bot {
     );
     if (resolves.length === 0) return null;
 
+    if (choice.kind === 'REPLACE_TARGET_SELECTION') {
+      return this.pickReplaceTarget(state, resolves);
+    }
+
     if (choice.kind !== 'EFFECT_TARGET_SELECTION') {
       return resolves[0];
     }
@@ -260,6 +264,29 @@ export class HeuristicBot implements Bot {
       if (r.cardIds.length === 0) continue;
       const score = this.scoreChoiceTargets(state, myPlayerId, r.cardIds);
       if (score > bestScore) {
+        bestScore = score;
+        best = r;
+      }
+    }
+    return best ?? resolves[0];
+  }
+
+  private pickReplaceTarget(
+    state: GameState,
+    resolves: readonly ResolveCommand[],
+  ): ResolveCommand {
+    let best: ResolveCommand | null = null;
+    let bestScore = Infinity;
+    for (const r of resolves) {
+      if (r.cardIds.length !== 1) continue;
+      const id = r.cardIds[0];
+      const card = state.cards[id];
+      if (!card) continue;
+      const def = state.definitions[card.definitionId];
+      if (!def) continue;
+      const hp = health(card);
+      const score = hp * 10 + (def.cost ?? 0) * 5;
+      if (score < bestScore) {
         bestScore = score;
         best = r;
       }
@@ -286,7 +313,7 @@ export class HeuristicBot implements Bot {
 
   private pickWorstForDiscard(
     state: GameState,
-    choice: NonNullable<GameState['pendingChoice']>,
+    choice: Extract<NonNullable<GameState['pendingChoice']>, { kind: 'END_TURN_DISCARD' }>,
     myPlayerId: PlayerId,
   ): ResolveCommand {
     const ids = choice.eligibleCardIds.slice();

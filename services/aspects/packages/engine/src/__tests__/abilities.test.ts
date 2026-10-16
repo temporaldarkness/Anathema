@@ -227,8 +227,19 @@ describe('ON_ENTER', () => {
     s = b.state;
     const handBefore = s.players[active].hand.length;
 
-    const r = applyCommand(s, { type: 'REPLACE_CARD', playerId: active, cardId: b.cardId });
+    let r = applyCommand(s, { type: 'REPLACE_CARD', playerId: active, cardId: b.cardId });
+    expect(r.state.pendingChoice).not.toBeNull();
+    expect(r.state.pendingChoice!.kind).toBe('REPLACE_TARGET_SELECTION');
+
+    const target = r.state.pendingChoice!.eligibleCardIds[0];
+    r = applyCommand(r.state, {
+      type: 'RESOLVE_CHOICE',
+      playerId: active,
+      cardIds: [target],
+    });
+
     expect(r.state.players[active].hand.length).toBe(handBefore - 1);
+    expect(r.events.some((e) => e.type === 'CARD_REPLACED')).toBe(true);
   });
 });
 

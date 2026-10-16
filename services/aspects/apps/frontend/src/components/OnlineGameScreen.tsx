@@ -443,6 +443,22 @@ function OnlineGameInner({
       cardIds,
     });
   };
+  
+  const handleCancelChoice = () => {
+    if (isSpectator || !mySide) return;
+    const choice = state.pendingChoice;
+    if (!choice) return;
+    if (choice.playerId !== mySide) return;
+    if (choice.kind === 'REPLACE_TARGET_SELECTION') {
+      dispatch({ type: 'CANCEL_CHOICE', playerId: choice.playerId });
+    } else {
+      dispatch({
+        type: 'RESOLVE_CHOICE',
+        playerId: choice.playerId,
+        cardIds: [],
+      });
+    }
+  };
 
   const opponentFrontEmpty = frontCount(state, opponentSideSafe) === 0;
   const bothPlayersReady = !!(roomInfo?.ownerId && roomInfo?.guestId);
@@ -652,7 +668,11 @@ function OnlineGameInner({
       </div>
 
       {!isSpectator && state.pendingChoice && state.pendingChoice.playerId === mySide && (
-        <ChoicePrompt state={state} onSubmit={handleChoice} />
+        <ChoicePrompt
+          state={state}
+          onSubmit={handleChoice}
+          onCancel={handleCancelChoice}
+        />
       )}
 
       {!isSpectator && (

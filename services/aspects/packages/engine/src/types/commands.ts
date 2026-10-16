@@ -32,13 +32,17 @@ export type Command =
       abilityIndex: number;
     }
   | { type: 'END_TURN'; playerId: PlayerId }
-  | { 
-		type: 'MULLIGAN';
-		playerId: PlayerId;
-		cardId: CardInstanceId | null;
-	}
+  | {
+      type: 'MULLIGAN';
+      playerId: PlayerId;
+      cardId: CardInstanceId | null;
+    }
   | {
       type: 'RESOLVE_CHOICE';
       playerId: PlayerId;
       cardIds: CardInstanceId[];
+    }
+  | {
+      type: 'CANCEL_CHOICE';
+      playerId: PlayerId;
     };

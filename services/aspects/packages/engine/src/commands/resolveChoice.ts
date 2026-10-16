@@ -9,6 +9,7 @@ import { resolveEffect } from '../abilities/effectResolver';
 import { advancePhaseInternal } from './advancePhase';
 import { processTemporaryCards } from './advancePhase';
 import { controlledCells } from '../state/helpers';
+import { applyReplacementInternal } from './replace';
 
 export interface ResolveChoiceParams {
   playerId: PlayerId;
@@ -23,7 +24,7 @@ export function resolveChoiceInternal(
   const choice = draft.pendingChoice;
   if (!choice) return { ok: false, reason: 'no_pending_choice' };
   if (choice.playerId !== params.playerId) return { ok: false, reason: 'not_your_choice' };
-  
+
   if (
     choice.kind === 'EFFECT_TARGET_SELECTION' &&
     params.cardIds.length === 0
@@ -36,8 +37,12 @@ export function resolveChoiceInternal(
     });
     return { ok: true };
   }
-  
-  if (params.cardIds.length !== choice.count) return { ok: false, reason: 'wrong_card_count' };
+
+  const expectedCount =
+    choice.kind === 'REPLACE_TARGET_SELECTION' ? 1 : choice.count;
+  if (params.cardIds.length !== expectedCount) {
+    return { ok: false, reason: 'wrong_card_count' };
+  }
 
   const seen = new Set<CardInstanceId>();
   for (const id of params.cardIds) {
@@ -72,21 +77,21 @@ export function resolveChoiceInternal(
           if (reserveId) promoteFromReserve(draft, reserveId, ctx);
         }
       }
-	  
-	  processTemporaryCards(draft, ctx);
+
+      processTemporaryCards(draft, ctx);
 
       draft.activePlayer = opponentOf(draft.activePlayer);
       draft.turnNumber += 1;
       draft.players[draft.activePlayer].replacementUsedThisTurn = false;
       draft.players[draft.activePlayer].cardsPlayedThisTurn = 0;
-	  const newActive = draft.activePlayer;
+      const newActive = draft.activePlayer;
       for (const id of Object.keys(draft.cards) as CardInstanceId[]) {
         const card = draft.cards[id];
         if (card.ownerId !== newActive) continue;
         if (card.usedAbilitiesThisTurn.length > 0) {
           card.usedAbilitiesThisTurn = [];
         }
-		if (card.usedTriggerIdsThisTurn.length > 0) {
+        if (card.usedTriggerIdsThisTurn.length > 0) {
           card.usedTriggerIdsThisTurn = [];
         }
       }
@@ -144,6 +149,37 @@ export function resolveChoiceInternal(
           params.cardIds,
         );
         if (draft.pendingChoice) break;
+      }
+      return { ok: true };
+    }
+
+    case 'REPLACE_TARGET_SELECTION': {
+      const newCardId = choice.newCardId;
+      const targetCardId = params.cardIds[0];
+      draft.pendingChoice = null;
+      ctx.events.push({
+        type: 'CHOICE_RESOLVED',
+        playerId: choice.playerId,
+        kind: 'REPLACE_TARGET_SELECTION',
+      });
+
+      const res = applyReplacementInternal(
+        draft,
+        {
+          playerId: choice.playerId,
+          newCardId,
+          targetCardId,
+        },
+        ctx,
+      );
+      if (!res.ok) {
+        // Теоретически недостижимо: все проверки пройдены в replaceInternal,
+        // между постановкой выбора и резолвом ничего не меняется.
+        ctx.events.push({
+          type: 'COMMAND_REJECTED',
+          playerId: choice.playerId,
+          reason: `replacement_failed:${res.reason}`,
+        });
       }
       return { ok: true };
     }

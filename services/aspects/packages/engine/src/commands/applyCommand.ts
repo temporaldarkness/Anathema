@@ -9,6 +9,7 @@ import { endTurnInternal } from './endTurn';
 import { attackInternal } from './attack';
 import { replaceInternal } from './replace';
 import { resolveChoiceInternal } from './resolveChoice';
+import { cancelChoiceInternal } from './cancelChoice';
 import { useAbilityInternal } from './useAbility';
 import { mulliganInternal } from './mulligan';
 import { drainTriggerQueue } from '../abilities/triggerQueue';
@@ -21,13 +22,13 @@ export interface ApplyResult {
 }
 
 export function applyCommand(state: GameState, cmd: Command): ApplyResult {
-  const ctx: ResolutionContext = { events: [], pendingNeutralCaptures: [], };
+  const ctx: ResolutionContext = { events: [], pendingNeutralCaptures: [] };
 
   if (state.winner) {
     ctx.events.push({ type: 'COMMAND_REJECTED', playerId: 'p1', reason: 'game_already_over' });
     return { state, events: ctx.events };
   }
-  
+
   if (state.phase === 'MULLIGAN' && cmd.type !== 'MULLIGAN') {
     ctx.events.push({
       type: 'COMMAND_REJECTED',
@@ -37,7 +38,11 @@ export function applyCommand(state: GameState, cmd: Command): ApplyResult {
     return { state, events: ctx.events };
   }
 
-  if (state.pendingChoice && cmd.type !== 'RESOLVE_CHOICE') {
+  if (
+    state.pendingChoice &&
+    cmd.type !== 'RESOLVE_CHOICE' &&
+    cmd.type !== 'CANCEL_CHOICE'
+  ) {
     ctx.events.push({
       type: 'COMMAND_REJECTED',
       playerId: state.pendingChoice.playerId,
@@ -54,7 +59,7 @@ export function applyCommand(state: GameState, cmd: Command): ApplyResult {
     drainTriggerQueue(draft, ctx);
 
     switch (cmd.type) {
-	  case 'MULLIGAN': {
+      case 'MULLIGAN': {
         const res = mulliganInternal(
           draft,
           { playerId: cmd.playerId, cardId: cmd.cardId },
@@ -117,7 +122,7 @@ export function applyCommand(state: GameState, cmd: Command): ApplyResult {
         }
         break;
       }
-	  case 'USE_ABILITY': {
+      case 'USE_ABILITY': {
         const res = useAbilityInternal(
           draft,
           {
@@ -143,6 +148,17 @@ export function applyCommand(state: GameState, cmd: Command): ApplyResult {
         }
         break;
       }
+      case 'CANCEL_CHOICE': {
+        const res = cancelChoiceInternal(
+          draft,
+          { playerId: cmd.playerId },
+          ctx,
+        );
+        if (!res.ok) {
+          ctx.events.push({ type: 'COMMAND_REJECTED', playerId: cmd.playerId, reason: res.reason });
+        }
+        break;
+      }
       default: {
         ctx.events.push({
           type: 'COMMAND_REJECTED',
@@ -159,7 +175,7 @@ export function applyCommand(state: GameState, cmd: Command): ApplyResult {
       killCard(draft, id as any, ctx);
     }
     drainTriggerQueue(draft, ctx);
-	
+
     for (const cap of ctx.pendingNeutralCaptures) {
       const attacker = draft.cards[cap.attackerId];
       if (!attacker || attacker.zone === 'DISCARD') continue;

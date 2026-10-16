@@ -141,7 +141,9 @@ describe('Выбор целей игроком', () => {
 
     expect(result.state.pendingChoice).not.toBeNull();
     expect(result.state.pendingChoice!.kind).toBe('EFFECT_TARGET_SELECTION');
-    expect(result.state.pendingChoice!.count).toBe(1);
+    if (result.state.pendingChoice!.kind === 'EFFECT_TARGET_SELECTION') {
+      expect(result.state.pendingChoice!.count).toBe(1);
+    }
     expect(result.state.pendingChoice!.playerId).toBe(active);
     expect(result.state.pendingChoice!.eligibleCardIds.length).toBe(2);
     expect(result.events.some((e) => e.type === 'CHOICE_REQUESTED')).toBe(true);

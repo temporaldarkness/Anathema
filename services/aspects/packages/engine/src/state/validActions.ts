@@ -20,22 +20,33 @@ export function getValidActions(
     const choice = state.pendingChoice;
     if (choice.playerId !== playerId) return [];
 
-    if (choice.kind === 'EFFECT_TARGET_SELECTION') {
-      const actions: Command[] = [];
-      actions.push({ type: 'RESOLVE_CHOICE', playerId, cardIds: [] });
-      for (const id of choice.eligibleCardIds) {
-        actions.push({ type: 'RESOLVE_CHOICE', playerId, cardIds: [id] });
+    switch (choice.kind) {
+      case 'EFFECT_TARGET_SELECTION': {
+        const actions: Command[] = [];
+        actions.push({ type: 'RESOLVE_CHOICE', playerId, cardIds: [] });
+        for (const id of choice.eligibleCardIds) {
+          actions.push({ type: 'RESOLVE_CHOICE', playerId, cardIds: [id] });
+        }
+        return actions;
       }
-      return actions;
+      case 'REPLACE_TARGET_SELECTION': {
+        const actions: Command[] = [];
+        for (const id of choice.eligibleCardIds) {
+          actions.push({ type: 'RESOLVE_CHOICE', playerId, cardIds: [id] });
+        }
+        actions.push({ type: 'CANCEL_CHOICE', playerId });
+        return actions;
+      }
+      case 'END_TURN_DISCARD': {
+        return [
+          {
+            type: 'RESOLVE_CHOICE',
+            playerId,
+            cardIds: choice.eligibleCardIds.slice(0, choice.count),
+          },
+        ];
+      }
     }
-
-    return [
-      {
-        type: 'RESOLVE_CHOICE',
-        playerId,
-        cardIds: choice.eligibleCardIds.slice(0, choice.count),
-      },
-    ];
   }
 
   if (state.phase === 'MULLIGAN') {

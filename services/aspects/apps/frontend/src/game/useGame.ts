@@ -266,11 +266,23 @@ export function useGame(initial: ResetParams): UseGameResult {
         });
         if (state.pendingChoice) {
           const choice = state.pendingChoice;
-          const cardIds =
-            choice.kind === 'EFFECT_TARGET_SELECTION'
-              ? []
-              : choice.eligibleCardIds.slice(0, choice.count);
-          cmd = { type: 'RESOLVE_CHOICE', playerId: choice.playerId, cardIds };
+          if (choice.kind === 'EFFECT_TARGET_SELECTION') {
+            cmd = {
+              type: 'RESOLVE_CHOICE',
+              playerId: choice.playerId,
+              cardIds: [],
+            };
+          } else if (choice.kind === 'REPLACE_TARGET_SELECTION') {
+            // Боты уже умеют выбирать цель замены сами. Сюда попадаем
+            // только если что-то пошло не так — безопаснее отменить.
+            cmd = { type: 'CANCEL_CHOICE', playerId: choice.playerId };
+          } else {
+            cmd = {
+              type: 'RESOLVE_CHOICE',
+              playerId: choice.playerId,
+              cardIds: choice.eligibleCardIds.slice(0, choice.count),
+            };
+          }
         } else if (state.phase === 'PLAY' || state.phase === 'COMBAT') {
           cmd = { type: 'END_TURN', playerId: pid };
         } else if (state.phase === 'MULLIGAN') {

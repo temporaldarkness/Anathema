@@ -1,5 +1,5 @@
 import type { CardInstanceId, ColumnIndex, PlayerId } from './ids';
-import type { GameState, Phase, Zone } from './state';
+import type { GameState, PendingChoice, Phase, Zone } from './state';
 
 export type GameEvent =
   | { type: 'GAME_STARTED'; seed: string; firstPlayer: PlayerId }
@@ -46,13 +46,18 @@ export type GameEvent =
   | {
       type: 'CHOICE_REQUESTED';
       playerId: PlayerId;
-      kind: 'END_TURN_DISCARD' | 'EFFECT_TARGET_SELECTION';
+      kind: PendingChoice['kind'];
       count: number;
     }
   | {
       type: 'CHOICE_RESOLVED';
       playerId: PlayerId;
-      kind: 'END_TURN_DISCARD' | 'EFFECT_TARGET_SELECTION';
+      kind: PendingChoice['kind'];
+    }
+  | {
+      type: 'CHOICE_CANCELLED';
+      playerId: PlayerId;
+      kind: PendingChoice['kind'];
     }
   | {
       type: 'MULLIGAN_DONE';
@@ -64,7 +69,7 @@ export type GameEvent =
       cardId: CardInstanceId;
       defId: string;
       ownerId: PlayerId;
-	  destination: 'FRONT' | 'RESERVE' | 'HAND';
+      destination: 'FRONT' | 'RESERVE' | 'HAND';
       column: ColumnIndex | null;
     }
   | {

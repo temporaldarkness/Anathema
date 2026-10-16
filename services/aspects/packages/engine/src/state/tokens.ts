@@ -3,7 +3,7 @@ import type { GameState, CardInstance } from '../types/state';
 import type { ResolutionContext } from '../types/resolution';
 import type { CardInstanceId, ColumnIndex, PlayerId } from '../types/ids';
 import { asCardInstanceId } from '../types/ids';
-import { personalityOnBoard } from './helpers';
+import { randomIndex } from './rng';
 
 export type SummonDestination = 'FRONT' | 'RESERVE' | 'HAND';
 
@@ -20,18 +20,9 @@ export function summonToken(
     return null;
   }
 
-  // Правило «одна личность на поле» — только для токенов с sharesIdentity.
-  if (def.isToken && (def.sharesIdentity ?? false)) {
-    if (personalityOnBoard(draft as GameState, ownerId, def.personalityTag)) {
-      ctx.events.push({
-        type: 'TOKEN_LOST',
-        defId,
-        ownerId,
-        reason: 'personality_conflict',
-      });
-      return null;
-    }
-  }
+  // Токены при призыве не конфликтуют по Личности — ни с обычными картами,
+  // ни между собой. Правило «одна Личность» применяется только при розыгрыше
+  // карты из руки и при замене.
 
   draft.instanceCounter += 1;
   const instanceId = asCardInstanceId(`t${draft.instanceCounter}`);
@@ -56,8 +47,8 @@ export function summonToken(
       usedTriggerIdsThisTurn: [],
       isToken: true,
       sharesIdentity: def.sharesIdentity ?? false,
-	  tempTurnsLeft: def.tempDuration ?? null,
-	  readyForFront: false,
+      tempTurnsLeft: def.tempDuration ?? null,
+      readyForFront: false,
     };
     draft.cards[instanceId] = card;
     draft.players[ownerId].hand.push(instanceId);
@@ -103,8 +94,8 @@ export function summonToken(
     usedTriggerIdsThisTurn: [],
     isToken: true,
     sharesIdentity: def.sharesIdentity ?? false,
-	tempTurnsLeft: def.tempDuration ?? null,
-	readyForFront: false,
+    tempTurnsLeft: def.tempDuration ?? null,
+    readyForFront: false,
   };
 
   draft.cards[instanceId] = card;
@@ -136,23 +127,39 @@ function findFreeSlot(
   destination: SummonDestination,
 ): { zone: 'FRONT' | 'RESERVE'; column: ColumnIndex } | null {
   if (destination === 'FRONT') {
+    const frontCols: ColumnIndex[] = [];
     for (let i = 1; i <= 5; i++) {
       const col = draft.board[i - 1];
       const frontId = ownerId === 'p1' ? col.p1Front : col.p2Front;
-      if (frontId === null) return { zone: 'FRONT', column: i as ColumnIndex };
+      if (frontId === null) frontCols.push(i as ColumnIndex);
     }
+    if (frontCols.length > 0) {
+      const column = frontCols[randomIndex(draft, frontCols.length)];
+      return { zone: 'FRONT', column };
+    }
+
+    const reserveCols: ColumnIndex[] = [];
     for (let i = 1; i <= 5; i++) {
       const col = draft.board[i - 1];
       const reserveId = ownerId === 'p1' ? col.p1Reserve : col.p2Reserve;
-      if (reserveId === null) return { zone: 'RESERVE', column: i as ColumnIndex };
+      if (reserveId === null) reserveCols.push(i as ColumnIndex);
+    }
+    if (reserveCols.length > 0) {
+      const column = reserveCols[randomIndex(draft, reserveCols.length)];
+      return { zone: 'RESERVE', column };
     }
     return null;
   }
 
+  const reserveCols: ColumnIndex[] = [];
   for (let i = 1; i <= 5; i++) {
     const col = draft.board[i - 1];
     const reserveId = ownerId === 'p1' ? col.p1Reserve : col.p2Reserve;
-    if (reserveId === null) return { zone: 'RESERVE', column: i as ColumnIndex };
+    if (reserveId === null) reserveCols.push(i as ColumnIndex);
+  }
+  if (reserveCols.length > 0) {
+    const column = reserveCols[randomIndex(draft, reserveCols.length)];
+    return { zone: 'RESERVE', column };
   }
   return null;
 }

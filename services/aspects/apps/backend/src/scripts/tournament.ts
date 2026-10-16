@@ -53,6 +53,38 @@ function randomSeed(): string {
 }
 
 /**
+ * Аварийный выбор, если бот вернул null, но выбор всё ещё висит.
+ * Безопасные дефолты для каждого вида:
+ *   - END_TURN_DISCARD: сбрасываем первые N карт (обязательный выбор).
+ *   - EFFECT_TARGET_SELECTION: пустой ответ = отмена эффекта.
+ *   - REPLACE_TARGET_SELECTION: CANCEL_CHOICE — не тратим Влияние.
+ */
+function buildFallbackChoiceCommand(state: GameState): Command | null {
+  const choice = state.pendingChoice;
+  if (!choice) return null;
+
+  switch (choice.kind) {
+    case 'END_TURN_DISCARD':
+      return {
+        type: 'RESOLVE_CHOICE',
+        playerId: choice.playerId,
+        cardIds: choice.eligibleCardIds.slice(0, choice.count),
+      };
+    case 'EFFECT_TARGET_SELECTION':
+      return {
+        type: 'RESOLVE_CHOICE',
+        playerId: choice.playerId,
+        cardIds: [],
+      };
+    case 'REPLACE_TARGET_SELECTION':
+      return {
+        type: 'CANCEL_CHOICE',
+        playerId: choice.playerId,
+      };
+  }
+}
+
+/**
  * Прогоняет одну партию между двумя ботами.
  * Возвращает 'p1' | 'p2' | 'draw' | 'abort'.
  */
@@ -90,14 +122,13 @@ function playMatch(
       const pid = state.pendingChoice.playerId;
       const bot = pid === 'p1' ? bot1 : bot2;
       cmd = bot.chooseCommand(state, pid);
+      if (!cmd) cmd = buildFallbackChoiceCommand(state);
       if (!cmd) {
-        // fallback — свернуть выбор без цели
-        const choice = state.pendingChoice;
-        const cardIds =
-          choice.kind === 'EFFECT_TARGET_SELECTION'
-            ? []
-            : choice.eligibleCardIds.slice(0, choice.count);
-        cmd = { type: 'RESOLVE_CHOICE', playerId: pid, cardIds };
+        // Теоретически недостижимо: pendingChoice есть, но fallback вернул null.
+        console.warn(
+          `[tournament] pendingChoice without fallback, aborting (turn ${turns})`,
+        );
+        return 'abort';
       }
     } else {
       const pid = state.activePlayer;

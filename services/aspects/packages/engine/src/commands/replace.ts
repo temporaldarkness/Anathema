@@ -18,6 +18,17 @@ export interface ReplaceParams {
   cardId: CardInstanceId;
 }
 
+export interface ApplyReplacementParams {
+  playerId: PlayerId;
+  newCardId: CardInstanceId;
+  targetCardId: CardInstanceId;
+}
+
+/**
+ * Проверяет возможность замены и, если всё в порядке, ставит pendingChoice
+ * с выбором цели. Реальная замена выполняется в applyReplacementInternal
+ * после ответа игрока.
+ */
 export function replaceInternal(
   draft: WritableDraft<GameState>,
   params: ReplaceParams,
@@ -39,8 +50,7 @@ export function replaceInternal(
   if (!newDef) return { ok: false, reason: 'unknown_definition' };
 
   const personality = newDef.personalityTag;
-  let oldCardId: CardInstanceId | null = null;
-  let oldLocation: ReturnType<typeof findCardLocation> = null;
+  const candidates: CardInstanceId[] = [];
 
   for (const col of draft.board) {
     const keys: ('p1Front' | 'p1Reserve' | 'p2Front' | 'p2Reserve')[] =
@@ -51,52 +61,115 @@ export function replaceInternal(
       const c = draft.cards[id];
       const def = draft.definitions[c.definitionId];
       if (def && def.personalityTag === personality) {
-        oldCardId = id;
-        oldLocation = findCardLocation(draft as GameState, id);
-        break;
+        candidates.push(id);
       }
     }
-    if (oldCardId) break;
   }
 
-  if (!oldCardId || !oldLocation) return { ok: false, reason: 'no_matching_card_on_board' };
+  if (candidates.length === 0) {
+    return { ok: false, reason: 'no_matching_card_on_board' };
+  }
 
-  const cost = Math.max(0, newDef.cost - columnBonuses(draft as GameState, playerId).costReduction);
-  if (draft.players[playerId].influence < cost) return { ok: false, reason: 'not_enough_influence' };
+  const cost = Math.max(
+    0,
+    newDef.cost - columnBonuses(draft as GameState, playerId).costReduction,
+  );
+  if (draft.players[playerId].influence < cost) {
+    return { ok: false, reason: 'not_enough_influence' };
+  }
+
+  draft.pendingChoice = {
+    kind: 'REPLACE_TARGET_SELECTION',
+    playerId,
+    newCardId: cardId,
+    eligibleCardIds: candidates,
+  };
+  ctx.events.push({
+    type: 'CHOICE_REQUESTED',
+    playerId,
+    kind: 'REPLACE_TARGET_SELECTION',
+    count: 1,
+  });
+
+  return { ok: true };
+}
+
+/**
+ * Применяет замену. Вызывается из resolveChoice, когда игрок выбрал цель.
+ * Все проверки уже выполнены в replaceInternal, состояние не может
+ * стать невалидным между постановкой выбора и его резолвом.
+ */
+export function applyReplacementInternal(
+  draft: WritableDraft<GameState>,
+  params: ApplyReplacementParams,
+  ctx: ResolutionContext,
+): { ok: true } | { ok: false; reason: string } {
+  const { playerId, newCardId, targetCardId } = params;
+
+  const newCard = draft.cards[newCardId];
+  if (!newCard) return { ok: false, reason: 'card_not_found' };
+  if (!draft.players[playerId].hand.includes(newCardId)) {
+    return { ok: false, reason: 'card_not_in_hand' };
+  }
+
+  const newDef = draft.definitions[newCard.definitionId];
+  if (!newDef) return { ok: false, reason: 'unknown_definition' };
+
+  const oldCard = draft.cards[targetCardId];
+  if (!oldCard) return { ok: false, reason: 'target_not_found' };
+
+  const oldDef = draft.definitions[oldCard.definitionId];
+  if (!oldDef || oldDef.personalityTag !== newDef.personalityTag) {
+    return { ok: false, reason: 'target_personality_mismatch' };
+  }
+
+  const oldLocation = findCardLocation(draft as GameState, targetCardId);
+  if (!oldLocation) return { ok: false, reason: 'target_not_on_board' };
+
+  const cost = Math.max(
+    0,
+    newDef.cost - columnBonuses(draft as GameState, playerId).costReduction,
+  );
+  if (draft.players[playerId].influence < cost) {
+    return { ok: false, reason: 'not_enough_influence' };
+  }
   if (cost > 0) changeInfluence(draft, playerId, -cost, ctx);
 
-  const wasExhausted = draft.cards[oldCardId].exhausted;
+  const wasExhausted = oldCard.exhausted;
   const oldColumn = oldLocation.column;
 
-  killCardNoExit(draft, oldCardId);
+  killCardNoExit(draft, targetCardId);
 
-  removeFromHand(draft, playerId, cardId);
-  
-  resetCardRuntimeState(draft, cardId);
+  removeFromHand(draft, playerId, newCardId);
+  resetCardRuntimeState(draft, newCardId);
 
   const col = getColumn(draft as GameState, oldColumn);
   const frontKey = playerId === 'p1' ? 'p1Front' : 'p2Front';
   const reserveKey = playerId === 'p1' ? 'p1Reserve' : 'p2Reserve';
 
   if (oldLocation.zone === 'FRONT') {
-    (col as any)[frontKey] = cardId;
+    (col as any)[frontKey] = newCardId;
     newCard.zone = 'FRONT';
     newCard.column = oldColumn;
   } else {
-    (col as any)[reserveKey] = cardId;
+    (col as any)[reserveKey] = newCardId;
     newCard.zone = 'RESERVE';
     newCard.column = oldColumn;
-    if (hasAbility(draft as GameState, cardId, 'charge')) {
-      promoteFromReserve(draft, cardId, ctx);
+    if (hasAbility(draft as GameState, newCardId, 'charge')) {
+      promoteFromReserve(draft, newCardId, ctx);
     }
   }
 
   newCard.exhausted = wasExhausted;
   draft.players[playerId].replacementUsedThisTurn = true;
 
-  ctx.events.push({ type: 'CARD_REPLACED', oldCardId, newCardId: cardId });
+  ctx.events.push({
+    type: 'CARD_REPLACED',
+    oldCardId: targetCardId,
+    newCardId,
+  });
 
-  enqueueTrigger(draft, cardId, 'ON_REPLACE');
+  enqueueTrigger(draft, newCardId, 'ON_REPLACE');
 
   return { ok: true };
 }

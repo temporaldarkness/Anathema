@@ -3,8 +3,7 @@ import { createGame } from '../state/create';
 import { applyCommand } from '../commands/applyCommand';
 import type { CardDefinition } from '@aspects/cards';
 import type { GameState } from '../types/state';
-import type { ColumnIndex, PlayerId } from '../types/ids';
-import { opponentOf } from '../types/ids';
+import type { PlayerId } from '../types/ids';
 
 const defs: Record<string, CardDefinition> = {
   handSummoner: {
@@ -30,7 +29,7 @@ const defs: Record<string, CardDefinition> = {
     }],
     activatedAbilities: [],
   } as any,
-  
+
   parasite: {
     id: 'parasite', name: 'Паразит', personalityTag: 'parasite', tags: [],
     cost: 1, strength: 1, health: 2, rarity: 'common',
@@ -146,6 +145,17 @@ function ensureInHand(state: GameState, pid: PlayerId, defId: string) {
   };
 }
 
+function playParasite(s: GameState, pid: PlayerId, defId = 'parasite', column: 1 | 2 | 3 | 4 | 5 = 1) {
+  const r = ensureInHand(s, pid, defId);
+  s = r.state;
+  return applyCommand(s, {
+    type: 'PLAY_CARD',
+    playerId: pid,
+    cardId: r.cardId,
+    column,
+  });
+}
+
 describe('SUMMON destination', () => {
   it('HAND: токен уходит в руку', () => {
     let s = setup();
@@ -198,18 +208,11 @@ describe('sharesIdentity', () => {
     let s = setup();
     const active = s.activePlayer;
 
-    const p = ensureInHand(s, active, 'parasite');
-    s = p.state;
-    s = applyCommand(s, {
-      type: 'PLAY_CARD',
-      playerId: active,
-      cardId: p.cardId,
-      column: 1,
-    }).state;
+    s = playParasite(s, active, 'parasite', 1).state;
 
     const larva = Object.values(s.cards).find(
       (c) => c.definitionId === 'tk_larva' && c.ownerId === active,
-    );
+    )!;
     expect(larva).toBeDefined();
     expect(larva!.sharesIdentity).toBe(true);
 
@@ -221,38 +224,59 @@ describe('sharesIdentity', () => {
       cardId: a.cardId,
       column: 2,
     });
+
     expect(
-      res.events.some((e) => e.type === 'COMMAND_REJECTED' && e.reason === 'duplicate_personality'),
+      res.events.some(
+        (e) => e.type === 'COMMAND_REJECTED' && e.reason === 'duplicate_personality',
+      ),
     ).toBe(true);
   });
 
-  it('токен с sharesIdentity не призывается дважды', () => {
+  it('токены не конфликтуют между собой: две личинки сосуществуют', () => {
     let s = setup();
     const active = s.activePlayer;
 
-    const p1 = ensureInHand(s, active, 'parasite');
-    s = p1.state;
-    s = applyCommand(s, {
-      type: 'PLAY_CARD',
-      playerId: active,
-      cardId: p1.cardId,
-      column: 1,
-    }).state;
-
-    const p2 = ensureInHand(s, active, 'parasite2');
-    s = p2.state;
-    const res = applyCommand(s, {
-      type: 'PLAY_CARD',
-      playerId: active,
-      cardId: p2.cardId,
-      column: 2,
-    });
+    s = playParasite(s, active, 'parasite', 1).state;
+    const res = playParasite(s, active, 'parasite2', 2);
 
     const lost = res.events.filter(
       (e) => e.type === 'TOKEN_LOST' && e.defId === 'tk_larva',
     );
-    expect(lost.length).toBe(1);
-    expect((lost[0] as any).reason).toBe('personality_conflict');
+    expect(lost.length).toBe(0);
+
+    const larvae = Object.values(res.state.cards).filter(
+      (c) => c.definitionId === 'tk_larva' && c.ownerId === active,
+    );
+    expect(larvae.length).toBe(2);
+  });
+
+  it('обычная карта на столе не блокирует призыв токена той же личности', () => {
+    let s = setup();
+    const active = s.activePlayer;
+
+    const a = ensureInHand(s, active, 'adult');
+    s = a.state;
+    s = applyCommand(s, {
+      type: 'PLAY_CARD',
+      playerId: active,
+      cardId: a.cardId,
+      column: 1,
+    }).state;
+
+    expect(
+      Object.values(s.cards).some(
+        (c) => c.definitionId === 'adult' && c.ownerId === active,
+      ),
+    ).toBe(true);
+
+    // Призываем Ларву
+    const res = playParasite(s, active, 'parasite', 2);
+
+    expect(
+      res.events.some(
+        (e) => e.type === 'TOKEN_LOST' && e.defId === 'tk_larva',
+      ),
+    ).toBe(false);
 
     const larvae = Object.values(res.state.cards).filter(
       (c) => c.definitionId === 'tk_larva' && c.ownerId === active,
@@ -264,14 +288,7 @@ describe('sharesIdentity', () => {
     let s = setup();
     const active = s.activePlayer;
 
-    const p = ensureInHand(s, active, 'parasite');
-    s = p.state;
-    s = applyCommand(s, {
-      type: 'PLAY_CARD',
-      playerId: active,
-      cardId: p.cardId,
-      column: 1,
-    }).state;
+    s = playParasite(s, active, 'parasite', 1).state;
 
     const larva = Object.values(s.cards).find(
       (c) => c.definitionId === 'tk_larva' && c.ownerId === active,
@@ -280,10 +297,20 @@ describe('sharesIdentity', () => {
     const a = ensureInHand(s, active, 'adult');
     s = a.state;
 
-    const res = applyCommand(s, {
+    s = applyCommand(s, {
       type: 'REPLACE_CARD',
       playerId: active,
       cardId: a.cardId,
+    }).state;
+
+    expect(s.pendingChoice).not.toBeNull();
+    expect(s.pendingChoice!.kind).toBe('REPLACE_TARGET_SELECTION');
+    expect(s.pendingChoice!.eligibleCardIds).toContain(larva.instanceId);
+
+    const res = applyCommand(s, {
+      type: 'RESOLVE_CHOICE',
+      playerId: active,
+      cardIds: [larva.instanceId],
     });
 
     expect(res.events.some((e) => e.type === 'COMMAND_REJECTED')).toBe(false);
@@ -291,5 +318,21 @@ describe('sharesIdentity', () => {
     expect(res.state.cards[a.cardId].column).toBe(larva.column);
     expect(res.state.cards[larva.instanceId].zone).toBe('DISCARD');
     expect(res.state.players[active].discard.includes(larva.instanceId)).toBe(false);
+  });
+});
+
+describe('random slot selection', () => {
+  it('призыв в FRONT попадает в разные колонки при разных seed', () => {
+    const positions: number[] = [];
+    for (const seed of ['r1', 'r2', 'r3', 'r4', 'r5', 'r6']) {
+      const s = setup(seed);
+      const res = playParasite(s, s.activePlayer, 'parasite', 1);
+      const larva = Object.values(res.state.cards).find(
+        (c) => c.definitionId === 'tk_larva' && c.ownerId === s.activePlayer,
+      );
+      if (larva && larva.column != null) positions.push(larva.column);
+    }
+    expect(positions.length).toBeGreaterThan(0);
+    expect(new Set(positions).size).toBeGreaterThan(1);
   });
 });

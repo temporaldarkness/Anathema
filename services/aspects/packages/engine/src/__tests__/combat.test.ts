@@ -517,10 +517,20 @@ describe('Замена', () => {
     }).state;
     expect(s.cards[cardA].zone).toBe('FRONT');
 
-    const r = applyCommand(s, {
+    let r = applyCommand(s, {
       type: 'REPLACE_CARD',
       playerId: active,
       cardId: cardB,
+    });
+
+    expect(r.state.pendingChoice).not.toBeNull();
+    expect(r.state.pendingChoice!.kind).toBe('REPLACE_TARGET_SELECTION');
+    expect(r.state.pendingChoice!.eligibleCardIds).toContain(cardA);
+
+    r = applyCommand(r.state, {
+      type: 'RESOLVE_CHOICE',
+      playerId: active,
+      cardIds: [cardA],
     });
 
     expect(r.events.some((e) => e.type === 'CARD_REPLACED')).toBe(true);

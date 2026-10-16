@@ -82,7 +82,9 @@ describe('Ожидающий выбор: end-of-turn discard', () => {
     expect(r.state.pendingChoice).not.toBeNull();
     expect(r.state.pendingChoice!.kind).toBe('END_TURN_DISCARD');
     expect(r.state.pendingChoice!.playerId).toBe(active);
-    expect(r.state.pendingChoice!.count).toBe(3);
+    if (r.state.pendingChoice!.kind === 'END_TURN_DISCARD') {
+      expect(r.state.pendingChoice!.count).toBe(3);
+    }
     expect(r.state.pendingChoice!.eligibleCardIds.length).toBe(13);
     expect(r.events.some((e) => e.type === 'CHOICE_REQUESTED')).toBe(true);
   });

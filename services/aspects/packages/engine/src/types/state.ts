@@ -38,10 +38,10 @@ export interface CardInstance {
   shieldAvailable: boolean;
 
   turnsOnBoard: number;
-  
+
   usedAbilitiesThisTurn: number[];
   usedTriggerIdsThisTurn: string[];
-  
+
   isToken: boolean;
   sharesIdentity: boolean;
   tempTurnsLeft: number | null;
@@ -95,6 +95,12 @@ export type PendingChoice =
       count: number;
       eligibleCardIds: CardInstanceId[];
       continuation: PendingEffectContinuation;
+    }
+  | {
+      kind: 'REPLACE_TARGET_SELECTION';
+      playerId: PlayerId;
+      newCardId: CardInstanceId;
+      eligibleCardIds: CardInstanceId[];
     };
 
 export interface GameState {
@@ -117,11 +123,11 @@ export interface GameState {
   altVictoryPending: Record<PlayerId, boolean>;
 
   pendingChoice: PendingChoice | null;
-  
+
   pendingTriggers: PendingTrigger[];
-  
+
   instanceCounter: number;
-  
+
   mulliganDone: Record<PlayerId, boolean>;
   mulliganReplaced: Record<PlayerId, number>;
 }
