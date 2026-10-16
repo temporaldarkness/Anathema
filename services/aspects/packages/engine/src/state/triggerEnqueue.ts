@@ -7,6 +7,7 @@ export function enqueueTrigger(
   draft: WritableDraft<GameState>,
   cardId: CardInstanceId,
   triggerType: TriggerType,
+  attackerId?: CardInstanceId,
 ): void {
-  draft.pendingTriggers.push({ cardId, triggerType });
+  draft.pendingTriggers.push({ cardId, triggerType, attackerId });
 }

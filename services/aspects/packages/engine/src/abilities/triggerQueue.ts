@@ -68,7 +68,11 @@ export function drainTriggerQueue(
         resolveEffect(
           draft,
           effect,
-          { sourceId: trigger.cardId, ownerId: card.ownerId },
+          {
+            sourceId: trigger.cardId,
+            ownerId: card.ownerId,
+            attackerId: trigger.attackerId,
+          },
           ctx,
         );
         if (draft.pendingChoice) return;

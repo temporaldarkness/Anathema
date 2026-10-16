@@ -81,7 +81,7 @@ function attackCard(
   }
   
   notifyEnemyAttack(draft, attackerId);
-  notifyAllyAttacked(draft, targetId);
+  notifyAllyAttacked(draft, targetId, attackerId);
 
   resolveCombat(draft, attackerId, targetId, ctx);
 

@@ -21,6 +21,7 @@ import { summonToken } from '../state/tokens';
 export interface EffectContext {
   sourceId: CardInstanceId;
   ownerId: PlayerId;
+  attackerId?: CardInstanceId;
 }
 
 export function resolveEffect(
@@ -68,6 +69,15 @@ export function resolveEffect(
             delta: effect.health,
           });
         }
+      }
+      break;
+    }
+	case 'GRANT_SHIELD': {
+      const targets = resolveTargets(draft, effect.target, ec, explicitTargets);
+      for (const id of targets) {
+        const card = draft.cards[id];
+        if (!card) continue;
+        card.shieldAvailable = true;
       }
       break;
     }
@@ -121,6 +131,7 @@ export function resolveEffect(
           sourceId: ec.sourceId,
           ownerId: ec.ownerId,
           then: effect.then,
+		  attackerId: ec.attackerId,
         },
       };
       ctx.events.push({
@@ -359,5 +370,8 @@ function resolveTargets(
       const pick = randomElement(draft, list);
       return pick ? [pick.instanceId] : [];
     }
+	case 'ATTACKER': {
+      return ec.attackerId ? [ec.attackerId] : [];
+	}
   }
 }

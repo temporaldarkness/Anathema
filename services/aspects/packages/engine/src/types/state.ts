@@ -72,12 +72,14 @@ export interface PlayerState {
 export interface PendingTrigger {
   cardId: CardInstanceId;
   triggerType: TriggerType;
+  attackerId?: CardInstanceId;
 }
 
 export interface PendingEffectContinuation {
   sourceId: CardInstanceId;
   ownerId: PlayerId;
   then: Effect[];
+  attackerId?: CardInstanceId;
 }
 
 export type PendingChoice =

@@ -135,7 +135,11 @@ export function resolveChoiceInternal(
         resolveEffect(
           draft,
           effect,
-          { sourceId: cont.sourceId, ownerId: cont.ownerId },
+          {
+            sourceId: cont.sourceId,
+            ownerId: cont.ownerId,
+            attackerId: cont.attackerId,
+          },
           ctx,
           params.cardIds,
         );

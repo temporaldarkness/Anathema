@@ -7,6 +7,7 @@ import { enqueueTrigger } from '../state/triggerEnqueue';
 export function notifyAllyAttacked(
   draft: WritableDraft<GameState>,
   targetId: CardInstanceId,
+  attackerId: CardInstanceId,
 ): void {
   const target = draft.cards[targetId];
   if (!target) return;
@@ -21,7 +22,7 @@ export function notifyAllyAttacked(
   }
   for (const id of ids) {
     if (id === targetId) continue;
-    enqueueTrigger(draft, id, 'ON_ALLY_ATTACKED');
+    enqueueTrigger(draft, id, 'ON_ALLY_ATTACKED', attackerId);
   }
 }
 

@@ -49,6 +49,7 @@ export const TARGET_SELECTORS = [
   'RANDOM_ENEMY_FRONT',      // Одна случайная карта противника во Фронте
   'RANDOM_FRIENDLY_FRONT',   // Одна случайная карта владельца во Фронте
   'CHOSEN',                  // Выбранная владельцем карта
+  'ATTACKER',                // карта, инициировавшая атаку в текущем контексте
 ] as const;
 
 export type TargetSelector = (typeof TARGET_SELECTORS)[number];
@@ -57,6 +58,7 @@ export type Effect =
   | { kind: 'DEAL_DAMAGE'; amount: number; target: TargetSelector }
   | { kind: 'HEAL'; amount: number; target: TargetSelector }
   | { kind: 'BUFF'; strength: number; health: number; target: TargetSelector }
+  | { kind: 'GRANT_SHIELD'; target: TargetSelector }
   | { kind: 'DRAW'; count: number; who: 'SELF' | 'OPPONENT' }
   | { kind: 'GAIN_INFLUENCE'; amount: number; who: 'SELF' | 'OPPONENT' }
   | { kind: 'DAMAGE_GLORY'; amount: number; who: 'SELF' | 'OPPONENT' }

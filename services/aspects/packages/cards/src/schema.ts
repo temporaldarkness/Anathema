@@ -25,6 +25,7 @@ const EffectSchema: z.ZodType<import('./abilities').Effect> = z.lazy(() =>
     z.object({ kind: z.literal('DEAL_DAMAGE'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS) }),
     z.object({ kind: z.literal('HEAL'), amount: z.number().int().min(0), target: z.enum(TARGET_SELECTORS) }),
     z.object({ kind: z.literal('BUFF'), strength: z.number().int(), health: z.number().int(), target: z.enum(TARGET_SELECTORS) }),
+	z.object({ kind: z.literal('GRANT_SHIELD'), target: z.enum(TARGET_SELECTORS) }),
     z.object({ kind: z.literal('DRAW'), count: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
     z.object({ kind: z.literal('GAIN_INFLUENCE'), amount: z.number().int(), who: z.enum(['SELF', 'OPPONENT']) }),
     z.object({ kind: z.literal('DAMAGE_GLORY'), amount: z.number().int().min(1), who: z.enum(['SELF', 'OPPONENT']) }),
