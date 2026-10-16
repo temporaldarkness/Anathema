@@ -8,14 +8,19 @@
     "strength": 1,
     "health": 2,
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["starter"],
     "series": ["stormwind"],
     "factions": ["stormwind"],
     "roles": ["fighter"],
     "title": "Первый ряд",
-    "shortDescription": "Дешёвый и крепкий ополченец.",
+    "shortDescription": "Всегда в стартовой руке.",
     "lore": "Он носит копьё со дня Присяги и знает: пока стоит он — стоит и стена за ним.",
-    "abilityInfo": {}
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
   },
   {
     "id": "sw_gatekeeper",
@@ -155,9 +160,31 @@
     "factions": ["stormwind"],
     "roles": ["fighter"],
     "title": "Клинок Престола",
-    "shortDescription": "Врывается в бой с ходу.",
+    "shortDescription": "Один на один — становится сильнее.",
     "lore": "Его шпоры звенят на всех парадах. Но настоящие рыцари — те, кто не звонит ими зря.",
-    "abilityInfo": {}
+    "triggers": [
+      {
+        "id": "duel_instinct",
+        "trigger": "ON_ATTACK",
+        "condition": {
+          "kind" : "FRONT_COUNT",
+          "who"  : "OPPONENT",
+          "op"   : "AT_MOST",
+          "value": 1
+        },
+        "name": "Дуэльная ярость",
+        "description": "Если у врага во Фронте ≤1 карты — +1 силы до конца боя.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
   },
   {
     "id": "sw_swordsman",
@@ -283,14 +310,14 @@
     "factions": ["stormwind"],
     "roles": ["fighter"],
     "title": "Голос в строю",
-    "shortDescription": "При выходе во Фронт усиливает всех.",
+    "shortDescription": "При выходе усиливает fighter'ов.",
     "lore": "Капитан не кричит. Он просто поднимает руку — и все уже знают, куда идти.",
     "triggers": [
       {
         "id": "rally",
         "trigger": "ON_REINFORCE",
         "name": "Сбор",
-        "description": "Все союзники во Фронте получают +1/+1 при переходе во Фронт.",
+        "description": "Все союзники во Фронте получают +1/+1.",
         "effects": [
           {
             "kind"    : "BUFF",
@@ -630,20 +657,21 @@
     "factions": ["stormwind"],
     "roles": ["fighter"],
     "title": "Один приказ — десять мечей",
-    "shortDescription": "Усиливает фронт при входе.",
+    "shortDescription": "Усиливает fighter'ов при входе.",
     "lore": "Он не командует — он объясняет. Солдаты понимают быстрее, чем звучит команда.",
     "triggers": [
       {
         "id"         : "tactics",
         "trigger"    : "ON_ENTER",
         "name"       : "Тактика",
-        "description": "При входе все союзники во Фронте получают +2 силы.",
+        "description": "При входе все fighter'ы во Фронте получают +2 силы.",
         "effects"    : [
           {
             "kind"    : "BUFF",
             "strength": 2,
             "health"  : 0,
-            "target"  : "ALL_FRIENDLY_FRONT"
+            "target"  : "ALL_FRIENDLY_FRONT",
+            "filter"  : {"tag": "fighter"}
           }
         ]
       }
@@ -720,7 +748,7 @@
     "factions": ["stormwind"],
     "roles": ["fighter"],
     "title": "Держит полотнище",
-    "shortDescription": "Усиливает фронт, пока есть захваты.",
+    "shortDescription": "Усиливает fighter'ов при захватах.",
     "lore": "Пока знамя стоит — строй держится. Он не сражается. Он держит.",
     "triggers": [
       {
@@ -733,13 +761,14 @@
           "value": 2
         },
         "name": "Знамя вверх",
-        "description": "Если контролируешь ≥2 нейтралов — все союзники во Фронте получают +1 силы.",
+        "description": "Если контролируешь ≥2 нейтралов — fighter'ы получают +1 силы.",
         "effects": [
           {
             "kind"    : "BUFF",
             "strength": 1,
             "health"  : 0,
-            "target"  : "ALL_FRIENDLY_FRONT"
+            "target"  : "ALL_FRIENDLY_FRONT",
+            "filter"  : {"tag": "fighter"}
           }
         ]
       }
@@ -774,6 +803,165 @@
       }
     ],
     "abilityInfo": {}
+  },
+  {
+    "id": "sw_dawn_volley",
+    "name": "Рассветный залп",
+    "personalityTag": "sw_dawn_volley",
+    "tags": ["stormwind", "scholar"],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["stormwind"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Первый луч",
+    "shortDescription": "Бьёт залпом по фронту врага.",
+    "lore": "Жрецы поют при первых лучах солнца. Враг слышит песню — и уже знает, что будет удар.",
+    "triggers": [
+      {
+        "id"         : "nova",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Рассветный залп",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_retribution",
+    "name": "Кара",
+    "personalityTag": "sw_retribution",
+    "tags": ["stormwind", "scholar"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["stormwind"],
+    "factions": ["stormwind"],
+    "roles": ["scholar"],
+    "title": "Ответ Света",
+    "shortDescription": "Свет наказывает зачинщиков.",
+    "lore": "Жрецы говорят: Свет не прощает тех, кто первый поднял меч. Имеющий уши — услышит.",
+    "triggers": [
+      {
+        "id"         : "smite",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Карающая длань",
+        "description": "Наносит 3 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_shield_smith",
+    "name": "Щитокузнец",
+    "personalityTag": "sw_shield_smith",
+    "tags": ["stormwind", "creator"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["stormwind"],
+    "factions": ["stormwind"],
+    "roles": ["creator"],
+    "title": "Умеет заковать в свет",
+    "shortDescription": "Даёт щит союзнику за 2 Влияния.",
+    "lore": "Он не куёт сталь — он куёт намерение. Щит держится ровно столько, сколько владелец верит, что он выдержит.",
+    "activatedAbilities": [
+      {
+        "id"         : "forge_shield",
+        "cost"       : 2,
+        "name"       : "Выковать щит",
+        "description": "Даёт щит выбранному союзнику. Раз в ход.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then"     : [ {"kind": "GRANT_SHIELD", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_honor_guard",
+    "name": "Почётный караул",
+    "personalityTag": "sw_honor_guard",
+    "tags": ["stormwind", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": ["armored", "taunt"],
+    "series": ["stormwind"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Закалённый в строю",
+    "shortDescription": "Бронированный защитник.",
+    "lore": "Его доспех помнит удары, которые он выдержал. И тех, кто их наносил.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."},
+      "taunt"  : {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту в колонке."
+      }
+    }
+  },
+  {
+    "id": "sw_lance_knight",
+    "name": "Копейный рыцарь",
+    "personalityTag": "sw_lance_knight",
+    "tags": ["stormwind", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["cleave"],
+    "cleaveDamage": 1,
+    "series": ["stormwind"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Прорывает строй",
+    "shortDescription": "Задевает соседей цели.",
+    "lore": "Копьё не выбирает цель. Оно просто идёт вперёд — и всё, что стоит по бокам, падает.",
+    "abilityInfo": {
+      "cleave": {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 1 урона."
+      }
+    }
+  },
+  {
+    "id": "sw_old_veteran",
+    "name": "Старый ветеран",
+    "personalityTag": "sw_old_veteran",
+    "tags": ["stormwind", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": ["armored"],
+    "series": ["stormwind"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Уже не боится",
+    "shortDescription": "Крепкий боец с бронёй.",
+    "lore": "Он пережил три похода и одного короля. Ничего нового его уже не пугает.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
   },
   {
     "id": "lg_roland",
@@ -889,97 +1077,6 @@
             "count"      : 1,
             "who"        : "SELF",
             "destination": "FRONT"
-          }
-        ]
-      }
-    ],
-    "abilityInfo": {}
-  },
-  {
-    "id": "sw_dawn_volley",
-    "name": "Рассветный залп",
-    "personalityTag": "sw_dawn_volley",
-    "tags": ["stormwind", "scholar"],
-    "cost": 3,
-    "strength": 1,
-    "health": 3,
-    "rarity": "rare",
-    "abilities": [],
-    "series": ["stormwind"],
-    "factions": ["stormwind"],
-    "roles": ["scholar"],
-    "title": "Первый луч",
-    "shortDescription": "Бьёт залпом по фронту врага.",
-    "lore": "Жрецы поют при первых лучах солнца. Враг слышит песню — и уже знает, что будет удар.",
-    "triggers": [
-      {
-        "id"         : "nova",
-        "trigger"    : "ON_ENTER",
-        "name"       : "Рассветный залп",
-        "description": "Наносит 2 урона всем картам противника во Фронте.",
-        "effects"    : [
-          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
-        ]
-      }
-    ],
-    "abilityInfo": {}
-  },
-  {
-    "id": "sw_retribution",
-    "name": "Кара",
-    "personalityTag": "sw_retribution",
-    "tags": ["stormwind", "scholar"],
-    "cost": 4,
-    "strength": 2,
-    "health": 4,
-    "rarity": "rare",
-    "abilities": [],
-    "series": ["stormwind"],
-    "factions": ["stormwind"],
-    "roles": ["scholar"],
-    "title": "Ответ Света",
-    "shortDescription": "Свет наказывает зачинщиков.",
-    "lore": "Жрецы говорят: Свет не прощает тех, кто первый поднял меч. Имеющий уши — услышит.",
-    "triggers": [
-      {
-        "id"         : "smite",
-        "trigger"    : "ON_ENTER",
-        "name"       : "Карающая длань",
-        "description": "Наносит 3 урона всем картам противника во Фронте.",
-        "effects"    : [
-          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
-        ]
-      }
-    ],
-    "abilityInfo": {}
-  },
-  {
-    "id": "sw_shield_smith",
-    "name": "Щитокузнец",
-    "personalityTag": "sw_shield_smith",
-    "tags": ["stormwind", "creator"],
-    "cost": 3,
-    "strength": 2,
-    "health": 3,
-    "rarity": "rare",
-    "abilities": [],
-    "series": ["stormwind"],
-    "factions": ["stormwind"],
-    "roles": ["creator"],
-    "title": "Умеет заковать в свет",
-    "shortDescription": "Даёт щит союзнику за 2 Влияния.",
-    "lore": "Он не куёт сталь — он куёт намерение. Щит держится ровно столько, сколько владелец верит, что он выдержит.",
-    "activatedAbilities": [
-      {
-        "id"         : "forge_shield",
-        "cost"       : 2,
-        "name"       : "Выковать щит",
-        "description": "Даёт щит выбранному союзнику. Раз в ход.",
-        "effects"    : [
-          {
-            "kind"     : "CHOOSE_TARGETS_THEN",
-            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
-            "then"     : [ {"kind": "GRANT_SHIELD", "target": "CHOSEN"} ]
           }
         ]
       }

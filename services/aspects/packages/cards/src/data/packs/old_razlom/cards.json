@@ -26,12 +26,12 @@
     "strength": 1,
     "health": 1,
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["starter"],
     "series": ["razlom"],
     "factions": ["razlom"],
     "roles": ["fighter"],
     "title": "Уже решил",
-    "shortDescription": "Лечит Величие, уходя.",
+    "shortDescription": "Всегда в стартовой руке.",
     "lore": "Он не хочет умирать. Просто знает, что уже не вернётся.",
     "triggers": [
       {
@@ -42,7 +42,12 @@
         "effects"    : [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
       }
     ],
-    "abilityInfo": {}
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
   },
   {
     "id": "rl_desperate",
@@ -348,7 +353,7 @@
     "factions": ["razlom"],
     "roles": ["scholar"],
     "title": "Знает только своих",
-    "shortDescription": "Ведёт за собой и крепнет от потерь.",
+    "shortDescription": "Растёт от захвата нейтралов.",
     "lore": "Он никогда не называет своего имени. Ячейка знает его только как «Главу».",
     "triggers": [
       {
@@ -361,11 +366,10 @@
         ]
       },
       {
-        "id"         : "ruthless",
-        "trigger"    : "ON_ALLY_DIED",
-        "oncePerTurn": true,
-        "name"       : "Безжалостность",
-        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "id"         : "territory",
+        "trigger"    : "ON_CELL_CAPTURED",
+        "name"       : "Территория",
+        "description": "Когда вы захватываете нейтрал — получает +1/+1.",
         "effects"    : [
           {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
         ]
@@ -515,6 +519,100 @@
     "abilityInfo": {}
   },
   {
+    "id": "rl_barricade",
+    "name": "Баррикада",
+    "personalityTag": "rl_barricade",
+    "tags": ["razlom", "fighter"],
+    "cost": 2,
+    "strength": 0,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Взрывается при смерти",
+    "shortDescription": "Стена, которая мстит.",
+    "lore": "Её ставят из всего, что нашлось. Когда её ломают — всё, что было внутри, вылетает наружу.",
+    "triggers": [
+      {
+        "id"         : "shrapnel",
+        "trigger"    : "ON_EXIT",
+        "name"       : "Шрапнель",
+        "description": "Наносит 2 урона всем врагам во Фронте при уходе.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту."
+      }
+    }
+  },
+  {
+    "id": "rl_bomber_crew",
+    "name": "Экипаж подрывников",
+    "personalityTag": "rl_bomber_crew",
+    "tags": ["razlom", "fighter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["cleave"],
+    "cleaveDamage": 2,
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Работает по площадям",
+    "shortDescription": "Задевает соседей на 2 урона.",
+    "lore": "Они не разбирают, где цель. Им важнее, чтобы после них никто не встал.",
+    "abilityInfo": {
+      "cleave": {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 2 урона."
+      }
+    }
+  },
+  {
+    "id": "rl_last_stand",
+    "name": "Последний рубеж",
+    "personalityTag": "rl_last_stand",
+    "tags": ["razlom", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Сильнее, когда всё плохо",
+    "shortDescription": "Растёт, когда гильдия на грани.",
+    "lore": "Его находят там, где уже никто не держится. Именно поэтому он держится дольше всех.",
+    "triggers": [
+      {
+        "id"         : "desperate_glory",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition"  : {
+          "kind" : "GLORY",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 10
+        },
+        "name"       : "Последний рубеж",
+        "description": "Если Величие ≤10 — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
     "id": "rl_butcher",
     "name": "Бородач",
     "personalityTag": "rl_butcher",
@@ -594,22 +692,22 @@
     "abilityInfo": {}
   },
   {
-    "id"              : "tk_looter",
-    "name"            : "Мародёр",
-    "personalityTag"  : "tk_looter",
-    "tags"            : ["token", "militant"],
-    "cost"            : 0,
-    "strength"        : 2,
-    "health"          : 2,
-    "rarity"          : "common",
-    "abilities"       : ["slow"],
-    "series"          : ["razlom"],
-    "factions"        : [],
-    "roles"           : [],
-    "title"           : "Идёт за своими",
+    "id": "tk_looter",
+    "name": "Мародёр",
+    "personalityTag": "tk_looter",
+    "tags": ["token", "militant"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["slow"],
+    "series": ["razlom"],
+    "factions": [],
+    "roles": [],
+    "title": "Идёт за своими",
     "shortDescription": "Подбирает после боя.",
-    "lore"            : "Приходит туда, где уже всё случилось, — и берёт, что осталось.",
-    "isToken"         : true,
-    "abilityInfo"     : {}
+    "lore": "Приходит туда, где уже всё случилось, — и берёт, что осталось.",
+    "isToken": true,
+    "abilityInfo": {}
   }
 ]

@@ -44,12 +44,12 @@
     "strength": 2,
     "health": 2,
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["starter"],
     "series": ["echo"],
     "factions": ["echo"],
     "roles": ["wanderer"],
     "title": "Работает тихо",
-    "shortDescription": "Тянет карту при входе.",
+    "shortDescription": "Всегда в стартовой руке.",
     "lore": "Он не рассказывает о своих операциях. Даже тем, кто подписывает приказы.",
     "triggers": [
       {
@@ -60,7 +60,12 @@
         "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
       }
     ],
-    "abilityInfo": {}
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
   },
   {
     "id": "eh_analyst",
@@ -451,6 +456,109 @@
     "abilityInfo": {}
   },
   {
+    "id": "eh_cyber_agent",
+    "name": "Киберагент",
+    "personalityTag": "eh_cyber_agent",
+    "tags": ["echo", "wanderer"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["echo"],
+    "factions": ["echo"],
+    "roles": ["wanderer"],
+    "title": "Отключает за карту",
+    "shortDescription": "Платит картой за отключение цели.",
+    "lore": "Он носит в кармане чип и один заряд. Этого хватает на одну цель — но правильную.",
+    "activatedAbilities": [
+      {
+        "id": "shutdown",
+        "name": "Отключение",
+        "description": "Сбрось 1 карту — лиши выбранного врага всех способностей.",
+        "cost": 1,
+        "discardCost": 1,
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [ {"kind": "SILENCE_TARGET", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "eh_drone_swarm",
+    "name": "Рой дронов",
+    "personalityTag": "eh_drone_swarm",
+    "tags": ["echo", "fighter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["echo"],
+    "factions": ["echo"],
+    "roles": ["fighter"],
+    "title": "Их много",
+    "shortDescription": "Призывает двух ударных дронов.",
+    "lore": "Их никто не считает. Они просто накрывают квадрат и уходят.",
+    "triggers": [
+      {
+        "id"         : "deploy_swarm",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Развёртывание",
+        "description": "Призывает 2 ударных дрона во Фронт.",
+        "effects"    : [
+          {
+            "kind"       : "SUMMON",
+            "defId"      : "tk_attack_drone",
+            "count"      : 2,
+            "who"        : "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "eh_sleeper_cell",
+    "name": "Спящая ячейка",
+    "personalityTag": "eh_sleeper_cell",
+    "tags": ["echo", "wanderer"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["scout"],
+    "series": ["echo"],
+    "factions": ["echo"],
+    "roles": ["wanderer"],
+    "title": "Растёт от контроля",
+    "shortDescription": "Укрепляется с каждым захватом клетки.",
+    "lore": "Она спит, пока не захватит точку. Тогда — просыпается.",
+    "triggers": [
+      {
+        "id"         : "awaken",
+        "trigger"    : "ON_CELL_CAPTURED",
+        "name"       : "Пробуждение",
+        "description": "Когда вы захватываете нейтрал — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
     "id": "eh_pathfinder",
     "name": "Следопыт",
     "personalityTag": "eh_pathfinder",
@@ -561,23 +669,23 @@
     "abilityInfo": {}
   },
   {
-    "id"              : "tk_sleeper",
-    "name"            : "Спящий агент",
-    "personalityTag"  : "tk_sleeper",
-    "tags"            : ["token"],
-    "cost"            : 0,
-    "strength"        : 1,
-    "health"          : 1,
-    "rarity"          : "common",
-    "abilities"       : ["slow"],
-    "series"          : ["echo"],
-    "factions"        : [],
-    "roles"           : [],
-    "title"           : "Заложен",
+    "id": "tk_sleeper",
+    "name": "Спящий агент",
+    "personalityTag": "tk_sleeper",
+    "tags": ["token"],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["slow"],
+    "series": ["echo"],
+    "factions": [],
+    "roles": [],
+    "title": "Заложен",
     "shortDescription": "Ждёт сигнала.",
-    "lore"            : "Работает через месяц или не работает никогда. Никаких промежуточных вариантов.",
-    "isToken"         : true,
-    "abilityInfo"     : {}
+    "lore": "Работает через месяц или не работает никогда. Никаких промежуточных вариантов.",
+    "isToken": true,
+    "abilityInfo": {}
   },
   {
     "id"              : "tk_attack_drone",

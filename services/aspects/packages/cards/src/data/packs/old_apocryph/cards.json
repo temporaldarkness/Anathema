@@ -49,7 +49,7 @@
     "id": "lg_cormac",
     "name": "Вождь Исхода Кормак",
     "personalityTag": "lg_cormac",
-    "tags": ["ruler", "wanderer", "ruler"],
+    "tags": ["ruler", "wanderer"],
     "cost": 6,
     "strength": 4,
     "health": 6,
@@ -116,7 +116,20 @@
         ]
       }
     ],
-    "abilityInfo": {}
+    "abilityInfo": {
+      "charge"      : {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт."
+      },
+      "scout"       : {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      },
+      "breakthrough": {
+        "name"       : "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
   },
   {
     "id": "lg_brann",
@@ -387,24 +400,99 @@
     "abilityInfo": {}
   },
   {
-    "id"              : "tk_meteor",
-    "name"            : "Метеор",
-    "personalityTag"  : "tk_meteor",
-    "tags"            : ["token"],
-    "cost"            : 0,
-    "strength"        : 3,
-    "health"          : 1,
-    "rarity"          : "common",
-    "abilities"       : ["charge", "temporary", "breakthrough"],
-    "tempDuration"    : 1,
-    "series"          : ["apocryph"],
-    "factions"        : [],
-    "roles"           : [],
-    "title"           : "Кусок неба",
+    "id": "lg_first_king",
+    "name": "Первый Король",
+    "personalityTag": "lg_first_king",
+    "tags": ["ruler", "stormwind", "sovereign"],
+    "cost": 8,
+    "strength": 6,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["armored"],
+    "series": ["apocryph"],
+    "factions": ["stormwind"],
+    "roles": ["ruler"],
+    "title": "Тот, кто всё начал",
+    "shortDescription": "Укрепляет фронт каждый ход.",
+    "lore": "Его имя стёрто из хроник. Но трон Штормграда стоит на его костях — и об этом все помнят.",
+    "triggers": [
+      {
+        "id"         : "royal_line",
+        "trigger"    : "ON_TURN_START",
+        "name"       : "Королевская линия",
+        "description": "В начале хода все союзники во Фронте получают +1/+1.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
+  },
+  {
+    "id": "lg_worldbreaker",
+    "name": "Разрушитель Миров",
+    "personalityTag": "lg_worldbreaker",
+    "tags": ["ruler", "voidflame", "ancient"],
+    "cost": 9,
+    "strength": 7,
+    "health": 9,
+    "rarity": "legendary",
+    "abilities": ["slow", "cleave"],
+    "cleaveDamage": 3,
+    "series": ["apocryph"],
+    "factions": ["voidflame"],
+    "roles": ["ruler"],
+    "title": "Приходит, чтобы закончить",
+    "shortDescription": "Уничтожает всё вокруг себя.",
+    "lore": "Он пришёл из пустоты, чтобы закончить то, что начал. Или начать то, что закончит всех.",
+    "triggers": [
+      {
+        "id"         : "world_break",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Разлом",
+        "description": "Наносит 4 урона всем врагам во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 4, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow"  : {
+        "name"       : "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      },
+      "cleave": {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 3 урона."
+      }
+    }
+  },
+  {
+    "id": "tk_meteor",
+    "name": "Метеор",
+    "personalityTag": "tk_meteor",
+    "tags": ["token"],
+    "cost": 0,
+    "strength": 3,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "temporary", "breakthrough"],
+    "tempDuration": 1,
+    "series": ["apocryph"],
+    "factions": [],
+    "roles": [],
+    "title": "Кусок неба",
     "shortDescription": "Падает один раз.",
-    "lore"            : "Там, где он касается земли, больше ничего не растёт. Никогда.",
-    "isToken"         : true,
-    "abilityInfo"     : {}
+    "lore": "Там, где он касается земли, больше ничего не растёт. Никогда.",
+    "isToken": true,
+    "abilityInfo": {}
   },
   {
     "id"              : "tk_phantom",

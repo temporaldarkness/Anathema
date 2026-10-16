@@ -26,14 +26,20 @@
     "strength": 1,
     "health": 1,
     "rarity": "common",
-    "abilities": ["charge"],
+    "abilities": ["charge", "starter"],
     "series": ["steel"],
     "factions": ["steel"],
     "roles": ["fighter"],
     "title": "Быстрее связи",
-    "shortDescription": "Бьёт с ходу.",
+    "shortDescription": "Всегда в стартовой руке.",
     "lore": "Пока штаб пишет приказ, вестовой уже рядом с целью. Иногда этим и заканчивается.",
-    "abilityInfo": {}
+    "abilityInfo": {
+      "charge" : {"name": "Рвение", "description": "Выходит сразу во Фронт."},
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
   },
   {
     "id": "st_rifleman",
@@ -235,9 +241,26 @@
     "factions": ["steel"],
     "roles": ["fighter"],
     "title": "Пробивает насквозь",
-    "shortDescription": "Урон переходит дальше.",
+    "shortDescription": "Наносит урон — растёт.",
     "lore": "Одна пуля — две цели. Не потому что рикошет, а потому что цель стояла слишком ровно.",
-    "abilityInfo": {}
+    "triggers": [
+      {
+        "id": "focus",
+        "trigger": "ON_DAMAGE_DEALT",
+        "oncePerTurn": true,
+        "name": "Сосредоточенность",
+        "description": "Раз в ход, когда эта карта наносит урон — получает +1 силы.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "breakthrough": {
+        "name"       : "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
   },
   {
     "id": "st_grenadier",
@@ -392,9 +415,25 @@
     "factions"        : ["steel"],
     "roles"           : ["fighter"],
     "title"           : "Проламывает строй",
-    "shortDescription": "Урон идёт дальше.",
+    "shortDescription": "Растёт от каждого убийства.",
     "lore"            : "Он не ищет слабое место. Он его создаёт.",
-    "abilityInfo"     : {}
+    "triggers"        : [
+      {
+        "id"         : "relentless",
+        "trigger"    : "ON_KILL",
+        "name"       : "Неумолимый",
+        "description": "Когда эта карта убивает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo"     : {
+      "breakthrough": {
+        "name"       : "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
   },
   {
     "id": "st_veteran",
@@ -454,6 +493,95 @@
             "strength": 1,
             "health"  : 0,
             "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "st_heavy_tank",
+    "name": "Тяжёлый танк",
+    "personalityTag": "st_heavy_tank",
+    "tags": ["steel", "fighter"],
+    "cost": 7,
+    "strength": 5,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": ["armored", "cleave"],
+    "cleaveDamage": 2,
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Едет напролом",
+    "shortDescription": "Проламывает всё на пути.",
+    "lore": "Он не ищет слабые места. Он едет напрямую — и слабые места находятся сами.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."},
+      "cleave" : {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 2 урона."
+      }
+    }
+  },
+  {
+    "id": "st_battle_medic",
+    "name": "Военврач",
+    "personalityTag": "st_battle_medic",
+    "tags": ["steel", "scholar"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["scholar"],
+    "title": "Держит гильдию в бою",
+    "shortDescription": "Восстанавливает Величие при потерях.",
+    "lore": "Он не спасает всех. Но каждый, кого он не спас, оставляет ему силы для следующего.",
+    "triggers": [
+      {
+        "id": "triage",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name": "Триаж",
+        "description": "Раз в ход, когда союзник погибает — восстанавливает 2 Величия гильдии.",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "st_commissar",
+    "name": "Комиссар",
+    "personalityTag": "st_commissar",
+    "tags": ["steel", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["steel"],
+    "factions": ["steel"],
+    "roles": ["fighter"],
+    "title": "Слабых — за борт",
+    "shortDescription": "Платит картой за массовый бафф.",
+    "lore": "Он не жалеет ни карт, ни людей. Всё уходит в строй — даже то, что могло быть спасено.",
+    "activatedAbilities": [
+      {
+        "id": "field_promotion",
+        "name": "Полевое повышение",
+        "description": "Сбрось 1 карту — все fighter'ы во Фронте получают +1/+1.",
+        "cost": 1,
+        "discardCost": 1,
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT",
+            "filter"  : {"tag": "fighter"}
           }
         ]
       }
@@ -592,22 +720,22 @@
     "abilityInfo": {}
   },
   {
-    "id"              : "tk_bunker",
-    "name"            : "Блокпост",
-    "personalityTag"  : "tk_bunker",
-    "tags"            : ["token"],
-    "cost"            : 0,
-    "strength"        : 0,
-    "health"          : 3,
-    "rarity"          : "common",
-    "abilities"       : ["taunt"],
-    "series"          : ["steel"],
-    "factions"        : [],
-    "roles"           : [],
-    "title"           : "Полуготовый",
+    "id": "tk_bunker",
+    "name": "Блокпост",
+    "personalityTag": "tk_bunker",
+    "tags": ["token"],
+    "cost": 0,
+    "strength": 0,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["steel"],
+    "factions": [],
+    "roles": [],
+    "title": "Полуготовый",
     "shortDescription": "Стоит и держит.",
-    "lore"            : "Собирается за пять минут, разбирается за одну. Работает как надо — и довольно.",
-    "isToken"         : true,
-    "abilityInfo"     : {}
+    "lore": "Собирается за пять минут, разбирается за одну. Работает как надо — и довольно.",
+    "isToken": true,
+    "abilityInfo": {}
   }
 ]

@@ -146,12 +146,12 @@
     "strength": 1,
     "health": 3,
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["regenerate"],
     "series": ["sky"],
     "factions": ["sky"],
     "roles": ["creator"],
     "title": "Оборудует позицию",
-    "shortDescription": "Крепнет при переходе во Фронт.",
+    "shortDescription": "Крепнет во Фронте и восстанавливается.",
     "lore": "Ему не нужны чертежи. Он смотрит на местность — и уже знает, где ставить.",
     "triggers": [
       {
@@ -164,7 +164,12 @@
         ]
       }
     ],
-    "abilityInfo": {}
+    "abilityInfo": {
+      "regenerate": {
+        "name"       : "Регенерация",
+        "description": "В конце хода восстанавливает 1 HP."
+      }
+    }
   },
   {
     "id": "sk_barrage",
@@ -261,17 +266,22 @@
     "series": ["sky"],
     "factions": ["sky"],
     "roles": ["fighter"],
-    "title": "Прячется за горизонтом",
-    "shortDescription": "Накрывает фронт залпом.",
+    "title": "Накрывает средних",
+    "shortDescription": "Бьёт залпом по врагам с силой ≤4.",
     "lore": "Она никогда не видит цели. Цель — это для корректировщика, у неё работа проще.",
     "triggers": [
       {
         "id"         : "bombardment",
         "trigger"    : "ON_ENTER",
         "name"       : "Обстрел",
-        "description": "Наносит 3 урона всем картам противника во Фронте.",
+        "description": "Наносит 3 урона всем врагам во Фронте с силой ≤4.",
         "effects"    : [
-          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+          {
+            "kind"  : "DEAL_DAMAGE",
+            "amount": 3,
+            "target": "ALL_ENEMY_FRONT",
+            "filter": {"maxStrength": 4}
+          }
         ]
       }
     ],
@@ -387,6 +397,81 @@
       }
     ],
     "abilityInfo": {}
+  },
+  {
+    "id": "sk_electronic_warfare",
+    "name": "Электронная война",
+    "personalityTag": "sk_electronic_warfare",
+    "tags": ["sky", "wanderer"],
+    "cost": 5,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["wanderer"],
+    "title": "Глушит навсегда",
+    "shortDescription": "Каждый ход лишает карту напротив способностей.",
+    "lore": "Её не видно и не слышно. Но у врага почему-то перестают работать все системы.",
+    "triggers": [
+      {
+        "id"         : "jam",
+        "trigger"    : "ON_ENTER",
+        "oncePerTurn": true,
+        "name"       : "Глушение",
+        "description": "При входе снимает способности у карты напротив.",
+        "effects"    : [ {"kind": "SILENCE_TARGET", "target": "OPPOSITE"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sk_armored_convoy",
+    "name": "Бронированный конвой",
+    "personalityTag": "sk_armored_convoy",
+    "tags": ["sky", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 6,
+    "rarity": "uncommon",
+    "abilities": ["armored", "taunt"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Доставляет под огнём",
+    "shortDescription": "Бронированная стена.",
+    "lore": "Ни один конвой не пропал. Даже тот, что шёл под шквальным огнём.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."},
+      "taunt"  : {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту."
+      }
+    }
+  },
+  {
+    "id": "sk_supersonic",
+    "name": "Сверхзвуковой",
+    "personalityTag": "sk_supersonic",
+    "tags": ["sky", "fighter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": ["frenzy"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Атакует дважды",
+    "shortDescription": "Две атаки за ход.",
+    "lore": "Ни один враг не успевает понять, что произошло. Только звуковой удар.",
+    "abilityInfo": {
+      "frenzy": {
+        "name"       : "Ярость",
+        "description": "Может атаковать дважды за ход."
+      }
+    }
   },
   {
     "id": "sk_sanctuary",
@@ -560,23 +645,23 @@
     "abilityInfo"     : {}
   },
   {
-    "id"              : "tk_paratrooper",
-    "name"            : "Десантник",
-    "personalityTag"  : "tk_paratrooper",
-    "tags"            : ["token"],
-    "cost"            : 0,
-    "strength"        : 2,
-    "health"          : 2,
-    "rarity"          : "common",
-    "abilities"       : ["charge", "temporary"],
-    "tempDuration"    : 1,
-    "series"          : ["sky"],
-    "factions"        : ["sky"],
-    "roles"           : [],
-    "title"           : "Сброшен",
+    "id": "tk_paratrooper",
+    "name": "Десантник",
+    "personalityTag": "tk_paratrooper",
+    "tags": ["token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["charge", "temporary"],
+    "tempDuration": 1,
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": [],
+    "title": "Сброшен",
     "shortDescription": "Живёт один ход.",
-    "lore"            : "Его задача — занять точку. Или погибнуть, пытаясь. Второе чаще.",
-    "isToken"         : true,
-    "abilityInfo"     : {}
+    "lore": "Его задача — занять точку. Или погибнуть, пытаясь. Второе чаще.",
+    "isToken": true,
+    "abilityInfo": {}
   }
 ]
