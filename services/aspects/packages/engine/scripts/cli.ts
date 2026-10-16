@@ -4,19 +4,21 @@
  * Запуск: pnpm --filter @aspects/engine cli [seed]
  *
  * Команды:
- *   status / s                — показать доску
- *   hand / h                  — показать руку
- *   play <handIdx> <column>   — разыграть карту
- *   replace <handIdx>         — заменить аспект
- *   ability <col> <f|r> <idx> — активируемая способность карты
+ *   status / s                    — показать доску
+ *   hand / h                      — показать руку
+ *   mulligan [<idx>]              — муллиган (без idx — оставить руку)
+ *   play <handIdx> <column>       — разыграть карту
+ *   replace <handIdx>             — заменить аспект
+ *   ability <col> <f|r> <idx>     — активируемая способность карты
  *   attack <col> <f|r> <target>
  *       target: g (guild) | n (neutral) | c:<col>:<f|r> (card)
- *   next / n                  — продвинуть фазу
- *   end / e                   — завершить ход
- *   discard <idx> ...         — сброс карт при выборе (END_TURN_DISCARD)
- *   choose <idx> ...          — выбор цели для эффекта (EFFECT_TARGET_SELECTION)
- *   help                      — справка
- *   quit / q                  — выход
+ *   next / n                      — продвинуть фазу
+ *   end / e                       — завершить ход
+ *   concede                       — сдаться
+ *   discard <idx> ...             — сброс карт (END_TURN_DISCARD)
+ *   choose <idx> ...              — выбор цели (EFFECT_TARGET_SELECTION)
+ *   help                          — справка
+ *   quit / q                      — выход
  */
 
 import * as readline from 'node:readline';
@@ -26,34 +28,52 @@ import {
   controlledCells,
   frontCount,
   health,
-  strength,
   strengthInBattle,
 } from '../src/state/helpers';
-import type { CardDefinition } from '@aspects/cards';
 import type { GameState } from '../src/types/state';
 import type { CardInstanceId, ColumnIndex, PlayerId } from '../src/types/ids';
 import { opponentOf } from '../src/types/ids';
+import type { DeckPreset, CardDefinition } from '@aspects/cards';
 import {
-  listPacks,
-  getPack,
-  getCardById,
   getDecks,
-  type CardDefinition,
+  mergedCardsById,
+  seriesOfDeck,
+  getPersonalityName,
 } from '@aspects/cards';
 
-const PACKS = listPacks();
-const packArg = process.argv[3] ?? PACKS[0].id;
-const PACK = getPack(packArg);
-const DEFS: Record<string, CardDefinition> = getCardsById(packArg);
-const DECKS = getDecks(packArg);
+// ─── Подготовка ───
+
+const seed = process.argv[2] ?? `cli-${Date.now()}`;
+const allPresets = getDecks();
+
+if (allPresets.length === 0) {
+  console.error('Нет пресетов. Проверь packages/cards/src/data/presets.json');
+  process.exit(1);
+}
+
+const deck1: DeckPreset = allPresets[0];
+const deck2: DeckPreset = allPresets[1] ?? allPresets[0];
+
+const series = [
+  ...new Set([
+    ...seriesOfDeck(deck1.cards),
+    ...seriesOfDeck(deck2.cards),
+  ]),
+];
+
+const DEFS: Record<string, CardDefinition> = mergedCardsById(series);
+
+// ─── Утилиты ───
 
 function defName(state: GameState, cardId: CardInstanceId): string {
   const card = state.cards[cardId];
+  if (!card) return '?';
   return state.definitions[card.definitionId]?.name ?? card.definitionId;
 }
 
 function cardLabel(state: GameState, cardId: CardInstanceId): string {
   const card = state.cards[cardId];
+  if (!card) return '?';
   const str = strengthInBattle(state, cardId);
   const hp = health(card);
   const flags: string[] = [];
@@ -64,6 +84,8 @@ function cardLabel(state: GameState, cardId: CardInstanceId): string {
   const flagStr = flags.length > 0 ? `[${flags.join('')}]` : '';
   return `${defName(state, cardId)} ${str}/${hp}${flagStr}`;
 }
+
+// ─── Рендер ───
 
 function renderBoard(state: GameState): void {
   const W = {
@@ -134,17 +156,28 @@ function renderBoard(state: GameState): void {
     );
   }
   console.log(`Ход ${state.turnNumber}  │  Фаза: ${state.phase}`);
+
+  if (state.phase === 'MULLIGAN') {
+    const picker: PlayerId = !state.mulliganDone.p1 ? 'p1' : 'p2';
+    console.log(`─── Муллigan: выбирает ${picker.toUpperCase()} ───`);
+  }
 }
 
 function renderHand(state: GameState): void {
   const p = state.activePlayer;
   const hand = state.players[p].hand;
   console.log(`\n─── Рука ${p.toUpperCase()} (${hand.length}) ───`);
+  if (hand.length === 0) {
+    console.log('  (пусто)');
+    return;
+  }
   hand.forEach((id, i) => {
     const card = state.cards[id];
     const def = state.definitions[card.definitionId];
-    const str = strength(card);
+    const str = card.baseStrength;
     const hp = health(card);
+    const personality = getPersonalityName(def.personalityTag);
+    const isAspect = def.name !== personality;
     const ab = def.abilities.length > 0 ? ` [${def.abilities.join(',')}]` : '';
     const act =
       def.activatedAbilities && def.activatedAbilities.length > 0
@@ -156,12 +189,32 @@ function renderHand(state: GameState): void {
         const od = state.definitions[state.cards[other].definitionId];
         return od.personalityTag === def.personalityTag;
       }) ? ' ★' : '';
+    const nameDisplay = isAspect
+      ? `${def.name} — ${personality}`
+      : def.name;
     console.log(
-      `  ${i}. ${def.name} — cost ${def.cost}, ${str}/${hp}${ab}${act}${maybe}`,
+      `  ${i}. ${nameDisplay} — cost ${def.cost}, ${str}/${hp}${ab}${act}${maybe}`,
     );
   });
   console.log('★ — есть дубликат личности в руке (можно менять с картой на столе)');
   console.log('⚡xN — N активируемых способностей (ability <col> <f|r> <idx>)');
+}
+
+function renderMulligan(state: GameState): void {
+  if (state.phase !== 'MULLIGAN') return;
+  const picker: PlayerId = !state.mulliganDone.p1 ? 'p1' : 'p2';
+  const hand = state.players[picker].hand;
+  console.log(`\n─── Стартовая рука ${picker.toUpperCase()} (${hand.length}) ───`);
+  hand.forEach((id, i) => {
+    const card = state.cards[id];
+    const def = state.definitions[card.definitionId];
+    const personality = getPersonalityName(def.personalityTag);
+    const nameDisplay = def.name !== personality
+      ? `${def.name} — ${personality}`
+      : def.name;
+    console.log(`  ${i}. ${nameDisplay} — cost ${def.cost}, ${def.strength}/${def.health}`);
+  });
+  console.log('Команда: mulligan <idx> (заменить карту) или mulligan (оставить руку)');
 }
 
 function renderPendingChoice(state: GameState): void {
@@ -192,16 +245,16 @@ function renderPendingChoice(state: GameState): void {
   }
 }
 
-interface HandCardRef {
-  handIndex: number;
-  cardId: CardInstanceId;
-}
+// ─── Парсинг команд ───
 
-function resolveHand(state: GameState, index: number): HandCardRef | null {
+function resolveHand(
+  state: GameState,
+  index: number,
+): { cardId: CardInstanceId } | null {
   const p = state.activePlayer;
   const hand = state.players[p].hand;
   if (index < 0 || index >= hand.length) return null;
-  return { handIndex: index, cardId: hand[index] };
+  return { cardId: hand[index] };
 }
 
 function parseAttack(
@@ -257,6 +310,8 @@ function parseAttack(
   return { error: 'Неизвестный тип цели' };
 }
 
+// ─── Обработка pending choice ───
+
 function handlePendingChoiceInput(
   state: GameState,
   cmd: string,
@@ -305,18 +360,52 @@ function handlePendingChoiceInput(
   return r.state;
 }
 
+// ─── Обработка муллигана ───
+
+function handleMulliganInput(
+  state: GameState,
+  cmd: string,
+  parts: string[],
+): GameState | null {
+  if (state.phase !== 'MULLIGAN') return null;
+  if (cmd !== 'mulligan' && cmd !== 'm') return null;
+
+  const picker: PlayerId = !state.mulliganDone.p1 ? 'p1' : 'p2';
+  const hand = state.players[picker].hand;
+
+  let cardId: CardInstanceId | null = null;
+  if (parts.length >= 2) {
+    const idx = parseInt(parts[1], 10);
+    if (Number.isNaN(idx) || idx < 0 || idx >= hand.length) {
+      console.log('Неверный индекс карты.');
+      return null;
+    }
+    cardId = hand[idx];
+  }
+
+  const r = applyCommand(state, {
+    type: 'MULLIGAN',
+    playerId: picker,
+    cardId,
+  });
+  reportEvents(r.events);
+  return r.state;
+}
+
+// ─── Main ───
+
 function main(): void {
-  const seed = process.argv[2] ?? `cli-${Date.now()}`;
-  let state = createGame({
+  const r = createGame({
     seed,
-    decks: {
-      p1: DECKS[0]?.cards ?? [],
-      p2: DECKS[1]?.cards ?? DECKS[0]?.cards ?? [],
-    },
+    decks: { p1: deck1.cards, p2: deck2.cards },
     cardDefinitions: DEFS,
-  }).state;
+    useMulligan: true,
+  });
+  let state: GameState = r.state;
 
   console.log(`Партия запущена. Seed: ${seed}`);
+  console.log(`Серии: ${series.join(', ')}`);
+  console.log(`P1: ${deck1.name} · P2: ${deck2.name}`);
   console.log('Напиши "help" для списка команд.');
 
   const rl = readline.createInterface({
@@ -327,6 +416,9 @@ function main(): void {
 
   const renderAll = (): void => {
     renderBoard(state);
+    if (state.phase === 'MULLIGAN') {
+      renderMulligan(state);
+    }
     if (state.pendingChoice) renderPendingChoice(state);
   };
 
@@ -342,8 +434,18 @@ function main(): void {
     const parts = input.split(/\s+/);
     const cmd = parts[0].toLowerCase();
 
+    // Pending choice
     if (state.pendingChoice) {
       const next = handlePendingChoiceInput(state, cmd, parts);
+      if (next) state = next;
+      renderAll();
+      rl.prompt();
+      return;
+    }
+
+    // Mulligan
+    if (state.phase === 'MULLIGAN') {
+      const next = handleMulliganInput(state, cmd, parts);
       if (next) state = next;
       renderAll();
       rl.prompt();
@@ -368,6 +470,7 @@ function main(): void {
             'attack <col> <f|r> <target>      — атака (target: g|n|c:col:f|r)',
             'next / n                         — продвинуть фазу',
             'end / e                          — завершить ход',
+            'concede                          — сдаться',
             'discard <idx> ...                — сброс карт (при END_TURN_DISCARD)',
             'choose <idx> ...                 — выбор целей (при EFFECT_TARGET_SELECTION)',
             'quit / q                         — выход',
@@ -509,6 +612,18 @@ function main(): void {
         break;
       }
 
+      case 'concede': {
+        if (state.winner) break;
+        const opp = opponentOf(state.activePlayer);
+        state = {
+          ...state,
+          winner: opp,
+          winnerReason: 'concede',
+        };
+        console.log(`🏳 Сдача. Победил ${opp}.`);
+        break;
+      }
+
       case 'quit':
       case 'q':
         rl.close();
@@ -541,7 +656,8 @@ function reportEvents(events: any[]): void {
       e.type === 'TOKEN_SUMMONED' ||
       e.type === 'TOKEN_LOST' ||
       e.type === 'CHOICE_REQUESTED' ||
-      e.type === 'CHOICE_RESOLVED',
+      e.type === 'CHOICE_RESOLVED' ||
+      e.type === 'MULLIGAN_DONE',
   );
   for (const e of relevant) {
     if (e.type === 'COMMAND_REJECTED') {
@@ -562,6 +678,8 @@ function reportEvents(events: any[]): void {
       console.log(`✨ Токен ${e.defId} призван в колонку ${e.column}`);
     } else if (e.type === 'TOKEN_LOST') {
       console.log(`⚠ Токен ${e.defId} потерян (${e.reason})`);
+    } else if (e.type === 'MULLIGAN_DONE') {
+      console.log(`🎴 ${e.playerId} ${e.replaced ? 'заменил карту' : 'оставил руку'}`);
     } else if (e.type === 'CHOICE_REQUESTED') {
       if (e.kind === 'END_TURN_DISCARD') {
         console.log(`❓ Выбор: сбросить ${e.count} карт(ы). Команда: discard <idx> ...`);
