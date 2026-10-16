@@ -1,7 +1,7 @@
 import type { CardDefinition } from './schema';
 import { KEYWORD_INFO, isFactionTag, type KeywordId } from './abilities';
 
-/*===========================================================*/
+import { PACKS_RAW } from './data/packs-index.generated';
 
 import activeSeriesRaw from './data/active-series.json';
 import presetsRaw from './data/presets.json';
@@ -12,41 +12,6 @@ import rolesRaw from './data/roles.json';
 const PERSONALITIES = personalitiesRaw as Record<string, string>;
 const FACTIONS = factionsRaw as Record<string, { name: string; color: string }>;
 const ROLES = rolesRaw as Record<string, { name: string; icon: string }>;
-
-import stormwindMeta from './data/packs/stormwind/meta.json';
-import stormwindCards from './data/packs/stormwind/cards.json';
-
-import voidflameMeta from './data/packs/voidflame/meta.json';
-import voidflameCards from './data/packs/voidflame/cards.json';
-
-import apocryphMeta from './data/packs/apocryph/meta.json';
-import apocryphCards from './data/packs/apocryph/cards.json';
-
-import steelMeta from './data/packs/steel/meta.json';
-import steelCards from './data/packs/steel/cards.json';
-
-import razlomMeta from './data/packs/razlom/meta.json';
-import razlomCards from './data/packs/razlom/cards.json';
-
-import echoMeta from './data/packs/echo/meta.json';
-import echoCards from './data/packs/echo/cards.json';
-
-import skyMeta from './data/packs/sky/meta.json';
-import skyCards from './data/packs/sky/cards.json';
-
-import classicMeta from './data/packs/classic/meta.json';
-import classicCards from './data/packs/classic/cards.json';
-
-import cradleMeta from './data/packs/cradle/meta.json';
-import cradleCards from './data/packs/cradle/cards.json';
-
-import throneMeta from './data/packs/throne/meta.json';
-import throneCards from './data/packs/throne/cards.json';
-
-import innerMeta from './data/packs/inner/meta.json';
-import innerCards from './data/packs/inner/cards.json';
-
-/*===========================================================*/
 
 export interface PackMeta {
   id: string;
@@ -107,20 +72,11 @@ function buildPack(meta: PackMeta, cardsRaw: unknown): Pack {
   return { meta, cards, cardsById };
 }
 
-const PACKS: Record<string, Pack> = {
-  stormwind: buildPack(stormwindMeta as PackMeta, stormwindCards),
-  voidflame: buildPack(voidflameMeta as PackMeta, voidflameCards),
-  apocryph: buildPack(apocryphMeta as PackMeta, apocryphCards),
-  steel: buildPack(steelMeta as PackMeta, steelCards),
-  razlom: buildPack(razlomMeta as PackMeta, razlomCards),
-  echo: buildPack(echoMeta as PackMeta, echoCards),
-  sky: buildPack(skyMeta as PackMeta, skyCards),
-  
-  classic: buildPack(classicMeta as PackMeta, classicCards),
-  cradle: buildPack(cradleMeta as PackMeta, cradleCards),
-  throne: buildPack(throneMeta as PackMeta, throneCards),
-  inner: buildPack(innerMeta as PackMeta, innerCards),
-};
+const PACKS: Record<string, Pack> = {};
+for (const raw of PACKS_RAW) {
+  const meta = raw.meta as PackMeta;
+  PACKS[meta.id] = buildPack(meta, raw.cards);
+}
 
 
 interface ActiveSeriesFile {

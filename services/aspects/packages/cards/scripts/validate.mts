@@ -21,9 +21,14 @@ const globalCardIds = new Set<string>();
 const globalCardRarity = new Map<string, string>();
 const packEntries: Array<{
   packId: string;
+  dirName: string;
   cards: any[];
   ids: Set<string>;
 }> = [];
+
+// meta.id → имя папки. Ловим коллизии: два пака с одним публичным id
+// молча перезапишут друг друга при загрузке.
+const seenPackIds = new Map<string, string>();
 
 for (const packName of readdirSync(packsDir)) {
   if (packName.startsWith('_')) continue;
@@ -43,13 +48,38 @@ for (const packName of readdirSync(packsDir)) {
     continue;
   }
 
-  const cards = JSON.parse(readFileSync(cardsPath, 'utf8')) as any[];
-  const meta = JSON.parse(readFileSync(metaPath, 'utf8')) as any;
-
-  if (meta.id !== packName) {
-    console.error(`✗ ${packName}: meta.id = "${meta.id}" ≠ имени папки`);
+  let cards: any[];
+  let meta: any;
+  try {
+    cards = JSON.parse(readFileSync(cardsPath, 'utf8')) as any[];
+  } catch (e) {
+    console.error(`✗ ${packName}: cards.json не парсится — ${(e as Error).message}`);
     errors++;
+    continue;
   }
+  try {
+    meta = JSON.parse(readFileSync(metaPath, 'utf8')) as any;
+  } catch (e) {
+    console.error(`✗ ${packName}: meta.json не парсится — ${(e as Error).message}`);
+    errors++;
+    continue;
+  }
+
+  // meta.id — публичный идентификатор, НЕ обязан совпадать с именем папки.
+  // Проверяем только наличие и уникальность.
+  if (!meta.id || typeof meta.id !== 'string') {
+    console.error(`✗ ${packName}: meta.json без поля "id"`);
+    errors++;
+    continue;
+  }
+  if (seenPackIds.has(meta.id)) {
+    console.error(
+      `✗ ${packName}: meta.id = "${meta.id}" уже занят папкой "${seenPackIds.get(meta.id)}"`,
+    );
+    errors++;
+    continue;
+  }
+  seenPackIds.set(meta.id, packName);
 
   const ids = new Set<string>();
   let packOk = 0;
@@ -77,9 +107,12 @@ for (const packName of readdirSync(packsDir)) {
     packOk++;
   }
   totalCards += packOk;
-  packEntries.push({ packId: packName, cards, ids });
+  packEntries.push({ packId: meta.id, dirName: packName, cards, ids });
 
-  console.log(`  ${packName}: ${packOk} карт`);
+  // Показываем и имя папки, и публичный id — чтобы при отладке
+  // сразу было видно, где что.
+  const sameName = meta.id === packName ? '' : ` (id=${meta.id})`;
+  console.log(`  ${packName}${sameName}: ${packOk} карт`);
 }
 
 // ─── Пресеты ───
@@ -101,7 +134,6 @@ if (!existsSync(presetsPath)) {
       continue;
     }
 
-    // Проверка: все карты существуют в общем пуле
     for (const cid of preset.cards) {
       if (!globalCardIds.has(cid)) {
         console.error(
@@ -111,7 +143,6 @@ if (!existsSync(presetsPath)) {
       }
     }
 
-    // Легендарки — не больше 1 копии каждой
     const legendCounts = new Map<string, number>();
     for (const cid of preset.cards) {
       if (globalCardRarity.get(cid) === 'legendary') {

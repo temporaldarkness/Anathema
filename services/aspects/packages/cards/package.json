@@ -4,6 +4,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
+	"gen:packs": "node scripts/gen-packs-index.mjs",
+	"prebuild": "node scripts/gen-packs-index.mjs",
     "build": "tsc -p tsconfig.json && node scripts/copy-data.mjs",
     "dev": "tsc -p tsconfig.json --watch",
     "validate": "tsx scripts/validate.mts",
