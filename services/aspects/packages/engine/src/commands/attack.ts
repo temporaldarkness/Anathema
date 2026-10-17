@@ -306,6 +306,33 @@ function captureNeutral(
   }
   ctx.events.push({ type: 'NEUTRAL_CAPTURED', column, playerId: newOwner });
   notifyCellCaptured(draft, column, newOwner);
+  
+  checkInstantAltVictory(draft, newOwner, ctx);
+}
+
+/**
+ * Мгновенная проверка alt-victory: если игрок контролирует все 5 клеток
+ * прямо сейчас — победа. Вызывается из всех путей захвата клетки.
+ */
+export function checkInstantAltVictory(
+  draft: WritableDraft<GameState>,
+  playerId: PlayerId,
+  ctx: ResolutionContext,
+): void {
+  if (draft.winner) return;
+  let count = 0;
+  for (const col of draft.board) {
+    if (col.neutralOwner === playerId) count++;
+  }
+  if (count === 5) {
+    draft.winner = playerId;
+    draft.winnerReason = 'alt_victory';
+    ctx.events.push({
+      type: 'GAME_OVER',
+      winner: playerId,
+      reason: 'alt_victory',
+    });
+  }
 }
 
 function attackGuild(

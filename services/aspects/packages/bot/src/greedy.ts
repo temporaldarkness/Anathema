@@ -197,9 +197,21 @@ export class GreedyBot implements Bot {
     if (attack.target.kind === 'NEUTRAL') {
       const myN = state.board.filter((c) => c.neutralOwner === myPlayerId).length;
       const oppN = state.board.filter((c) => c.neutralOwner === opp).length;
-      if (myN >= 4) return 50_000;
-      if (oppN >= 4) return 40_000;
-      if (myN >= 3) return 5_000;
+      const column = attack.target.column;
+      const colOwner = state.board[column - 1]?.neutralOwner ?? null;
+    
+      // Alt-victory (new rules): 5/5 = instant win.
+      if (myN === 4) return 100_000;
+      if (oppN === 4) {
+        // Prefer flipping their 4th cell — deny their win.
+        if (colOwner === opp) return 80_000;
+        // Otherwise race (greedy-flavored — Greedy is a cell-hungry bot).
+        return 40_000;
+      }
+    
+      // Mid-game (kept greedy — Greedy always prioritizes cells).
+      if (myN === 3) return 5_000;
+      if (oppN === 3) return 3_000;
       if (myN > oppN) return 1_500 + atkStr * 10;
       return 2_000 + atkStr * 10;
     }

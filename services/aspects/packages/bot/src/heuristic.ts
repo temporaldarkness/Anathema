@@ -309,7 +309,9 @@ export class HeuristicBot implements Bot {
       const def = state.definitions[card.definitionId];
       if (!def) continue;
       const hp = health(card);
-      const score = hp * 10 + (def.cost ?? 0) * 5;
+      // Silenced card — priority target (nothing to lose).
+      const silencedBonus = card.silenced ? -1000 : 0;
+      const score = hp * 10 + (def.cost ?? 0) * 5 + silencedBonus;
       if (score < bestScore) {
         bestScore = score;
         best = r;
@@ -359,7 +361,14 @@ export class HeuristicBot implements Bot {
     if (!card) return -1;
     const def = state.definitions[card.definitionId];
     if (!def) return -1;
-    return def.cost * 10 + (def.strength ?? 0) * 8 + (def.health ?? 0) * 4;
+    const inf = state.players[card.ownerId]?.influence ?? 0;
+    const base = def.cost * 10 + (def.strength ?? 0) * 8 + (def.health ?? 0) * 4;
+    // Дорогая карта, которую мы не сможем разыграть в ближайшие ходы —
+    // это "мёртвый груз" в руке. Штрафуем её ценность как кандидата на сброс.
+    // NB: ключевой момент — сейчас высокий cost ДАЁТ больше value, из-за
+    // чего smartDiscard сбрасывает дешёвые карты и рука заполняется дорогими.
+    const wastedTurns = Math.max(0, def.cost - inf - 1);
+    return base - wastedTurns * 15;
   }
 
 
@@ -417,17 +426,41 @@ export class HeuristicBot implements Bot {
         score += this.scoreColumnForCard(
           state, myPlayerId, a.column, card.definitionId,
         );
+		
+		// Hand bloat: когда рука переполнена, приоритет — сыграть БОЛЬШЕ карт,
+        // а не самую дорогую. Смещаем скоринг в пользу дешёвых.
+        const handSize = state.players[myPlayerId].hand.length;
+        if (handSize > 7) {
+          score -= def.cost * (handSize - 7) * 30;
+          score += 100 + (handSize - 7) * 25;
+        }
 
         scored.push({ value: a, score });
       } else if (a.type === 'REPLACE_CARD' && this.v2SmartReplace) {
         const s = this.v4ReplaceV2
           ? this.scoreReplaceCardV2(state, myPlayerId, a)
           : this.scoreReplaceCard(state, myPlayerId, a);
+		  
         // Профиль replacementLove — сдвиг в пользу замены.
         const profileShift = (this.profile.replacementLove - 0.5) * 200;
+		
         if (Number.isFinite(s)) {
           scored.push({ value: a, score: s + profileShift });
         }
+      }
+    }
+	
+	// В конце pickBestPlayAction, перед selectOption:
+    if (this.debug) {
+      const replaces = scored.filter((s) => s.value.type === 'REPLACE_CARD');
+      const allReplaceActions = actions.filter((a) => a.type === 'REPLACE_CARD');
+      if (allReplaceActions.length > 0) {
+        console.warn('[HB] REPLACE in actions:', allReplaceActions.length,
+          'finite scored:', replaces.length,
+          'scores:', allReplaceActions.map((a) => ({
+            cardId: a.type === 'REPLACE_CARD' ? a.cardId : '',
+            s: this.scoreReplaceCardV2(state, myPlayerId, a as Extract<Command, {type: 'REPLACE_CARD'}>),
+          })));
       }
     }
 
@@ -473,12 +506,20 @@ export class HeuristicBot implements Bot {
 
     const oldLoc = this.findLocation(state, oldId);
     const inFront = oldLoc?.zone === 'FRONT';
+	
+	// Скидка на замену: та же формула, что в движке.
+    const discount = Math.min(
+      Math.floor(oldDef.cost / 2),
+      Math.floor(newDef.cost / 2),
+    );
+    const effectiveCost = Math.max(0, newDef.cost - discount);
 
     let score = inFront ? 120 : 60;
     score += dStr * 40;
     score += dHpMax * 25;
     score += restoredHp * 30;
-    score -= newDef.cost * 30;
+    score -= effectiveCost * 30;
+	score += discount * 20;
     return score;
   }
 
@@ -491,38 +532,106 @@ export class HeuristicBot implements Bot {
     if (!newCard) return -Infinity;
     const newDef = state.definitions[newCard.definitionId];
     if (!newDef) return -Infinity;
-
-    const oldId = this.findPersonalityCard(state, myPlayerId, newDef.personalityTag);
+  
+    let oldId: CardInstanceId | null = null;
+    let bestCandidateScore = Infinity;
+    for (const col of state.board) {
+      const ids = myPlayerId === 'p1'
+        ? [col.p1Front, col.p1Reserve]
+        : [col.p2Front, col.p2Reserve];
+      for (const id of ids) {
+        if (!id || id === cmd.cardId) continue;
+        const card = state.cards[id];
+        if (!card) continue;
+        const def = state.definitions[card.definitionId];
+        if (def?.personalityTag !== newDef.personalityTag) continue;
+        const hp = health(card);
+        const cost = def.cost ?? 0;
+        const s = hp * 10 + cost * 5 + (card.silenced ? -1000 : 0);
+        if (s < bestCandidateScore) {
+          bestCandidateScore = s;
+          oldId = id;
+        }
+      }
+    }
     if (!oldId) return -Infinity;
     const oldCard = state.cards[oldId];
     if (!oldCard) return -Infinity;
     const oldDef = state.definitions[oldCard.definitionId];
     if (!oldDef) return -Infinity;
-
+  
     const dStr = (newDef.strength ?? 0) - (oldDef.strength ?? 0);
     const dHpMax = (newDef.health ?? 0) - (oldDef.health ?? 0);
     const currentHp = health(oldCard);
-    const newMaxHp = newDef.health ?? 0;
-    const restoredHp = Math.max(0, newMaxHp - currentHp);
-    const hpFraction = newMaxHp > 0 ? currentHp / newMaxHp : 0;
-
-    const isWounded = hpFraction < 0.7;
-    const isUpgrade = dStr > 0 || dHpMax > 0;
-    // Silenced карта потеряла способности — замена на ту же Личность
-    // это починка, даже если статы не улучшаются.
+    const maxHp = oldDef.health ?? 1;
+    const newMaxHp = newDef.health ?? 1;
+    const hpMissing = Math.max(0, maxHp - currentHp);
+    const hpFraction = maxHp > 0 ? currentHp / maxHp : 1;
+  
+    const isWounded = hpFraction < 0.85;
     const isSilenced = oldCard.silenced;
-    if (!isWounded && !isUpgrade && !isSilenced) return -Infinity;
-
+  
+    const newKws = new Set(newDef.abilities ?? []);
+    const oldKws = new Set(oldDef.abilities ?? []);
+    const gainedKeywords: string[] = [];
+    for (const kw of newKws) if (!oldKws.has(kw)) gainedKeywords.push(kw);
+    const lostKeywords: string[] = [];
+    for (const kw of oldKws) if (!newKws.has(kw)) lostKeywords.push(kw);
+  
+    const handSize = state.players[myPlayerId].hand.length;
+    const needsRelief = handSize >= 7;
+  
+    const isUpgrade = dStr > 0 || dHpMax > 0 || gainedKeywords.length > 0;
+    const isSameId = oldDef.id === newDef.id;
+  
+    // ── A→A compromise: pure repair allowed, but only substantial.
+    // Same-id replacement is useful when it heals a badly wounded card
+    // or restores silenced keywords. It is NOT useful for "1 HP heal" or
+    // "hand-relief spam" — those waste the copy and lose tempo.
+    // Cross-aspect variants (upgrades) are strictly better when available.
+    if (isSameId) {
+      const substantialRepair = isSilenced || hpMissing >= 2;
+      if (!substantialRepair) return -Infinity;
+    }
+  
+    if (!isWounded && !isUpgrade && !isSilenced && !needsRelief) {
+      return -Infinity;
+    }
+  
     const oldLoc = this.findLocation(state, oldId);
     const inFront = oldLoc?.zone === 'FRONT';
-
-    let score = 200;
-    if (inFront && isWounded) score += 80;
-    if (!inFront) score -= 40;
-    score += dStr * 50;
-    score += dHpMax * 30;
-    score += restoredHp * 40;
-    score -= newDef.cost * 25;
+  
+    const discount = Math.min(
+      Math.floor((oldDef.cost ?? 0) / 2),
+      Math.floor((newDef.cost ?? 0) / 2),
+    );
+    const effectiveCost = Math.max(0, (newDef.cost ?? 0) - discount);
+  
+    let score = 450;
+    if (inFront) score += 40;
+    if (isWounded) score += 60 + hpMissing * 45;
+    if (isSilenced) score += 150;
+    if (dStr > 0) score += dStr * 45;
+    if (dHpMax > 0) score += dHpMax * 25;
+  
+    const KEYWORD_VALUE: Record<string, number> = {
+      taunt: 60, armored: 40, cleave: 80, frenzy: 80,
+      regenerate: 50, starter: 0, charge: 60, vanguard: 40,
+      scout: 30, shield: 50, suppress: 40, silence: 60,
+    };
+    for (const kw of gainedKeywords) score += KEYWORD_VALUE[kw] ?? 20;
+    for (const kw of lostKeywords) score -= KEYWORD_VALUE[kw] ?? 20;
+  
+    if (handSize >= 6) score += (handSize - 5) * 30;
+    if (needsRelief) score += (handSize - 7) * 20;
+  
+    score -= effectiveCost * 10;
+    score += discount * 20;
+  
+    // Prefer cross-aspect upgrades when both A→A repair and A→B upgrade
+    // are available in hand. A→A fires when it's the only sensible move.
+    if (isSameId) score -= 100;
+  
     return score;
   }
 
@@ -699,7 +808,17 @@ export class HeuristicBot implements Bot {
       const value = this.scoreEffects(
         state, ability.effects, card.ownerId, card.instanceId,
       );
-      const net = value - ability.cost * 10;
+      const discardCost = (ability as { discardCost?: number }).discardCost ?? 0;
+      const handSize = state.players[card.ownerId].hand.length;
+  
+      // ── discardCost safety ──
+      // Cannot pay — skip (engine would reject anyway, but no score churn).
+      if (discardCost > 0 && handSize < discardCost) continue;
+      // Thin hand + heavy discard = cards are precious; save them.
+      if (discardCost >= 2 && handSize <= 3) continue;
+  
+      const discardPenalty = discardCost * 60;
+      const net = value - ability.cost * 10 - discardPenalty;
       if (net > bestNet) {
         bestNet = net;
         best = a;
@@ -1454,68 +1573,64 @@ export class HeuristicBot implements Bot {
     return frontId;
   }
 
-  /**
-   * Атака по нейтралу. Разветвляется по флагу lateGameNeutralFix:
-   *  - false → старое поведение (агрессивные константы 50k/40k/5k, без
-   *    учёта защитника).
-   *  - true  → новое: учитываем защитника, снижаем приоритет нейтрала
-   *    ниже карточного kill, в лейтгейме (пустая колода) игнорируем
-   *    бесполезные колонки 1/3/5.
-   */
   private scoreNeutralAttack(
     state: GameState,
     myPlayerId: PlayerId,
     attack: AttackCommand,
   ): number {
-	if (attack.target.kind !== 'NEUTRAL') return 0;
+    if (attack.target.kind !== 'NEUTRAL') return 0;
     const opp = opponentOf(myPlayerId);
     const myN = this.neutralCount(state, myPlayerId);
     const oppN = this.neutralCount(state, opp);
     const atkStr = strengthInBattle(state, attack.attackerId);
     const column = attack.target.column;
-
-    if (this.v5AltVictory) {
-      const pending = state.altVictoryPending;
-      if (pending?.[opp] && oppN >= 4) return 600_000;
-      if (pending?.[myPlayerId] && myN >= 4) return 500_000;
-    }
-
-    if (!this.lateGameNeutralFix) {
-      if (myN >= 4) return 50_000;
-      if (oppN >= 4) return 40_000;
-      if (this.v4Attack && myN >= 3) return 7_000 + atkStr * 15;
-      if (myN >= 3) return 5_000;
-      if (myN > oppN) return 1_500 + atkStr * 10;
-      return 2_000 + atkStr * 10;
-    }
-
-    const defender = this.findNeutralDefender(state, column, opp);
-    let canCapture = true;
-    if (defender) {
+  
+    const canCaptureCell = (): boolean => {
+      const defender = this.findNeutralDefender(state, column, opp);
+      if (!defender) return true;
       const pv = previewCardAttack(state, attack.attackerId, defender);
-      if (!pv || !(pv.defenderDies && !pv.attackerDies)) canCapture = false;
+      return !!(pv && pv.defenderDies && !pv.attackerDies);
+    };
+  
+    const colOwner = state.board[column - 1]?.neutralOwner ?? null;
+  
+    // ── Alt-victory: 5/5 = мгновенная победа. ──
+    // Case 1: мы в одной клетке от победы — максимальный приоритет.
+    if (myN === 4) {
+      return canCaptureCell() ? 100_000 : 100;
     }
-
-    if (!canCapture && defender) {
-      const pv = previewCardAttack(state, attack.attackerId, defender);
-      if (pv) {
-        if (pv.defenderDies && !pv.attackerDies) return 800;
-        if (pv.defenderDies && pv.attackerDies) return 300;
-        if (pv.attackerDies) return -400;
-      }
+    // Case 3: опп в одной клетке от победы.
+    if (oppN === 4) {
+      // Лучшее: флипнуть ИХ клетку (deny + catch up одновременно).
+      if (colOwner === opp && canCaptureCell()) return 80_000;
+      // Следующее: взять свободный нейтрал (догнать до 4/5 самим).
+      if (colOwner === null && myN >= 3 && canCaptureCell()) return 60_000;
+      // Иначе — не приоритет; лучше убивать их карты на доске.
       return 100;
     }
-
-    const deckLeft = state.players[myPlayerId].deck.length;
-    if (deckLeft === 0) {
-      if (column === 1 || column === 3 || column === 5) return 50;
-      return 1_000 + atkStr * 10;
+    // Case 2 (myN=4, oppN=3) — уже покрыт case 1.
+    // Case 4 (both ≤ 3) — обычная логика ниже.
+  
+    const profMult = 0.2 + this.profile.neutralPriority * 1.9;
+  
+    if (!canCaptureCell()) {
+      const defender = this.findNeutralDefender(state, column, opp);
+      const pv = defender
+        ? previewCardAttack(state, attack.attackerId, defender)
+        : null;
+      if (pv?.attackerDies) return -300;
+      return 50;
     }
-
-    if (myN >= 4) return 1_400 + atkStr * 10;
-    if (oppN >= 4) return 1_200 + atkStr * 10;
-    if (myN >= 3) return 1_100 + atkStr * 10;
-    if (myN > oppN) return 900 + atkStr * 10;
-    return 1_000 + atkStr * 10;
+  
+    const deckLeft = state.players[myPlayerId].deck.length;
+    if (deckLeft === 0 && (column === 1 || column === 3 || column === 5)) {
+      return 50;
+    }
+  
+    if (myN === 3 && oppN < 4) return 550 * profMult;
+    if (oppN === 3) return 450 * profMult;
+  
+    const base = myN > oppN ? 350 : 300;
+    return (base + atkStr * 5) * profMult;
   }
 }

@@ -29,6 +29,8 @@ interface LevelFeatures {
   v4MulliganV2: boolean;
   v4ReplaceV2: boolean;
   lateGameNeutralFix: boolean;
+  v5AltVictory: boolean;
+  debug: boolean;
 }
 
 const BASE_FEATURES: LevelFeatures = {
@@ -45,6 +47,8 @@ const BASE_FEATURES: LevelFeatures = {
   v4MulliganV2: false,
   v4ReplaceV2: false,
   lateGameNeutralFix: false,
+  v5AltVictory: false,
+  debug: false
 };
 
 const LEVEL_FEATURES: Record<LevelName, LevelFeatures> = {
@@ -93,6 +97,8 @@ const LEVEL_FEATURES: Record<LevelName, LevelFeatures> = {
     v4MulliganV2: true,
     v4ReplaceV2: true,
     lateGameNeutralFix: true,
+	v5AltVictory: true,
+	debug: false
   },
 
   // Grandmaster: тот же набор, но с нулевым шумом.
@@ -110,6 +116,8 @@ const LEVEL_FEATURES: Record<LevelName, LevelFeatures> = {
     v4MulliganV2: true,
     v4ReplaceV2: true,
     lateGameNeutralFix: true,
+	v5AltVictory: true,
+	debug: false
   },
 };
 

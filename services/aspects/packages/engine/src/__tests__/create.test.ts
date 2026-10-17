@@ -61,8 +61,8 @@ describe('createGame', () => {
       decks: { p1: deckOf('guard'), p2: deckOf('runner') },
       cardDefinitions: defs,
     });
-    expect(state.players.p1.glory).toBe(30);
-    expect(state.players.p2.glory).toBe(30);
+    expect(state.players.p1.glory).toBe(25);
+    expect(state.players.p2.glory).toBe(25);
     const firstInfluence = state.players[state.activePlayer].influence;
     const secondInfluence = state.players[state.activePlayer === 'p1' ? 'p2' : 'p1'].influence;
     expect(firstInfluence).toBe(0);

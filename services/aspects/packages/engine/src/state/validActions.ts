@@ -114,11 +114,42 @@ export function getValidActions(
         const def = state.definitions[card.definitionId];
         if (!def) continue;
 
-        const match = findMatchingPersonalityOnBoard(state, playerId, def.personalityTag);
-        if (!match) continue;
+        // Собираем всех кандидатов той же Личности.
+        const candidates: CardInstanceId[] = [];
+        for (const col of state.board) {
+          const ids =
+            playerId === 'p1'
+              ? [col.p1Front, col.p1Reserve]
+              : [col.p2Front, col.p2Reserve];
+          for (const cid of ids) {
+            if (!cid) continue;
+            const c = state.cards[cid];
+            if (!c) continue;
+            const cd = state.definitions[c.definitionId];
+            if (!cd) continue;
+            if (cd.personalityTag !== def.personalityTag) continue;
+            if (cd.cantBeReplaced) continue;
+            candidates.push(cid);
+          }
+        }
+        if (candidates.length === 0) continue;
 
-        const cost = Math.max(0, def.cost - bonuses.costReduction);
-        if (cost > player.influence) continue;
+        // Минимальная стоимость замены с учётом скидки
+        // (выбираем лучшего кандидата — если хоть на одного хватает — команда валидна).
+        let minCost = Infinity;
+        for (const cid of candidates) {
+          const c = state.cards[cid];
+          if (!c) continue;
+          const cd = state.definitions[c.definitionId];
+          if (!cd) continue;
+          const discount = Math.min(
+            Math.floor(cd.cost / 2),
+            Math.floor(def.cost / 2),
+          );
+          const cost = Math.max(0, def.cost - discount - bonuses.costReduction);
+          if (cost < minCost) minCost = cost;
+        }
+        if (minCost > player.influence) continue;
 
         actions.push({ type: 'REPLACE_CARD', playerId, cardId });
       }

@@ -113,7 +113,7 @@ export function createGame(opts: CreateGameOptions): CreateGameResult {
     seed,
     decks,
     cardDefinitions,
-    startingGlory = 30,
+    startingGlory = 25,
     startingHandSize = 4,
     useMulligan = false,
   } = opts;

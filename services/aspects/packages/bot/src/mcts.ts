@@ -215,8 +215,25 @@ export class MctsBot implements Bot {
     const opp = opponentOf(rootPlayer);
     const myGlory = state.players[rootPlayer].glory;
     const oppGlory = state.players[opp].glory;
-    // Разница glory ограничена [-60, +60] → [0, 1].
-    const delta = (myGlory - oppGlory) / 60;
-    return Math.max(0, Math.min(1, 0.5 + delta));
+  
+    // Alt-victory (new rules): 5/5 = instant win.
+    let myN = 0;
+    let oppN = 0;
+    for (const col of state.board) {
+      if (col.neutralOwner === rootPlayer) myN++;
+      else if (col.neutralOwner === opp) oppN++;
+    }
+    if (myN === 5) return 1;
+    if (oppN === 5) return 0;
+  
+    // Glory component: [-60, +60] → [0, 1].
+    let score = 0.5 + (myGlory - oppGlory) / 60;
+  
+    // Neutral: 4/5 is nearly a win — swing terminal evaluation.
+    if (myN === 4) score += 0.35;
+    if (oppN === 4) score -= 0.35;
+    score += (myN - oppN) * 0.03;
+  
+    return Math.max(0, Math.min(1, score));
   }
 }

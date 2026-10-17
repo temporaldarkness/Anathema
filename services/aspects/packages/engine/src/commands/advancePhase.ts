@@ -68,9 +68,9 @@ function doDraw(draft: WritableDraft<GameState>, ctx: ResolutionContext): void {
   const bonuses = columnBonuses(draft as GameState, player);
 
   let count = 1 + bonuses.extraDraw;
-  if (frontCount(draft as GameState, player) < frontCount(draft as GameState, opponent)) {
-    count += 1;
-  }
+  //if (frontCount(draft as GameState, player) < frontCount(draft as GameState, opponent)) {
+  //  count += 1;
+  //}
 
   for (let i = 0; i < count; i++) {
     const p = draft.players[player];
@@ -187,6 +187,11 @@ function doEndOfTurnStart(draft: WritableDraft<GameState>, ctx: ResolutionContex
 }
 
 function doEndOfTurnFinish(draft: WritableDraft<GameState>, ctx: ResolutionContext): void {
+  // Despair отключён (эксперимент).
+  // Обоснование: auto-promote резервов в low-glory фазе создаёт
+  // больше юнитов на фронте → больше обменов → attrition затягивается.
+  // Гипотеза: без Despair хвост длинных партий сократится на 3-5 ходов.
+  /*
   const player = draft.activePlayer;
   if (draft.players[player].glory < 10) {
     for (let i = 0; i < 5; i++) {
@@ -195,6 +200,7 @@ function doEndOfTurnFinish(draft: WritableDraft<GameState>, ctx: ResolutionConte
       if (reserveId) promoteFromReserve(draft, reserveId, ctx);
     }
   }
+  */
 }
 
 function checkAltVictory(draft: WritableDraft<GameState>, ctx: ResolutionContext): void {

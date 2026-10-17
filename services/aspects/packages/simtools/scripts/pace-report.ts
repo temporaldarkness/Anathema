@@ -1,30 +1,21 @@
 #!/usr/bin/env tsx
 /**
- * Pace report v2: длина партии, стоимость, влияние, рука,
- * idle-ходы, однa-ходовые смерти.
+ * Pace report v3: длина партии, стоимость, влияние, рука, idle-ходы,
+ * одноходовые смерти + underdog триггеры.
  *
  * Usage:
  *   pace-report <scope> <N> [botName] [deck1,deck2,...] [--mulligan]
  */
 
 import type { GameState, Command, GameEvent } from '@aspects/engine';
-import type { CardInstanceId } from '@aspects/engine';
+import { frontCount, controlledCells, opponentOf } from '@aspects/engine';
 import { decksForScope, resolveScope, listScopes } from '@aspects/cards';
 import { makeBot, listAllBotIds } from '@aspects/bot';
 import { runOneGame } from '../src/runner';
 
 const DEFAULT_BOT = 'heuristic-v5-balanced-master';
 
-interface Args {
-  scopeStr: string;
-  series: string[];
-  n: number;
-  botName: string;
-  deckIds: string[];
-  useMulligan: boolean;
-}
-
-function parseArgs(argv: string[]): Args {
+function parseArgs(argv: string[]) {
   const cleaned: string[] = [];
   let useMulligan = false;
   for (const a of argv) {
@@ -40,9 +31,7 @@ function parseArgs(argv: string[]): Args {
   }
   const series = resolveScope(scopeStr);
   if (series.length === 0) {
-    console.error(
-      `Empty scope "${scopeStr}". Known: ${listScopes().map((s) => s.id).join(', ')}`,
-    );
+    console.error(`Empty scope "${scopeStr}".`);
     process.exit(1);
   }
   const n = Number.parseInt(nStr, 10);
@@ -106,13 +95,18 @@ interface PerGameStats {
   neutralEndP2: number;
   neutralEndNone: number;
 
-  // v2:
   turnSnapshots: TurnSnapshot[];
   unusedInfluenceEndOfPlay: number[];
   costByTurn: Map<number, number[]>;
   turnsWithAction: Set<number>;
   oneTurnDeaths: number;
   totalPlays: number;
+
+  // v3: underdog
+  totalDrawPhases: number;
+  underdogDrawTriggers: number;
+  totalInfluencePhases: number;
+  underdogInfluenceTriggers: number;
 }
 
 function collectOneGame(
@@ -123,7 +117,6 @@ function collectOneGame(
   botName: string,
   useMulligan: boolean,
 ): PerGameStats | null {
-  // Локальные аккумуляторы
   const playedCardsCost: number[] = [];
   let firstTurnOfPlay: number | null = null;
   let firstTurnOfCardDeath: number | null = null;
@@ -136,9 +129,15 @@ function collectOneGame(
   const unusedInfluenceEndOfPlay: number[] = [];
   const costByTurn = new Map<number, number[]>();
   const turnsWithAction = new Set<number>();
-  const playedCardTurns = new Map<CardInstanceId, number>();
+  const playedCardTurns = new Map<string, number>();
   let oneTurnDeaths = 0;
   let totalPlays = 0;
+
+  // v3
+  let totalDrawPhases = 0;
+  let underdogDrawTriggers = 0;
+  let totalInfluencePhases = 0;
+  let underdogInfluenceTriggers = 0;
 
   const r = runOneGame(series, p1DeckId, p2DeckId, seed, {
     bots: { p1: makeBot(botName), p2: makeBot(botName) },
@@ -184,7 +183,50 @@ function collectOneGame(
         turnsWithAction.add(turn);
       }
 
-      // 4. События: PHASE_CHANGED, death, capture, glory
+      // 4. События
+      const hasDrawPhase = events.some(
+        (e) => e.type === 'PHASE_CHANGED' && e.phase === 'DRAW',
+      );
+      const hasInfluencePhase = events.some(
+        (e) => e.type === 'PHASE_CHANGED' && e.phase === 'INFLUENCE',
+      );
+
+      // 5. Подсчёт underdog-draw
+      if (hasDrawPhase) {
+        totalDrawPhases++;
+        const drawnCount = events.filter((e) => e.type === 'CARD_DRAWN').length;
+        if (drawnCount > 0) {
+          const player = state.activePlayer;
+          const opp = opponentOf(player);
+          const myFront = frontCount(state, player);
+          const oppFront = frontCount(state, opp);
+          const col5Owner = state.board[4].neutralOwner;
+          const col5Bonus = col5Owner === player ? 1 : 0;
+          const baseExpected = 1 + col5Bonus;
+          const underdogBonus = myFront < oppFront ? 1 : 0;
+          if (underdogBonus === 1 && drawnCount > baseExpected) {
+            underdogDrawTriggers++;
+          }
+        }
+      }
+
+      // 6. Подсчёт underdog-influence
+      if (hasInfluencePhase) {
+        totalInfluencePhases++;
+        const influenceEvents = events.filter(
+          (e) => e.type === 'INFLUENCE_CHANGED',
+        );
+        if (influenceEvents.length > 0) {
+          const player = state.activePlayer;
+          const opp = opponentOf(player);
+          const myCells = controlledCells(state, player);
+          const oppCells = controlledCells(state, opp);
+          if (myCells < oppCells) {
+            underdogInfluenceTriggers++;
+          }
+        }
+      }
+
       for (const e of events) {
         if (e.type === 'PHASE_CHANGED' && e.phase === 'COMBAT') {
           unusedInfluenceEndOfPlay.push(state.players[e.playerId].influence);
@@ -199,7 +241,10 @@ function collectOneGame(
             oneTurnDeaths++;
           }
         }
-        if (e.type === 'NEUTRAL_CAPTURED' && firstTurnOfNeutralCapture === null) {
+        if (
+          e.type === 'NEUTRAL_CAPTURED' &&
+          firstTurnOfNeutralCapture === null
+        ) {
           firstTurnOfNeutralCapture = turn;
         }
         if (e.type === 'GLORY_CHANGED') {
@@ -245,6 +290,10 @@ function collectOneGame(
     turnsWithAction,
     oneTurnDeaths,
     totalPlays,
+    totalDrawPhases,
+    underdogDrawTriggers,
+    totalInfluencePhases,
+    underdogInfluenceTriggers,
   };
 }
 
@@ -335,7 +384,7 @@ function main(): void {
   console.log(histogram(turns, 5, 60));
   console.log('');
 
-  // ─── Стоимость карт ───
+  // ─── Стоимость ───
   const allCosts = all.flatMap((g) => g.playedCardsCost);
   const costHist = new Array(11).fill(0);
   for (const c of allCosts) {
@@ -365,7 +414,7 @@ function main(): void {
   console.log(`  Дорогих (5+):       ${pct(expensive, totalPlayed)}`);
   console.log('');
 
-  // ─── НОВОЕ: Средний cost по ходам ───
+  // ─── Средний cost по ходам ───
   console.log('─── Средний cost по ходам ─────────────────────');
   for (const [lo, hi] of [[1, 5], [6, 10], [11, 15], [16, 20], [21, 25], [26, 30]] as const) {
     const allInBucket: number[] = [];
@@ -375,12 +424,11 @@ function main(): void {
       }
     }
     const avg = allInBucket.length > 0 ? mean(allInBucket).toFixed(2) : '—';
-    const n2 = allInBucket.length;
-    console.log(`  Ходы ${String(lo).padStart(2)}–${String(hi).padStart(2)}:  avg=${avg}  (n=${n2})`);
+    console.log(`  Ходы ${String(lo).padStart(2)}–${String(hi).padStart(2)}:  avg=${avg}  (n=${allInBucket.length})`);
   }
   console.log('');
 
-  // ─── НОВОЕ: Размер руки ───
+  // ─── Размер руки ───
   console.log('─── Средний размер руки (активный игрок) ─────');
   for (const [lo, hi] of [[1, 5], [6, 10], [11, 15], [16, 20], [21, 25], [26, 30]] as const) {
     const sizes: number[] = [];
@@ -396,9 +444,9 @@ function main(): void {
   }
   console.log('');
 
-  // ─── НОВОЕ: Неистраченное влияние в конце PLAY ───
+  // ─── Неистраченное влияние ───
   const unusedInf = all.flatMap((g) => g.unusedInfluenceEndOfPlay);
-  const infHist = [0, 0, 0, 0, 0, 0]; // 0-1, 2-3, 4-5, 6-7, 8-9, 10
+  const infHist = [0, 0, 0, 0, 0, 0];
   for (const v of unusedInf) {
     const idx = Math.min(5, Math.floor(v / 2));
     infHist[idx]++;
@@ -407,7 +455,6 @@ function main(): void {
   console.log(`  Замеров:    ${unusedInf.length}`);
   console.log(`  Среднее:    ${mean(unusedInf).toFixed(2)} / 10`);
   console.log(`  Медиана:    ${median(unusedInf)}`);
-  console.log('');
   const infLabels = ['0-1', '2-3', '4-5', '6-7', '8-9', '10 '];
   const maxInfCount = Math.max(...infHist, 1);
   for (let i = 0; i < infHist.length; i++) {
@@ -417,8 +464,27 @@ function main(): void {
   }
   console.log('');
 
-  // ─── НОВОЕ: Idle-ходы ───
-  console.log('─── Idle-ходы (нет PLAY_CARD/ATTACK/USE_ABILITY) ───');
+  // ─── НОВОЕ: Underdog триггеры ───
+  const totalDrawPhases = all.reduce((a, g) => a + g.totalDrawPhases, 0);
+  const underdogDrawTriggers = all.reduce((a, g) => a + g.underdogDrawTriggers, 0);
+  const totalInfluencePhases = all.reduce((a, g) => a + g.totalInfluencePhases, 0);
+  const underdogInfluenceTriggers = all.reduce(
+    (a, g) => a + g.underdogInfluenceTriggers,
+    0,
+  );
+
+  console.log('─── Underdog триггеры ─────────────────────────');
+  console.log(`  Draw phases:               ${totalDrawPhases}`);
+  console.log(`  Underdog-draw triggers:    ${underdogDrawTriggers}  (${pct(underdogDrawTriggers, totalDrawPhases)} of phases)`);
+  console.log(`  Per game:                  ${(underdogDrawTriggers / all.length).toFixed(2)}`);
+  console.log('');
+  console.log(`  Influence phases:          ${totalInfluencePhases}`);
+  console.log(`  Underdog-influence triggers: ${underdogInfluenceTriggers}  (${pct(underdogInfluenceTriggers, totalInfluencePhases)} of phases)`);
+  console.log(`  Per game:                  ${(underdogInfluenceTriggers / all.length).toFixed(2)}`);
+  console.log('');
+
+  // ─── Idle-ходы ───
+  console.log('─── Idle-ходы ─────────────────────────────────');
   const idleFractions: number[] = [];
   let totalTurnsAll = 0;
   let totalIdleTurns = 0;
@@ -433,7 +499,7 @@ function main(): void {
   console.log(`  Среднее на партию: ${(totalIdleTurns / all.length).toFixed(2)} ходов`);
   console.log('');
 
-  // ─── НОВОЕ: Однa-ходовые смерти ───
+  // ─── Однa-ходовые смерти ───
   const totalPlays = all.reduce((a, g) => a + g.totalPlays, 0);
   const totalOneTurnDeaths = all.reduce((a, g) => a + g.oneTurnDeaths, 0);
   console.log('─── Карты, умершие в течение 1 хода ───────────');
@@ -441,7 +507,7 @@ function main(): void {
   console.log(`  Умерли за 1 ход:      ${totalOneTurnDeaths}  (${pct(totalOneTurnDeaths, totalPlays)})`);
   console.log('');
 
-  // ─── Фазы партии ───
+  // ─── Вехи ───
   const fPlay = all.map((g) => g.firstTurnOfPlay).filter((x): x is number => x !== null);
   const fDeath = all.map((g) => g.firstTurnOfCardDeath).filter((x): x is number => x !== null);
   const fNeutral = all.map((g) => g.firstTurnOfNeutralCapture).filter((x): x is number => x !== null);
@@ -456,7 +522,7 @@ function main(): void {
   console.log(`  Первое падение до <10:  сред. ход ${mean(fGlory10).toFixed(1)}`);
   console.log('');
 
-  // ─── Причины завершения ───
+  // ─── Причины ───
   const reasons: Record<string, number> = {};
   for (const g of all) {
     const r = g.winnerReason ?? 'unknown';

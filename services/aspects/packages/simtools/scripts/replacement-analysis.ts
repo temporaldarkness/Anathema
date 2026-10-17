@@ -178,13 +178,15 @@ function collectOneGame(
         }
       }
 
-      // 2. Смотрим на реальные замены
-      if (cmd.type === 'REPLACE_CARD') {
-        // Через события CARD_REPLACED получаем oldCardId
-        const replaced = events.find((e) => e.type === 'CARD_REPLACED');
-        if (replaced && replaced.type === 'CARD_REPLACED') {
-          const oldId = replaced.oldCardId;
-          const newId = replaced.newCardId;
+      // 2. Смотрим на реальные замены.
+      // ВАЖНО: в новой архитектуре замена идёт в ДВЕ команды —
+      // REPLACE_CARD ставит pendingChoice, RESOLVE_CHOICE применяет.
+      // CARD_REPLACED эмитится во ВТОРОЙ команде. Проверяем события
+      // любой команды, не только REPLACE_CARD.
+      for (const e of events) {
+        if (e.type === 'CARD_REPLACED') {
+          const oldId = e.oldCardId;
+          const newId = e.newCardId;
           const oldCard = state.cards[oldId];
           const newCard = state.cards[newId];
           if (oldCard && newCard) {
@@ -194,7 +196,7 @@ function collectOneGame(
               stats.actuallyReplaced++;
               stats.replacements.push({
                 turn: state.turnNumber,
-                playerId: cmd.playerId,
+                playerId: oldCard.ownerId,
                 oldCardId: oldId,
                 newCardId: newId,
                 oldName: oldDef.name,

@@ -563,4 +563,237 @@ describe('Замена', () => {
       ),
     ).toBe(true);
   });
+  
+  it('скидка: floor(old_cost/2), но не больше floor(new_cost/2)', () => {
+    const localDefs: Record<string, CardDefinition> = {
+      expOld: {
+        id: 'expOld', name: 'Старая дорогая', personalityTag: 'repltest', tags: [],
+        cost: 4, strength: 2, health: 4, rarity: 'common', abilities: ['charge'],
+      },
+      expNew: {
+        id: 'expNew', name: 'Новая дорогая', personalityTag: 'repltest', tags: [],
+        cost: 4, strength: 3, health: 5, rarity: 'common', abilities: ['charge'],
+      },
+      plain: {
+        id: 'plain', name: 'Пехотинец', personalityTag: 'plain', tags: [],
+        cost: 1, strength: 1, health: 3, rarity: 'common', abilities: [],
+      },
+    };
+    let s = setupAtPlay(localDefs, 'replace-discount-1');
+    const active = s.activePlayer;
+  
+    const ensureInHand = (defId: string): CardInstanceId => {
+      const player = s.players[active];
+      const existing = player.hand.find((id) => s.cards[id].definitionId === defId);
+      if (existing) return existing;
+      const pool = [...player.hand, ...player.deck];
+      const found = pool.find((id) => s.cards[id].definitionId === defId)!;
+      const swap = player.hand[0];
+      s = {
+        ...s,
+        cards: {
+          ...s.cards,
+          [found]: { ...s.cards[found], zone: 'HAND', column: null },
+          [swap]: { ...s.cards[swap], zone: 'DECK', column: null },
+        },
+        players: {
+          ...s.players,
+          [active]: {
+            ...player,
+            deck: player.deck.map((id) => (id === found ? swap : id)),
+            hand: player.hand.map((id) => (id === swap ? found : id)),
+          },
+        },
+      };
+      return found;
+    };
+  
+    const expNewId = ensureInHand('expNew');
+    const expOldId = ensureInHand('expOld');
+    s = {
+      ...s,
+      players: { ...s.players, [active]: { ...s.players[active], influence: 10 } },
+    };
+  
+    s = applyCommand(s, { type: 'PLAY_CARD', playerId: active, cardId: expOldId, column: 1 }).state;
+    expect(s.cards[expOldId].zone).toBe('FRONT');
+    const infBefore = s.players[active].influence; // 10 - 4 = 6
+  
+    s = applyCommand(s, { type: 'REPLACE_CARD', playerId: active, cardId: expNewId }).state;
+    expect(s.pendingChoice).not.toBeNull();
+    expect(s.pendingChoice!.kind).toBe('REPLACE_TARGET_SELECTION');
+  
+    const r = applyCommand(s, {
+      type: 'RESOLVE_CHOICE',
+      playerId: active,
+      cardIds: [expOldId],
+    });
+  
+    // Old cost 4, New cost 4: discount = min(2, 2) = 2. Cost = 4 - 2 = 2.
+    // Influence: 6 - 2 = 4.
+    expect(r.state.players[active].influence).toBe(infBefore - 2);
+    expect(r.state.cards[expNewId].zone).toBe('FRONT');
+  });
+  
+  it('скидка: нет прибыли при даунгрейде (5→1: скидка 0)', () => {
+    const localDefs: Record<string, CardDefinition> = {
+      bigOld: {
+        id: 'bigOld', name: 'Большая', personalityTag: 'downtest', tags: [],
+        cost: 4, strength: 3, health: 5, rarity: 'common', abilities: ['charge'],
+      },
+      smallNew: {
+        id: 'smallNew', name: 'Маленькая', personalityTag: 'downtest', tags: [],
+        cost: 1, strength: 1, health: 1, rarity: 'common', abilities: ['charge'],
+      },
+      plain: {
+        id: 'plain', name: 'Пехотинец', personalityTag: 'plain', tags: [],
+        cost: 1, strength: 1, health: 3, rarity: 'common', abilities: [],
+      },
+    };
+    let s = setupAtPlay(localDefs, 'replace-discount-2');
+    const active = s.activePlayer;
+  
+    const ensureInHand = (defId: string): CardInstanceId => {
+      const player = s.players[active];
+      const existing = player.hand.find((id) => s.cards[id].definitionId === defId);
+      if (existing) return existing;
+      const found = [...player.hand, ...player.deck].find(
+        (id) => s.cards[id].definitionId === defId,
+      )!;
+      const swap = player.hand[0];
+      s = {
+        ...s,
+        cards: {
+          ...s.cards,
+          [found]: { ...s.cards[found], zone: 'HAND', column: null },
+          [swap]: { ...s.cards[swap], zone: 'DECK', column: null },
+        },
+        players: {
+          ...s.players,
+          [active]: {
+            ...player,
+            deck: player.deck.map((id) => (id === found ? swap : id)),
+            hand: player.hand.map((id) => (id === swap ? found : id)),
+          },
+        },
+      };
+      return found;
+    };
+  
+    const smallId = ensureInHand('smallNew');
+    const bigId = ensureInHand('bigOld');
+    s = {
+      ...s,
+      players: { ...s.players, [active]: { ...s.players[active], influence: 10 } },
+    };
+  
+    s = applyCommand(s, { type: 'PLAY_CARD', playerId: active, cardId: bigId, column: 1 }).state;
+    const infBefore = s.players[active].influence; // 10 - 4 = 6
+  
+    s = applyCommand(s, { type: 'REPLACE_CARD', playerId: active, cardId: smallId }).state;
+    const r = applyCommand(s, {
+      type: 'RESOLVE_CHOICE',
+      playerId: active,
+      cardIds: [bigId],
+    });
+  
+    // Old cost 4, New cost 1: discount = min(2, 0) = 0. Cost = 1 - 0 = 1.
+    // Influence: 6 - 1 = 5.
+    expect(r.state.players[active].influence).toBe(infBefore - 1);
+  });
+});
+
+describe('Мгновенная alt-victory', () => {
+  it('пятая клетка → мгновенная победа', () => {
+    let s = setupAtPlay();
+    const active = s.activePlayer;
+
+    // Даём p1 контроль над 4 клетками (1-4).
+    s = {
+      ...s,
+      board: s.board.map((c, i) =>
+        i < 4 ? { ...c, neutralOwner: active } : c,
+      ),
+    };
+
+    // Юнит p1 в колонке 5. Нейтрал в колонке 5 ничейный.
+    const a = placeCardDirectly(s, active, 'chargePlain', 5, 'FRONT');
+    s = a.state;
+
+    s = advanceToCombat(s);
+
+    const r = applyCommand(s, {
+      type: 'ATTACK',
+      playerId: active,
+      attackerId: a.cardId,
+      target: { kind: 'NEUTRAL', column: 5 },
+    });
+
+    expect(r.state.winner).toBe(active);
+    expect(r.state.winnerReason).toBe('alt_victory');
+    expect(
+      r.events.some((e) => e.type === 'GAME_OVER' && e.reason === 'alt_victory'),
+    ).toBe(true);
+  });
+
+  it('четыре клетки → победы нет', () => {
+    let s = setupAtPlay();
+    const active = s.activePlayer;
+
+    // Даём p1 контроль над 3 клетками.
+    s = {
+      ...s,
+      board: s.board.map((c, i) =>
+        i < 3 ? { ...c, neutralOwner: active } : c,
+      ),
+    };
+
+    const a = placeCardDirectly(s, active, 'chargePlain', 4, 'FRONT');
+    s = a.state;
+
+    s = advanceToCombat(s);
+
+    const r = applyCommand(s, {
+      type: 'ATTACK',
+      playerId: active,
+      attackerId: a.cardId,
+      target: { kind: 'NEUTRAL', column: 4 },
+    });
+
+    // 4/5 — не победа.
+    expect(r.state.winner).toBeNull();
+  });
+
+  it('победа через deferred capture (после боя с защитником)', () => {
+    let s = setupAtPlay();
+    const active = s.activePlayer;
+    const opponent = opponentOf(active);
+
+    // p1 контролирует 4 клетки (1-4).
+    s = {
+      ...s,
+      board: s.board.map((c, i) =>
+        i < 4 ? { ...c, neutralOwner: active } : c,
+      ),
+    };
+
+    // В колонке 5 — юнит p1 (4/2 breakthrough) и defender p2 (1/1 charge).
+    const atk = placeCardDirectly(s, active, 'breakthrough', 5, 'FRONT');
+    s = atk.state;
+    const def = placeCardDirectly(s, opponent, 'charge', 5, 'FRONT');
+    s = def.state;
+
+    s = advanceToCombat(s);
+
+    // Атакующий убьёт защитника (4 vs 1 hp) → deferred capture.
+    const r = applyCommand(s, {
+      type: 'ATTACK',
+      playerId: active,
+      attackerId: atk.cardId,
+      target: { kind: 'NEUTRAL', column: 5 },
+    });
+
+    expect(r.state.winner).toBe(active);
+    expect(r.state.winnerReason).toBe('alt_victory');
+  });
 });

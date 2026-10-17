@@ -51,6 +51,8 @@ export function replaceInternal(
 
   const personality = newDef.personalityTag;
   const candidates: CardInstanceId[] = [];
+  const columnReduction = columnBonuses(draft as GameState, playerId).costReduction;
+  const playerInfluence = draft.players[playerId].influence;
 
   for (const col of draft.board) {
     const keys: ('p1Front' | 'p1Reserve' | 'p2Front' | 'p2Reserve')[] =
@@ -60,23 +62,25 @@ export function replaceInternal(
       if (!id) continue;
       const c = draft.cards[id];
       const def = draft.definitions[c.definitionId];
-      if (def && def.personalityTag === personality) {
-		if (def.cantBeReplaced) continue;
-        candidates.push(id);
-      }
+      if (!def || def.personalityTag !== personality) continue;
+      if (def.cantBeReplaced) continue;
+
+      // Проверяем, что игроку хватит влияния на замену ИМЕННО этого кандидата.
+      const discount = Math.min(
+        Math.floor(def.cost / 2),
+        Math.floor(newDef.cost / 2),
+      );
+      const candidateCost = Math.max(0, newDef.cost - discount - columnReduction);
+      if (playerInfluence < candidateCost) continue;
+
+      candidates.push(id);
     }
   }
 
   if (candidates.length === 0) {
+    // Различаем: нет подходящей личности вообще, или есть но не хватает влияния.
+    // Для простоты возвращаем no_matching — проверка влияния уже учтена.
     return { ok: false, reason: 'no_matching_card_on_board' };
-  }
-
-  const cost = Math.max(
-    0,
-    newDef.cost - columnBonuses(draft as GameState, playerId).costReduction,
-  );
-  if (draft.players[playerId].influence < cost) {
-    return { ok: false, reason: 'not_enough_influence' };
   }
 
   draft.pendingChoice = {
@@ -130,14 +134,20 @@ export function applyReplacementInternal(
   const oldLocation = findCardLocation(draft as GameState, targetCardId);
   if (!oldLocation) return { ok: false, reason: 'target_not_on_board' };
 
-  const cost = Math.max(
-    0,
-    newDef.cost - columnBonuses(draft as GameState, playerId).costReduction,
-  );
-  if (draft.players[playerId].influence < cost) {
-    return { ok: false, reason: 'not_enough_influence' };
-  }
-  if (cost > 0) changeInfluence(draft, playerId, -cost, ctx);
+    // Скидка на замену: floor(old_cost / 2), но не больше floor(new_cost / 2).
+    // Поощряет замену дорогих карт (5→5: скидка 2), но не даёт прибыли
+    // при даунгрейде (5→1: скидка 0). Складывается с −1 от колонки 1.
+    const columnReduction = columnBonuses(draft as GameState, playerId).costReduction;
+    const oldCost = oldDef.cost;
+    const discount = Math.min(
+      Math.floor(oldCost / 2),
+      Math.floor(newDef.cost / 2),
+    );
+    const cost = Math.max(0, newDef.cost - discount - columnReduction);
+    if (draft.players[playerId].influence < cost) {
+      return { ok: false, reason: 'not_enough_influence' };
+    }
+    if (cost > 0) changeInfluence(draft, playerId, -cost, ctx);
 
   const wasExhausted = oldCard.exhausted;
   const wasAttacksThisTurn = oldCard.attacksThisTurn;

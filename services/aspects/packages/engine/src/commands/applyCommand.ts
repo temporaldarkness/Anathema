@@ -6,7 +6,6 @@ import type { ResolutionContext } from '../types/resolution';
 import { advancePhaseInternal } from './advancePhase';
 import { playCardInternal } from './playCard';
 import { endTurnInternal } from './endTurn';
-import { attackInternal } from './attack';
 import { replaceInternal } from './replace';
 import { resolveChoiceInternal } from './resolveChoice';
 import { cancelChoiceInternal } from './cancelChoice';
@@ -16,6 +15,7 @@ import { drainTriggerQueue } from '../abilities/triggerQueue';
 import { notifyCellCaptured, notifyCellLost } from '../abilities/cellEvents';
 import { recomputeSuppression, checkSuppressionDeaths } from '../state/suppression';
 import { killCard } from '../state/mutations';
+import { attackInternal, checkInstantAltVictory } from './attack';
 
 export interface ApplyResult {
   state: GameState;
@@ -198,6 +198,8 @@ export function applyCommand(state: GameState, cmd: Command): ApplyResult {
         playerId: cap.playerId,
       });
       notifyCellCaptured(draft, cap.column, cap.playerId);
+	  
+	  checkInstantAltVictory(draft, cap.playerId, ctx);
     }
 
     // Отложенные захваты могли энкьюить ON_CELL_CAPTURED / ON_CELL_LOST.
