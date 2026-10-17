@@ -71,7 +71,7 @@ describe('HEAL_GLORY', () => {
     expect(r.state.players[active].glory).toBe(25);
   });
 
-  it('не превышает cap 30', () => {
+  it('не превышает cap 25', () => {
     let s = setupAtPlay();
     const active = s.activePlayer;
 
@@ -79,7 +79,7 @@ describe('HEAL_GLORY', () => {
       ...s,
       players: {
         ...s.players,
-        [active]: { ...s.players[active], glory: 28 },
+        [active]: { ...s.players[active], glory: 23 },
       },
     };
 
@@ -93,6 +93,6 @@ describe('HEAL_GLORY', () => {
       column: 1,
     });
 
-    expect(r.state.players[active].glory).toBe(30);
+    expect(r.state.players[active].glory).toBe(25);
   });
 });

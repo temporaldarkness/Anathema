@@ -116,7 +116,7 @@ export function healGlory(
   if (amount <= 0) return;
   const player = draft.players[playerId];
   const before = player.glory;
-  player.glory = Math.min(30, before + amount);
+  player.glory = Math.min(25, before + amount);
   if (player.glory !== before) {
     ctx.events.push({
       type: 'GLORY_CHANGED',
