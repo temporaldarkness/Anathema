@@ -109,8 +109,9 @@ export class GreedyBot implements Bot {
       const def = state.definitions[card.definitionId];
       if (!def) continue;
       const hp = health(card);
-      // Приоритет: раненые карты и низкокостные.
-      const score = hp * 10 + (def.cost ?? 0) * 5;
+      // Silenced карта — приоритетная цель для замены: терять нечего.
+      const silencedBonus = card.silenced ? -1000 : 0;
+      const score = hp * 10 + (def.cost ?? 0) * 5 + silencedBonus;
       if (score < bestScore) {
         bestScore = score;
         best = r;

@@ -15,7 +15,7 @@ import {
   columnBonuses,
   simulateAttackFully,
 } from '@aspects/engine';
-import type { Effect, TargetSelector, TriggeredAbility } from '@aspects/cards';
+import type { Effect, TargetSelector, TriggeredAbility, CardFilter } from '@aspects/cards';
 import type { Bot } from './types';
 import { PROFILES, selectOption, type BehaviorProfile } from './profile';
 
@@ -466,7 +466,10 @@ export class HeuristicBot implements Bot {
 
     const isWounded = hpFraction < 0.7;
     const isUpgrade = dStr > 0 || dHpMax > 0;
-    if (!isWounded && !isUpgrade) return -Infinity;
+    // Silenced карта потеряла способности — замена на ту же Личность
+    // это починка, даже если статы не улучшаются.
+    const isSilenced = oldCard.silenced;
+    if (!isWounded && !isUpgrade && !isSilenced) return -Infinity;
 
     const oldLoc = this.findLocation(state, oldId);
     const inFront = oldLoc?.zone === 'FRONT';
@@ -505,7 +508,10 @@ export class HeuristicBot implements Bot {
 
     const isWounded = hpFraction < 0.7;
     const isUpgrade = dStr > 0 || dHpMax > 0;
-    if (!isWounded && !isUpgrade) return -Infinity;
+    // Silenced карта потеряла способности — замена на ту же Личность
+    // это починка, даже если статы не улучшаются.
+    const isSilenced = oldCard.silenced;
+    if (!isWounded && !isUpgrade && !isSilenced) return -Infinity;
 
     const oldLoc = this.findLocation(state, oldId);
     const inFront = oldLoc?.zone === 'FRONT';
@@ -788,7 +794,7 @@ export class HeuristicBot implements Bot {
     myPlayerId: PlayerId,
     sourceCardId?: CardInstanceId,
   ): number {
-    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId);
+    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId, eff.filter);
     let total = 0;
     for (const id of targets) {
       const card = state.cards[id];
@@ -807,7 +813,7 @@ export class HeuristicBot implements Bot {
     sourceCardId: CardInstanceId | undefined,
     unexhaust: boolean,
   ): number {
-    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId);
+    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId, eff.filter);
     let total = 0;
     for (const id of targets) {
       const card = state.cards[id];
@@ -833,7 +839,7 @@ export class HeuristicBot implements Bot {
     myPlayerId: PlayerId,
     sourceCardId?: CardInstanceId,
   ): number {
-    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId);
+    const targets = this.resolveDamageTargets(state, eff.target, myPlayerId, sourceCardId, eff.filter);
     let total = 0;
     for (const id of targets) {
       const card = state.cards[id];
@@ -858,7 +864,7 @@ export class HeuristicBot implements Bot {
     if (eff.target === 'ENEMY_HERO') return eff.amount * 80;
 
     const targets = this.resolveDamageTargets(
-      state, eff.target, myPlayerId, sourceCardId,
+      state, eff.target, myPlayerId, sourceCardId, eff.filter
     );
 
     if (targets.length === 0) {
@@ -894,37 +900,65 @@ export class HeuristicBot implements Bot {
     selector: TargetSelector,
     myPlayerId: PlayerId,
     sourceCardId?: CardInstanceId,
+    filter?: CardFilter,
   ): CardInstanceId[] {
     const opp = opponentOf(myPlayerId);
     const result: CardInstanceId[] = [];
 
+    const matches = (id: CardInstanceId): boolean => {
+      if (!filter) return true;
+      const card = state.cards[id];
+      if (!card) return false;
+      const def = state.definitions[card.definitionId];
+      if (!def) return false;
+      if (filter.tag !== undefined && !(def.tags ?? []).includes(filter.tag)) return false;
+      if (filter.keyword !== undefined && !readAbilities(state, id).includes(filter.keyword)) return false;
+      if (filter.withoutShield && card.shieldAvailable) return false;
+      if (filter.minStrength !== undefined || filter.maxStrength !== undefined) {
+        const s = strength(card);
+        if (filter.minStrength !== undefined && s < filter.minStrength) return false;
+        if (filter.maxStrength !== undefined && s > filter.maxStrength) return false;
+      }
+      if (filter.minCost !== undefined && def.cost < filter.minCost) return false;
+      if (filter.maxCost !== undefined && def.cost > filter.maxCost) return false;
+      return true;
+    };
+
     const pushFront = (pid: PlayerId) => {
       for (const col of state.board) {
         const id = pid === 'p1' ? col.p1Front : col.p2Front;
-        if (id) result.push(id);
+        if (id && matches(id)) result.push(id);
       }
     };
     const pushBoard = (pid: PlayerId) => {
       for (const col of state.board) {
         const f = pid === 'p1' ? col.p1Front : col.p2Front;
         const r = pid === 'p1' ? col.p1Reserve : col.p2Reserve;
-        if (f) result.push(f);
-        if (r) result.push(r);
+        if (f && matches(f)) result.push(f);
+        if (r && matches(r)) result.push(r);
       }
     };
 
     switch (selector) {
       case 'SELF':
-        if (sourceCardId) result.push(sourceCardId);
+        if (sourceCardId && matches(sourceCardId)) result.push(sourceCardId);
         break;
       case 'OWNER_HERO':
       case 'ENEMY_HERO':
         break;
-      case 'ALL_FRIENDLY_FRONT': pushFront(myPlayerId); break;
-      case 'ALL_ENEMY_FRONT':    pushFront(opp); break;
-      case 'ALL_FRIENDLY_BOARD': pushBoard(myPlayerId); break;
-      case 'ALL_ENEMY_BOARD':    pushBoard(opp); break;
-            case 'ALL_CARDS_ON_BOARD': {
+      case 'ALL_FRIENDLY_FRONT':
+        pushFront(myPlayerId);
+        break;
+      case 'ALL_ENEMY_FRONT':
+        pushFront(opp);
+        break;
+      case 'ALL_FRIENDLY_BOARD':
+        pushBoard(myPlayerId);
+        break;
+      case 'ALL_ENEMY_BOARD':
+        pushBoard(opp);
+        break;
+      case 'ALL_CARDS_ON_BOARD': {
         pushBoard(myPlayerId);
         pushBoard(opp);
         return result.filter((id) => id !== sourceCardId);
@@ -936,17 +970,18 @@ export class HeuristicBot implements Bot {
         if (!loc || !srcCard) break;
         const c = state.board[loc.column - 1];
         const oppositeSide = opponentOf(srcCard.ownerId);
-        const oppositeId = loc.zone === 'FRONT'
-          ? (oppositeSide === 'p1' ? c.p1Front : c.p2Front)
-          : (oppositeSide === 'p1' ? c.p1Reserve : c.p2Reserve);
-        if (oppositeId) result.push(oppositeId);
+        const oppositeId =
+          loc.zone === 'FRONT'
+            ? oppositeSide === 'p1' ? c.p1Front : c.p2Front
+            : oppositeSide === 'p1' ? c.p1Reserve : c.p2Reserve;
+        if (oppositeId && matches(oppositeId)) result.push(oppositeId);
         break;
       }
       case 'RANDOM_ENEMY_FRONT': {
         const list: CardInstanceId[] = [];
         for (const col of state.board) {
           const id = opp === 'p1' ? col.p1Front : col.p2Front;
-          if (id) list.push(id);
+          if (id && matches(id)) list.push(id);
         }
         if (list.length > 0) result.push(list[0]);
         break;
@@ -955,16 +990,13 @@ export class HeuristicBot implements Bot {
         const list: CardInstanceId[] = [];
         for (const col of state.board) {
           const id = myPlayerId === 'p1' ? col.p1Front : col.p2Front;
-          if (id) list.push(id);
+          if (id && matches(id)) list.push(id);
         }
         if (list.length > 0) result.push(list[0]);
         break;
       }
       case 'CHOSEN':
       case 'ATTACKER':
-        // В скоринге не моделируем — вернём пустой список.
-        break;
-      default:
         break;
     }
     return result;
@@ -1145,7 +1177,7 @@ export class HeuristicBot implements Bot {
       }
     }
 
-    if (preview.shieldBlocks && !preview.defenderDies) {
+        if (preview.shieldBlocks && !preview.defenderDies) {
       score -= 250;
     }
     score += preview.overkillToReserve * 15;
@@ -1153,6 +1185,14 @@ export class HeuristicBot implements Bot {
     if (preview.cleaveTargetCount > 0) {
       score += preview.cleaveDamagePerTarget * preview.cleaveTargetCount * 25;
       score += preview.cleaveKills * 250;
+    }
+
+    const attackerAbilities = readAbilities(state, attack.attackerId);
+    if (attackerAbilities.includes('frenzy') && score > 0) {
+      const attacksLeft = Math.max(0, 2 - state.cards[attack.attackerId].attacksThisTurn);
+      if (attacksLeft >= 2) {
+        score *= 1.6;
+      }
     }
 
     if (this.v4Triggers) {

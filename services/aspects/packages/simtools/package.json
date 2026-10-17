@@ -22,7 +22,10 @@
     "turn-outcome": "tsx scripts/turn-outcome.ts",
     "matchup-heatmap": "tsx scripts/matchup-heatmap.ts",
 	"missed-lethal": "tsx scripts/missed-lethal.ts",
-	"combat-efficiency": "tsx scripts/combat-efficiency.ts"
+	"combat-efficiency": "tsx scripts/combat-efficiency.ts",
+	"replacement-analysis": "tsx scripts/replacement-analysis.ts",
+    "board-state-timeline": "tsx scripts/board-state-timeline.ts",
+    "attack-efficiency": "tsx scripts/attack-efficiency.ts"
   },
   "dependencies": {
     "@aspects/engine": "workspace:*",
