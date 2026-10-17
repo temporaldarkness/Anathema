@@ -165,8 +165,13 @@ describe('Пакеты карт', () => {
 });
 
 describe('Легендарные карты', () => {
-  it('16 легендарок в пакете', () => {
-    expect(LEGENDARY_ASPECTS.length).toBe(16);
+  it('все легендарки уникальны и валидны', () => {
+    const ids = new Set(LEGENDARY_ASPECTS.map((c) => c.id));
+    expect(ids.size).toBe(LEGENDARY_ASPECTS.length); // нет дубликатов
+    expect(LEGENDARY_ASPECTS.length).toBeGreaterThan(0);
+    for (const c of LEGENDARY_ASPECTS) {
+      expect(c.rarity).toBe('legendary');
+    }
   });
 
   it('createGame запрещает >1 копии легендарки', () => {

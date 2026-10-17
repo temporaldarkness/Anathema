@@ -6,13 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "vitest run",
-    "simulate": "tsx scripts/simulate.ts",
-    "matrix":   "tsx scripts/matrix.ts",
-    "duel":     "tsx scripts/duel.ts",
-	"first-player": "tsx scripts/first-player.ts",
-	"trace": "tsx scripts/trace.ts",
-	"card-stats": "tsx scripts/card-stats.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "@aspects/engine": "workspace:*",

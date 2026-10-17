@@ -1,15 +1,18 @@
 /**
  * Турнир ботов. Запуск:
  *   pnpm --filter @aspects/backend tournament
+ *
+ * Партии прогоняются через @aspects/simtools (runOneGame).
+ * Backend отвечает за Glicko-2, Prisma и сохранение.
  */
 
 import * as dotenv from 'dotenv';
 import { join } from 'node:path';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
-import { createGame, applyCommand, type Command, type GameState } from '@aspects/engine';
 import { makeBot, listAllBotIds } from '@aspects/bot';
-import { getDecks, mergedCardsById, seriesOfDeck } from '@aspects/cards';
+import { getDecks, seriesOfDeck } from '@aspects/cards';
+import { runOneGame } from '@aspects/simtools';
 import {
   updatePair,
   RATING_DEFAULTS,
@@ -17,18 +20,14 @@ import {
   type Rating,
 } from '../rating/glicko2';
 
-// Ищем .env по приоритету:
-//   1. apps/backend/.env            — если появится, приоритетнее
-//   2. корень монорепы (.env)       — где он лежит сейчас
-//   3. fallback от dist/scripts     — если CWD окажется не тем
 dotenv.config();
 dotenv.config({ path: join(process.cwd(), '..', '..', '..', '..', '.env') });
 dotenv.config({
   path: join(__dirname, '..', '..', '..', '..', '..', '..', '.env'),
 });
 
-const TOTAL_MATCHES = 12000;
-const MAX_TURNS_SAFETY = 1000;
+const TOTAL_MATCHES = 1200;
+const MAX_STEPS = 20_000;
 
 const adapter = new PrismaPg({
   connectionString: process.env.ASPECTS_DATABASE_URL!,
@@ -52,126 +51,11 @@ function randomSeed(): string {
   return `tournament-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/**
- * Аварийный выбор, если бот вернул null, но выбор всё ещё висит.
- * Безопасные дефолты для каждого вида:
- *   - END_TURN_DISCARD: сбрасываем первые N карт (обязательный выбор).
- *   - DISCARD_CHOSEN:   то же самое (обязательный выбор).
- *   - EFFECT_TARGET_SELECTION: пустой ответ = отмена эффекта.
- *   - REPLACE_TARGET_SELECTION: CANCEL_CHOICE — не тратим Влияние.
- *   - ACTIVATION_DISCARD: CANCEL_CHOICE — не тратим Влияние.
- */
-function buildFallbackChoiceCommand(state: GameState): Command | null {
-  const choice = state.pendingChoice;
-  if (!choice) return null;
-
-  switch (choice.kind) {
-    case 'END_TURN_DISCARD':
-    case 'DISCARD_CHOSEN':
-      return {
-        type: 'RESOLVE_CHOICE',
-        playerId: choice.playerId,
-        cardIds: choice.eligibleCardIds.slice(0, choice.count),
-      };
-    case 'EFFECT_TARGET_SELECTION':
-      return {
-        type: 'RESOLVE_CHOICE',
-        playerId: choice.playerId,
-        cardIds: [],
-      };
-    case 'REPLACE_TARGET_SELECTION':
-    case 'ACTIVATION_DISCARD':
-      return {
-        type: 'CANCEL_CHOICE',
-        playerId: choice.playerId,
-      };
-    default:
-      return null;
-  }
-}
-
-/**
- * Прогоняет одну партию между двумя ботами.
- * Возвращает 'p1' | 'p2' | 'draw' | 'abort'.
- */
-function playMatch(
-  bot1Id: string,
-  bot2Id: string,
-  cardDefs: Record<string, any>,
-  deckP1: string[],
-  deckP2: string[],
-): 'p1' | 'p2' | 'draw' | 'abort' {
-  const initial = createGame({
-    seed: randomSeed(),
-    decks: { p1: deckP1, p2: deckP2 },
-    cardDefinitions: cardDefs,
-    useMulligan: true,
-  });
-
-  const bot1 = makeBot(bot1Id);
-  const bot2 = makeBot(bot2Id);
-
-  let state: GameState = initial.state;
-  let turns = 0;
-
-  while (!state.winner && turns < MAX_TURNS_SAFETY) {
-    turns++;
-
-    let cmd: Command | null = null;
-
-    if (state.phase === 'MULLIGAN') {
-      const picker: 'p1' | 'p2' = !state.mulliganDone.p1 ? 'p1' : 'p2';
-      const bot = picker === 'p1' ? bot1 : bot2;
-      cmd = bot.chooseCommand(state, picker);
-      if (!cmd) cmd = { type: 'MULLIGAN', playerId: picker, cardId: null };
-    } else if (state.pendingChoice) {
-      const pid = state.pendingChoice.playerId;
-      const bot = pid === 'p1' ? bot1 : bot2;
-      cmd = bot.chooseCommand(state, pid);
-      if (!cmd) cmd = buildFallbackChoiceCommand(state);
-      if (!cmd) {
-        // Теоретически недостижимо: pendingChoice есть, но fallback вернул null.
-        console.warn(
-          `[tournament] pendingChoice without fallback, aborting (turn ${turns})`,
-        );
-        return 'abort';
-      }
-    } else {
-      const pid = state.activePlayer;
-      const bot = pid === 'p1' ? bot1 : bot2;
-      cmd = bot.chooseCommand(state, pid);
-      if (!cmd) {
-        if (state.phase === 'PLAY' || state.phase === 'COMBAT') {
-          cmd = { type: 'END_TURN', playerId: pid };
-        } else {
-          cmd = { type: 'ADVANCE_PHASE', playerId: pid };
-        }
-      }
-    }
-
-    const result = applyCommand(state, cmd);
-    if (result.events.some((e) => e.type === 'COMMAND_REJECTED')) {
-      // Что-то сломалось — прерываем партию.
-      console.warn(
-        `[tournament] rejected: ${cmd.type} in ${state.phase} (turn ${turns})`,
-      );
-      return 'abort';
-    }
-    state = result.state;
-  }
-
-  if (!state.winner) return 'abort';
-  if (state.winner === 'p1') return 'p1';
-  if (state.winner === 'p2') return 'p2';
-  return 'draw';
-}
-
 async function main(): Promise<void> {
   const botIds = listAllBotIds();
   console.log(`[tournament] bots: ${botIds.length}`);
   console.log(`[tournament] matches: ${TOTAL_MATCHES}`);
 
-  // Инициализация
   for (const id of botIds) {
     const existing = await prisma.botRating.findUnique({ where: { botId: id } });
     if (existing) {
@@ -195,16 +79,17 @@ async function main(): Promise<void> {
     }
   }
 
-  const allPresets = getDecks();
-  const presetPools = allPresets.map((d) => ({
-    cards: d.cards,
-    cardDefs: mergedCardsById(seriesOfDeck(d.cards)),
+  // Пресеты берём глобально. Серии вычисляются один раз.
+  // Если пресет multi-series — попадут все нужные серии.
+  const allPresets = getDecks().map((d) => ({
+    preset: d,
+    series: seriesOfDeck(d.cards),
   }));
 
   let aborted = 0;
+  let played = 0;
 
   for (let i = 0; i < TOTAL_MATCHES; i++) {
-    // Двое разных ботов
     let id1 = randomOf(botIds);
     let id2 = randomOf(botIds);
     let safety = 0;
@@ -213,30 +98,36 @@ async function main(): Promise<void> {
     }
     if (id1 === id2) continue;
 
-    const preset = randomOf(presetPools);
+    const entry = randomOf(allPresets);
+    const r = runOneGame(entry.series, entry.preset.id, entry.preset.id, randomSeed(), {
+      bots: { p1: makeBot(id1), p2: makeBot(id2) },
+      useMulligan: true,
+      maxSteps: MAX_STEPS,
+    });
 
-    const outcome = playMatch(id1, id2, preset.cardDefs, preset.cards, preset.cards);
+    played++;
 
-    if (outcome === 'abort') {
+    if (!r.winner) {
       aborted++;
+      console.warn(
+        `[tournament] abort #${aborted}: ${id1} vs ${id2} on ${entry.preset.id} (turn ${r.turns})`,
+      );
       continue;
     }
 
+    const outcome = r.winner === 'p1' ? 'p1_win' : 'p2_win';
     const s1 = states.get(id1)!;
     const s2 = states.get(id2)!;
 
-    const outcomeName =
-      outcome === 'p1' ? 'p1_win' : outcome === 'p2' ? 'p2_win' : 'draw';
-    const { p1: new1, p2: new2 } = updatePair(s1.rating, s2.rating, outcomeName);
-
+    const { p1: new1, p2: new2 } = updatePair(s1.rating, s2.rating, outcome);
     s1.rating = new1;
     s2.rating = new2;
     s1.matches++;
     s2.matches++;
-    if (outcome === 'p1') {
+    if (outcome === 'p1_win') {
       s1.wins++;
       s2.losses++;
-    } else if (outcome === 'p2') {
+    } else {
       s1.losses++;
       s2.wins++;
     }
@@ -248,7 +139,6 @@ async function main(): Promise<void> {
     }
   }
 
-  // Сохраняем
   const updates = Array.from(states.entries()).map(([botId, s]) => ({
     botId,
     rating: s.rating.rating,
@@ -269,7 +159,7 @@ async function main(): Promise<void> {
     ),
   );
 
-  console.log(`\n[tournament] done. Results:\n`);
+  console.log(`\n[tournament] done. Played: ${played}, aborted: ${aborted}\n`);
   const sorted = [...states.entries()].sort(
     (a, b) => b[1].rating.rating - a[1].rating.rating,
   );

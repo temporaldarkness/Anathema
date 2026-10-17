@@ -1,5 +1,6 @@
 import type { CardDefinition } from './schema';
 import { KEYWORD_INFO, isFactionTag, type KeywordId } from './abilities';
+import { SCOPES, type ScopeMeta } from './scopes';
 
 import { PACKS_RAW } from './data/packs-index.generated';
 
@@ -38,7 +39,6 @@ const PRESETS = (presetsRaw as DeckPreset[]) ?? [];
 
 function normalizeCard(card: CardDefinition, packId: string): CardDefinition {
   const tags = card.tags ?? [];
-
   const series = card.series ?? [packId];
   const factions = card.factions ?? tags.filter((t) => isFactionTag(t));
   const roles =
@@ -72,12 +72,18 @@ function buildPack(meta: PackMeta, cardsRaw: unknown): Pack {
   return { meta, cards, cardsById };
 }
 
+// ─── PACKS: реальные серии ───
+// Ключ — meta.id серии. Никаких виртуальных паков.
+
 const PACKS: Record<string, Pack> = {};
 for (const raw of PACKS_RAW) {
   const meta = raw.meta as PackMeta;
   PACKS[meta.id] = buildPack(meta, raw.cards);
 }
 
+// ─── Активные серии (UI) ───
+// active-series.json управляет тем, что показывается в декбилдере.
+// Если файла нет / пусто — считаем активными все серии.
 
 interface ActiveSeriesFile {
   active?: string[];
@@ -89,36 +95,9 @@ const ACTIVE_SERIES: Set<string> =
     ? new Set(ACTIVE_FILE.active)
     : new Set(Object.keys(PACKS));
 
-// ─── Legacy-алиасы ───
-
-const LEGACY_AZEROTH_IDS = ['stormwind', 'voidflame', 'apocryph'];
-const LEGACY_SVO_IDS = ['steel', 'razlom', 'echo', 'sky'];
-
-function legacyCards(ids: string[]): CardDefinition[] {
-  const seen = new Set<string>();
-  const out: CardDefinition[] = [];
-  for (const id of ids) {
-    for (const c of PACKS[id].cards) {
-      if (seen.has(c.id)) continue;
-      seen.add(c.id);
-      out.push(c);
-    }
-  }
-  return out;
-}
-
-function legacyPack(
-  id: string,
-  name: string,
-  description: string,
-  sourceIds: string[],
-): Pack {
-  const cards = legacyCards(sourceIds);
-  const cardsById = Object.fromEntries(cards.map((c) => [c.id, c]));
-  return { meta: { id, name, description, version: '1.0.0' }, cards, cardsById };
-}
-
-// ─── Публичный API ───
+// ═══════════════════════════════════════════════════════
+//   ПУБЛИЧНЫЙ API — СЕРИИ
+// ═══════════════════════════════════════════════════════
 
 export function listPacks(): PackMeta[] {
   return Object.values(PACKS)
@@ -134,53 +113,111 @@ export function isSeriesActive(id: string): boolean {
   return ACTIVE_SERIES.has(id);
 }
 
-export function getPack(packId: string): Pack {
-  if (PACKS[packId]) return PACKS[packId];
-
-  if (packId === 'azeroth') {
-    return legacyPack(
-      'azeroth',
-      'Азерот (legacy)',
-      'Объединение Штормграда, Пламени Пустоты и Апокрифа',
-      LEGACY_AZEROTH_IDS,
-    );
-  }
-
-  if (packId === 'svo') {
-    return legacyPack(
-      'svo',
-      'Современность (legacy)',
-      'Объединение Стального Корпуса, Разлома, Эхо-7 и Стратоса',
-      LEGACY_SVO_IDS,
-    );
-  }
-  
-  if (packId === 'merged') {
-    return legacyPack(
-      'merged',
-      'Слияние (legacy)',
-      'Объединение Азерота и Современности — тестовый пак',
-      [
-        ...LEGACY_AZEROTH_IDS,
-        ...LEGACY_SVO_IDS,
-      ],
-    );
-  }
-
-  throw new Error(`Unknown pack: ${packId}`);
+export function hasSeriesId(id: string): boolean {
+  return !!PACKS[id];
 }
 
-export function getCards(packId: string): CardDefinition[] {
-  return getPack(packId).cards;
+export function getPack(seriesId: string): Pack {
+  const pack = PACKS[seriesId];
+  if (!pack) {
+    throw new Error(
+      `Unknown series: "${seriesId}". Known: ${Object.keys(PACKS).join(', ')}`,
+    );
+  }
+  return pack;
 }
 
-export function getCardsById(packId: string): Record<string, CardDefinition> {
-  return getPack(packId).cardsById;
+export function getCards(seriesId: string): CardDefinition[] {
+  return getPack(seriesId).cards;
 }
 
-export function getDecks(packId?: string): DeckPreset[] {
-  if (!packId) return PRESETS;
-  const pack = getPack(packId);
+export function getCardsById(seriesId: string): Record<string, CardDefinition> {
+  return getPack(seriesId).cardsById;
+}
+
+// ═══════════════════════════════════════════════════════
+//   ПУБЛИЧНЫЙ API — SCOPE
+// ═══════════════════════════════════════════════════════
+
+export function listScopes(): ScopeMeta[] {
+  return Object.values(SCOPES);
+}
+
+export function getScopeMeta(scopeId: string): ScopeMeta | null {
+  return SCOPES[scopeId] ?? null;
+}
+
+/**
+ * Принимает:
+ *   - имя scope («main», «azeroth», «svo»);
+ *   - явный список серий через запятую («classic,throne»);
+ *   - массив серий ([«classic», «throne»]).
+ *
+ * Возвращает массив серий. Несуществующие серии отфильтровываются.
+ */
+export function resolveScope(scope: string | string[]): string[] {
+  if (Array.isArray(scope)) return scope.filter((s) => !!PACKS[s]);
+  if (SCOPES[scope]) return [...SCOPES[scope].series];
+  if (scope.includes(',')) {
+    return scope
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => !!PACKS[s]);
+  }
+  if (PACKS[scope]) return [scope];
+  return [];
+}
+
+/**
+ * Возвращает имя scope, к которому относится серия.
+ * null — если серия не входит ни в один известный scope.
+ */
+export function scopeOfSeries(seriesId: string): string | null {
+  for (const scope of Object.values(SCOPES)) {
+    if (scope.series.includes(seriesId)) return scope.id;
+  }
+  return null;
+}
+
+/**
+ * Определяет scope колоды. Возвращает имя, если все серии колоды
+ * принадлежат одному scope. null — если:
+ *   - колода смешивает серии разных scope'ов;
+ *   - содержит серию без scope'а;
+ *   - пустая.
+ */
+export function scopeOfDeck(cardIds: string[]): string | null {
+  const series = seriesOfDeck(cardIds);
+  if (series.length === 0) return null;
+  let found: string | null = null;
+  for (const s of series) {
+    const sc = scopeOfSeries(s);
+    if (!sc) return null;
+    if (found === null) found = sc;
+    else if (found !== sc) return null;
+  }
+  return found;
+}
+
+/** Объединяет cardsById всех серий scope'а. */
+export function cardsForScope(
+  scope: string | string[],
+): Record<string, CardDefinition> {
+  return mergedCardsById(resolveScope(scope));
+}
+
+/** Пресеты, чьи карты целиком лежат в сериях scope'а. */
+export function decksForScope(scope: string | string[]): DeckPreset[] {
+  return decksForSeries(resolveScope(scope));
+}
+
+// ═══════════════════════════════════════════════════════
+//   ПУБЛИЧНЫЙ API — ПРЕСЕТЫ
+// ═══════════════════════════════════════════════════════
+
+export function getDecks(seriesId?: string): DeckPreset[] {
+  if (!seriesId) return PRESETS;
+  const pack = getPack(seriesId);
   const cardIds = new Set(pack.cards.map((c) => c.id));
   return PRESETS.filter((d) => d.cards.every((cid) => cardIds.has(cid)));
 }
@@ -188,18 +225,15 @@ export function getDecks(packId?: string): DeckPreset[] {
 export function decksForSeries(series: string[]): DeckPreset[] {
   const cardIds = new Set<string>();
   for (const s of series) {
-    let pack: Pack;
-    try {
-      pack = getPack(s);
-    } catch {
-      continue;
-    }
+    const pack = PACKS[s];
+    if (!pack) continue;
     for (const c of pack.cards) cardIds.add(c.id);
   }
   if (cardIds.size === 0) return [];
   return PRESETS.filter((d) => d.cards.every((cid) => cardIds.has(cid)));
 }
 
+/** Все пресеты, чьи серии активны в UI. */
 export function listActiveDecks(): DeckPreset[] {
   return PRESETS.filter((d) => {
     const series = seriesOfDeck(d.cards);
@@ -211,7 +245,9 @@ export function listAllDecks(): DeckPreset[] {
   return PRESETS;
 }
 
-// ─── Хелперы ───
+// ═══════════════════════════════════════════════════════
+//   ХЕЛПЕРЫ КАРТ
+// ═══════════════════════════════════════════════════════
 
 export function hasSeries(card: CardDefinition, series: string): boolean {
   return card.series?.includes(series) ?? false;
@@ -234,24 +270,13 @@ export function getPrimarySeries(card: CardDefinition): string | null {
   return s && s.length > 0 ? s[0] : null;
 }
 
-/**
- * Объединяет cardsById нескольких серий. Позволяет строить одну
- * cardDefinitions-карту для createGame, когда колода использует
- * карты из нескольких серий.
- *
- * При конфликте id — первая серия выигрывает.
- */
 export function mergedCardsById(
   series: string[],
 ): Record<string, CardDefinition> {
   const merged: Record<string, CardDefinition> = {};
   for (const s of series) {
-    let pack: Pack;
-    try {
-      pack = getPack(s);
-    } catch {
-      continue;
-    }
+    const pack = PACKS[s];
+    if (!pack) continue;
     for (const [id, def] of Object.entries(pack.cardsById)) {
       if (!merged[id]) merged[id] = def;
     }
@@ -259,17 +284,12 @@ export function mergedCardsById(
   return merged;
 }
 
-/** Тот же merge, но отдаёт массив без дубликатов. */
 export function mergedCards(series: string[]): CardDefinition[] {
   const seen = new Set<string>();
   const out: CardDefinition[] = [];
   for (const s of series) {
-    let pack: Pack;
-    try {
-      pack = getPack(s);
-    } catch {
-      continue;
-    }
+    const pack = PACKS[s];
+    if (!pack) continue;
     for (const c of pack.cards) {
       if (seen.has(c.id)) continue;
       seen.add(c.id);
@@ -279,7 +299,6 @@ export function mergedCards(series: string[]): CardDefinition[] {
   return out;
 }
 
-/** Все серии, к которым относятся карты колоды. */
 export function seriesOfDeck(cardIds: string[]): string[] {
   const result = new Set<string>();
   for (const pack of Object.values(PACKS)) {
@@ -292,7 +311,6 @@ export function seriesOfDeck(cardIds: string[]): string[] {
   return [...result];
 }
 
-/** Объединение cardsById всех паков. Для реплеев и подобного. */
 export function allCardsById(): Record<string, CardDefinition> {
   const merged: Record<string, CardDefinition> = {};
   for (const pack of Object.values(PACKS)) {
@@ -303,29 +321,30 @@ export function allCardsById(): Record<string, CardDefinition> {
   return merged;
 }
 
+// ═══════════════════════════════════════════════════════
+//   LEGACY-КОНСТАНТЫ
+// ═══════════════════════════════════════════════════════
+//
+// Оставлены для совместимости. Собраны через scope'ы — так честнее,
+// чем через захардкоженные списки.
 
-// ─── Legacy-константы ───
+export const ALL_CARDS = PACKS.stormwind
+  ? PACKS.stormwind.cards.filter((c) => !c.isToken)
+  : [];
+export const ALL_CARDS_WITH_TOKENS = PACKS.stormwind?.cards ?? [];
+export const CARDS_BY_ID = PACKS.stormwind?.cardsById ?? {};
 
-export const ALL_CARDS = getPack('stormwind').cards.filter((c) => !c.isToken);
-export const ALL_CARDS_WITH_TOKENS = getPack('stormwind').cards;
-export const CARDS_BY_ID = getPack('stormwind').cardsById;
+export const STORMWIND_ASPECTS = PACKS.stormwind?.cards ?? [];
+export const VOIDFLAME_ASPECTS = PACKS.voidflame?.cards ?? [];
 
-export const STORMWIND_ASPECTS = PACKS.stormwind.cards;
-export const VOIDFLAME_ASPECTS = PACKS.voidflame.cards;
-export const LEGENDARY_ASPECTS = [
-  ...PACKS.stormwind.cards,
-  ...PACKS.voidflame.cards,
-  ...PACKS.apocryph.cards,
-].filter((c) => c.rarity === 'legendary');
-export const TOKEN_ASPECTS = [
-  ...PACKS.stormwind.cards,
-  ...PACKS.voidflame.cards,
-  ...PACKS.apocryph.cards,
-  ...PACKS.steel.cards,
-  ...PACKS.razlom.cards,
-  ...PACKS.echo.cards,
-  ...PACKS.sky.cards,
-].filter((c) => c.isToken);
+export const LEGENDARY_ASPECTS = mergedCards(SCOPES.azeroth.series).filter(
+  (c) => c.rarity === 'legendary',
+);
+
+export const TOKEN_ASPECTS = mergedCards([
+  ...SCOPES.azeroth.series,
+  ...SCOPES.svo.series,
+]).filter((c) => c.isToken);
 
 export function getPersonalityName(id: string): string {
   return PERSONALITIES[id] ?? id;

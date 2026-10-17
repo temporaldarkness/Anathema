@@ -1,7 +1,8 @@
-import { runSeries } from '../src/sim';
+#!/usr/bin/env tsx
+import { runSeries } from '../src/runner';
 
 function usage(): never {
-  console.error('Usage: simulate <packId> <p1DeckId> <p2DeckId> <N>');
+  console.error('Usage: simulate <packId> <p1DeckId> <p2DeckId> <N> [--mulligan]');
   process.exit(1);
 }
 

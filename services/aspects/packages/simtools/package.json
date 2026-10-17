@@ -1,0 +1,38 @@
+{
+  "name": "@aspects/simtools",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "simulate": "tsx scripts/simulate.ts",
+    "list": "tsx scripts/list.ts",
+    "matrix": "tsx scripts/matrix.ts",
+    "duel": "tsx scripts/duel.ts",
+    "first-player": "tsx scripts/first-player.ts",
+    "trace": "tsx scripts/trace.ts",
+    "dump-state": "tsx scripts/dump-state.ts",
+    "card-stats": "tsx scripts/card-stats.ts",
+    "meta-report": "tsx scripts/meta-report.ts",
+    "pace-report": "tsx scripts/pace-report.ts",
+    "deck-diff": "tsx scripts/deck-diff.ts",
+    "deck-optimizer": "tsx scripts/deck-optimizer.ts",
+	"keyword-stats": "tsx scripts/keyword-stats.ts",
+    "turn-outcome": "tsx scripts/turn-outcome.ts",
+    "matchup-heatmap": "tsx scripts/matchup-heatmap.ts",
+	"missed-lethal": "tsx scripts/missed-lethal.ts",
+	"combat-efficiency": "tsx scripts/combat-efficiency.ts"
+  },
+  "dependencies": {
+    "@aspects/engine": "workspace:*",
+    "@aspects/cards": "workspace:*",
+    "@aspects/bot": "workspace:*",
+    "@aspects/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.3",
+    "tsx": "^4.19.1"
+  }
+}

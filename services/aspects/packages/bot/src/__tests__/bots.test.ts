@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createGame, applyCommand } from '@aspects/engine';
 import type { GameState, PlayerId } from '@aspects/engine';
-import { getPack, getDecks } from '@aspects/cards';
+import { cardsForScope, decksForScope } from '@aspects/cards';
 import { GreedyBot } from '../greedy';
 import { HeuristicBot } from '../heuristic';
 import { pickResponder } from '../responder';
@@ -10,12 +10,12 @@ import type { Bot } from '../types';
 // ───────────────────────────── helpers ──────────────────────────────
 
 function newGame(seed: string, useMulligan = false): GameState {
-  const pack = getPack('azeroth');
-  const decks = getDecks('azeroth');
+  const cardDefinitions = cardsForScope('azeroth');
+  const decks = decksForScope('azeroth');
   return createGame({
     seed,
     decks: { p1: decks[0].cards, p2: decks[1].cards },
-    cardDefinitions: pack.cardsById,
+    cardDefinitions,
     useMulligan,
   }).state;
 }

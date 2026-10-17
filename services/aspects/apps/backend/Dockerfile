@@ -7,11 +7,12 @@ RUN corepack enable
 
 # Манифесты для установки зависимостей
 COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
-COPY packages/shared/package.json ./packages/shared/package.json
-COPY packages/cards/package.json  ./packages/cards/package.json
-COPY packages/engine/package.json ./packages/engine/package.json
-COPY packages/bot/package.json    ./packages/bot/package.json
-COPY apps/backend/package.json    ./apps/backend/package.json
+COPY packages/shared/package.json     ./packages/shared/package.json
+COPY packages/cards/package.json      ./packages/cards/package.json
+COPY packages/engine/package.json     ./packages/engine/package.json
+COPY packages/bot/package.json        ./packages/bot/package.json
+COPY packages/simtools/package.json   ./packages/simtools/package.json
+COPY apps/backend/package.json        ./apps/backend/package.json
 
 # Устанавливаем ВСЁ, включая workspace-пакеты
 RUN pnpm install --frozen-lockfile=false
@@ -21,10 +22,11 @@ COPY packages ./packages
 COPY apps/backend ./apps/backend
 
 # Собираем пакеты в правильном порядке
-RUN pnpm --filter @aspects/shared build \
- && pnpm --filter @aspects/cards  build \
- && pnpm --filter @aspects/engine build \
- && pnpm --filter @aspects/bot    build
+RUN pnpm --filter @aspects/shared   build \
+ && pnpm --filter @aspects/cards    build \
+ && pnpm --filter @aspects/engine   build \
+ && pnpm --filter @aspects/bot      build \
+ && pnpm --filter @aspects/simtools build
 
 # Prisma generate + backend build
 RUN cd apps/backend \

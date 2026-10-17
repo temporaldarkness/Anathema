@@ -1,23 +1,20 @@
 #!/usr/bin/env tsx
 /**
- * Матрица N×N партий между колодами пака.
+ * Матрица N×N партий между пресетами внутри scope.
  *
- * Использование:
- *   matrix <packId> <N> [botName] [deck1,deck2,...]
+ * Usage:
+ *   matrix <scope> <N> [botName] [deck1,deck2,...] [--mulligan]
  *
  * Примеры:
- *   matrix azeroth 50 greedy
- *   matrix azeroth 50 heuristic
- *   matrix azeroth 50 heuristic-v3
- *   matrix azeroth 100 heuristic-v3 stormwind,voidflame
+ *   matrix main 50
+ *   matrix classic,throne 50 heuristic-v5-balanced-master
+ *   matrix azeroth 100 heuristic-v5-balanced-master stormwind,forsaken
  */
 
-import { getDecks } from '@aspects/cards';
-import { runSeries } from '../src/sim';
-import { GreedyBot } from '../src/greedy';
-import { HeuristicBot } from '../src/heuristic';
-import type { Bot } from '../src/types';
-import { makeBot } from '../src/bot-factory'
+import { decksForScope, resolveScope, listScopes } from '@aspects/cards';
+import { makeBot, listAllBotIds } from '@aspects/bot';
+import { runSeries } from '../src/runner';
+import type { Bot } from '@aspects/bot';
 
 interface Cell {
   p1Winrate: number;
@@ -26,26 +23,27 @@ interface Cell {
   sample: number;
 }
 
+const DEFAULT_BOT = 'heuristic-v5-balanced-master';
+
 function parseArgs(argv: string[]): {
-  packId: string;
+  series: string[];
+  scopeStr: string;
   n: number;
-  botName: BotName;
+  botName: string;
   deckIds: string[];
   useMulligan: boolean;
 } {
-  // Флаги.
-  const args = argv.slice();
-  let useMulligan = false;
   const cleaned: string[] = [];
-  for (const a of args) {
+  let useMulligan = false;
+  for (const a of argv) {
     if (a === '--mulligan') useMulligan = true;
     else cleaned.push(a);
   }
 
-  const [packId, nStr, arg3, arg4] = cleaned;
-  if (!packId || !nStr) {
+  const [scopeStr, nStr, arg3, arg4] = cleaned;
+  if (!scopeStr || !nStr) {
     console.error(
-      'Usage: matrix <packId> <N> [botName] [deck1,deck2,...] [--mulligan]\n'
+      'Usage: matrix <scope> <N> [botName] [deck1,deck2,...] [--mulligan]',
     );
     process.exit(1);
   }
@@ -55,39 +53,48 @@ function parseArgs(argv: string[]): {
     process.exit(1);
   }
 
-  let botName: BotName = 'greedy';
+  const series = resolveScope(scopeStr);
+  if (series.length === 0) {
+    console.error(
+      `Empty scope "${scopeStr}". Known: ${listScopes().map((s) => s.id).join(', ')}`,
+    );
+    process.exit(1);
+  }
+
+  const allDecks = decksForScope(scopeStr);
+  const allIds = allDecks.map((d) => d.id);
+
+  let botName = DEFAULT_BOT;
   let decksArg: string | undefined;
 
   if (arg3 === undefined) {
     // ничего
   } else if (arg3.includes(',')) {
     decksArg = arg3;
-  } else if (true) {
+  } else {
+    if (!listAllBotIds().includes(arg3)) {
+      console.error(
+        `Unknown bot "${arg3}". Known: ${listAllBotIds().join(', ')}`,
+      );
+      process.exit(1);
+    }
     botName = arg3;
     decksArg = arg4;
-  } else {
-    console.error(
-      `Unknown bot "${arg3}". Known: ${KNOWN_BOTS.join(', ')}\n` +
-      `(Если это список колод — раздели их запятыми.)`,
-    );
-    process.exit(1);
   }
 
-  const allDecks = getDecks(packId);
-  const allIds = allDecks.map((d) => d.id);
   const deckIds = decksArg
     ? decksArg.split(',').map((s) => s.trim()).filter(Boolean)
     : allIds;
   for (const id of deckIds) {
     if (!allIds.includes(id)) {
       console.error(
-        `Unknown deck "${id}". Available: ${allIds.join(', ')}`,
+        `Unknown deck "${id}" in scope [${series.join(', ')}]. Available: ${allIds.join(', ')}`,
       );
       process.exit(1);
     }
   }
 
-  return { packId, n, botName, deckIds, useMulligan };
+  return { series, scopeStr, n, botName, deckIds, useMulligan };
 }
 
 function pad(s: string, w: number): string {
@@ -99,27 +106,27 @@ function padRight(s: string, w: number): string {
 }
 
 function main(): void {
-  const { packId, n, botName, deckIds, useMulligan } = parseArgs(
+  const { series, scopeStr, n, botName, deckIds, useMulligan } = parseArgs(
     process.argv.slice(2),
   );
 
   const mkBot = (): Bot => makeBot(botName);
 
-  const cellW = 12;
-  const labelW = 12;
+  const cellW = 14;
+  const labelW = 14;
   const cells = new Map<string, Cell>();
   const total = deckIds.length * deckIds.length;
   let done = 0;
   const started = Date.now();
 
   console.log(
-    `Running matrix with bot="${botName}"${useMulligan ? ' (mulligan on)' : ''} …`,
+    `Matrix: scope=[${series.join(', ')}], bot=${botName}${useMulligan ? ', mulligan' : ''} …`,
   );
 
   for (const p1 of deckIds) {
     for (const p2 of deckIds) {
       const r = runSeries({
-        packId,
+        series,
         p1DeckId: p1,
         p2DeckId: p2,
         games: n,
@@ -140,22 +147,18 @@ function main(): void {
   }
   process.stdout.write('\r');
 
-  console.log(`════════════════════════════════════════════════════`);
+  console.log('════════════════════════════════════════════════════');
   console.log(`  Bot:   ${botName}${useMulligan ? ' (+ mulligan)' : ''}`);
-  console.log(`  Pack:  ${packId}`);
+  console.log(`  Scope: ${scopeStr}  [${series.join(', ')}]`);
   console.log(`  Decks: ${deckIds.join(', ')}`);
   console.log(`  Games: ${total * n}`);
   console.log('────────────────────────────────────────────────────');
 
-  const header =
-    pad('P1 \\ P2', labelW) +
-    '│' +
-    deckIds.map((d) => padRight(d, cellW)).join(' ');
+  let header = pad('P1 \\ P2', labelW) + '│';
+  for (const d of deckIds) header += padRight(d, cellW) + ' ';
   console.log(header);
   console.log(
-    '─'.repeat(labelW) +
-      '┼' +
-      deckIds.map(() => '─'.repeat(cellW)).join(' '),
+    '─'.repeat(labelW) + '┼' + deckIds.map(() => '─'.repeat(cellW)).join(' '),
   );
 
   for (const p1 of deckIds) {
@@ -176,7 +179,7 @@ function main(): void {
       const a = cells.get(`${deckIds[i]}|${deckIds[j]}`)!;
       const b = cells.get(`${deckIds[j]}|${deckIds[i]}`)!;
       const sum = a.p1Winrate + b.p1Winrate;
-      const off = Math.abs(sum - 1) > 0.10;
+      const off = Math.abs(sum - 1) > 0.1;
       if (off) symmetricOk = false;
       const flag = off ? '  ⚠' : '';
       console.log(
@@ -187,7 +190,7 @@ function main(): void {
   if (symmetricOk) console.log('  → все симметричны');
   else console.log('  → есть асимметрия — присмотреться');
 
-  console.log('\nПричины побед (по всем матчам):');
+  console.log('\nПричины завершения (по всем матчам):');
   const reasonTotals: Record<string, number> = {};
   for (const c of cells.values()) {
     for (const [k, v] of Object.entries(c.reasons)) {
@@ -195,9 +198,7 @@ function main(): void {
     }
   }
   const totalGames = total * n;
-  for (const [k, v] of Object.entries(reasonTotals).sort(
-    (a, b) => b[1] - a[1],
-  )) {
+  for (const [k, v] of Object.entries(reasonTotals).sort((a, b) => b[1] - a[1])) {
     const p = ((v / totalGames) * 100).toFixed(1);
     console.log(`  ${pad(k, 16)} ${v.toString().padStart(6)}  (${p}%)`);
   }
