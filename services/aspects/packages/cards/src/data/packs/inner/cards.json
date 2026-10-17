@@ -44,7 +44,7 @@
     "abilityInfo": {}
   },
   {
-    "id": "inner_krom_warlord",
+    "id": "inner_crom_warlord",
     "name": "Варлорд",
     "personalityTag": "crom",
     "tags": ["burgundy", "fighter"],
@@ -582,10 +582,10 @@
       }
     ],
     "abilityInfo": {
-      "taunt": {
+      "taunt"  : {
         "name": "Страж",
         "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
-	 },
+      },
       "starter": {
         "name"       : "Стартер",
         "description": "Гарантированно в стартовой руке."
