@@ -1,0 +1,7 @@
+{
+  "card-stats-svo":   ["run","--filter","@aspects/simtools","card-stats","svo","100"],
+  "card-stats-az":    ["run","--filter","@aspects/simtools","card-stats","azeroth","100"],
+  "replacement-svo":  ["run","--filter","@aspects/simtools","replacement-analysis","svo","100"],
+  "pace-svo":         ["run","--filter","@aspects/simtools","pace-report","svo","100"],
+  "attack-svo":       ["run","--filter","@aspects/simtools","attack-efficiency","svo","100"]
+}
