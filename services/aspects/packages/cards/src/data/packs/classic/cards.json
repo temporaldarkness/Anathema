@@ -8,14 +8,19 @@
     "strength": 2,
     "health": 1,
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["starter"],
     "series": ["classic"],
     "factions": ["stormwind"],
     "roles": ["fighter"],
     "title": "Принял свой кринж",
-    "shortDescription": "Простой, честный и смешной.",
+    "shortDescription": "Всегда в стартовой руке.",
     "lore": "Аска отслужил в армии, но не строит из себя героя. Над ним часто шутят — но он давно перестал смущаться и просто делает своё дело.",
-    "abilityInfo": {}
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
   },
   {
     "id": "classic_zamiatish",
@@ -69,16 +74,7 @@
     "title": "Лоботомированная версия",
     "shortDescription": "Простой, но верный помощник.",
     "lore": "Ультраролевик был создан из скуки, чтобы играть в военно-политические игры. Его код сильно урезан — но он честно выполняет, что умеет, пока хватает заряда.",
-    "abilityInfo": {
-      "charge"   : {
-        "name": "Рвение",
-        "description": "При розыгрыше карта сразу переходит во Фронт, минуя Резерв."
-      },
-      "temporary": {
-        "name"       : "Временная",
-        "description": "Карта исчезает с поля через указанное число ходов."
-      }
-    }
+    "abilityInfo": {}
   },
   {
     "id": "classic_interdict",
@@ -299,8 +295,8 @@
     "cost": 3,
     "strength": 3,
     "health": 3,
-    "rarity": "rare",
-    "abilities": [],
+    "rarity": "epic",
+    "abilities": ["armored"],
     "series": ["classic"],
     "factions": ["stormwind"],
     "roles": ["fighter"],
@@ -319,7 +315,9 @@
         ]
       }
     ],
-    "abilityInfo": {}
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
   },
   {
     "id": "classic_temporal",

@@ -135,16 +135,16 @@
     "factions": ["burgundy"],
     "roles": ["ruler"],
     "title": "Обвинение и приговор",
-    "shortDescription": "Забирает карты врага и ведёт дела.",
+    "shortDescription": "Выбирает, что забрать у врага.",
     "lore": "Хайпер — бургундец на службе короны. Он не бьёт в лоб — он ведёт дело. Пока идёт разбирательство, у тебя исчезают карты, а у него растёт власть.",
     "triggers": [
       {
         "id"         : "trial",
         "trigger"    : "ON_ENTER",
         "name"       : "Разбирательство",
-        "description": "Противник сбрасывает 2 случайные карты.",
+        "description": "Противник сбрасывает 1 карту на ваш выбор.",
         "effects"    : [
-          {"kind": "DISCARD_RANDOM", "count": 2, "who": "OPPONENT"}
+          {"kind": "DISCARD_CHOSEN", "count": 1, "who": "OPPONENT"}
         ]
       },
       {
@@ -576,12 +576,12 @@
     "strength": 2,
     "health": 2,
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["starter"],
     "series": ["throne"],
     "factions": ["stormwind"],
     "roles": ["scholar"],
     "title": "Считает каждую монету",
-    "shortDescription": "Приносит Влияние при входе.",
+    "shortDescription": "Всегда в стартовой руке.",
     "lore": "Джаст ведёт казну Штормграда — и не любит, когда что-то уходит не туда. Он медлителен, но точен.",
     "triggers": [
       {
@@ -594,7 +594,12 @@
         ]
       }
     ],
-    "abilityInfo": {}
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
   },
   {
     "id": "throne_oddi_lady_in_waiting",

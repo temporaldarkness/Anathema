@@ -290,12 +290,12 @@
     "strength": 0,
     "health": 2,
     "rarity": "uncommon",
-    "abilities": ["charge", "taunt"],
+    "abilities": ["charge", "taunt", "regenerate"],
     "series": ["cradle"],
     "factions": ["ganimed"],
     "roles": ["fighter"],
     "title": "Беззубый, кроме конфликтов",
-    "shortDescription": "Врывается, притягивает удар и взрывается.",
+    "shortDescription": "Врывается, притягивает удар и взрывается. Живуч.",
     "lore": "Сефирот — взрывной подросток и талисман проекта. Кажется, всё хорошо, пока не начнётся конфликт — и тогда задевает всех вокруг.",
     "triggers": [
       {
@@ -314,9 +314,13 @@
         "name": "Рвение",
         "description": "При розыгрыше карта сразу переходит во Фронт, минуя Резерв."
       },
-      "taunt" : {
+      "taunt"     : {
         "name": "Страж",
         "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "regenerate": {
+        "name"       : "Регенерация",
+        "description": "В конце хода восстанавливает 1 HP."
       }
     }
   },
@@ -496,13 +500,18 @@
     "strength": 1,
     "health": 2,
     "rarity": "common",
-    "abilities": [],
+    "abilities": ["starter"],
     "series": ["cradle"],
     "factions": ["ganimed"],
     "roles": ["fighter"],
     "title": "Таким же и остался",
-    "shortDescription": "Простой и крепкий — как всегда.",
+    "shortDescription": "Всегда в стартовой руке.",
     "lore": "Асочка был на сервере с самого начала — и, удивительно, совсем не изменился. Позже он станет «Простаком». Пока — просто новобранец.",
-    "abilityInfo": {}
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
   }
 ]
