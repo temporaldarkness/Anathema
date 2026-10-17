@@ -284,13 +284,28 @@ function main(): void {
   // ─── Winrate с заменой vs без ───
   const gamesWith = all.filter((s) => s.actuallyReplaced > 0 && s.winner !== null);
   const gamesWithout = all.filter((s) => s.actuallyReplaced === 0 && s.winner !== null);
-  const winsWith = gamesWith.filter((s) => s.winner === 'p1' || s.winner === 'p2').length;
-  const winsWithout = gamesWithout.filter((s) => s.winner === 'p1' || s.winner === 'p2').length;
 
   if (gamesWith.length > 0 || gamesWithout.length > 0) {
-    console.log('─── Winrate с заменой vs без ─────────────────');
-    console.log(`  С заменой:   ${gamesWith.length} партий, winrate разницы = ${pct(winsWith, gamesWith.length)} (учитывая обе стороны)`);
-    console.log(`  Без замены:  ${gamesWithout.length} партий, winrate разницы = ${pct(winsWithout, gamesWithout.length)}`);
+    // Считаем winrate по стороне, где произошла замена.
+    // Если замена была у P1 — считаем, выиграл ли P1.
+    // Если у P2 — выиграл ли P2.
+    // Если у обоих — считаем как «замена была, победа любой стороны».
+    // Упрощение: считаем, что "с заменой" — это партии, где замена вообще была.
+    // Winrate = доля партий, где выиграл тот, у кого была замена.
+    const winWith = gamesWith.filter((s) => {
+      const replacedByP1 = s.replacements.some((r) => r.playerId === 'p1');
+      const replacedByP2 = s.replacements.some((r) => r.playerId === 'p2');
+      // Если замена была только у одного — победа этого игрока = win.
+      // Если у обоих — считаем как 0.5 (ничья между ними).
+      if (replacedByP1 && !replacedByP2) return s.winner === 'p1';
+      if (replacedByP2 && !replacedByP1) return s.winner === 'p2';
+      return false; // замена у обоих — не считаем
+    }).length;
+
+    console.log('─── Партии с заменой ─────────────────────────');
+    console.log(`  Games with replacement:  ${gamesWith.length}`);
+    console.log(`  Wins by replacer:        ${winWith} (${pct(winWith, gamesWith.length)})`);
+    console.log(`  (winrate считается для стороны, сделавшей замену)`);
     console.log('');
   }
 

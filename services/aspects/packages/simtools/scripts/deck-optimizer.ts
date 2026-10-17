@@ -455,9 +455,10 @@ function main(): void {
 
   for (let gen = 0; gen < opts.generations; gen++) {
     // Оппоненты: все базовые + top-5 из прошлой генерации (co-evolution)
-    const opponents = [
+    const coevoCount = 2;
+	const opponents = [
       ...baseDecks,
-      ...prevTop.slice(0, 5).map((g) => g.cards),
+      ...prevTop.slice(0, coevoCount).map((g) => g.cards),
     ];
 
     // Оценка всей популяции
