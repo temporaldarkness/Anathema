@@ -4,24 +4,44 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+import { relative } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');                            // packages/cards
 const packsDir = join(root, 'src', 'data', 'packs');           // ← здесь
 const outFile = join(root, 'src', 'data', 'packs-index.generated.ts');
 
-const dirs = readdirSync(packsDir, { withFileTypes: true })
-  .filter((d) => d.isDirectory() && !d.name.startsWith('_'))
-  .map((d) => d.name)
-  .sort();
+function getPackDirs(baseDir) {
+  const result = [];
+  const walk = (dir) => {
+    const entries = readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name.startsWith('_') || entry.name.startsWith('.')) continue;
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (existsSync(join(fullPath, 'meta.json'))) {
+          result.push(fullPath);
+        } else {
+          walk(fullPath);
+        }
+      }
+    }
+  };
+  walk(baseDir);
+  return result;
+}
+
+const packDirs = getPackDirs(packsDir).sort();
 
 const entries = [];
 const errors = [];
 const seenIds = new Map();
 
-for (const dir of dirs) {
-  const metaPath = join(packsDir, dir, 'meta.json');
-  const cardsPath = join(packsDir, dir, 'cards.json');
+for (const fullPath of packDirs) {
+  const dir = relative(packsDir, fullPath).replace(/\\/g, '/');
+  const metaPath = join(fullPath, 'meta.json');
+  const cardsPath = join(fullPath, 'cards.json');
 
   let meta;
   try {

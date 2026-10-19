@@ -2,6 +2,27 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { CardDefinitionSchema } from '../src/schema.js';
+import { relative } from 'node:path';
+
+function getPackDirs(baseDir) {
+  const result = [];
+  const walk = (dir) => {
+    const entries = readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name.startsWith('_') || entry.name.startsWith('.')) continue;
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (existsSync(join(fullPath, 'meta.json'))) {
+          result.push(fullPath);
+        } else {
+          walk(fullPath);
+        }
+      }
+    }
+  };
+  walk(baseDir);
+  return result;
+}
 
 const here = dirname(fileURLToPath(import.meta.url));
 const packsDir = join(here, '..', 'src', 'data', 'packs');
@@ -30,12 +51,13 @@ const packEntries: Array<{
 // молча перезапишут друг друга при загрузке.
 const seenPackIds = new Map<string, string>();
 
-for (const packName of readdirSync(packsDir)) {
-  if (packName.startsWith('_')) continue;
+const packDirs = getPackDirs(packsDir);
 
-  const packDir = join(packsDir, packName);
-  const cardsPath = join(packDir, 'cards.json');
-  const metaPath = join(packDir, 'meta.json');
+for (const fullPath of packDirs) {
+  const packName = relative(packsDir, fullPath);
+  const cardsPath = join(fullPath, 'cards.json');
+  const metaPath = join(fullPath, 'meta.json');
+  if (packName.startsWith('_')) continue;
 
   if (!existsSync(cardsPath)) {
     console.error(`✗ ${packName}: нет cards.json`);
