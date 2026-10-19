@@ -18,6 +18,7 @@ interface Props {
   attackMode: boolean;
   attackerColumn: ColumnIndex | null;
   floatingsByPos: Map<string, Floating[]>;
+  replaceCosts?: Map<CardInstanceId, number>;
 }
 
 const NEUTRAL_BONUS: Record<number, string> = {
@@ -46,6 +47,7 @@ export function Board({
   attackMode,
   attackerColumn,
   floatingsByPos,
+  replaceCosts,
 }: Props) {
   return (
     <div className="board">
@@ -87,6 +89,7 @@ export function Board({
               }
               onClick={() => onSlotClick(colNum, 'p1', 'RESERVE', col.p1Reserve)}
               floating={floatingsByPos.get(`${colNum}:p1:RESERVE`)}
+			  replaceCost={col.p1Reserve ? replaceCosts?.get(col.p1Reserve) : undefined}
             />
 
             <CardSlot
@@ -105,6 +108,7 @@ export function Board({
               }
               onClick={() => onSlotClick(colNum, 'p1', 'FRONT', col.p1Front)}
               floating={floatingsByPos.get(`${colNum}:p1:FRONT`)}
+			  replaceCost={col.p1Front ? replaceCosts?.get(col.p1Front) : undefined}
             />
 
             <div
@@ -139,6 +143,7 @@ export function Board({
               }
               onClick={() => onSlotClick(colNum, 'p2', 'FRONT', col.p2Front)}
               floating={floatingsByPos.get(`${colNum}:p2:FRONT`)}
+			  replaceCost={col.p2Front ? replaceCosts?.get(col.p2Front) : undefined}
             />
 
             <CardSlot
@@ -154,6 +159,7 @@ export function Board({
               }
               onClick={() => onSlotClick(colNum, 'p2', 'RESERVE', col.p2Reserve)}
               floating={floatingsByPos.get(`${colNum}:p2:RESERVE`)}
+			  replaceCost={col.p2Reserve ? replaceCosts?.get(col.p2Reserve) : undefined}
             />
           </div>
         );

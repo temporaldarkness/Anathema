@@ -82,7 +82,16 @@ export function useAbilityInternal(
       { sourceId: cardId, ownerId: playerId },
       ctx,
     );
-    if (draft.pendingChoice) break;
+    if (draft.pendingChoice) {
+      if (draft.pendingChoice.kind === 'EFFECT_TARGET_SELECTION') {
+        draft.pendingChoice.continuation.paidAbility = {
+          cardId,
+          abilityIndex,
+          influenceSpent: ability.cost,
+        };
+      }
+      break;
+    }
   }
 
   return { ok: true };
@@ -151,7 +160,16 @@ export function applyActivationDiscard(
       { sourceId: sourceCardId, ownerId: playerId },
       ctx,
     );
-    if (draft.pendingChoice) break;
+    if (draft.pendingChoice) {
+      if (draft.pendingChoice.kind === 'EFFECT_TARGET_SELECTION') {
+        draft.pendingChoice.continuation.paidAbility = {
+          cardId: sourceCardId,
+          abilityIndex,
+          influenceSpent: ability.cost,
+        };
+      }
+      break;
+    }
   }
 
   return { ok: true };

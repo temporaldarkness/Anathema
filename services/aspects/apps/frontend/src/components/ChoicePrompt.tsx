@@ -16,12 +16,12 @@ export function ChoicePrompt({ state, onSubmit, onCancel }: Props) {
   }, [choice?.kind, choice?.playerId, choice?.eligibleCardIds.length]);
 
   if (!choice) return null;
+  if (choice.kind === 'REPLACE_TARGET_SELECTION') return null;
 
   const isDiscard = choice.kind === 'END_TURN_DISCARD';
-  const isReplace = choice.kind === 'REPLACE_TARGET_SELECTION';
   const isDiscardChosen = choice.kind === 'DISCARD_CHOSEN';
   const isActivationDiscard = choice.kind === 'ACTIVATION_DISCARD';
-  const count = isReplace ? 1 : choice.count;
+  const count = choice.count;
   const canCancel = !isDiscard && !isDiscardChosen;
 
   let title: string;
@@ -33,8 +33,6 @@ export function ChoicePrompt({ state, onSubmit, onCancel }: Props) {
         ? 'из своей руки'
         : `из руки ${choice.targetPlayerId.toUpperCase()}`;
     title = `Выберите ${count} карт(ы) ${targetLabel} для сброса`;
-  } else if (isReplace) {
-    title = `${choice.playerId.toUpperCase()} — какую карту заменить?`;
   } else if (isActivationDiscard) {
     title = `Сбросьте ${count} карт(ы) для активации способности`;
   } else {
@@ -44,7 +42,6 @@ export function ChoicePrompt({ state, onSubmit, onCancel }: Props) {
   let subtitle: string | null = null;
   if (isDiscard) subtitle = 'Сброс обязателен — отмена недоступна';
   else if (isDiscardChosen) subtitle = 'Сброс обязателен — отмена недоступна';
-  else if (isReplace) subtitle = 'Выберите карту для замены. Отмена — замена не сработает.';
   else if (isActivationDiscard) subtitle = 'Отмена — способность не сработает, ничего не потрачено.';
   else subtitle = 'Отмена — эффект не сработает';
 

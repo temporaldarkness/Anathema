@@ -18,7 +18,7 @@ import { DeckEditorScreen } from './components/DeckEditorScreen';
 import { useAuth } from './game/useAuth';
 import { useDecks } from './game/useDecks';
 import type { CardInstanceId, ColumnIndex, GameState, PlayerId } from '@aspects/engine';
-import { opponentOf, frontCount } from '@aspects/engine';
+import { opponentOf, frontCount, columnBonuses } from '@aspects/engine';
 import type { Floating } from './game/floatings';
 import { useMatches } from './game/useMatches';
 import { matchesApi } from './game/matchesApi';
@@ -40,7 +40,7 @@ type ActionMode =
   | { kind: 'idle' }
   | { kind: 'play'; cardId: CardInstanceId }
   | { kind: 'attack'; attackerId: CardInstanceId }
-  | { kind: 'replace'; handCardId: CardInstanceId; targetCardId: CardInstanceId };
+  | { kind: 'replace'; handCardId: CardInstanceId };
 
 interface CardMenuState {
   cardId: CardInstanceId;
@@ -180,6 +180,8 @@ function AppMain({
   }, [state.winner]);
   
   const savedMatchRef = useRef<string | null>(null);
+  
+  const replaceIntentRef = useRef<CardInstanceId | null>(null);
 
   useEffect(() => {
     if (!state.winner) return;
@@ -211,6 +213,27 @@ function AppMain({
     getMatchPayload,
     matchStore,
   ]);
+  
+  useEffect(() => {
+    if (!state.pendingChoice) return;
+    if (state.pendingChoice.kind !== 'REPLACE_TARGET_SELECTION') return;
+  
+    const intent = replaceIntentRef.current;
+    replaceIntentRef.current = null;
+  
+    const eligible = state.pendingChoice.eligibleCardIds;
+    const target = intent && eligible.includes(intent)
+      ? intent
+      : eligible.length === 1 ? eligible[0] : null;
+  
+    if (target) {
+      dispatch({
+        type: 'RESOLVE_CHOICE',
+        playerId: state.pendingChoice.playerId,
+        cardIds: [target],
+      });
+    }
+  }, [state.pendingChoice, dispatch]);
 
   const floatingsByPos = useMemo(() => {
     const m = new Map<string, Floating[]>();
@@ -220,12 +243,50 @@ function AppMain({
     }
     return m;
   }, [floatings]);
+  
+  interface ReplaceCandidate {
+    cardId: CardInstanceId;
+    cost: number;
+  }
+  
+  const replaceCandidates = useMemo<ReplaceCandidate[]>(() => {
+    if (mode.kind !== 'replace') return [];
+    const newCard = state.cards[mode.handCardId];
+    if (!newCard) return [];
+    const newDef = state.definitions[newCard.definitionId];
+    if (!newDef) return [];
+    const colReduction = columnBonuses(state, activePlayer).costReduction;
+    const out: ReplaceCandidate[] = [];
+    for (const col of state.board) {
+      const ids = activePlayer === 'p1'
+        ? [col.p1Front, col.p1Reserve]
+        : [col.p2Front, col.p2Reserve];
+      for (const cid of ids) {
+        if (!cid) continue;
+        const c = state.cards[cid];
+        if (!c) continue;
+        const cd = state.definitions[c.definitionId];
+        if (!cd) continue;
+        if (cd.personalityTag !== newDef.personalityTag) continue;
+        if (cd.cantBeReplaced) continue;
+        const discount = Math.min(
+          Math.floor(cd.cost / 2),
+          Math.floor(newDef.cost / 2),
+        );
+        const cost = Math.max(0, newDef.cost - discount - colReduction);
+        out.push({ cardId: cid, cost });
+      }
+    }
+    return out;
+  }, [mode, state, activePlayer]);
 
   const highlightSources = useMemo(() => {
     if (mode.kind === 'attack') return new Set([mode.attackerId]);
-    if (mode.kind === 'replace') return new Set([mode.targetCardId]);
+    if (mode.kind === 'replace') {
+      return new Set(replaceCandidates.map((c) => c.cardId));
+    }
     return new Set<CardInstanceId>();
-  }, [mode]);
+  }, [mode, replaceCandidates]);
 
   const highlightTargets = useMemo(() => {
     if (mode.kind !== 'attack') return new Set<CardInstanceId>();
@@ -271,11 +332,7 @@ function AppMain({
 
   const handlePlay = (cardId: CardInstanceId) => setMode({ kind: 'play', cardId });
   const handleReplace = (cardId: CardInstanceId) => {
-    const card = state.cards[cardId];
-    const def = state.definitions[card.definitionId];
-    const targetId = findMatchingPersonalityOnBoard(state, activePlayer, def.personalityTag);
-    if (!targetId) return;
-    setMode({ kind: 'replace', handCardId: cardId, targetCardId: targetId });
+    setMode({ kind: 'replace', handCardId: cardId });
   };
 
   const handleSlotClick = (
@@ -286,14 +343,16 @@ function AppMain({
   ) => {
     if (!activePlayerIsHuman) return;
 
-    if (mode.kind === 'replace') {
-      if (cardId === mode.targetCardId) {
-        dispatch({ type: 'REPLACE_CARD', playerId: activePlayer, cardId: mode.handCardId });
-        setMode({ kind: 'idle' });
-      }
-      return;
-    }
-    if (mode.kind === 'play') {
+  if (mode.kind === 'replace') {
+    if (!cardId) return;
+    const isCandidate = replaceCandidates.some((c) => c.cardId === cardId);
+    if (!isCandidate) return;
+    replaceIntentRef.current = cardId;
+    dispatch({ type: 'REPLACE_CARD', playerId: activePlayer, cardId: mode.handCardId });
+    setMode({ kind: 'idle' });
+    return;
+  }
+  if (mode.kind === 'play') {
       if (owner !== activePlayer) return;
       if (zone !== 'RESERVE') return;
       if (cardId !== null) return;
@@ -746,6 +805,11 @@ function AppMain({
             attackMode={mode.kind === 'attack'}
             attackerColumn={attackerColumn}
             floatingsByPos={floatingsByPos}
+			replaceCosts={(() => {
+              const m = new Map<CardInstanceId, number>();
+              for (const c of replaceCandidates) m.set(c.cardId, c.cost);
+              return m;
+            })()}
           />
 
           {botThinking && !bothBots && (
@@ -762,12 +826,23 @@ function AppMain({
                 <button className="hint-cancel" onClick={resetMode}>✕ Отмена</button>
               </div>
             )}
-            {mode.kind === 'replace' && (
-              <div className="hint hint-with-actions">
-                <div>Кликните по подсвеченной карте, чтобы заменить</div>
-                <button className="hint-cancel" onClick={resetMode}>✕ Отмена</button>
-              </div>
-            )}
+            {mode.kind === 'replace' && (() => {
+              const costs = replaceCandidates.map((c) => c.cost);
+              const minC = costs.length ? Math.min(...costs) : 0;
+              const maxC = costs.length ? Math.max(...costs) : 0;
+              const costText =
+                costs.length === 0 ? '—'
+                : minC === maxC ? `${minC}💰`
+                : `${minC}–${maxC}💰`;
+              return (
+                <div className="hint hint-with-actions">
+                  <div>
+                    Кликните по цели. Стоимость замены: <b>{costText}</b>.
+                  </div>
+                  <button className="hint-cancel" onClick={resetMode}>✕ Отмена</button>
+                </div>
+              );
+            })()}
             {mode.kind === 'attack' && (() => {
               const attacker = state.cards[mode.attackerId];
               const attackerCol = attacker?.column;

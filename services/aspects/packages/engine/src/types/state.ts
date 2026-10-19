@@ -82,6 +82,11 @@ export interface PendingEffectContinuation {
   ownerId: PlayerId;
   then: Effect[];
   attackerId?: CardInstanceId;
+  paidAbility?: {
+    cardId: CardInstanceId;
+    abilityIndex: number;
+    influenceSpent: number;
+  };
 }
 
 export type PendingChoice =

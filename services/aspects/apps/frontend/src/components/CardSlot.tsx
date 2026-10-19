@@ -14,6 +14,7 @@ interface Props {
   highlight?: 'none' | 'target' | 'source';
   playable?: boolean;
   floating?: Floating[];
+  replaceCost?: number;
 }
 
 function FloatingLayer({ items }: { items: Floating[] }) {
@@ -42,6 +43,7 @@ export function CardSlot({
   highlight = 'none',
   playable = false,
   floating,
+  replaceCost,
 }: Props) {
   const baseClasses = [
     'slot',
@@ -126,6 +128,11 @@ export function CardSlot({
           title={`Атак осталось: ${attacksLeft} из ${maxAttacks}`}
         >
           ⚡ {attacksLeft}/{maxAttacks}
+        </div>
+      )}
+	  {replaceCost !== undefined && (
+        <div className="slot-replace-cost" title="Стоимость замены">
+          ↻ {replaceCost}💰
         </div>
       )}
       <div className="slot-name">{def?.name ?? card.definitionId}</div>

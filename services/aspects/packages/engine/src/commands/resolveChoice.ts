@@ -11,6 +11,7 @@ import { processTemporaryCards } from './advancePhase';
 import { controlledCells } from '../state/helpers';
 import { applyReplacementInternal } from './replace';
 import { applyActivationDiscard } from './useAbility';
+import { changeInfluence } from '../state/mutations';
 
 export interface ResolveChoiceParams {
   playerId: PlayerId;
@@ -30,6 +31,19 @@ export function resolveChoiceInternal(
     choice.kind === 'EFFECT_TARGET_SELECTION' &&
     params.cardIds.length === 0
   ) {
+    // Пустой выбор = отмена эффекта. Если эффект от оплаченной способности —
+    // возвращаем влияние и разблокируем способность.
+    if (choice.continuation.paidAbility) {
+      const { cardId, abilityIndex, influenceSpent } = choice.continuation.paidAbility;
+      if (influenceSpent > 0) {
+        changeInfluence(draft, choice.playerId, influenceSpent, ctx);
+      }
+      const card = draft.cards[cardId];
+      if (card) {
+        const idx = card.usedAbilitiesThisTurn.indexOf(abilityIndex);
+        if (idx >= 0) card.usedAbilitiesThisTurn.splice(idx, 1);
+      }
+    }
     draft.pendingChoice = null;
     ctx.events.push({
       type: 'CHOICE_RESOLVED',

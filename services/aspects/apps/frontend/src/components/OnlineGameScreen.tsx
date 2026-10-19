@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { AuthState } from '../game/useAuth';
 import { useOnlineGame } from '../game/useOnlineGame';
 import type { CardInstanceId, ColumnIndex, PlayerId } from '@aspects/engine';
-import { opponentOf, frontCount } from '@aspects/engine';
+import { opponentOf, frontCount, columnBonuses } from '@aspects/engine';
 import { Board } from './Board';
 import { Hand } from './Hand';
 import { PlayerPanel } from './PlayerPanel';
@@ -89,6 +89,9 @@ function OnlineGameInner({
 
   const [selectedCardId, setSelectedCardId] = useState<CardInstanceId | null>(null);
   const [attackMode, setAttackMode] = useState<CardInstanceId | null>(null);
+  const [replaceMode, setReplaceMode] = useState<CardInstanceId | null>(null);
+
+  const replaceIntentRef = useRef<CardInstanceId | null>(null);
 
   const isSpectator = myRole === 'spectator';
   const mySide: PlayerId | null = myPlayerId;
@@ -116,11 +119,52 @@ function OnlineGameInner({
   }, [floatings]);
 
   const opponentSide: PlayerId | null = myPlayerId ? opponentOf(myPlayerId) : null;
-
-  const highlightSources = useMemo(
-    () => (attackMode ? new Set<CardInstanceId>([attackMode]) : new Set<CardInstanceId>()),
-    [attackMode],
-  );
+  
+  const replaceCandidates = useMemo(() => {
+    if (!state || !replaceMode || !mySide) return [];
+    const newCard = state.cards[replaceMode];
+    if (!newCard) return [];
+    const newDef = state.definitions[newCard.definitionId];
+    if (!newDef) return [];
+    const colReduction = columnBonuses(state, mySide).costReduction;
+    const out: Array<{ cardId: CardInstanceId; cost: number }> = [];
+    for (const col of state.board) {
+      const ids = mySide === 'p1'
+        ? [col.p1Front, col.p1Reserve]
+        : [col.p2Front, col.p2Reserve];
+      for (const cid of ids) {
+        if (!cid) continue;
+        const c = state.cards[cid];
+        if (!c) continue;
+        const cd = state.definitions[c.definitionId];
+        if (!cd) continue;
+        if (cd.personalityTag !== newDef.personalityTag) continue;
+        if (cd.cantBeReplaced) continue;
+        const discount = Math.min(
+          Math.floor(cd.cost / 2),
+          Math.floor(newDef.cost / 2),
+        );
+        const cost = Math.max(0, newDef.cost - discount - colReduction);
+        out.push({ cardId: cid, cost });
+      }
+    }
+    return out;
+  }, [state, replaceMode, mySide]);
+  
+  const replaceCosts = useMemo(() => {
+    const m = new Map<CardInstanceId, number>();
+    for (const c of replaceCandidates) m.set(c.cardId, c.cost);
+    return m;
+  }, [replaceCandidates]);
+  
+  const highlightSources = useMemo(() => {
+    const s = new Set<CardInstanceId>();
+    if (attackMode) s.add(attackMode);
+    if (replaceMode) {
+      for (const c of replaceCandidates) s.add(c.cardId);
+    }
+    return s;
+  }, [attackMode, replaceMode, replaceCandidates]);
 
   const highlightTargets = useMemo(() => {
     const targets = new Set<CardInstanceId>();
@@ -342,14 +386,39 @@ function OnlineGameInner({
   const handlePlay = (cardId: CardInstanceId) => {
     if (isSpectator || !mySide) return;
     if (!canAct || state.phase !== 'PLAY') return;
+    setReplaceMode(null);
     setSelectedCardId(cardId);
   };
 
   const handleReplace = (cardId: CardInstanceId) => {
     if (isSpectator || !mySide) return;
     if (!canAct || state.phase !== 'PLAY') return;
-    dispatch({ type: 'REPLACE_CARD', playerId: mySide, cardId });
+    setSelectedCardId(null);
+    setAttackMode(null);
+    setReplaceMode(cardId);
   };
+  
+  useEffect(() => {
+    if (!state) return;
+    if (!state.pendingChoice) return;
+    if (state.pendingChoice.kind !== 'REPLACE_TARGET_SELECTION') return;
+  
+    const intent = replaceIntentRef.current;
+    replaceIntentRef.current = null;
+  
+    const eligible = state.pendingChoice.eligibleCardIds;
+    const target = intent && eligible.includes(intent)
+      ? intent
+      : eligible[0];
+  
+    if (target) {
+      dispatch({
+        type: 'RESOLVE_CHOICE',
+        playerId: state.pendingChoice.playerId,
+        cardIds: [target],
+      });
+    }
+  }, [state?.pendingChoice, dispatch]);
 
   const handleSlotClick = (
     column: number,
@@ -359,7 +428,18 @@ function OnlineGameInner({
   ) => {
     if (isSpectator || !mySide) return;
     if (!canAct) return;
-
+  
+    if (replaceMode) {
+      if (!cardId) return;
+      if (owner !== mySide) return;
+      const isCandidate = replaceCandidates.some((c) => c.cardId === cardId);
+      if (!isCandidate) return;
+      replaceIntentRef.current = cardId;
+      dispatch({ type: 'REPLACE_CARD', playerId: mySide, cardId: replaceMode });
+      setReplaceMode(null);
+      return;
+    }
+  
     if (selectedCardId) {
       if (owner !== mySide) return;
       if (zone !== 'RESERVE') return;
@@ -600,6 +680,7 @@ function OnlineGameInner({
             attackMode={!isSpectator && !!attackMode}
             attackerColumn={attackerColumn}
             floatingsByPos={floatingsByPos}
+            replaceCosts={replaceCosts}
           />
 
           <div className="hint-container">
@@ -608,7 +689,25 @@ function OnlineGameInner({
                 {state.activePlayer === mySide ? 'Ожидание…' : 'Ход соперника'}
               </div>
             )}
-            {!isSpectator && canAct && selectedCardId && (
+            {!isSpectator && canAct && replaceMode && (() => {
+              const costs = replaceCandidates.map((c) => c.cost);
+              const minC = costs.length ? Math.min(...costs) : 0;
+              const maxC = costs.length ? Math.max(...costs) : 0;
+              const costText = costs.length === 0
+                ? '—'
+                : minC === maxC ? `${minC}💰` : `${minC}–${maxC}💰`;
+              return (
+                <div className="hint hint-with-actions">
+                  <div>
+                    Кликните по цели. Стоимость замены: <b>{costText}</b>.
+                  </div>
+                  <button className="hint-cancel" onClick={() => setReplaceMode(null)}>
+                    ✕ Отмена
+                  </button>
+                </div>
+              );
+            })()}
+			{!isSpectator && canAct && selectedCardId && (
               <div className="hint hint-with-actions">
                 <div>Кликните по пустому слоту Резерва (1–5)</div>
                 <button className="hint-cancel" onClick={() => setSelectedCardId(null)}>

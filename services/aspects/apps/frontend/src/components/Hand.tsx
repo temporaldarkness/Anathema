@@ -14,6 +14,36 @@ interface Props {
   observe?: boolean;
 }
 
+function findReplaceCandidatesFor(
+  state: GameState,
+  playerId: 'p1' | 'p2',
+  newDef: { personalityTag: string; cost: number },
+): Array<{ cardId: string; cost: number }> {
+  const colReduction = columnBonuses(state, playerId).costReduction;
+  const out: Array<{ cardId: string; cost: number }> = [];
+  for (const col of state.board) {
+    const ids = playerId === 'p1'
+      ? [col.p1Front, col.p1Reserve]
+      : [col.p2Front, col.p2Reserve];
+    for (const cid of ids) {
+      if (!cid) continue;
+      const c = state.cards[cid];
+      if (!c) continue;
+      const cd = state.definitions[c.definitionId];
+      if (!cd) continue;
+      if (cd.personalityTag !== newDef.personalityTag) continue;
+      if (cd.cantBeReplaced) continue;
+      const discount = Math.min(
+        Math.floor(cd.cost / 2),
+        Math.floor(newDef.cost / 2),
+      );
+      const cost = Math.max(0, newDef.cost - discount - colReduction);
+      out.push({ cardId: cid, cost });
+    }
+  }
+  return out;
+}
+
 export function Hand({ state, playerId, onPlay, onReplace, selectedCardId, disabled = false, observe = false }: Props) {
   const hand = state.players[playerId].hand;
 
@@ -55,14 +85,25 @@ export function Hand({ state, playerId, onPlay, onReplace, selectedCardId, disab
             className={`hand-card ${selected ? 'hand-card-selected' : ''}`}
             content={<CardTooltip state={state} cardId={cardId} />}
           >
-            {hasCopy && (
-              <div
-                className="hand-card-replace-badge"
-                title="Личность уже на поле — можно заменить"
-              >
-                ↻ ЗАМЕНА
-              </div>
-            )}
+            {hasCopy && (() => {
+              // Минимальная стоимость замены (лучший кандидат).
+              const candidates = findReplaceCandidatesFor(state, playerId, def);
+              const minCost = candidates.length > 0
+                ? Math.min(...candidates.map((c) => c.cost))
+                : null;
+              return (
+                <div
+                  className="hand-card-replace-badge"
+                  title={
+                    minCost !== null
+                      ? `Можно заменить, от ${minCost}💰`
+                      : 'Личность уже на поле — можно заменить'
+                  }
+                >
+                  ↻ {minCost !== null ? `от ${minCost}💰` : 'ЗАМЕНА'}
+                </div>
+              );
+            })()}
             <div className="hand-card-name">{def.name}</div>
             <div className="hand-card-stats">
               <span className="stat stat-cost" title="Стоимость">

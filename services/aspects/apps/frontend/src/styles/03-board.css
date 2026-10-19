@@ -424,3 +424,22 @@
   pointer-events: none;
   font-variant-numeric: tabular-nums;
 }
+
+/* ─── Replace cost badge ─── */
+
+.slot-replace-cost {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--clr-warning);
+  background: color-mix(in srgb, var(--clr-warning) 18%, var(--clr-elevated));
+  border: 1px solid color-mix(in srgb, var(--clr-warning) 50%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  z-index: 3;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
