@@ -19,6 +19,7 @@ import { botDisplayName } from '@aspects/bot';
 import { useOpenProfile } from '../game/profileModal';
 import { onlineApi } from '../game/onlineApi';
 import { useConfirm } from '../game/confirmContext';
+import { ActionMenu, type ActionOption } from './ActionMenu';
 
 interface Props {
   auth: AuthState;
@@ -90,6 +91,7 @@ function OnlineGameInner({
   const [selectedCardId, setSelectedCardId] = useState<CardInstanceId | null>(null);
   const [attackMode, setAttackMode] = useState<CardInstanceId | null>(null);
   const [replaceMode, setReplaceMode] = useState<CardInstanceId | null>(null);
+  const [cardMenu, setCardMenu] = useState<CardInstanceId | null>(null);
 
   const replaceIntentRef = useRef<CardInstanceId | null>(null);
 
@@ -420,6 +422,23 @@ function OnlineGameInner({
     }
   }, [state?.pendingChoice, dispatch]);
 
+  const handleAbilityClick = (cardId: CardInstanceId) => {
+    if (isSpectator || !mySide || !canAct) return;
+    const card = state.cards[cardId];
+    if (!card) return;
+    const def = state.definitions[card.definitionId];
+    const abilities = def.activatedAbilities ?? [];
+    const affordable = abilities
+      .map((a, i) => ({ a, i }))
+      .filter(({ a, i }) => !card.usedAbilitiesThisTurn.includes(i) && state.players[mySide].influence >= a.cost);
+
+    if (affordable.length === 1) {
+      dispatch({ type: 'USE_ABILITY', playerId: mySide, cardId, abilityIndex: affordable[0].i });
+    } else if (affordable.length > 1) {
+      setCardMenu(cardId);
+    }
+  };
+  
   const handleSlotClick = (
     column: number,
     owner: 'p1' | 'p2',
@@ -471,10 +490,24 @@ function OnlineGameInner({
     if (!cardId) return;
     if (owner !== mySide) return;
     if (zone !== 'FRONT') return;
+
     const card = state.cards[cardId];
-    if (card.exhausted) return;
-    if (state.phase !== 'COMBAT') return;
-    setAttackMode(cardId);
+    const def = state.definitions[card.definitionId];
+    const canAttack = !card.exhausted && state.phase === 'COMBAT';
+
+    if (canAttack) {
+        setAttackMode(cardId);
+      return;
+    }
+
+    const abilities = def.activatedAbilities ?? [];
+    const affordable = abilities
+      .map((a, i) => ({ a, i }))
+      .filter(({ a, i }) => !card.usedAbilitiesThisTurn.includes(i) && state.players[mySide].influence >= a.cost);
+
+    if (affordable.length > 0) {
+      setCardMenu(cardId);
+    }
   };
 
   const handleNeutralClick = (column: ColumnIndex) => {
@@ -541,6 +574,41 @@ function OnlineGameInner({
       });
     }
   };
+  
+  let cardMenuOptions: ActionOption[] = [];
+  let cardMenuTitle = '';
+  let cardMenuSubtitle = '';
+  if (cardMenu && mySide) {
+    const card = state.cards[cardMenu];
+    const def = state.definitions[card.definitionId];
+    cardMenuTitle = def.name;
+    const abilities = def.activatedAbilities ?? [];
+        const isFront = card.zone === 'FRONT';
+    const ownerControlsCol2 = state.board[1].neutralOwner === card.ownerId;
+    let displayStr = card.baseStrength;
+    for (const m of card.modifiers) if (m.stat === 'strength') displayStr += m.delta;
+    if (isFront && ownerControlsCol2) displayStr += 1;
+    
+    cardMenuSubtitle =
+      `⚔ ${Math.max(0, displayStr)} · ❤ ${card.baseHealth - card.damageTaken}` +
+      (card.exhausted ? ' · истощён' : '');
+
+    if (abilities.length > 0 && (state.phase === 'PLAY' || state.phase === 'COMBAT')) {
+      abilities.forEach((a: any, idx: number) => {
+        const used = card.usedAbilitiesThisTurn.includes(idx);
+        const canAfford = state.players[mySide].influence >= a.cost;
+        if (!used && canAfford) {
+          cardMenuOptions.push({
+            label: `⚡ ${a.name ?? a.id} (${a.cost}💰)`,
+            onSelect: () => {
+              dispatch({ type: 'USE_ABILITY', playerId: mySide, cardId: cardMenu, abilityIndex: idx });
+              setCardMenu(null);
+            },
+          });
+        }
+      });
+    }
+  }
 
   const opponentFrontEmpty = frontCount(state, opponentSideSafe) === 0;
   const bothPlayersReady = !!(roomInfo?.ownerId && roomInfo?.guestId);
@@ -681,6 +749,8 @@ function OnlineGameInner({
             attackerColumn={attackerColumn}
             floatingsByPos={floatingsByPos}
             replaceCosts={replaceCosts}
+			onAbilityClick={!isSpectator ? handleAbilityClick : undefined}
+			localPlayerId={mySideSafe}
           />
 
           <div className="hint-container">
@@ -768,7 +838,16 @@ function OnlineGameInner({
         </div>
       </div>
 
-      {!isSpectator && state.pendingChoice && state.pendingChoice.playerId === mySide && (
+      {cardMenu && cardMenuOptions.length > 0 && (
+        <ActionMenu
+          title={cardMenuTitle}
+          subtitle={cardMenuSubtitle}
+          options={cardMenuOptions}
+          onCancel={() => setCardMenu(null)}
+        />
+      )}
+	  
+	  {!isSpectator && state.pendingChoice && state.pendingChoice.playerId === mySide && (
         <ChoicePrompt
           state={state}
           onSubmit={handleChoice}

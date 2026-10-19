@@ -202,7 +202,19 @@ export function formatEvent(
 
     case 'COMMAND_REJECTED':
       return { kind: 'error', playerId: e.playerId, text: `❌ Отказ: ${e.reason}` };
-
+	case 'ABILITY_TRIGGERED': {
+      const card = state.cards[e.cardId];
+      const def = card ? state.definitions[card.definitionId] : null;
+      const ability = def?.activatedAbilities?.find(
+        (a) => a.id === e.abilityId
+      ) ?? def?.activatedAbilities?.[Number(e.abilityId)];
+      const abilityName = ability?.name ?? ability?.id ?? 'способность';
+      return {
+        kind: 'play',
+        text: `⚡ ${def?.name ?? 'Карта'} активирует: ${abilityName}`,
+      };
+    }
+	
     default:
       return null;
   }

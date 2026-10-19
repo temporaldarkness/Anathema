@@ -334,6 +334,22 @@ function AppMain({
   const handleReplace = (cardId: CardInstanceId) => {
     setMode({ kind: 'replace', handCardId: cardId });
   };
+  
+  const handleAbilityClick = (cardId: CardInstanceId) => {
+    if (!activePlayerIsHuman) return;
+    const card = state.cards[cardId];
+    const def = state.definitions[card.definitionId];
+    const abilities = def.activatedAbilities ?? [];
+    const affordable = abilities
+      .map((a, i) => ({ a, i }))
+      .filter(({ a, i }) => !card.usedAbilitiesThisTurn.includes(i) && state.players[activePlayer].influence >= a.cost);
+
+    if (affordable.length === 1) {
+      dispatch({ type: 'USE_ABILITY', playerId: activePlayer, cardId, abilityIndex: affordable[0].i });
+    } else if (affordable.length > 1) {
+      setCardMenu({ cardId });
+    }
+  };
 
   const handleSlotClick = (
     column: number,
@@ -385,27 +401,20 @@ function AppMain({
     const card = state.cards[cardId];
     const def = state.definitions[card.definitionId];
     const canAttack = !card.exhausted && state.phase === 'COMBAT';
-    const abilities = def.activatedAbilities ?? [];
-    const availableAbilities = abilities
-      .map((_, idx) => idx)
-      .filter((idx) => !card.usedAbilitiesThisTurn.includes(idx));
-    const inActionPhase = state.phase === 'PLAY' || state.phase === 'COMBAT';
-    const hasAbility = availableAbilities.length > 0 && inActionPhase;
 
-    if (canAttack && !hasAbility) {
+    if (canAttack) {
       setMode({ kind: 'attack', attackerId: cardId });
       return;
     }
-    if (!canAttack && availableAbilities.length === 1) {
-      dispatch({
-        type: 'USE_ABILITY',
-        playerId: activePlayer,
-        cardId,
-        abilityIndex: availableAbilities[0],
-      });
-      return;
+
+    const abilities = def.activatedAbilities ?? [];
+    const affordable = abilities
+      .map((a, i) => ({ a, i }))
+      .filter(({ a, i }) => !card.usedAbilitiesThisTurn.includes(i) && state.players[activePlayer].influence >= a.cost);
+
+    if (affordable.length > 0) {
+      setCardMenu({ cardId });
     }
-    setCardMenu({ cardId });
   };
 
   const handleNeutralClick = (column: ColumnIndex) => {
@@ -513,35 +522,33 @@ function AppMain({
     cardMenuTitle = def.name;
     const canAttack = !card.exhausted && state.phase === 'COMBAT';
     const abilities = def.activatedAbilities ?? [];
+    const isFront = card.zone === 'FRONT';
+    const ownerControlsCol2 = state.board[1].neutralOwner === card.ownerId;
+    let displayStr = card.baseStrength;
+    for (const m of card.modifiers) if (m.stat === 'strength') displayStr += m.delta;
+    if (isFront && ownerControlsCol2) displayStr += 1;
+    
     cardMenuSubtitle =
-      `⚔ ${card.baseStrength} · ❤ ${card.baseHealth - card.damageTaken}` +
+      `⚔ ${Math.max(0, displayStr)} · ❤ ${card.baseHealth - card.damageTaken}` +
       (card.exhausted ? ' · истощён' : '');
 
-    if (canAttack) {
-      cardMenuOptions.push({
-        label: '⚔ Атаковать',
-        onSelect: () => setMode({ kind: 'attack', attackerId: cardMenu.cardId }),
-      });
-    }
     if (abilities.length > 0 && (state.phase === 'PLAY' || state.phase === 'COMBAT')) {
       abilities.forEach((a: any, idx: number) => {
         const used = card.usedAbilitiesThisTurn.includes(idx);
-        if (!used) {
+        const canAfford = state.players[activePlayer].influence >= a.cost;
+        if (!used && canAfford) {
           cardMenuOptions.push({
-            label: `⚡ ${a.id} (${a.cost}💰)`,
-            onSelect: () =>
-              dispatch({
-                type: 'USE_ABILITY',
-                playerId: activePlayer,
-                cardId: cardMenu.cardId,
-                abilityIndex: idx,
-              }),
+            label: `⚡ ${a.name ?? a.id} (${a.cost}💰)`,
+            onSelect: () => {
+              dispatch({ type: 'USE_ABILITY', playerId: activePlayer, cardId: cardMenu.cardId, abilityIndex: idx });
+              setCardMenu(null);
+            },
           });
         }
       });
     }
     if (cardMenuOptions.length === 0) {
-      cardMenuOptions.push({ label: 'Нет доступных действий', onSelect: () => {} });
+      return null;
     }
   }
   
@@ -810,6 +817,8 @@ function AppMain({
               for (const c of replaceCandidates) m.set(c.cardId, c.cost);
               return m;
             })()}
+			onAbilityClick={handleAbilityClick}
+			localPlayerId={activePlayer}
           />
 
           {botThinking && !bothBots && (

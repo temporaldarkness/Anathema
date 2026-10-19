@@ -73,6 +73,11 @@ export function useAbilityInternal(
   if (ability.cost > 0) changeInfluence(draft, playerId, -ability.cost, ctx);
 
   card.usedAbilitiesThisTurn.push(abilityIndex);
+  ctx.events.push({
+    type: 'ABILITY_TRIGGERED',
+    cardId,
+    abilityId: ability.id ?? String(abilityIndex),
+  });
 
   for (const effect of ability.effects) {
     if (!draft.cards[cardId]) break;
@@ -151,6 +156,11 @@ export function applyActivationDiscard(
   if (ability.cost > 0) changeInfluence(draft, playerId, -ability.cost, ctx);
 
   card.usedAbilitiesThisTurn.push(abilityIndex);
+  ctx.events.push({
+    type: 'ABILITY_TRIGGERED',
+    cardId: sourceCardId,
+    abilityId: ability.id ?? String(abilityIndex),
+  });
 
   for (const effect of ability.effects) {
     if (!draft.cards[sourceCardId]) break;

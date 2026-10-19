@@ -11,10 +11,13 @@ interface Props {
   column: number;
   isActive: boolean;
   onClick?: () => void;
+  onAbilityClick?: (cardId: CardInstanceId) => void;
   highlight?: 'none' | 'target' | 'source';
   playable?: boolean;
   floating?: Floating[];
+  playerInfluence?: number;
   replaceCost?: number;
+  isMyCard?: boolean;
 }
 
 function FloatingLayer({ items }: { items: Floating[] }) {
@@ -40,10 +43,13 @@ export function CardSlot({
   zone,
   isActive,
   onClick,
+  onAbilityClick,
   highlight = 'none',
   playable = false,
   floating,
+  playerInfluence = 0,
   replaceCost,
+  isMyCard = false,
 }: Props) {
   const baseClasses = [
     'slot',
@@ -70,8 +76,14 @@ export function CardSlot({
   const def = state.definitions[card.definitionId];
   const silenced = card.silenced;
 
-  // Silence снимает все keywords и триггеры.
   const abilities = silenced ? [] : (def?.abilities ?? []);
+  
+  // Проверка активируемых способностей
+  const activated = silenced ? [] : (def?.activatedAbilities ?? []);
+  const availableAbilities = activated
+    .map((a, i) => ({ a, i }))
+    .filter(({ a, i }) => !card.usedAbilitiesThisTurn.includes(i) && playerInfluence >= a.cost);
+  const hasAbilities = availableAbilities.length > 0;
 
   let strength = card.baseStrength;
   let hp = card.baseHealth - card.damageTaken;
@@ -130,7 +142,22 @@ export function CardSlot({
           ⚡ {attacksLeft}/{maxAttacks}
         </div>
       )}
-	  {replaceCost !== undefined && (
+      
+      {/* Кнопка способности */}
+      {hasAbilities && onAbilityClick && (
+        <div
+          className={`slot-ability-badge ${isMyCard ? 'slot-ability-active' : 'slot-ability-passive'}`}
+          title={isMyCard ? "Есть доступная способность" : "У противника есть способность"}
+          onClick={isMyCard && onAbilityClick ? (e) => {
+            e.stopPropagation();
+            onAbilityClick(cardId);
+          } : undefined}
+        >
+          ⚡
+        </div>
+      )}
+
+      {replaceCost !== undefined && (
         <div className="slot-replace-cost" title="Стоимость замены">
           ↻ {replaceCost}💰
         </div>

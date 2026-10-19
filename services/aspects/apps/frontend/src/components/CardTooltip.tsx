@@ -27,6 +27,10 @@ export function CardTooltip({ state, cardId }: Props) {
     if (m.stat === 'strength') strength += m.delta;
     if (m.stat === 'health') hp += m.delta;
   }
+  const isFront = card.zone === 'FRONT';
+  const ownerControlsCol2 = state.board[1].neutralOwner === card.ownerId;
+  if (isFront && ownerControlsCol2) strength += 1;
+  
   strength = Math.max(0, strength);
 
   const hasModifiers = card.modifiers.length > 0;

@@ -12,6 +12,7 @@ interface Props {
     cardId: CardInstanceId | null,
   ) => void;
   onNeutralClick: (column: ColumnIndex) => void;
+  onAbilityClick?: (cardId: CardInstanceId) => void; // ← Новое
   highlightTargets: Set<CardInstanceId>;
   highlightSources: Set<CardInstanceId>;
   playMode: boolean;
@@ -19,6 +20,7 @@ interface Props {
   attackerColumn: ColumnIndex | null;
   floatingsByPos: Map<string, Floating[]>;
   replaceCosts?: Map<CardInstanceId, number>;
+  localPlayerId?: 'p1' | 'p2';
 }
 
 const NEUTRAL_BONUS: Record<number, string> = {
@@ -41,6 +43,7 @@ export function Board({
   state,
   onSlotClick,
   onNeutralClick,
+  onAbilityClick,
   highlightTargets,
   highlightSources,
   playMode,
@@ -48,7 +51,9 @@ export function Board({
   attackerColumn,
   floatingsByPos,
   replaceCosts,
+  localPlayerId,
 }: Props) {
+  const playerInfluence = state.players[state.activePlayer].influence;
   return (
     <div className="board">
       <div className="board-header">
@@ -88,8 +93,11 @@ export function Board({
                 col.p1Reserve && highlightTargets.has(col.p1Reserve) ? 'target' : 'none'
               }
               onClick={() => onSlotClick(colNum, 'p1', 'RESERVE', col.p1Reserve)}
+              onAbilityClick={onAbilityClick}
+              playerInfluence={playerInfluence}
               floating={floatingsByPos.get(`${colNum}:p1:RESERVE`)}
 			  replaceCost={col.p1Reserve ? replaceCosts?.get(col.p1Reserve) : undefined}
+			  isMyCard={localPlayerId === "p1"}
             />
 
             <CardSlot
@@ -107,8 +115,11 @@ export function Board({
                     : 'none'
               }
               onClick={() => onSlotClick(colNum, 'p1', 'FRONT', col.p1Front)}
+              onAbilityClick={onAbilityClick}
+              playerInfluence={playerInfluence}
               floating={floatingsByPos.get(`${colNum}:p1:FRONT`)}
 			  replaceCost={col.p1Front ? replaceCosts?.get(col.p1Front) : undefined}
+			  isMyCard={localPlayerId === "p1"}
             />
 
             <div
@@ -142,8 +153,11 @@ export function Board({
                     : 'none'
               }
               onClick={() => onSlotClick(colNum, 'p2', 'FRONT', col.p2Front)}
+              onAbilityClick={onAbilityClick}
+              playerInfluence={playerInfluence}
               floating={floatingsByPos.get(`${colNum}:p2:FRONT`)}
 			  replaceCost={col.p2Front ? replaceCosts?.get(col.p2Front) : undefined}
+			  isMyCard={localPlayerId === "p2"}
             />
 
             <CardSlot
@@ -158,8 +172,11 @@ export function Board({
                 col.p2Reserve && highlightTargets.has(col.p2Reserve) ? 'target' : 'none'
               }
               onClick={() => onSlotClick(colNum, 'p2', 'RESERVE', col.p2Reserve)}
+              onAbilityClick={onAbilityClick}
+              playerInfluence={playerInfluence}
               floating={floatingsByPos.get(`${colNum}:p2:RESERVE`)}
 			  replaceCost={col.p2Reserve ? replaceCosts?.get(col.p2Reserve) : undefined}
+			  isMyCard={localPlayerId === "p2"}
             />
           </div>
         );
