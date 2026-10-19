@@ -1,22 +1,22 @@
 {
   "fighter":    {
     "name": "Боец",
-    "icon": "⚔",
+    "icon": "⚔"
   },
   "guardian":   {
     "name": "Стражник",
-    "icon": "🛡",
+    "icon": "🛡"
   },
   "controller": {
     "name": "Интриган",
-    "icon": "🎭",
+    "icon": "🎭"
   },
   "supporter":  {
     "name": "Хранитель",
-    "icon": "✨",
+    "icon": "✨"
   },
   "tactician":  {
     "name": "Тактик",
-    "icon": "🎯",
+    "icon": "🎯"
   }
 }
