@@ -1,7 +1,7 @@
 /**
  * Scope — множество серий, в рамках которого допустимо колодостроение.
  * Колода целиком должна лежать в одном scope. Кросс-scope-колоды
- * (main + azeroth) считаются ошибкой колодостроения.
+ * (main + ashenlight) считаются ошибкой колодостроения.
  */
 
 export interface ScopeMeta {
@@ -21,18 +21,18 @@ export const SCOPES: Record<string, ScopeMeta> = {
     series: ['classic', 'cradle', 'inner', 'throne'],
     primary: true,
   },
-  azeroth: {
-    id: 'azeroth',
-    name: 'Азерот (legacy)',
-    description: 'Штормград · Пламя Пустоты · Апокриф',
-    series: ['stormwind', 'voidflame', 'apocryph'],
+  ashenlight: {
+    id: 'ashenlight',
+    name: 'Пепельный свет (legacy)',
+    description: 'Штормград · Пламя Пустоты · Обречённые · Апокриф',
+    series: ['ash_stormwind', 'voidflame', 'forsaken', 'apocryph'],
     primary: false,
   },
-  svo: {
-    id: 'svo',
+  oskol: {
+    id: 'oskol',
     name: 'Современность (legacy)',
-    description: 'Стальной Корпус · Разлом · Эхо-7 · Стратос',
-    series: ['steel', 'razlom', 'echo', 'sky'],
+    description: 'Периметр · Разлом · Эхо-7 · Стратос',
+    series: ['perimeter', 'razlom', 'echo', 'sky'],
     primary: false,
   },
 };

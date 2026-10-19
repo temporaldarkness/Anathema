@@ -1,0 +1,566 @@
+[
+  {
+    "id": "fk_lamplighter",
+    "name": "Лампадщик",
+    "personalityTag": "fk_lamplighter",
+    "tags": ["forsaken", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["supporter"],
+    "title": "Зажигает тех, кто остыл",
+    "shortDescription": "Поднимает вурдалака и истощает врага.",
+    "lore": "У него при себе лампада и список. Каждое имя написано от руки, некоторые — дважды. Он читает вслух, и те, чьи имена произнёс, встают. Не все. Только те, кого их повелитель успел забрать.",
+    "triggers": [
+      {
+        "id"         : "raise_ghoul",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Перекличка",
+        "description": "Призывает Остова.",
+        "effects"    : [
+          {"kind": "SUMMON", "defId": "fk_tk_husk", "count": 1, "who": "SELF"}
+        ]
+      },
+      {
+        "id": "soul_fuel",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name": "Пепельный осадок",
+        "description": "Раз в ход, когда союзник погибает — враг теряет 1 Влияние.",
+        "effects": [
+          {"kind": "SPEND_INFLUENCE", "amount": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_gravedigger",
+    "name": "Могильщик",
+    "personalityTag": "fk_gravedigger",
+    "tags": ["forsaken", "tactician"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["tactician"],
+    "title": "Достаёт то, что осталось",
+    "shortDescription": "Тянет карту из сброса.",
+    "lore": "Лопата старая, с обломанным черенком. Он копает, не для тех, кто ляжет - для тех, кто встанет. Достаёт то, что ещё можно вернуть. Остальное уходит. Куда — не его забота.",
+    "triggers": [
+      {
+        "id"         : "raise",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Возврат",
+        "description": "Возвращает 1 случайную карту из сброса в руку.",
+        "effects"    : [
+          {
+            "kind"       : "RETURN_FROM_DISCARD",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "HAND"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_lodger",
+    "name": "Постоялец",
+    "personalityTag": "fk_lodger",
+    "tags": ["forsaken", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Чужое тело, чужие мысли",
+    "shortDescription": "Просто хорошо стоит.",
+    "lore": "Огонь забрал у него всё, кроме тела - его теперь он делит с кем-то ещё. Иногда всплывают чужие воспоминания: запах яблок, детский смех, дорога к дому, которого у него никогда не было. Постоялец молчит об этом и просто живёт с чужими снами.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_brood",
+    "name": "Выводок",
+    "personalityTag": "fk_brood",
+    "tags": ["forsaken", "supporter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["supporter"],
+    "title": "Один снаружи, несколько внутри",
+    "shortDescription": "Призывает личинку.",
+    "lore": "Одно тело. Внутри — голоса тех, кого не хватило на отдельного. Когда Выводок гибнет, они выходят. Не все, а только те, кто успел. Кто-то всегда должен идти дальше.",
+    "triggers": [
+      {
+        "id"         : "infest",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Заражение",
+        "description": "Призывает личинку Постояльчика во Фронт.",
+        "effects"    : [
+          {
+            "kind"       : "SUMMON",
+            "defId"      : "fk_tk_brood_larva",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "fk_afterimage",
+    "name": "Отблеск",
+    "personalityTag": "fk_afterimage",
+    "tags": ["forsaken", "controller"],
+    "cost": 3,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["controller"],
+    "title": "Лицо, которое было до огня",
+    "shortDescription": "Возвращает цель в руку.",
+    "lore": "Помнит одно — своё лицо. Каким оно было до огня. Всё остальное сгорело. И показывает другим, заставляя отпрянуть. И тогда он чувствует себя живым.",
+    "activatedAbilities": [
+      {
+        "id": "bounce",
+        "cost": 1,
+        "name": "Отражение",
+        "description": "Возвращает выбранную карту противника во Фронте в руку.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_harvester",
+    "name": "Жнец",
+    "personalityTag": "fk_harvester",
+    "tags": ["forsaken", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": ["cleave"],
+    "cleaveDamage": 2,
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "В пепле все равны",
+    "shortDescription": "Задевает соседей на 2 урона.",
+    "lore": "Коса длинная, тяжёлая, с обгоревшим лезвием. Он не точит её — ржавое тоже режет. Свои, чужие — коса не спрашивает. И когда поле пустеет, Жнец идёт дальше, ведь поле всегда есть.",
+    "abilityInfo": {
+      "cleave": {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 2 урона."
+      }
+    }
+  },
+  {
+    "id": "fk_patchwork",
+    "name": "Сборка",
+    "personalityTag": "fk_patchwork",
+    "tags": ["forsaken", "guardian"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt", "regenerate"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["guardian"],
+    "title": "Памятник тем, кого не успели спасти",
+    "shortDescription": "Бронированная стена, которая лечится.",
+    "lore": "Из частей тех, кого не успели спасти целиком. Три руки, два сердца, ни одного имени. Стоит, потому что части помнят — надо стоять. Ни одна не помнит, зачем.",
+    "abilityInfo": {
+      "taunt"     : {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "regenerate": {
+        "name"       : "Регенерация",
+        "description": "В конце хода восстанавливает 1 HP."
+      }
+    }
+  },
+  {
+    "id": "fk_silent",
+    "name": "Молчунья",
+    "personalityTag": "fk_silent",
+    "tags": ["forsaken", "guardian"],
+    "cost": 3,
+    "strength": 0,
+    "health": 8,
+    "rarity": "uncommon",
+    "abilities": ["taunt", "suppress"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["guardian"],
+    "title": "Голос остался там",
+    "shortDescription": "Держит колонку и подавляет.",
+    "lore": "До огня она слишком много говорила. Голос остался там. Рот открывается — ничего. Тело осталось. Большое. Тяжёлое. Надёжное. Когда на неё нападают, она отвечает. Без слов. Слов больше нет.",
+    "abilityInfo": {
+      "taunt"   : {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "suppress": {"name": "Подавление", "description": "−1/−1 карте напротив."}
+    }
+  },
+  {
+    "id": "fk_rumble",
+    "name": "Закованный",
+    "personalityTag": "fk_rumble",
+    "tags": ["forsaken", "guardian"],
+    "cost": 7,
+    "strength": 4,
+    "health": 8,
+    "rarity": "rare",
+    "abilities": ["taunt", "slow"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["guardian"],
+    "title": "Цепи - не наказание",
+    "shortDescription": "Трясёт землю при выходе во Фронт.",
+    "lore": "Собран из великанов - тех, кто пал в огне и был слишком велик, чтобы подняться целиком. Цепи - не наказание, он носит их, чтобы не развалиться на части. Подражает тому, кого однажды увидел. Цепи гремят, когда он идёт. Те, кто слышит, расступаются. Будто слышали этот звон раньше.",
+    "triggers": [
+      {
+        "id": "quake",
+        "trigger": "ON_REINFORCE",
+        "name": "Землетрясение",
+        "description": "При переходе во Фронт наносит 1 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "slow" : {
+        "name"       : "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "fk_watcher",
+    "name": "Соглядатай",
+    "personalityTag": "fk_watcher",
+    "tags": ["forsaken", "tactician"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": ["scout"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["tactician"],
+    "title": "Видит то, что ещё целое",
+    "shortDescription": "Бьёт в резерв.",
+    "lore": "Глаза видят больше, чем должны. Сквозь дым. Сквозь стены. Прямо туда, где ещё целое. Он смотрит мимо горящего — и идёт.",
+    "abilityInfo": {
+      "scout": {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "fk_charger",
+    "name": "Головня",
+    "personalityTag": "fk_charger",
+    "tags": ["forsaken", "fighter"],
+    "cost": 7,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": ["charge"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Что-то ещё горит внутри",
+    "shortDescription": "Врывается и наносит удар.",
+    "lore": "Мёртвый — но внутри что-то тлеет. Пламя Пустоты не доело его до конца, он вернулся раньше, чем угли остыли. Он не выбирает направление. Выбирает движение — и этого достаточно.",
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "fk_rememberer",
+    "name": "Помнящий",
+    "personalityTag": "fk_rememberer",
+    "tags": ["forsaken", "fighter"],
+    "cost": 2,
+    "strength": 3,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Ни одного удара",
+    "shortDescription": "Растёт, когда союзника бьют.",
+    "lore": "Имена ушедших. Каждый удар по своим. Каждая потеря. Ничего не забывает — и с каждым воспоминанием становится тяжелее.",
+    "triggers": [
+      {
+        "id"         : "vengeance",
+        "trigger"    : "ON_ALLY_ATTACKED",
+        "name"       : "Бремя",
+        "description": "Когда союзника атакуют — получает +1 силы.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_scribe",
+    "name": "Писец",
+    "personalityTag": "fk_scribe",
+    "tags": ["forsaken", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["tactician"],
+    "title": "Чужие воспоминания, своих нет",
+    "shortDescription": "Ранен — берёт карту.",
+    "lore": "Записывает чужие воспоминания. Своих у него нет. Чернила кончаются, но он пишет кровью. Кровь тоже кончается, но он мёртв, так что это не проблема. Времени мало. Воспоминаний много.",
+    "triggers": [
+      {
+        "id"         : "writ_of_ashes",
+        "trigger"    : "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name"       : "Письмо пеплом",
+        "description": "Раз в ход, когда получает урон — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      },
+      {
+        "id"         : "from_the_ashes",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name"       : "Из пепла",
+        "description": "Раз в ход, когда союзник погибает — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_marcan",
+    "name": "Маркан",
+    "personalityTag": "fk_marcan",
+    "tags": ["forsaken", "fighter"],
+    "cost": 7,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Король-в-Цепях",
+    "shortDescription": "Жжёт фронт и поднимает павших.",
+    "lore": "Тысячу лет в темноте, в цепях, которые надел сам. Каждый сожжённый, кому он даёт форму, - кусок топлива, который не дошёл. Знает, что ускоряет конец. Не может иначе. Не смотреть, как их едят, — единственное, чего он не может.",
+    "triggers": [
+      {
+        "id": "brazenmourne",
+        "trigger": "ON_TURN_START",
+        "name": "Пылающая скорбь",
+        "description": "В начале хода наносит 2 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      },
+      {
+        "id": "kings_mercy",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name": "Милосердие короля",
+        "description": "Раз в ход, когда союзник погибает — восстанавливает 2 Величия и призывает Восставшего.",
+        "effects": [
+          {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"},
+          {"kind": "SUMMON", "defId": "fk_tk_risen", "count": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name"       : "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "fk_lianna",
+    "name": "Лианна",
+    "personalityTag": "fk_lianna",
+    "tags": ["forsaken", "fighter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 3,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Плачущая Королева",
+    "shortDescription": "Вызывает банши при уходе.",
+    "lore": "Сожгла себя, чтобы быть со своим королём. Не дотянулась, цепи держат его глубже, чем она может достать. Теперь ходит по поверхности и поёт, чтобы он слышал её каждую ночь. Она поёт, потому что не может коснуться. Он слушает, потому что не может ответить. Поёт — чтобы заглушить собственные мысли. Если перестанет петь — начнёт говорить. И тогда всё рухнет.",
+    "triggers": [
+      {
+        "id": "banshee_wail",
+        "trigger": "ON_EXIT",
+        "name": "Плач банши",
+        "description": "Наносит 3 урона всем картам противника во Фронте и призывает 2 банши.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"},
+          {
+            "kind" : "SUMMON",
+            "defId": "fk_tk_banshee",
+            "count": 2,
+            "who"  : "SELF"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_tk_risen",
+    "name": "Восставший",
+    "personalityTag": "fk_tk_risen",
+    "tags": ["forsaken", "fighter", "token"],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Только что из огня",
+    "shortDescription": "Сражается, пока может.",
+    "lore": "Только что из огня. Ещё не понимает, где он. Ещё не знает, что мёртв. Стоит — потому что кто-то попросил.",
+    "isToken": true,
+    "abilityInfo": {}
+  },
+  {
+    "id": "fk_tk_husk",
+    "name": "Остов",
+    "personalityTag": "fk_tk_husk",
+    "tags": ["forsaken", "fighter", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["slow"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "То, что осталось",
+    "shortDescription": "Пропускает первый переход.",
+    "lore": "Медленный. Упорный. Огонь забрал имя, голос, лицо. Оставил тело. Тело встало и пошло.",
+    "isToken": true,
+    "abilityInfo": {
+      "slow": {
+        "name"       : "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "fk_tk_banshee",
+    "name": "Банши",
+    "personalityTag": "fk_tk_banshee",
+    "tags": ["forsaken", "fighter", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "scout"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Эхо одинокой песни",
+    "shortDescription": "Приходит сквозь фронт.",
+    "lore": "Песню помнит. Для кого — нет. Поёт для себя. Чтобы не забыть.",
+    "isToken": true,
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      },
+      "scout" : {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "fk_tk_brood_larva",
+    "name": "Постояльчик",
+    "personalityTag": "fk_lodger",
+    "tags": ["forsaken", "fighter", "token"],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["forsaken"],
+    "factions": ["forsaken"],
+    "roles": ["fighter"],
+    "title": "Та же воля, новая форма",
+    "shortDescription": "Второе тело Постояльца.",
+    "lore": "Не отдельная сущность. Та же воля — просто нашла ещё одно тело.",
+    "isToken": true,
+    "sharesIdentity": true,
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  }
+]

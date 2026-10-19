@@ -1,6 +1,6 @@
-# `@aspects/simtools` — справочник по мета-инструментам (v0.3)
+# `@aspects/simtools` — справочник по мета-инструментам (v0.3.1)
 
-Монолитный документ, описывающий всю систему симуляций и анализа игры «Аспекты Штормграда». Обновлён под baseline v0.3 (glory 25, Despair off, мгновенная alt-victory, замена со скидкой).
+Монолитный документ, описывающий всю систему симуляций и анализа игры «Аспекты Штормграда». Обновлён под baseline v0.3 (glory 25, Despair off, мгновенная alt-victory, замена со скидкой). **Изменения v0.3.1:** расширен `card-stats` (флаги `--all`, `--card`, `--sort`, `--min-samples`), починен `shield_blocked` в `attack-efficiency`.
 
 ---
 
@@ -64,7 +64,7 @@
 
 Карта принадлежит **одной или нескольким сериям** (при рестайле).
 
-Папка на диске ≠ `meta.id` (например, `old_stormwind/` содержит `id: "stormwind"`).
+Папка на диске ≠ `meta.id` (например, `old_stormwind/` содержит `id: "ash_stormwind"`).
 
 ### 2.2. Scope (набор серий)
 
@@ -73,8 +73,8 @@
 | Scope | Серии | Назначение |
 |---|---|---|
 | `main` ★ | `classic`, `cradle`, `inner`, `throne` | Основная игра, фокус баланса |
-| `azeroth` | `stormwind`, `voidflame`, `apocryph` | Legacy-пак 1 |
-| `svo` | `steel`, `echo`, `razlom`, `sky` | Legacy-пак 2 |
+| `ashenlight` | `stormwind`, `voidflame`, `forsaken`, `apocryph` | Legacy-пак 1 |
+| `oskol` | `perimeter`, `echo`, `razlom`, `sky` | Legacy-пак 2 |
 
 Колода должна целиком лежать в одном scope. Кросс-scope колоды — **ошибка**.
 
@@ -421,14 +421,110 @@ pnpm run --filter @aspects/simtools card-stats main 50
 
 Это устраняет базовый winrate колоды и отвечает: **«играть карту — лучше, чем не играть?»**
 
-**Что выводит:**
+#### Флаги (v0.3.1)
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 [flags]
+```
+
+| Флаг | Что делает |
+|---|---|
+| `--all` | Вывести **полный список** всех карт (не только top/bottom 15) |
+| `--card <id\|name>` | Детали по **конкретной карте** (по id или по имени) |
+| `--sort <field>` | Сортировка: `delta` (default) \| `playRate` \| `cost` \| `medianTurn` \| `drawn` \| `played` |
+| `--min-samples N` | Порог сэмплов (default 20). `--min-samples 5` покажет карты с 5 сэмплами |
+| `--mulligan` | Включить муллиган |
+
+#### Примеры
+
+**Полный список всех карт:**
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --all
+pnpm run --filter @aspects/simtools card-stats main 100 --all > card-stats-all.txt
+```
+
+Выводит top-15, bottom-15, dead, потом **все карты** (обычно ~80-150 строк). С `--all` удобно грепать: `grep "Ворчун" card-stats-all.txt`.
+
+**Детали конкретной карты:**
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --card classic_hacker
+pnpm run --filter @aspects/simtools card-stats main 100 --card "Ростовчанин"
+```
+
+Если карта набрала сэмплов — выводит полную статистику:
+
+```
+─── Детали карты: classic_hacker ──────
+
+  ┌─ Ростовчанин
+  │  id:          classic_hacker
+  │  cost:        3
+  │  drawn:       566
+  │  played:      362
+  │  playRate:    64.0%
+  │  medianTurn:  18
+  │  wr_play:     71.0%
+  │  wr_no:       13.2%
+  │  Δ:           +57.8pp
+  └─
+```
+
+Если карта не набрала `minSamples` — выводит `drawn/played` и подсказку:
+
+```
+⚠ Ростовчанин (classic_hacker): недостаточно сэмплов.
+  drawn: 15, played: 8
+  minSamples=20. Попробуй --min-samples 8
+```
+
+Если карта вообще **не была в руке ни разу** — сообщает:
+
+```
+⚠ Имя (id): ни разу не была в руке за 2500 партий.
+  Карта существует, но её нет в пресетах scope.
+```
+
+**Сортировка по популярности:**
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --all --sort played
+```
+
+Сначала — самые играемые карты. Полезно для ревизии контента.
+
+**Сортировка по мёртвости:**
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --all --sort playRate
+```
+
+Сначала — карты, которые редко играются.
+
+**С низким порогом сэмплов:**
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --all --min-samples 5
+```
+
+Увидишь даже карты с 5 сэмплами.
+
+#### Что выводит (summary mode)
+
 ```
 ─── Топ 15 «ценных» карт (Δ > 0) ──────────────
 card                       cost  drawn played  pRate  medT  wr_play  wr_no         Δ
 Ростовчанин                   3    566    362  64.0%    18  71.0%  13.2%   +57.8pp
 ...
+─── Топ 15 «проблемных» карт (Δ < 0) ──────────
+...
 ─── «Мёртвый груз» (playRate < 15%) ───────────
 Ворчун                        4    569     75  13.2%  23.5  72.0%  46.0%   +26.0pp
+
+💡 Полный список (N карт): добавь --all
+   Детали карты: --card <id|name>
+   Другая сортировка: --sort playRate | cost | medianTurn | drawn | played
 ```
 
 **Колонки:** cost, drawn, played, pRate (доля разыгрывания), medT (медианный ход), wr_play, wr_no, Δ.
@@ -447,7 +543,10 @@ card                       cost  drawn played  pRate  medT  wr_play  wr_no      
 
 **Крайне важно:** Δ — **корреляция, не причинность**. Win-more карты имеют высокий Δ автоматически. Comeback-карты — низкий.
 
-**Когда использовать:** после добавления новых карт — проверить, играются ли они.
+**Когда использовать:**
+- После добавления новых карт — проверить, играются ли они
+- Найти «мёртвый груз» для ревизии контента
+- Разобрать одну конкретную карту, которая «кажется хорошей, но не играется»
 
 ### 7.2. `deck-diff` — сравнение двух колод
 
@@ -596,9 +695,9 @@ pnpm run --filter @aspects/simtools attack-efficiency main 100
 - **`neutral`** — атака по нейтралу
 - **`kill`** — защитник умер, атакующий жив
 - **`trade`** — оба умерли
-- **`chip`** — оба выжили
+- **`chip`** — оба выжили (без учёта щитов)
 - **`suicide`** — атакующий умер, защитник выжил
-- **`shield_blocked`** — щит поглотил урон
+- **`shield_blocked`** — щит поглотил весь урон (событие `SHIELD_ABSORBED`)
 
 **Что выводит:**
 ```
@@ -610,6 +709,7 @@ pnpm run --filter @aspects/simtools attack-efficiency main 100
   Размен (trade):           6469   (6.6%)
   Чип (chip):               1778   (1.8%)
   Суицид (suicide):         21     (0.0%)
+  Поглощён щитом:           0      (0.0%)
 ─── Урон по гильдии ───────────────────────────
   Средний удар (direct):      2.60
 ```
@@ -619,8 +719,19 @@ pnpm run --filter @aspects/simtools attack-efficiency main 100
 - **`kill + trade < 30%`** — большинство атак нерезультативны.
 - **`suicide > 10%`** — бот плохо оценивает размен.
 - **`neutral > 30%`** — бот переоценивает клетки.
+- **`shield_blocked > 5%`** — щиты реально поглощают атаки. Проверить, что `scoreAttackHeur` бота их обходит (`preview.shieldBlocks`).
 
-**Примечание v0.3:** `guild_intercepted` больше не используется (механика откачена). Поле осталось для совместимости, всегда 0.
+**Примечание v0.3.1:** `shield_blocked` теперь **работает** — раньше он всегда был 0% из-за бага в классификаторе (щит-атаки попадали в `chip`/`suicide`). Теперь через `events.some(e => e.type === 'SHIELD_ABSORBED')`. Если `shield_blocked = 0%` — значит щиты в текущих пресетах либо не атакуются (бот обходит), либо вообще отсутствуют в колодах.
+
+**Как проверить, есть ли щиты в колодах:**
+
+```bash
+pnpm run --filter @aspects/simtools deck-diff main strazha divan
+```
+
+В разделе `─── Keywords ──────` увидишь, какие keywords есть в колодах.
+
+**Примечание про `guild_intercepted`:** с v0.3 механика откачена. Поле осталось для совместимости, всегда 0. Не пугайся.
 
 ### 9.3. `combat-efficiency` — эффективность боя
 
@@ -876,6 +987,7 @@ turns stuck glory       winner  decks                           seed
 **Для баланса карт:**
 1. `card-stats` — Δ и playRate
 2. `deck-diff` — сравнить с существующим
+3. `card-stats --card <id>` — детали конкретной карты
 
 **Для pace:**
 1. `pace-report` — длина, cost, рука, влияние
@@ -894,6 +1006,7 @@ turns stuck glory       winner  decks                           seed
 1. `duel` — сравнить ботов
 2. `missed-lethal` — AI-баги
 3. `first-player` — bias
+4. `attack-efficiency` — `shield_blocked` (обходит ли бот щиты?)
 
 **Для замены:**
 1. `replacement-analysis` — utilization, wins by replacer
@@ -909,7 +1022,8 @@ turns stuck glory       winner  decks                           seed
 3. `pnpm run --filter @aspects/simtools list main <deck>` — убедиться, что новые карты попали в пресет
 4. `pnpm run --filter @aspects/simtools deck-diff main <old> <new>` — сравнить cost-кривые
 5. `pnpm run --filter @aspects/simtools card-stats main 100` — есть ли playRate > 15%
-6. `pnpm run --filter @aspects/simtools meta-report main 100` — общий winrate не сломался
+6. `pnpm run --filter @aspects/simtools card-stats main 100 --card <new_id>` — детали конкретной карты
+7. `pnpm run --filter @aspects/simtools meta-report main 100` — общий winrate не сломался
 
 ### 14.2. «Хочу понять, почему игра затянута»
 
@@ -951,6 +1065,47 @@ turns stuck glory       winner  decks                           seed
 3. Если 10-30% — работает, но ситуативно
 4. Если `Wins by replacer < 45%` — бот делает замену неправильно. Trace
 
+### 14.8. «Хочу посмотреть детали конкретной карты»
+
+```bash
+# Если не знаешь id — по имени
+pnpm run --filter @aspects/simtools card-stats main 100 --card "Ростовчанин"
+
+# Если знаешь id
+pnpm run --filter @aspects/simtools card-stats main 100 --card classic_hacker
+```
+
+**Если карта не набрала сэмплов:**
+
+```
+⚠ Ростовчанин (classic_hacker): недостаточно сэмплов.
+  drawn: 15, played: 8
+  minSamples=20. Попробуй --min-samples 8
+```
+
+Снижай порог и смотри снова:
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --card classic_hacker --min-samples 5
+```
+
+**Если карта вообще ни разу не попала в руку** — значит её нет в пресетах scope. Проверь через `list main <deck>`.
+
+### 14.9. «Нужен полный список всех карт»
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --all > card-stats-all.txt
+```
+
+Открой `card-stats-all.txt` — там все карты, которые были в руке хотя бы раз. С `--min-samples 5` — почти все карты scope.
+
+**Сортировка:**
+- `--sort delta` — сначала самые «ценные» (Δ высокий)
+- `--sort playRate` — сначала «мёртвые» (playRate низкий)
+- `--sort played` — сначала самые играемые
+- `--sort cost` — по стоимости
+- `--sort medianTurn` — по медианному ходу
+
 ---
 
 ## 15. Troubleshooting
@@ -976,7 +1131,7 @@ turns stuck glory       winner  decks                           seed
 **Проблема:** `resolveScope(<arg>)` вернул пустой массив.
 
 **Решение:**
-- Проверь имя: `main`, `azeroth`, `svo`
+- Проверь имя: `main`, `ashenlight`, `oskol`
 - Для явного списка — через запятую без пробелов: `classic,throne`
 
 ### 15.4. `Each deck must have exactly 30 cards`
@@ -1029,15 +1184,35 @@ pnpm --filter @aspects/simtools build
 
 ### 15.10. `Unknown pack` при обращении к `getPack`
 
-**Проблема:** пытаешься использовать `getPack('azeroth')` — но `azeroth` это **scope**, не серия.
+**Проблема:** пытаешься использовать `getPack('ashenlight')` — но `ashenlight` это **scope**, не серия.
 
-**Решение:** использовать `cardsForScope('azeroth')` вместо `getPack('azeroth')`.
+**Решение:** использовать `cardsForScope('ashenlight')` вместо `getPack('ashenlight')`.
 
 ### 15.11. Боты играют по-разному на одинаковом seed
 
 **Проблема:** бот stateful, используется один инстанс.
 
 **Решение:** всегда `botFactories: { p1: () => makeBot(name), p2: () => makeBot(name) }`.
+
+### 15.12. `shield_blocked = 0%` в `attack-efficiency`
+
+**Было актуально до v0.3.1.** Пофикшено — теперь щит-блоки считаются через `SHIELD_ABSORBED` событие.
+
+Если всё ещё 0%:
+- **Проверь, есть ли щиты в пресетах:** `deck-diff main strazha divan` → раздел `Keywords`. Если `shield` нет ни в одной колоде — 0% правда.
+- **Проверь, обходит ли бот щиты:** `scoreAttackHeur` имеет `if (preview.shieldBlocks && !preview.defenderDies) score -= 250` — бот **избегает** атак в щит. Поэтому 0% может быть **правильным** поведением.
+
+### 15.13. `card-stats --card <id>` — «недостаточно сэмплов»
+
+**Проблема:** карта была в руке, но реже `minSamples` (default 20) раз.
+
+**Решение:** снизь порог:
+
+```bash
+pnpm run --filter @aspects/simtools card-stats main 100 --card <id> --min-samples 5
+```
+
+Если и с 5 не находит — значит карта **редко попадает в руку**. Может быть, её нет в пресетах, или в колоде мало копий.
 
 ---
 
@@ -1065,9 +1240,10 @@ pnpm --filter @aspects/simtools build
 2. Обнови оглавление и таблицу «Список инструментов»
 3. Если меняется `runner` API — обнови раздел 4
 4. Если меняются baseline метрики — обнови раздел 1
+5. **При изменении флагов инструмента** — обнови соответствующий раздел и добавь примеры в раздел 14
 
 ---
 
-**Конец документа.** Обновлено под baseline v0.3 (glory 25, Despair off, мгновенная alt-victory, underdog-draw off, замена со скидкой, бот v6.1, pace 24.3).
+**Конец документа.** Обновлено под baseline v0.3.1 (glory 25, Despair off, мгновенная alt-victory, underdog-draw off, замена со скидкой, бот v6.1, pace 24.3).
 
 Если что-то устарело — править при первом столкновении. Если появился новый инструмент — добавить раздел. Если изменилось правило — отметить в «Baseline».

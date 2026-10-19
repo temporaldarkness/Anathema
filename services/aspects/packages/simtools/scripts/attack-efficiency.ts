@@ -226,15 +226,30 @@ function collectOneGame(
           const defenderDied = !defenderCard || defenderCard.zone === 'DISCARD';
           const attackerCard = state.cards[cmd.attackerId];
           const attackerDied = !attackerCard || attackerCard.zone === 'DISCARD';
-
-          if (defenderDied && !attackerDied) {
-            stats.attacks.push({ category: 'kill', attackerStrength: 0, damageToGuild: 0, defenderHpBefore: 0, defenderHpAfter: 0 });
+        
+          // Щит: проверяем через события, а не через состояние.
+          // SHIELD_ABSORBED эмитится в damageCard при поглощении.
+          const shieldBlocked = events.some((e) => e.type === 'SHIELD_ABSORBED');
+        
+          if (shieldBlocked) {
+            // Классифицируем по факту щита, независимо от исхода боя.
+            // Attacker мог выжить (chip) или умереть (suicide) — но
+            // его атака "утонула" в щите.
+            stats.attacks.push({
+              category: 'shield_blocked',
+              attackerStrength: 0,
+              damageToGuild: 0,
+              defenderHpBefore: 0,
+              defenderHpAfter: 0,
+            });
+          } else if (defenderDied && !attackerDied) {
+            stats.attacks.push({ category: 'kill', ... });
           } else if (defenderDied && attackerDied) {
-            stats.attacks.push({ category: 'trade', attackerStrength: 0, damageToGuild: 0, defenderHpBefore: 0, defenderHpAfter: 0 });
+            stats.attacks.push({ category: 'trade', ... });
           } else if (!defenderDied && attackerDied) {
-            stats.attacks.push({ category: 'suicide', attackerStrength: 0, damageToGuild: 0, defenderHpBefore: 0, defenderHpAfter: 0 });
+            stats.attacks.push({ category: 'suicide', ... });
           } else {
-            stats.attacks.push({ category: 'chip', attackerStrength: 0, damageToGuild: 0, defenderHpBefore: 0, defenderHpAfter: 0 });
+            stats.attacks.push({ category: 'chip', ... });
           }
         }
       }
@@ -348,6 +363,13 @@ function main(): void {
   if (neutralRatio > 0.3) {
     console.log(`  ⚠ ${(neutralRatio * 100).toFixed(0)}% атак — по нейтралам.`);
     console.log('    Бот переоценивает клетки, тратит на них много атак.');
+  }
+  
+  const shieldRatio = counts.shield_blocked / totalAttacks;
+  if (shieldRatio > 0.05) {
+    console.log(`  ⚠ ${(shieldRatio * 100).toFixed(1)}% атак — утонули в щите.`);
+    console.log('    Проверить: scoreAttackHeur учитывает shieldBlocks?');
+    console.log('    Если да — бот ошибается. Если нет — добавить.');
   }
 
   const attacksToKill = 30 / Math.max(0.01, totalGuildDamage / all.length);

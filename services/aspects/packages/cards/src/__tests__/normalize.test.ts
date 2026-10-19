@@ -29,7 +29,7 @@ describe('normalizeCard (через getCards)', () => {
     // Проверяем суть: роли есть, и в них нет faction/series.
     expect((c.roles ?? []).length).toBeGreaterThan(0);
     expect(c.roles).not.toContain('stormwind');
-    expect(c.roles).not.toContain('azeroth');
+    expect(c.roles).not.toContain('ashenlight');
   });
 
   it('не переопределяет явно заданные series', () => {
@@ -51,10 +51,10 @@ describe('normalizeCard (через getCards)', () => {
   });
 
   it('abilityInfo не переопределяется, если задано явно', () => {
-    // `azeroth` — scope, а не серия. Используем cardsForScope,
+    // `ashenlight` — scope, а не серия. Используем cardsForScope,
     // который возвращает Record<string, CardDefinition>.
-    const azerothCards = Object.values(cardsForScope('azeroth'));
-    const c = azerothCards.find((x) => x.id === 'sw_marksman');
+    const ashenlightCards = Object.values(cardsForScope('ashenlight'));
+    const c = ashenlightCards.find((x) => x.id === 'sw_marksman');
     expect(c?.abilityInfo).toBeDefined();
   });
 

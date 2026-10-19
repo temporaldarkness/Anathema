@@ -1,0 +1,881 @@
+[
+  {
+    "id": "rl_match",
+    "name": "Спичка",
+    "personalityTag": "rl_match",
+    "tags": ["razlom", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Выходит по ночам",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "На стене дома по Металлистов, 14, мелом: «Спичка выходит по ночам». Ниже, другим почерком: «Не сдавать». Ещё ниже, детским: «Он хороший». Надпись не стирали.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_martyr",
+    "name": "Смертник",
+    "personalityTag": "rl_martyr",
+    "tags": ["razlom", "supporter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["starter"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["supporter"],
+    "title": "Фотография в кармане",
+    "shortDescription": "Всегда в стартовой руке. Лечит Величие при уходе.",
+    "lore": "В кармане у него фотография — старая, с загнутыми углами. Что на ней, не знает никто. Он никому не показывает. Всегда идёт первым. Когда спрашивают зачем — «Кто-то же должен». Ячейка его любит и не останавливает. Так проще всем. Он это понимает.",
+    "triggers": [
+      {
+        "id"         : "rl_final_sacrifice",
+        "trigger"    : "ON_EXIT",
+        "name"       : "Последнее",
+        "description": "Восстанавливает 2 Величия гильдии при уходе.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
+  },
+  {
+    "id": "rl_desperate",
+    "name": "Отчаявшийся",
+    "personalityTag": "rl_desperate",
+    "tags": ["razlom", "tactician"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["tactician"],
+    "title": "Руки и злость",
+    "shortDescription": "Даёт Влияние, если ты пуст.",
+    "lore": "Квартал сгорел — вместе с домом, мастерской и женой. Остались руки и злость. Пришёл в ячейку сам, без разговоров. Ему дали работу. Не пожалели — в Разломе жалеть некого и некогда. Берёт следующее задание, и следующее, и следующее. Пока есть задание — есть и он.",
+    "triggers": [
+      {
+        "id"         : "rl_second_wind",
+        "trigger"    : "ON_ENTER",
+        "condition"  : {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "EQUAL",
+          "value": 0
+        },
+        "name"       : "Второе дыхание",
+        "description": "Если у тебя 0 Влияния — получаешь +2 Влияния.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_scavenger",
+    "name": "Старьёвщик",
+    "personalityTag": "rl_scavenger",
+    "tags": ["razlom", "tactician"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["tactician"],
+    "title": "Мешок и дети",
+    "shortDescription": "Тянет карту, если враг пуст.",
+    "lore": "Дети бегут за ним от самого рынка — знают, что бросит что-нибудь из мешка. Приходит туда, где уже всё случилось, и забирает то, что осталось: патроны, обувь, консервы. Иногда оставляет. В Разломе это называется «делиться». Мешок у него всегда полный. Дети — сытые.",
+    "triggers": [
+      {
+        "id"         : "rl_loot",
+        "trigger"    : "ON_ENTER",
+        "condition"  : {
+          "kind" : "FRONT_COUNT",
+          "who"  : "OPPONENT",
+          "op"   : "AT_MOST",
+          "value": 1
+        },
+        "name"       : "Сбор",
+        "description": "Если у противника ≤1 карты во Фронте — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_yard",
+    "name": "Дворовый",
+    "personalityTag": "rl_yard",
+    "tags": ["razlom", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "За двор",
+    "shortDescription": "Простой боец.",
+    "lore": "На кухне пахнет чаем — крепким, с травами. Вечером сидит с женой и говорит, что скоро кончится. Жена верит. Он тоже — только иначе: не в победу, а в то, что однажды можно будет спать без сирены. Ночью работает. За двор. Остальное — не его.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_glass",
+    "name": "Стекло",
+    "personalityTag": "rl_glass",
+    "tags": ["razlom", "fighter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Окно на девятом",
+    "shortDescription": "Бьёт на 2 по выбранной цели.",
+    "lore": "Окно на девятом — его рабочее место. Нигде не задерживается больше одной ночи: сам уходит, потому что нельзя привыкать к одному окну. Дети показывают на крышу: «Там живёт дядя, который не промахивается». Не промахивается. Пока — ни разу.",
+    "triggers": [
+      {
+        "id"         : "rl_headshot",
+        "trigger"    : "ON_ENTER",
+        "name"       : "С крыши",
+        "description": "Наносит 2 урона выбранной карте противника во Фронте.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_ied",
+    "name": "Самоделка",
+    "personalityTag": "rl_ied",
+    "tags": ["razlom", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Кастрюля и гвозди",
+    "shortDescription": "Взрывается при входе.",
+    "lore": "Кастрюля, гвозди, провод от лампы. Собирают на коленке, в подвале, где пахнет маслом и порохом. Работает через раз — но когда работает, запоминается. На стене у сборщика — фотография довоенного города. «Для настроения, — говорит. — Чтобы помнить, что именно собираю по кускам».",
+    "triggers": [
+      {
+        "id"         : "rl_detonate",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Сработало",
+        "description": "Наносит 1 урона случайной карте противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_living_bomb",
+    "name": "Живая бомба",
+    "personalityTag": "rl_living_bomb",
+    "tags": ["razlom", "fighter"],
+    "cost": 2,
+    "strength": 0,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Улыбается всю дорогу",
+    "shortDescription": "Взрывается при уходе.",
+    "lore": "Улыбается от ячейки до передовой. В ячейке зовут «наша девочка». Когда спрашивают зачем — «А кто ещё?» — и идёт. После таких разговоров в ячейке долго молчат. А она улыбается. Говорят, был брат. Говорят, не вернулся. Она об этом молчит.",
+    "triggers": [
+      {
+        "id"         : "rl_blast",
+        "trigger"    : "ON_EXIT",
+        "name"       : "Подрыв",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_petrovich",
+    "name": "Петрович",
+    "personalityTag": "rl_petrovich",
+    "tags": ["razlom", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["tactician"],
+    "title": "Частота 142.7",
+    "shortDescription": "Тянет карту при уроне.",
+    "lore": "Антенна на крыше девятиэтажки — собрал сам из чего нашёл. Записывает в тетрадку: частоту, время, что слышал. Кто-то плачет. Кто-то молится. Кто-то просто дышит в микрофон — не разобрать, живой или запись. Соседи смеются: «Какая книга, Петрович?» Он не спорит. Продолжает слушать. Последняя запись, без даты: «Частота 142.7. Тишина. Но не пустая».",
+    "triggers": [
+      {
+        "id"         : "rl_intercept",
+        "trigger"    : "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name"       : "Перехват",
+        "description": "Раз в ход, когда получает урон — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_snapped",
+    "name": "Сорвавшийся",
+    "personalityTag": "rl_snapped",
+    "tags": ["razlom", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Бормочет даты",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Бормочет даты — тихо, себе под нос. До Разлома вёл историю в школе, которой больше нет. Что бормочет — не разобрать: то ли даты сражений, то ли дни рождения. В ячейке таких берегут — сорвавшийся это тот, кто увидел слишком много и не смог забыть. Останавливаться нельзя. Он и не останавливается.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_raider",
+    "name": "Налётчик",
+    "personalityTag": "rl_raider",
+    "tags": ["razlom", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Пока шумно — живём",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "В дом заходит первым. Выходит — тоже часто первым, но это другой вопрос. Темнота ему нравится: после Разлома привык. А вот тишину не выносит — тишина значит, что все уже мертвы. Поэтому всегда первым. Чтобы было слышно: выстрелы, крики, шаги. Пока шумно — значит, живём.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_nail",
+    "name": "Гвоздь",
+    "personalityTag": "rl_nail",
+    "tags": ["razlom", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "А как иначе",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "«Упёртый, как гвоздь в доске» — так говорят в соседнем дворе. Не спорит, не доказывает, не убеждает. Идёт вперёд и не сворачивает. Когда спрашивают зачем — «А как иначе?» — и в этом что-то такое, от чего взрослые мужики опускают глаза.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_ash",
+    "name": "Пепел",
+    "personalityTag": "rl_ash",
+    "tags": ["razlom", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Огонь честнее",
+    "shortDescription": "Поджигает фронт за Влияние.",
+    "lore": "После него — пепел. Отсюда и кличка. Домов всё равно больше нет, так что разбирать, чей — не стал. Говорит, огонь честнее людей: тот хотя бы притворяться не умеет. До Разлома работал в котельной. Пожимает плечами: «Котельная, не котельная. Главное, что тепло».",
+    "activatedAbilities": [
+      {
+        "id"         : "rl_flame",
+        "cost"       : 1,
+        "name"       : "Пал",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_boss",
+    "name": "Глава",
+    "personalityTag": "rl_boss",
+    "tags": ["razlom", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["supporter"],
+    "title": "Список в клеточку",
+    "shortDescription": "Растёт от захвата. Призывает Мародёра.",
+    "lore": "Настоящего имени не называет даже жене. В столе — список, тетрадка в клеточку. Один столбец. Без пометок «свои» или «чужие». Просто имена. Все, кого потеряли. Старый Петрович однажды проговорился, что видел: «Там имена. Он их не забывает». Тетрадка становится толще. Глава — тише.",
+    "triggers": [
+      {
+        "id"         : "rl_recruit",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Набор",
+        "description": "Призывает Мародёра.",
+        "effects"    : [
+          {"kind": "SUMMON", "defId": "rl_tk_looter", "count": 1, "who": "SELF"}
+        ]
+      },
+      {
+        "id"         : "rl_territory",
+        "trigger"    : "ON_CELL_CAPTURED",
+        "name"       : "Наш квартал",
+        "description": "Когда вы захватываете нейтрал — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_agitator",
+    "name": "Агитатор",
+    "personalityTag": "rl_agitator",
+    "tags": ["razlom", "fighter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Говорит не о войне",
+    "shortDescription": "Бьёт по фронту, если держите нейтралы.",
+    "lore": "На площади собирает толпу за десять минут. Говорит не о войне — о доме: что было и что можно вернуть. После его слов люди идут туда, куда до этого не шли. Сам в атаку не ходит. Говорит — его дело, «чтобы шли другие». Это, пожалуй, самое честное, что он о себе говорит.",
+    "triggers": [
+      {
+        "id": "rl_rally",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind" : "CELLS",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 2
+        },
+        "name": "Слово",
+        "description": "Если контролируешь ≥2 нейтралов — наносит 2 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_fuse",
+    "name": "Шнур",
+    "personalityTag": "rl_fuse",
+    "tags": ["razlom", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Чтобы не шли следом",
+    "shortDescription": "Накрывает фронт при входе.",
+    "lore": "Моток провода — всегда с собой: в кармане, за пазухой, в сапоге. Оставляет за собой обрушенные переходы. В мирное время был бы инженером, а теперь взрывает то, что сам когда-то строил. «Мосты — не главное. Главное, чтобы за тобой не шли». Помолчав: «Даже если это свои».",
+    "triggers": [
+      {
+        "id"         : "rl_shockwave",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Обвал",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_foreman",
+    "name": "Бригадир",
+    "personalityTag": "rl_foreman",
+    "tags": ["razlom", "fighter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Следит, чтобы не разбежались",
+    "shortDescription": "Каждый ход бьёт случайную цель.",
+    "lore": "Стоит позади и смотрит. Не любят, но слушаются — знает каждого и помнит всё. До Разлома был мастером на заводе. После — тем, кто следит за дисциплиной. «Кто-то должен, чтобы не разбежались. И чтобы не забыли, зачем пришли». Помолчав: «А кто забудет — пусть лучше уйдёт сам».",
+    "triggers": [
+      {
+        "id": "rl_pressure",
+        "trigger": "ON_TURN_START",
+        "name": "Надзор",
+        "description": "В начале хода наносит 1 урона случайной карте противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_sergeant",
+    "name": "Старшина",
+    "personalityTag": "rl_sergeant",
+    "tags": ["razlom", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Помнит имена",
+    "shortDescription": "Растёт от гибели своих.",
+    "lore": "Имена — все, кто был под ним. До Разлома был военным. После остался военным — армия просто стала меньше. В атаку идёт первым, из укрытия приказов не отдаёт. Не умеет по-другому. И не хочет учиться. Каждый погибший — новое имя в голове. Список не записывает. Не нужно — помнит и так.",
+    "triggers": [
+      {
+        "id"         : "rl_survival",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name"       : "Ещё одно имя",
+        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_cleaner",
+    "name": "Чистильщик",
+    "personalityTag": "rl_cleaner",
+    "tags": ["razlom", "fighter"],
+    "cost": 7,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": ["charge"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "После него — тишина",
+    "shortDescription": "Врывается с ходу.",
+    "lore": "После него — тишина. Ни свидетелей, ни вопросов. В ячейке не любят и не зовут без нужды. До Разлома был санитаром в морге. После — санитаром города. У него не бывает плохих дней. Бывают только тихие.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_barricade",
+    "name": "Баррикада",
+    "personalityTag": "rl_barricade",
+    "tags": ["razlom", "guardian"],
+    "cost": 2,
+    "strength": 0,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["guardian"],
+    "title": "Мы здесь",
+    "shortDescription": "Стена. Взрывается при смерти.",
+    "lore": "Шкафы, покрышки, мешки с песком. Когда ломают — всё, что внутри, вылетает наружу. Иногда на баррикаде пишут имена. Иногда — просто «мы здесь». И то, и другое читается одинаково.",
+    "triggers": [
+      {
+        "id"         : "rl_shrapnel",
+        "trigger"    : "ON_EXIT",
+        "name"       : "Осколки",
+        "description": "Наносит 2 урона всем врагам во Фронте при уходе.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту."
+      }
+    }
+  },
+  {
+    "id": "rl_trinity",
+    "name": "Троица",
+    "personalityTag": "rl_trinity",
+    "tags": ["razlom", "fighter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["cleave"],
+    "cleaveDamage": 2,
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Имён не спрашивают",
+    "shortDescription": "Задевает соседей на 2.",
+    "lore": "Их трое. Имён никто не спрашивает — все трое отзываются на «Троицу». Работают по площадям: не разбирают, где цель, а где рядом стоит. Когда нужно расчистить улицу — зовут именно их. Переглядываются между собой и идут. Молча. Говорить — потом, если будет потом.",
+    "abilityInfo": {
+      "cleave": {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 2 урона."
+      }
+    }
+  },
+  {
+    "id": "rl_last_stand",
+    "name": "Последний рубеж",
+    "personalityTag": "rl_last_stand",
+    "tags": ["razlom", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Легче не будет",
+    "shortDescription": "Растёт, когда Величие на грани.",
+    "lore": "Его находят там, где уже никто не держится. До Разлома — пожарный. После — тот, кто дольше всех. «Легче не будет. Но продержаться — можно». И продерживается. Дольше, чем кажется возможным. Дольше, чем нужно. Потому что «нужно» здесь считают те, кого рядом нет.",
+    "triggers": [
+      {
+        "id"         : "rl_desperate_stand",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition"  : {
+          "kind" : "GLORY",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 10
+        },
+        "name"       : "На грани",
+        "description": "Если Величие ≤10 — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_messenger",
+    "name": "Связной",
+    "personalityTag": "rl_messenger",
+    "tags": ["razlom", "tactician"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["tactician"],
+    "title": "Лица не помнят",
+    "shortDescription": "Карта за каждый захваченный нейтрал.",
+    "lore": "Пока одни берут улицу, он уже несёт донесение в следующую ячейку. Знает всех, и его знают все — но лица не помнят: не потому что прячется, а потому что всегда в пути. Если нужно передать важное — передай Связному. Донесёт. Даже если последнее.",
+    "triggers": [
+      {
+        "id": "rl_dispatch",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Донесение",
+        "description": "Когда вы захватываете нейтрал — берёт 1 карту. Раз в ход.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_knot",
+    "name": "Узел",
+    "personalityTag": "rl_knot",
+    "tags": ["razlom", "guardian"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["guardian"],
+    "title": "Своя улица",
+    "shortDescription": "Бьёт по фронту при захвате точки.",
+    "lore": "Умеет связывать вещи так, чтобы держались. Баррикаду превращает в огневую точку за полчаса. В мирное время был бы строителем. «После него улица становится своей», — говорят соседи. Своя — это когда можно держаться. А держаться — когда есть за что.",
+    "triggers": [
+      {
+        "id": "rl_fortify",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Закрепление",
+        "description": "Когда вы захватываете нейтрал — наносит 1 урон всем врагам во Фронте. Раз в ход.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "rl_frenzied",
+    "name": "Одержимый",
+    "personalityTag": "rl_frenzied",
+    "tags": ["razlom", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["frenzy"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "За сестру",
+    "shortDescription": "Атакует дважды за ход.",
+    "lore": "Бьёт дважды. Не торопится. Была сестра — не пережила Разлом. Он об этом молчит. Просто бьёт дважды. Соседи говорят — это его способ помнить. Первый удар — за двор. Второй — за тех, кого уже нет.",
+    "abilityInfo": {
+      "frenzy": {
+        "name"       : "Ярость",
+        "description": "Может атаковать дважды за ход."
+      }
+    }
+  },
+  {
+    "id": "rl_turtle",
+    "name": "Черепаха",
+    "personalityTag": "rl_turtle",
+    "tags": ["razlom", "guardian"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["armored", "taunt"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["guardian"],
+    "title": "Пахнет бензином и чаем",
+    "shortDescription": "Бронированная стена.",
+    "lore": "Внутри пахнет бензином и чаем — так его и узнают. Собран из обломков броневика. Медленный, но не пробить. Внутри можно согреться, перевязать раны, поспать. Соседи говорят — «самый уютный фургон в Разломе». Водитель не спорит. Наливает чай и ждёт, пока перестанут стрелять.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."},
+      "taunt"  : {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "rl_grandpa",
+    "name": "Дед",
+    "personalityTag": "rl_grandpa",
+    "tags": ["razlom", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Аккуратно — чтобы своих не задеть",
+    "shortDescription": "Обваливает фронт при входе.",
+    "lore": "Мостов взорвал больше, чем построил. Каждый выход — новый обвал. В ячейке зовут «Дед»: не за возраст, а за то, что всегда рядом и всегда знает, где ставить заряд. «Сапёр разминирует, а я — наоборот. Но тоже аккуратно». Аккуратно — чтобы своих не задеть.",
+    "triggers": [
+      {
+        "id"         : "rl_collapse",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Обвал",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_chemist",
+    "name": "Химик",
+    "personalityTag": "rl_chemist",
+    "tags": ["razlom", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Сначала снести",
+    "shortDescription": "При входе бьёт по фронту.",
+    "lore": "Формулы держит в секрете. Не целится — закладывает заряд в центр и нажимает кнопку. До Разлома работал на стройке. С тех пор сохранил привычку: сначала снести, потом разбираться. Уходит, оставляя пыль и запах химии. Оборачивается только один раз — проверить, что не стоит.",
+    "triggers": [
+      {
+        "id"         : "rl_big_bang",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Заряд",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_butcher",
+    "name": "Бородач",
+    "personalityTag": "rl_butcher",
+    "tags": ["razlom", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["supporter"],
+    "title": "Помнит трамваи",
+    "shortDescription": "Усиливает всех и бьёт каждый ход.",
+    "lore": "На ящике у подъезда рассказывает про довоенный город — трамваи, музыку, как по субботам на площади играл оркестр. Слушают все: соседи, дети, даже те, кто не застал. Был мясником, пока улицу не разорвало пополам. С тех пор режет уже не свиней — но так же спокойно. В голосе нет злости. Только память. Это страшнее — потому что злость проходит, а память нет. Однажды он забудет, как звучал трамвай. В этот день Разлом потеряет больше, чем в любом бою.",
+    "triggers": [
+      {
+        "id"         : "rl_rally_all",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Сбор",
+        "description": "Все союзники во Фронте получают +1/+1.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "rl_grudge",
+        "trigger": "ON_TURN_START",
+        "name": "Память",
+        "description": "В начале хода наносит 1 урона случайной карте противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_hollow_voice",
+    "name": "Пустой Голос",
+    "personalityTag": "rl_hollow_voice",
+    "tags": ["razlom", "fighter"],
+    "cost": 6,
+    "strength": 5,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Вышел и не вернулся",
+    "shortDescription": "Тянет карты и рвёт всё на столе.",
+    "lore": "Иногда шепчет — тихо, на грани слышимости. Те, кто слышит, потом не могут спать. Прежнего имени не помнит никто. Для него Разлом был всегда — ни довоенного города, ни трамваев, ни музыки. Говорят — «вышел из Разлома и не вернулся». Троих из своей ячейки убил молча, когда собрались выйти к Периметру с белым флагом. Потом сказал: «Они уже ушли». Имел ли в виду, что ушли к Периметру, или что-то другое — никто не переспросил.",
+    "triggers": [
+      {
+        "id"         : "rl_interrogation",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Шёпот",
+        "description": "Берёт 3 карты при входе.",
+        "effects"    : [ {"kind": "DRAW", "count": 3, "who": "SELF"} ]
+      },
+      {
+        "id"         : "rl_terror",
+        "trigger"    : "ON_TURN_START",
+        "name"       : "Ужас",
+        "description": "В начале хода наносит 2 урона всем картам на столе.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_CARDS_ON_BOARD"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "rl_tk_looter",
+    "name": "Мародёр",
+    "personalityTag": "rl_tk_looter",
+    "tags": ["razlom", "fighter", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["slow"],
+    "series": ["razlom"],
+    "factions": ["razlom"],
+    "roles": ["fighter"],
+    "title": "Не выбрасывает",
+    "shortDescription": "Подбирает после боя.",
+    "lore": "Приходит туда, где уже всё случилось. Берёт то, что осталось. Дети бегают стайкой — ждут, что бросит. Иногда бросает. «Просто не люблю выбрасывать». Это, пожалуй, самое точное — и про него, и про весь Разлом.",
+    "isToken": true,
+    "abilityInfo": {}
+  }
+]

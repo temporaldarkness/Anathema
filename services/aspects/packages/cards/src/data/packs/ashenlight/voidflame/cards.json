@@ -1,0 +1,1028 @@
+[
+  {
+    "id": "vf_spark",
+    "name": "Искра",
+    "personalityTag": "vf_spark",
+    "tags": ["voidflame", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Первая искра",
+    "shortDescription": "Огонь, что не греет.",
+    "lore": "Её нашли на пепелище, в обгоревшей колыбели. Она не плакала — просто смотрела на угли. С тех пор прошло шесть лет, и она всё ещё смотрит на угли.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_scorcher",
+    "name": "Гаритель",
+    "personalityTag": "vf_scorcher",
+    "tags": ["voidflame", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Пепельный чародей",
+    "shortDescription": "Жжёт фронт по своему желанию.",
+    "lore": "Учился сжигать, пока не понял: пепел не развеивается. Он возвращается, каждый раз — к одному и тому же месту. Гаритель думает — к нему. Но пепел уходит глубже, под Круглую Башню. Туда, где кто-то ждёт.",
+    "activatedAbilities": [
+      {
+        "id": "void_flame",
+        "cost": 1,
+        "name": "Пламя Пустоты",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_ash_core",
+    "name": "Тлень",
+    "personalityTag": "vf_ash_core",
+    "tags": ["voidflame", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Ещё дышит",
+    "shortDescription": "При входе жжёт всё перед собой.",
+    "lore": "Нашли в старой кузне, среди углей, которые не остывали десять лет. Оно дышит. Культ считает его благословением. Прежний хозяин кузни считал иначе — пока не перестал считать.",
+    "triggers": [
+      {
+        "id": "detonate",
+        "trigger": "ON_ENTER",
+        "name": "Детонация",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_slag_thrower",
+    "name": "Шлаковщик",
+    "personalityTag": "vf_slag_thrower",
+    "tags": ["voidflame", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Возвращает миру огонь",
+    "shortDescription": "Осыпает фронт шлаком.",
+    "lore": "Собирает то, что осталось после чужих пожаров — и мечет обратно. Впервые взял в руки раскалённый кусок в девять лет и не почувствовал боли. Говорит, это его работа — возвращать миру то, что мир потерял. Никто не спорит, но все стараются стоять за его спиной.",
+    "triggers": [
+      {
+        "id": "void_strike",
+        "trigger": "ON_ENTER",
+        "name": "Осыпание",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_ash_sniper",
+    "name": "Уголёк",
+    "personalityTag": "vf_ash_sniper",
+    "tags": ["voidflame", "fighter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Видит сквозь пепел",
+    "shortDescription": "Бьёт на 2 по выбранной цели.",
+    "lore": "В дыму не видно на десять шагов, но он всё равно попадает. Говорят, помнит, где стояла цель раньше. Он не подтверждает, а просто смотрит в дым, стреляет — и попадает.",
+    "triggers": [
+      {
+        "id": "snipe",
+        "trigger": "ON_ENTER",
+        "name": "Точный выстрел",
+        "description": "Наносит 2 урона выбранной карте во Фронте противника.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then": [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_charred",
+    "name": "Обугленный",
+    "personalityTag": "vf_charred",
+    "tags": ["voidflame", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Уже горел",
+    "shortDescription": "Взрывается при уходе.",
+    "lore": "Он выжил там, где не выживают. С тех пор его тело помнит, как горит мир. Когда умирает — взрывается, не от злости: огонь просто не знает, куда ему деться, когда сосуд ломается.",
+    "triggers": [
+      {
+        "id": "final_flare",
+        "trigger": "ON_EXIT",
+        "name": "Последняя вспышка",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_vow",
+    "name": "Обет",
+    "personalityTag": "vf_vow",
+    "tags": ["voidflame", "supporter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["supporter"],
+    "title": "Обещание сгореть",
+    "shortDescription": "Лечит Величие, уходя.",
+    "lore": "Обещал вернуться. Обещал гореть — и горит. Когда Обет уходит, после него остаётся тепло. Не для него — для тех, кто ещё стоит у костра.",
+    "triggers": [
+      {
+        "id": "void_offering",
+        "trigger": "ON_EXIT",
+        "name": "Возвращённый обет",
+        "description": "Восстанавливает 2 Величия гильдии при уходе.",
+        "effects": [
+          {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_brand",
+    "name": "Головня",
+    "personalityTag": "vf_brand",
+    "tags": ["voidflame", "fighter"],
+    "cost": 2,
+    "strength": 0,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Не гаснет",
+    "shortDescription": "Уходя — жжёт фронт.",
+    "lore": "Не может потухнуть. Ни водой, ни волей. Когда уходит — жжёт. Ей не находят места, ей находят направление.",
+    "triggers": [
+      {
+        "id": "boom",
+        "trigger": "ON_EXIT",
+        "name": "Ожог",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_cinder",
+    "name": "Изгарь",
+    "personalityTag": "vf_cinder",
+    "tags": ["voidflame", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Знает, что ненадолго",
+    "shortDescription": "Врывается и бьёт.",
+    "lore": "Знает, что не проживёт долго. Потому и торопится.",
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "vf_ash_lord",
+    "name": "Владыка Пепла",
+    "personalityTag": "vf_ash_lord",
+    "tags": ["voidflame", "wanderer", "fighter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Говорил с солнцем",
+    "shortDescription": "Каждый ход жжёт случайную цель.",
+    "lore": "Он говорил с солнцем, когда оно ещё было живым. Голос — низкий, тёплый, далёкий — отвечал ему каждое утро. Потом замолчал. Владыка не перестал говорить. Когда солнце молчит — он жжёт. Может быть, если гореть достаточно ярко, оно услышит.",
+    "triggers": [
+      {
+        "id": "void_aura",
+        "trigger": "ON_TURN_START",
+        "name": "Аура пепла",
+        "description": "В начале хода наносит 1 урона случайной карте противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_ash_acolyte",
+    "name": "Послушник",
+    "personalityTag": "vf_ash_acolyte",
+    "tags": ["voidflame", "tactician"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Смотрит на огонь третий год",
+    "shortDescription": "Тянет карту при входе.",
+    "lore": "Учитель сказал: смотри на огонь и запоминай. Третий год он уже смотрит. Руки учителя — старые, в трещинах, с обгоревшими ногтями — он запомнил первыми.",
+    "triggers": [
+      {
+        "id": "first_lesson",
+        "trigger": "ON_ENTER",
+        "name": "Первый урок",
+        "description": "Берёт 1 карту при входе.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_cauterizer",
+    "name": "Прижигатель",
+    "personalityTag": "vf_cauterizer",
+    "tags": ["voidflame", "supporter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["supporter"],
+    "title": "Тёплые руки",
+    "shortDescription": "Восстанавливает 5 Величия.",
+    "lore": "Вытаскивал людей с того света ещё до того, как это стало ритуалом. Руки должны быть тёплыми — остальное приложится. Когда не может спасти — закрывает глаза и идёт к следующему.",
+    "triggers": [
+      {
+        "id": "triage",
+        "trigger": "ON_ENTER",
+        "name": "Прижигание",
+        "description": "Восстанавливает 5 Величия гильдии.",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 5, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_scavenger",
+    "name": "Огарыш",
+    "personalityTag": "vf_scavenger",
+    "tags": ["voidflame", "tactician"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Идёт за огнём",
+    "shortDescription": "Тянет карту, если враг пуст.",
+    "lore": "Идёт за пожаром. После огня всегда что-то остаётся, мёртвым не нужно — живым нужно.",
+    "triggers": [
+      {
+        "id": "seize_moment",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "FRONT_COUNT",
+          "who": "OPPONENT",
+          "op": "AT_MOST",
+          "value": 1
+        },
+        "name": "Удачный момент",
+        "description": "Если у противника ≤1 карты во Фронте — берёт 1 карту.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_ash_chronicler",
+    "name": "Летописец",
+    "personalityTag": "vf_ash_chronicler",
+    "tags": ["voidflame", "fighter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Пишет, пока горячо",
+    "shortDescription": "Бьёт, если есть нейтралы.",
+    "lore": "Пишет историю, пока она ещё горячая. Иначе — не дописать. Когда закончится пергамент, начнёт жечь — потому что если история не продолжится, зачем было писать?",
+    "triggers": [
+      {
+        "id": "chronicle",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "CELLS",
+          "who": "SELF",
+          "op": "AT_LEAST",
+          "value": 2
+        },
+        "name": "Хроника",
+        "description": "Если контролируешь ≥2 нейтралов — наносит 2 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "vf_ash_surveyor",
+    "name": "Межевик",
+    "personalityTag": "vf_ash_surveyor",
+    "tags": ["voidflame", "tactician"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Рисует то, чего уже нет",
+    "shortDescription": "Тянет 2 карты, если есть нейтралы.",
+    "lore": "Рисует карты края, который сам же и уничтожил. Когда заканчивает — сжигает карту, ведь карта — это тоже топливо. Говорит, что чертит путь к солнцу, по его картам даже можно идти — только некуда.",
+    "triggers": [
+      {
+        "id": "survey",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "CELLS",
+          "who": "SELF",
+          "op": "AT_LEAST",
+          "value": 3
+        },
+        "name": "Обзор",
+        "description": "Если контролируешь ≥3 нейтрала — берёт 2 карты.",
+        "effects": [ {"kind": "DRAW", "count": 2, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_ash_oracle",
+    "name": "Дымница",
+    "personalityTag": "vf_ash_oracle",
+    "tags": ["voidflame", "tactician"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Слышит дым",
+    "shortDescription": "Приносит Влияние каждый ход.",
+    "lore": "Говорит о том, что ещё не сгорело — и сгоревшие слушают. Дым — горький, тёплый, живой — шепчет ей по утрам, она передаёт его слова. Те, кто слышит, берут факелы и идут. Она не знает, врёт ли дым, ведь она никогда не спрашивала.",
+    "triggers": [
+      {
+        "id": "foresight",
+        "trigger": "ON_TURN_START",
+        "name": "Предвидение",
+        "description": "В начале хода даёт +1 Влияния.",
+        "effects": [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_pit_berserker",
+    "name": "Ямник",
+    "personalityTag": "vf_pit_berserker",
+    "tags": ["voidflame", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Из ямы — в бой",
+    "shortDescription": "Бьёт сразу.",
+    "lore": "В яме выживает один, а он - выжил дважды. Песок — горячий, красный, липкий — не отмывается. Яма — единственное место, где он знает, что делать.",
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "vf_desperate",
+    "name": "Отчаявшийся",
+    "personalityTag": "vf_desperate",
+    "tags": ["voidflame", "tactician"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Последняя ставка",
+    "shortDescription": "Даёт 2 Влияния, если ты пуст.",
+    "lore": "Раньше у него было имя. Теперь есть только то, что он может предложить, а если нечего отдавать — жжёт. Огонь тоже подношение.",
+    "triggers": [
+      {
+        "id": "second_wind",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "INFLUENCE",
+          "who": "SELF",
+          "op": "EQUAL",
+          "value": 0
+        },
+        "name": "Второе дыхание",
+        "description": "Если у тебя 0 Влияния — получаешь +2 Влияния.",
+        "effects": [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_pit_champion",
+    "name": "Чемпион Ямы",
+    "personalityTag": "vf_pit_champion",
+    "tags": ["voidflame", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Сто боёв — ни одного поражения",
+    "shortDescription": "Убивает — враг теряет влияние.",
+    "lore": "Помнит лица — всех, кого победил. Не имена. Лица. В яме нет места надежде, есть только победа или смерть. Сто раз он выбрал победу. И каждый раз забирал не только жизнь, но и веру тоже.",
+    "triggers": [
+      {
+        "id": "glory_of_the_fallen",
+        "trigger": "ON_KILL",
+        "name": "Слава павших",
+        "description": "Когда эта карта убивает — враг теряет 1 Влияние, чемпион получает +1/+1.",
+        "effects": [
+          {"kind": "SPEND_INFLUENCE", "amount": 1, "who": "OPPONENT"},
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_duelist",
+    "name": "Дуэлянт",
+    "personalityTag": "vf_duelist",
+    "tags": ["voidflame", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Один на один",
+    "shortDescription": "Идёт на сближение.",
+    "lore": "Не умеет драться в строю, только один на один — но хорошо. Когда остаётся один — улыбается. Клинок старый и ржавый, но всё ещё острый.",
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "vf_blademaster",
+    "name": "Ржавый Клинок",
+    "personalityTag": "vf_blademaster",
+    "tags": ["voidflame", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Мёртвое железо — тоже режет",
+    "shortDescription": "Бьёт на 3 по выбранной цели.",
+    "lore": "Его клинок считали мёртвым. В трещинах, с обломанным кончиком. Но ржавое тоже режет. Просто медленнее и грязнее.",
+    "activatedAbilities": [
+      {
+        "id": "precise_strike",
+        "cost": 1,
+        "name": "Точный удар",
+        "description": "Наносит 3 урона выбранной карте во Фронте противника.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then": [
+              {"kind": "DEAL_DAMAGE", "amount": 3, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_flickerstep",
+    "name": "Мерцающий",
+    "personalityTag": "vf_flickerstep",
+    "tags": ["voidflame", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Не стоит на месте",
+    "shortDescription": "Прыгает между колонками.",
+    "lore": "Огонь не стоит на месте — и он не стоит. Поймать его в одной точке невозможно - он сам не всегда знает, где окажется. Бьёт — и уходит. Пламя так и работает: коснулось — перескочило.",
+    "triggers": [
+      {
+        "id": "reposition",
+        "trigger": "ON_TURN_START",
+        "oncePerTurn": true,
+        "name": "Смена позиции",
+        "description": "Раз в ход в начале хода перемещается в свободную колонку.",
+        "effects": [
+          {"kind": "MOVE_CARD", "target": "SELF", "to": "RANDOM_OWN_EMPTY"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "vf_confiscator",
+    "name": "Изыматель",
+    "personalityTag": "vf_confiscator",
+    "tags": ["voidflame", "controller"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["controller"],
+    "title": "Забирает лучшее",
+    "shortDescription": "Противник сбрасывает карту на выбор.",
+    "lore": "Не бьёт — забирает. У кого-то последнее топливо. У кого-то — последнюю надежду. Пустота — тоже приговор, и очень тихий.",
+    "triggers": [
+      {
+        "id": "extort",
+        "trigger": "ON_ENTER",
+        "name": "Изъятие",
+        "description": "Противник сбрасывает 1 карту на ваш выбор.",
+        "effects": [
+          {"kind": "DISCARD_CHOSEN", "count": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_coal_golem",
+    "name": "Угольный истукан",
+    "personalityTag": "vf_coal_golem",
+    "tags": ["voidflame", "guardian"],
+    "cost": 4,
+    "strength": 1,
+    "health": 10,
+    "rarity": "uncommon",
+    "abilities": ["taunt", "slow"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["guardian"],
+    "title": "Собран из тех, кого не успели спасти",
+    "shortDescription": "Держит удар и берёт карты.",
+    "lore": "Не воюет. Стоит. Пока он стоит — культ успевает сделать всё, что нужно. Собран из обгоревших, кого не спас ни огонь, ни тот, кто сидит в темноте. Когда получает удар — не падает. Падать — значит забыть. А забывать нельзя.",
+    "triggers": [
+      {
+        "id": "adaptive_plating",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name": "Пластины",
+        "description": "Раз в ход, когда получает урон — берёт 1 карту.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "slow": {
+        "name": "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "vf_coal_warden",
+    "name": "Угольный дозорный",
+    "personalityTag": "vf_coal_warden",
+    "tags": ["voidflame", "guardian"],
+    "cost": 2,
+    "strength": 1,
+    "health": 4,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["guardian"],
+    "title": "Не нападает первым",
+    "shortDescription": "Отвечает на атаку по фронту.",
+    "lore": "Никогда не нападает первым. И всё же чаще других отвечает ударом на удар. Из обгоревших — тех, кто не успел уйти. Стоять — это тоже ответ.",
+    "triggers": [
+      {
+        "id": "riposte",
+        "trigger": "ON_ENEMY_ATTACK",
+        "oncePerTurn": true,
+        "name": "Рипост",
+        "description": "Раз в ход, когда враг атакует — наносит 1 урона всем его картам во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_coal_tyrant",
+    "name": "Угольный колосс",
+    "personalityTag": "vf_coal_tyrant",
+    "tags": ["voidflame", "controller"],
+    "cost": 6,
+    "strength": 4,
+    "health": 7,
+    "rarity": "epic",
+    "abilities": ["armored"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["controller"],
+    "title": "Скован в пепле",
+    "shortDescription": "Каждый ход замораживает карту напротив.",
+    "lore": "Собран из обгоревших, которые были королями. Не двигается. Не говорит. Просто смотрит — и тот, на кого он смотрит, замирает. Говорят, внутри до сих пор слышен скрежет — сотни голосов, что не смогли договориться, кому принадлежит это тело. Пока они спорят, колосс стоит, и мир вокруг него останавливается.",
+    "triggers": [
+      {
+        "id": "petrify",
+        "trigger": "ON_TURN_START",
+        "oncePerTurn": true,
+        "name": "Окаменение",
+        "description": "В начале хода истощает карту напротив.",
+        "effects": [ {"kind": "EXHAUST_TARGET", "target": "OPPOSITE"} ]
+      }
+    ],
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
+  },
+  {
+    "id": "vf_cinder_berserker",
+    "name": "Пепельный берсерк",
+    "personalityTag": "vf_cinder_berserker",
+    "tags": ["voidflame", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["frenzy"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Горит изнутри",
+    "shortDescription": "Атакует дважды за ход.",
+    "lore": "Горит изнутри, и пока горит — бьёт. Дважды, прежде чем пепел осядет. Потом — уже не будет. Он это знает, потому бьёт дважды.",
+    "abilityInfo": {
+      "frenzy": {
+        "name": "Ярость",
+        "description": "Может атаковать дважды за ход."
+      }
+    }
+  },
+  {
+    "id": "vf_flame_scout",
+    "name": "Палёный вестник",
+    "personalityTag": "vf_flame_scout",
+    "tags": ["voidflame", "tactician"],
+    "cost": 2,
+    "strength": 3,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": ["scout"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Выжженная земля за спиной",
+    "shortDescription": "Разведка. Бьёт по гильдии за захват.",
+    "lore": "Идёт впереди основных сил, каждая взятая точка — удар по врагу. За ним — выжженная земля. Вестник не может останавливаться. Иначе — не вестник.",
+    "triggers": [
+      {
+        "id": "burn_the_land",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Выжженная земля",
+        "description": "Когда вы захватываете нейтрал — наносит 1 урон Величию противника. Раз в ход.",
+        "effects": [ {"kind": "DAMAGE_GLORY", "amount": 1, "who": "OPPONENT"} ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "vf_infernal",
+    "name": "Инфернал",
+    "personalityTag": "vf_infernal",
+    "tags": ["voidflame", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["cleave"],
+    "cleaveDamage": 2,
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Не разбирает целей",
+    "shortDescription": "Задевает соседей цели на 2 урона.",
+    "lore": "Не разбирает, где цель, а где просто рядом. Всё, что стоит рядом — сгорает вместе. Огонь — большой, жадный — не различает. По пеплу идётся легче. К следующей цели — всегда.",
+    "abilityInfo": {
+      "cleave": {
+        "name": "Рассечение",
+        "description": "Атака задевает соседей цели на 2 урона."
+      }
+    }
+  },
+  {
+    "id": "vf_tarn",
+    "name": "Одноглазый пророк",
+    "personalityTag": "vf_tarn",
+    "tags": ["voidflame", "fighter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 4,
+    "rarity": "legendary",
+    "abilities": ["charge", "scout", "breakthrough"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Видит то, чего нет",
+    "shortDescription": "Платит здоровьем за силу.",
+    "lore": "Ему выжгли глаз, чтобы он перестал видеть. Он стал видеть больше. Каждый раз, когда жжёт, — видит солнце. Как оно встаёт. Как греет. Как возвращается. Он жжёт - и видения становятся ярче. Он жжёт больше, но солнце никогда не приходит. Поэтому он жжёт ещё. Ибо без видения — он просто слепой старик с выжженным глазом.",
+    "triggers": [
+      {
+        "id": "demonic_fury",
+        "trigger": "ON_TURN_START",
+        "name": "Пророческое исступление",
+        "description": "В начале хода теряет 1 Величия и получает +1 силы.",
+        "effects": [
+          {"kind": "DAMAGE_GLORY", "amount": 1, "who": "SELF"},
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт."
+      },
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      },
+      "breakthrough": {
+        "name": "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
+  },
+  {
+    "id": "vf_grim",
+    "name": "Грим",
+    "personalityTag": "vf_grim",
+    "tags": ["voidflame", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "legendary",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Не считает потерь",
+    "shortDescription": "Растёт от каждой потери.",
+    "lore": "Никогда не считал потери. Считал только — сколько ещё нужно сжечь. Когда кто-то падает — он не оглядывается, чтобы не помнить. Помнить — значит жалеть,а жалеть — значит остановиться. Он не останавливается.",
+    "triggers": [
+      {
+        "id": "bloodlust",
+        "trigger": "ON_ALLY_DIED",
+        "name": "Жажда пепла",
+        "description": "Когда союзник погибает — получает +1/+1.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "vf_brann",
+    "name": "Охотник пустошей",
+    "personalityTag": "vf_brann",
+    "tags": ["voidflame", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "legendary",
+    "abilities": ["charge", "scout"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "А он - один",
+    "shortDescription": "Бьёт при входе, добивает активируемо.",
+    "lore": "Не разбирает, кто перед ним. Важно только одно: ещё жив или уже нет. Пустошь дала ему цель — в обоих смыслах, а что стоит за ней — не его дело. Стреляет, цель падает, идёт дальше. Пустошь большая. А он — один.",
+    "triggers": [
+      {
+        "id": "hunters_mark",
+        "trigger": "ON_ENTER",
+        "name": "Метка охотника",
+        "description": "Наносит 2 урона случайной карте противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id": "kill_command",
+        "cost": 1,
+        "name": "Контрольный",
+        "description": "Наносит 1 урона выбранной карте противника во Фронте.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then": [
+              {"kind": "DEAL_DAMAGE", "amount": 1, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      },
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "vf_tk_imp",
+    "name": "Бес",
+    "personalityTag": "vf_tk_imp",
+    "tags": ["voidflame", "fighter", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["fighter"],
+    "title": "Когда огонь горит",
+    "shortDescription": "Кусает и убегает.",
+    "lore": "Зовут из ниоткуда — отпускают туда же. Приходит, когда огонь горит правильно. Кусает. Убегает. Не в обиде.",
+    "isToken": true,
+    "abilityInfo": {}
+  },
+  {
+    "id": "vf_tk_shade",
+    "name": "Тень",
+    "personalityTag": "vf_tk_shade",
+    "tags": ["voidflame", "tactician", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["scout", "temporary"],
+    "tempDuration": 3,
+    "series": ["voidflame"],
+    "factions": ["voidflame"],
+    "roles": ["tactician"],
+    "title": "Три хода — и пепел",
+    "shortDescription": "Проходит и уходит.",
+    "lore": "Ни тела, ни имени — только цель. Этой цели хватает на три хода. Проходит. Растворяется. В пепле.",
+    "isToken": true,
+    "abilityInfo": {}
+  }
+]

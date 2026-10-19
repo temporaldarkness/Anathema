@@ -3,24 +3,35 @@
  * Статистика по картам в рамках scope.
  *
  * Δ = winrate_when_played − winrate_when_drawn_not_played.
- * Устраняет базовый winrate колоды и отвечает:
- * «играть карту — лучше, чем держать её в руке?»
- *
- * Δ > +3pp  → карта ценится (или win-more)
- * Δ ≈ 0    → нейтральна
- * Δ < −3pp → карта вредит (или играется от отчаяния)
- * playRate < 15% → мёртвый груз
  *
  * Usage:
- *   card-stats <scope> <N> [botName] [deck1,deck2,...] [--mulligan]
+ *   card-stats <scope> <N> [botName] [deck1,deck2,...] [flags]
+ *
+ * Flags:
+ *   --mulligan              Включить муллиган
+ *   --all                   Вывести полный список карт
+ *   --card <id|name>        Детали по конкретной карте (по id или имени)
+ *   --sort <field>          Сортировка: delta | playRate | cost | medianTurn | drawn | played
+ *   --min-samples N         Порог сэмплов (default 20)
+ *
+ * Примеры:
+ *   card-stats main 100
+ *   card-stats main 100 --all
+ *   card-stats main 100 --all --sort playRate
+ *   card-stats main 100 --card classic_hacker
+ *   card-stats main 100 --card "Ростовчанин"
+ *   card-stats main 100 --all --min-samples 5 --sort medianTurn
  */
 
 import type { GameState, Command, GameEvent, CardInstanceId, PlayerId } from '@aspects/engine';
+import type { CardDefinition } from '@aspects/cards';
 import { decksForScope, resolveScope, listScopes, cardsForScope } from '@aspects/cards';
 import { makeBot, listAllBotIds } from '@aspects/bot';
 import { runOneGame } from '../src/runner';
 
 const DEFAULT_BOT = 'heuristic-v5-balanced-master';
+
+type SortField = 'delta' | 'playRate' | 'cost' | 'medianTurn' | 'drawn' | 'played';
 
 interface Args {
   scopeStr: string;
@@ -31,18 +42,52 @@ interface Args {
   useMulligan: boolean;
   minSamples: number;
   minPlayRateForDead: number;
+  all: boolean;
+  cardLookup: string | null;
+  sortBy: SortField;
 }
 
 function parseArgs(argv: string[]): Args {
   const cleaned: string[] = [];
   let useMulligan = false;
-  for (const a of argv) {
-    if (a === '--mulligan') useMulligan = true;
-    else cleaned.push(a);
+  let all = false;
+  let cardLookup: string | null = null;
+  let sortBy: SortField = 'delta';
+  let minSamples = 20;
+  let minPlayRateForDead = 0.15;
+
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--mulligan') {
+      useMulligan = true;
+    } else if (a === '--all') {
+      all = true;
+    } else if (a === '--card') {
+      cardLookup = argv[++i] ?? null;
+    } else if (a === '--sort') {
+      const v = argv[++i];
+      if (v === 'delta' || v === 'playRate' || v === 'cost' || v === 'medianTurn' || v === 'drawn' || v === 'played') {
+        sortBy = v;
+      } else {
+        console.error(`Invalid --sort: "${v}". Use delta | playRate | cost | medianTurn | drawn | played`);
+        process.exit(1);
+      }
+    } else if (a === '--min-samples') {
+      minSamples = Number.parseInt(argv[++i], 10);
+      if (!Number.isFinite(minSamples) || minSamples < 1) {
+        console.error('Invalid --min-samples');
+        process.exit(1);
+      }
+    } else {
+      cleaned.push(a);
+    }
   }
+
   const [scopeStr, nStr, arg3, arg4] = cleaned;
   if (!scopeStr || !nStr) {
-    console.error('Usage: card-stats <scope> <N> [botName] [deck1,deck2,...] [--mulligan]');
+    console.error(
+      'Usage: card-stats <scope> <N> [botName] [deck1,deck2,...] [--mulligan] [--all] [--card <id|name>] [--sort <field>] [--min-samples N]',
+    );
     process.exit(1);
   }
   const series = resolveScope(scopeStr);
@@ -55,6 +100,7 @@ function parseArgs(argv: string[]): Args {
     console.error(`Invalid N: ${nStr}`);
     process.exit(1);
   }
+
   const botIds = listAllBotIds();
   let botName = DEFAULT_BOT;
   let decksArg: string | undefined;
@@ -80,6 +126,7 @@ function parseArgs(argv: string[]): Args {
       process.exit(1);
     }
   }
+
   return {
     scopeStr,
     series,
@@ -87,8 +134,11 @@ function parseArgs(argv: string[]): Args {
     botName,
     deckIds,
     useMulligan,
-    minSamples: 20,
-    minPlayRateForDead: 0.15,
+    minSamples,
+    minPlayRateForDead,
+    all,
+    cardLookup,
+    sortBy,
   };
 }
 
@@ -96,12 +146,12 @@ function parseArgs(argv: string[]): Args {
 
 interface CardAcc {
   defId: string;
-  drawn: number;         // сколько раз карта попадала в руку
-  winsAfterDraw: number; // из них — в выигранных партиях
-  played: number;        // сколько раз сыграна
-  winsAfterPlay: number; // из них — в выигранных
-  turnSum: number;       // сумма ходов розыгрыша (для median)
-  turns: number[];       // все ходы розыгрыша
+  drawn: number;
+  winsAfterDraw: number;
+  played: number;
+  winsAfterPlay: number;
+  turnSum: number;
+  turns: number[];
 }
 
 function ensureCard(map: Map<string, CardAcc>, defId: string): CardAcc {
@@ -129,10 +179,6 @@ function absorbHand(state: GameState, p: PlayerId, into: Set<string>): void {
   }
 }
 
-interface PerGameInfo {
-  winner: PlayerId | null;
-}
-
 function collectOneGame(
   series: string[],
   p1DeckId: string,
@@ -158,8 +204,6 @@ function collectOneGame(
     bots: { p1: makeBot(botName), p2: makeBot(botName) },
     useMulligan,
     onAfterCommand: (state, cmd, events) => {
-      // Первый вызов — до того как состояние изменилось. Но у нас state — уже после.
-      // Стартовые руки можно определить на первом вызове.
       if (!initializedStartHands) {
         absorbHand(state, 'p1', drawn.p1);
         absorbHand(state, 'p2', drawn.p2);
@@ -177,7 +221,6 @@ function collectOneGame(
         }
       }
 
-      // Подхватываем карты, попавшие в руку через эффекты (DRAW, RETURN_TO_HAND).
       absorbHand(state, 'p1', drawn.p1);
       absorbHand(state, 'p2', drawn.p2);
     },
@@ -190,8 +233,6 @@ function collectOneGame(
     winner: r?.winner ?? null,
   };
 }
-
-// ─── Агрегация ───
 
 function aggregateGame(
   info: ReturnType<typeof collectOneGame>,
@@ -276,6 +317,32 @@ function buildRows(
   return rows;
 }
 
+function sortRows(rows: Row[], sortBy: SortField): Row[] {
+  const sorted = [...rows];
+  switch (sortBy) {
+    case 'playRate':
+      sorted.sort((a, b) => b.playRate - a.playRate);
+      break;
+    case 'cost':
+      sorted.sort((a, b) => a.cost - b.cost || b.delta - a.delta);
+      break;
+    case 'medianTurn':
+      sorted.sort((a, b) => a.medianTurn - b.medianTurn);
+      break;
+    case 'drawn':
+      sorted.sort((a, b) => b.drawn - a.drawn);
+      break;
+    case 'played':
+      sorted.sort((a, b) => b.played - a.played);
+      break;
+    case 'delta':
+    default:
+      sorted.sort((a, b) => b.delta - a.delta);
+      break;
+  }
+  return sorted;
+}
+
 const pct = (x: number) => `${(x * 100).toFixed(1).padStart(5)}%`;
 const pp = (x: number) => (x >= 0 ? '+' : '') + (x * 100).toFixed(1) + 'pp';
 
@@ -306,6 +373,23 @@ function printTable(rows: Row[]): void {
   }
 }
 
+function printCardDetail(row: Row): void {
+  console.log('');
+  console.log(`  ┌─ ${row.name}`);
+  console.log(`  │  id:          ${row.defId}`);
+  console.log(`  │  cost:        ${row.cost}`);
+  console.log(`  │  drawn:       ${row.drawn}`);
+  console.log(`  │  played:      ${row.played}`);
+  console.log(`  │  playRate:    ${(row.playRate * 100).toFixed(1)}%`);
+  console.log(`  │  medianTurn:  ${row.medianTurn}`);
+  console.log(`  │  wr_play:     ${(row.wrPlay * 100).toFixed(1)}%`);
+  console.log(`  │  wr_no:       ${(row.wrNoPlay * 100).toFixed(1)}%`);
+  console.log(`  │  Δ:           ${pp(row.delta)}`);
+  console.log(`  └─`);
+}
+
+// ─── main ───
+
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const t0 = Date.now();
@@ -313,6 +397,8 @@ function main(): void {
   console.log('═══════════════════════════════════════════════════');
   console.log(`  Card stats — scope=[${args.series.join(', ')}]`);
   console.log(`  Bot: ${args.botName}, N/pair=${args.n}`);
+  if (args.all) console.log(`  Mode: ALL (sort=${args.sortBy})`);
+  if (args.cardLookup) console.log(`  Mode: CARD LOOKUP ("${args.cardLookup}")`);
   console.log('═══════════════════════════════════════════════════\n');
 
   const pairs: Array<[string, string]> = [];
@@ -336,25 +422,89 @@ function main(): void {
   process.stdout.write('\r');
 
   const rows = buildRows(args.series, cards, args.minSamples);
-  rows.sort((a, b) => b.delta - a.delta);
+  const sorted = sortRows(rows, args.sortBy);
 
-  console.log('\n─── Топ 15 «ценных» карт (Δ > 0) ──────────────');
-  printTable(rows.slice(0, 15));
+  // ─── Card lookup mode ───
+  if (args.cardLookup) {
+    const allDefs = cardsForScope(args.series);
 
-  console.log('\n─── Топ 15 «проблемных» карт (Δ < 0) ──────────');
-  printTable(rows.slice(-15).reverse());
+    // Найти целевую карту: сначала по id, потом по имени.
+    let targets: CardDefinition[] = [];
+    const byId = allDefs[args.cardLookup];
+    if (byId) {
+      targets = [byId];
+    } else {
+      targets = Object.values(allDefs).filter((d) => d.name === args.cardLookup);
+    }
+
+    if (targets.length === 0) {
+      console.log(`\n❌ Карта "${args.cardLookup}" не найдена в scope [${args.series.join(', ')}].`);
+      console.log('   Проверь id или имя. Список карт в колоде:');
+      console.log('   pnpm run --filter @aspects/simtools list main <deck>');
+      return;
+    }
+
+    console.log(`\n─── Детали карты: ${args.cardLookup} ──────`);
+
+    for (const def of targets) {
+      const row = rows.find((r) => r.defId === def.id);
+
+      if (row) {
+        printCardDetail(row);
+      } else {
+        const raw = cards.get(def.id);
+        if (raw && raw.drawn > 0) {
+          console.log(`\n  ⚠ ${def.name} (${def.id}): недостаточно сэмплов.`);
+          console.log(`    drawn: ${raw.drawn}, played: ${raw.played}`);
+          console.log(`    minSamples=${args.minSamples}. Попробуй --min-samples ${Math.max(1, Math.min(raw.drawn, 20))}`);
+        } else {
+          console.log(`\n  ⚠ ${def.name} (${def.id}): ни разу не была в руке за ${total} партий.`);
+          console.log(`    Карта существует, но её нет в пресетах scope.`);
+        }
+      }
+    }
+
+    console.log('');
+    console.log(`Готово за ${((Date.now() - t0) / 1000).toFixed(1)}s.`);
+    return;
+  }
+
+  // ─── Summary mode ───
+  const sortLabel = {
+    delta: 'Δ',
+    playRate: 'playRate',
+    cost: 'cost',
+    medianTurn: 'medianTurn',
+    drawn: 'drawn',
+    played: 'played',
+  }[args.sortBy];
+
+  console.log(`\n─── Топ 15 по ${sortLabel} (по убыванию) ──────────`);
+  printTable(sorted.slice(0, 15));
+
+  if (sorted.length > 15) {
+    console.log(`\n─── Топ 15 по ${sortLabel} (по возрастанию) ────────`);
+    printTable(sorted.slice(-15).reverse());
+  }
 
   const dead = rows
     .filter((r) => r.playRate < args.minPlayRateForDead)
     .sort((a, b) => a.playRate - b.playRate);
-  console.log('\n─── «Мёртвый груз» (playRate < 15%) ───────────');
+  console.log(`\n─── «Мёртвый груз» (playRate < ${(args.minPlayRateForDead * 100).toFixed(0)}%) ───────────`);
   if (dead.length === 0) console.log('  (нет)');
   else printTable(dead.slice(0, 20));
 
-  // ─── Карты, отсортированные по медианному ходу ───
-  const lateCards = [...rows].sort((a, b) => b.medianTurn - a.medianTurn).slice(0, 10);
-  console.log('\n─── Топ 10 «поздних» карт (median turn) ───────');
-  printTable(lateCards);
+  // ─── Full list ───
+  if (args.all) {
+    console.log(`\n═══════════════════════════════════════════════════`);
+    console.log(`  Полный список: ${sorted.length} карт (sort=${args.sortBy})`);
+    console.log(`═══════════════════════════════════════════════════\n`);
+    printTable(sorted);
+  } else {
+    console.log(`\n💡 Полный список (${sorted.length} карт): добавь --all`);
+    console.log(`   Детали карты: --card <id|name>`);
+    console.log(`   Другая сортировка: --sort ${['delta', 'playRate', 'cost', 'medianTurn', 'drawn', 'played'].filter((f) => f !== args.sortBy).join(' | ')}`);
+  }
 
   console.log('\n─── Как читать ────────────────────────────────');
   console.log('  Δ >  +8pp   — сильный сигнал «карта ценна»');

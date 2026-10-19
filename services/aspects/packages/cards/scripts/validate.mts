@@ -123,6 +123,13 @@ for (const fullPath of packDirs) {
       errors++;
       continue;
     }
+	if (card.series && !card.series.includes(meta.id)) {
+      console.error(
+        `✗ ${packName} [${card.id}]: series=[${card.series.join(', ')}] не совпадает с meta.id="${meta.id}"`
+      );
+      errors++;
+      continue;
+    }
     ids.add(card.id);
     globalCardIds.add(card.id);
     if (card.rarity) globalCardRarity.set(card.id, card.rarity);

@@ -8,7 +8,7 @@
  * Примеры:
  *   matrix main 50
  *   matrix classic,throne 50 heuristic-v5-balanced-master
- *   matrix azeroth 100 heuristic-v5-balanced-master stormwind,forsaken
+ *   matrix ashenlight 100 heuristic-v5-balanced-master stormwind,forsaken
  */
 
 import { decksForScope, resolveScope, listScopes } from '@aspects/cards';

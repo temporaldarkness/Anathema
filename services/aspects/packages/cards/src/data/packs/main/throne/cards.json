@@ -1,0 +1,641 @@
+[
+  {
+    "id": "throne_yuoko_king",
+    "name": "Король Юко",
+    "personalityTag": "yuoko",
+    "tags": ["throne", "stormwind", "fighter"],
+    "cost": 5,
+    "strength": 5,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": ["taunt"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Воля без терпения",
+    "shortDescription": "Выносит приговор прежде, чем выслушает.",
+    "lore": "Юко взошёл на трон, не дождавшись совершеннолетия. Его указы непредсказуемы, а милость мимолётна. При дворе говорят: Король решает быстрее, чем думает — и горе тому, на кого падёт его взгляд.",
+    "triggers": [
+      {
+        "id": "royal_verdict",
+        "trigger": "ON_ENTER",
+        "name": "Королевский приговор",
+        "description": "При входе выносит приговор: наносит 4 урона выбранной цели.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "throne_ultrarolevik_director",
+    "name": "Постановщик",
+    "personalityTag": "ultrarolevik",
+    "tags": ["throne", "stormwind", "controller"],
+    "cost": 7,
+    "strength": 5,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["controller"],
+    "title": "Тот, кто двигает фигуры",
+    "shortDescription": "Не сражается сам — но каждый ход кто-то покидает поле не по своей воле.",
+    "lore": "Ультраролевик появляется при дворе в фарфоровой маске — и никто не знает, что за ней. Он не отдаёт приказов, но каждое утро чья-то позиция оказывается пуста — и никто не помнит, как это случилось.",
+    "triggers": [
+      {
+        "id": "puppet_strings",
+        "trigger": "ON_TURN_START",
+        "name": "Дёрнуть за ниточки",
+        "description": "В начале хода возвращает выбранного врага из Фронта в руку владельца.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Карта пропускает свой первый плановый переход из Резерва во Фронт."
+      }
+    }
+  },
+  {
+    "id": "throne_temporal_left_hand",
+    "name": "Шуйца",
+    "personalityTag": "temporal",
+    "tags": ["throne", "stormwind", "supporter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["supporter"],
+    "title": "Тот, кто правит, пока Король играет",
+    "shortDescription": "Пока двор пирует, он считает, укрепляет, латает.",
+    "lore": "Темпорал — фаворит Короля и левая рука престола. Он позволяет Юко всё: чем бы дитя ни тешилось. А сам тихо ведёт казну, укрепляет гарнизоны и следит, чтобы королевство не развалилось к утру.",
+    "triggers": [
+      {
+        "id"         : "royal_treasury",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Рука на казне",
+        "description": "При входе приносит +1 Влияние — казна всегда при нём.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      },
+      {
+        "id": "quiet_rule",
+        "trigger": "ON_TURN_START",
+        "oncePerTurn": true,
+        "name": "Тихое правление",
+        "description": "В начале хода тихо укрепляет одного случайного союзника во Фронте: +1/+1.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "RANDOM_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_hyper_magistrate",
+    "name": "Магистрат",
+    "personalityTag": "hyper",
+    "tags": ["throne", "burgundy", "controller"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["burgundy"],
+    "roles": ["controller"],
+    "title": "Дело заведено — дело закрыто",
+    "shortDescription": "Ведёт разбирательство: враг теряет карту, а он — набирает вес.",
+    "lore": "Хайпер — бургундец, поставленный при дворе для соблюдения порядка. Он ведёт дела с бумагой и печатью: пока идёт разбирательство, у обвиняемого исчезают улики, а у Магистрата растёт влияние. Вердикт — формальность.",
+    "triggers": [
+      {
+        "id": "trial",
+        "trigger": "ON_ENTER",
+        "name": "Разбирательство",
+        "description": "При входе открывает дело: противник вынужден сбросить 1 карту на ваш выбор.",
+        "effects": [ {"kind": "DISCARD_CHOSEN", "count": 1, "who": "OPPONENT"} ]
+      },
+      {
+        "id"         : "bureaucracy",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "name"       : "Бюрократия",
+        "description": "В начале хода канцелярия работает: +1 Влияние.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_interdict_crown_prince",
+    "name": "Кронпринц",
+    "personalityTag": "interdict",
+    "tags": ["throne", "stormwind", "tactician"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": ["vanguard", "scout"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["tactician"],
+    "title": "Наследник, объявленный слишком рано",
+    "shortDescription": "Появляется раньше всех, видит дальше всех, получает больше всех.",
+    "lore": "Интердикт — младший сын Темпорала. Юко назвал его наследником в первый же день на троне, не спросив ни двор, ни отца. Юный, подвижный, вездесущий — он уже ведёт себя как будущий правитель. Во только заслужил ли он это.",
+    "triggers": [
+      {
+        "id"         : "heir_apparent",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Право наследника",
+        "description": "При входе берёт 1 карту — привилегия крови.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      },
+      "scout"   : {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, даже если Фронт перед ним занят. Игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "throne_adorik_executioner",
+    "name": "Палач",
+    "personalityTag": "adorik",
+    "tags": ["throne", "stormwind", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Без вопросов, без промедления",
+    "shortDescription": "Приходит с подписанным указом. Уходит — с выполненным.",
+    "lore": "Адорик не спрашивает, виновен ли ты. Он вообще не спрашивает. Указ подписан до его прихода. Быстро, чисто, без лишних слов, остаётся только поставить точку.",
+    "triggers": [
+      {
+        "id": "signed_order",
+        "trigger": "ON_ENTER",
+        "name": "Подписанный указ",
+        "description": "При входе исполняет указ: наносит 4 урона выбранному врагу.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_safno_commandant",
+    "name": "Комендант",
+    "personalityTag": "safno",
+    "tags": ["throne", "stormwind", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["supporter"],
+    "title": "Каждый пост — укреплён",
+    "shortDescription": "Где он прошёл — стоят крепче.",
+    "lore": "Сафно не рвётся в бой первым. Он идёт вдоль стен, проверяет посты, укрепляет слабые звенья. Когда он заканчивает обход — гарнизон стоит так, будто его строили заново.",
+    "triggers": [
+      {
+        "id": "fortify_post",
+        "trigger": "ON_ENTER",
+        "name": "Укрепить пост",
+        "description": "При входе укрепляет позицию: даёт щит выбранному союзнику.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then"     : [ {"kind": "GRANT_SHIELD", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_proklyatie_chronicler",
+    "name": "Летописец",
+    "personalityTag": "proklyatie",
+    "tags": ["throne", "stormwind", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Не каждый достоин страницы",
+    "shortDescription": "Чем больше имён в его книге, тем тяжелее его слово.",
+    "lore": "Летописец ведёт книгу двора. Не всех он удостаивает записи — лишь тех, кого считает достойными. Когда достойный погибает, его имя ложится на страницу, а перо Летописца становится острее. По какому праву он решает, кого помнить — не знает никто.",
+    "triggers": [
+      {
+        "id": "record_the_fallen",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name": "Записать павшего",
+        "description": "Когда союзник погибает, Летописец вносит его в книгу: +1 к силе.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_hacker_imperial_medic",
+    "name": "Имперский Лекарь",
+    "personalityTag": "hacker",
+    "tags": ["throne", "stormwind", "supporter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["supporter"],
+    "title": "Лечит — и не спрашивает",
+    "shortDescription": "Пришёл издалека. Лечит тихо, уходит незаметно.",
+    "lore": "Хакер пришёл из Ростова — пыльного города на границе. При дворе его приняли не за манеры, а за умение - латает раны он быстро и молча. Кто его пациент, кто его враг — ему безразлично. Важно только, кто перед ним сейчас.",
+    "triggers": [
+      {
+        "id": "field_medicine",
+        "trigger": "ON_ENTER",
+        "name": "Полевая медицина",
+        "description": "При входе оказывает помощь: лечит всех союзников во Фронте на 1.",
+        "effects": [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_inki_court_wizard",
+    "name": "Придворный Волшебник",
+    "personalityTag": "inki",
+    "tags": ["throne", "stormwind", "fighter"],
+    "cost": 3,
+    "strength": 1,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": ["shield"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["fighter"],
+    "title": "Не покидает башню без причины",
+    "shortDescription": "Хрупок, но за щитом — и каждый его выстрел находит цель.",
+    "lore": "Инки живёт в северной башне и спускается лишь по необходимости. Он не любит двор, не выносит шум, не терпит пустых разговоров. Но когда Король указывает на цель — Инки поднимает посох, и заклинание летит без промаха.",
+    "activatedAbilities": [
+      {
+        "id"         : "arcane_bolt",
+        "cost"       : 1,
+        "name"       : "Заклинание без промаха",
+        "description": "Наносит 2 урона выбранному врагу. Раз в ход.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "shield": {
+        "name": "Щит",
+        "description": "Поглощает первый входящий урон полностью, включая урон от способностей. После поглощения снимается."
+      }
+    }
+  },
+  {
+    "id": "throne_gorox_jester",
+    "name": "Шут",
+    "personalityTag": "gorox",
+    "tags": ["throne", "stormwind", "controller"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["controller"],
+    "title": "Смешно всем — кроме того, над кем шутят",
+    "shortDescription": "Его шутки заставляют уйти со сцены — друга или врага.",
+    "lore": "Горох пришёл ко двору без имени, без титула — только с острым языком. Его насмешки не щадят никого: ни врагов, ни союзников. Кого он высмеет — тот покидает площадь, хочет он того или нет. Король хохочет. Остальные — терпят.",
+    "triggers": [
+      {
+        "id": "mockery",
+        "trigger": "ON_ENTER",
+        "name": "Злая шутка",
+        "description": "При входе высмеивает выбранную карту — она возвращается в руку владельца.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_zamiatish_herald",
+    "name": "Герольд",
+    "personalityTag": "zamiatish",
+    "tags": ["throne", "burgundy", "stormwind", "guardian"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["throne"],
+    "factions": ["burgundy", "stormwind"],
+    "roles": ["guardian"],
+    "title": "Его голос — закон для площадей",
+    "shortDescription": "Объявляет волю Короля — и те, кто слышит, стоят крепче.",
+    "lore": "Замятыш — полукровка: отец из Штормграда, мать из бургундских земель. Он объявляет указы Короля на площадях обеих земель, и его голос одинаково уверен по обе стороны границы. Пока он говорит — люди расправляют плечи и верят, что трон стоит прочно.",
+    "triggers": [
+      {
+        "id": "royal_call",
+        "trigger": "ON_ENTER",
+        "name": "Королевский зов",
+        "description": "При входе голос Герольда укрепляет строй: все союзники во Фронте получают +1 здоровья.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 0,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "throne_kingston_foreign_craftsman",
+    "name": "Заморский Умелец",
+    "personalityTag": "kingston",
+    "tags": ["throne", "stormwind", "guardian"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["vanguard"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Сначала — щит. Остальное — потом.",
+    "shortDescription": "Приходит готовым: входит во Фронт уже под защитой.",
+    "lore": "Паша приехал из-за моря — без рекомендаций, зато с инструментами. Пока другие ждут в Резерве, он куёт. Когда приходит его черёд выйти на позицию — щит уже готов. Двор не понимает его манер, но ценит результат.",
+    "triggers": [
+      {
+        "id": "first_work",
+        "trigger": "ON_REINFORCE",
+        "name": "Выковано в ожидании",
+        "description": "При переходе во Фронт получает щит — результат работы в Резерве.",
+        "effects": [ {"kind": "GRANT_SHIELD", "target": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "throne_alt_warlord",
+    "name": "Полководец",
+    "personalityTag": "alt",
+    "tags": ["throne", "burgundy", "stormwind", "supporter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": ["vanguard"],
+    "series": ["throne"],
+    "factions": ["burgundy", "stormwind"],
+    "roles": ["supporter"],
+    "title": "Слово тяжелее приказа",
+    "shortDescription": "Где он встаёт — войска бьют сильнее.",
+    "lore": "Альт пришёл из бургундских земель и принял присягу — но не Королю. Он служит идее порядка, а не человеку на троне. Его солдаты идут за ним не потому, что обязаны, а потому что его слово весит больше любого указа.",
+    "triggers": [
+      {
+        "id": "lead_the_charge",
+        "trigger": "ON_ENTER",
+        "name": "ВК оружию!",
+        "description": "При входе воодушевляет строй: все союзники во Фронте получают +1 силы.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "throne_solongo_alchemist",
+    "name": "Придворный Алхимик",
+    "personalityTag": "solongo",
+    "tags": ["throne", "enterprise", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["enterprise"],
+    "roles": ["supporter"],
+    "title": "На всё есть рецепт — и у всего есть цена",
+    "shortDescription": "За каплю влияния — эликсир, меняющий расклад.",
+    "lore": "Солонго не служит короне — она работает на себя. Её лаборатория при дворе в северной башне оплачена контрактом: зелья в обмен на ресурсы. Она знает состав для любого случая, но ничего не делает бесплатно. Даже Шуйца платит ей за каждый флакон.",
+    "activatedAbilities": [
+      {
+        "id": "potion",
+        "cost": 1,
+        "name": "Зелье по контракту",
+        "description": "За 1 Влияние готовит эликсир: выбранный союзник получает +2/+1. Раз в ход.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "BUFF", "strength": 2, "health": 1, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "throne_asuka_knight",
+    "name": "Рыцарь",
+    "personalityTag": "asuka",
+    "tags": ["throne", "stormwind", "guardian"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Честная сталь",
+    "shortDescription": "Стоит в строю и прикрывает того, кто рядом.",
+    "lore": "Аска не стремится к трону и не плетёт интриг. Он знает главное: щит вверх, строй держать, прикрыть соседа. При дворе, где каждый второй — с двойным дном, его простота — редкость. И, может быть, сила.",
+    "triggers": [
+      {
+        "id"         : "shield_wall",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Стена щитов",
+        "description": "Даёт щит случайному союзнику во Фронте.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_FRONT", "count": 1},
+            "then"     : [ {"kind": "GRANT_SHIELD", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "throne_just_treasurer",
+    "name": "Казначей",
+    "personalityTag": "just",
+    "tags": ["throne", "stormwind", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["starter"],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["tactician"],
+    "title": "Казна не терпит спешки",
+    "shortDescription": "При дворе с первого дня. Казна — при нём.",
+    "lore": "Джаст не поднимает голоса и не спорит с Королём. Он просто не выдаёт денег на то, что считает глупостью. Юко злится, топает ногами — а Джаст показывает книгу расходов и ждёт. Обычно Король сдаётся первым.",
+    "triggers": [
+      {
+        "id"         : "count_the_coins",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Бюджет утверждён",
+        "description": "При входе берёт казну под контроль: +1 Влияние.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
+  },
+  {
+    "id": "throne_oddi_lady_in_waiting",
+    "name": "Фрейлина",
+    "personalityTag": "oddi",
+    "tags": ["throne", "stormwind", "supporter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["throne"],
+    "factions": ["stormwind"],
+    "roles": ["supporter"],
+    "title": "Пока она рядом — двор дышит",
+    "shortDescription": "Негромкая, незаметная — но без неё всё рассыпается.",
+    "lore": "Одди не командует и не сражается. Вместо этого приносит горячий чай в караульню, помнит имена слуг, знает, кто вчера плакал. Двор — это ведь не только указы и казни. Без неё он давно бы задохнулся от собственной жестокости.",
+    "triggers": [
+      {
+        "id": "court_warmth",
+        "trigger": "ON_ENTER",
+        "name": "Доброе слово",
+        "description": "При входе согревает двор: восстанавливает 2 Величия гильдии.",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  }
+]

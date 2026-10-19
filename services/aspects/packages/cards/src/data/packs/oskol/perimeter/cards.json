@@ -1,0 +1,1098 @@
+[
+  {
+    "id": "pm_private",
+    "name": "Рядовой",
+    "personalityTag": "pm_private",
+    "tags": ["perimeter", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Подпись — кривая",
+    "shortDescription": "Дешёвый и надёжный боец.",
+    "lore": "Из формуляра: «Контракт № 0041-Д. Срок: 18 мес. Оклад: стандарт. Мотивация: финансовая. Примечание: без опыта». На обороте, карандашом, другим почерком: «Третья неделя. Письма не отправляет».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_runner",
+    "name": "Вестовой",
+    "personalityTag": "pm_runner",
+    "tags": ["perimeter", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "starter"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Ноги вместо эфира",
+    "shortDescription": "Всегда в стартовой руке. Бьёт с ходу.",
+    "lore": "Приказ по гарнизону №117: «В связи с перехватом радиосообщений неустановленной стороной — перейти на курьерскую доставку приказов. Ответственный: [вымарано]». На полях, карандашом: «Эхо-7 слушает всё. Вестовой бегает быстрее шифровальщика. И дешевле».",
+    "abilityInfo": {
+      "charge" : {"name": "Рвение", "description": "Выходит сразу во Фронт."},
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
+  },
+  {
+    "id": "pm_rifleman",
+    "name": "Автоматчик",
+    "personalityTag": "pm_rifleman",
+    "tags": ["perimeter", "fighter"],
+    "cost": 2,
+    "strength": 3,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Очередь и тишина",
+    "shortDescription": "Крепкий стрелок.",
+    "lore": "Из личного дела: «Специальность: стрелок. Квалификация: стандарт. Замечания: нет». На обороте, тем же почерком, что заполнял формуляр: «Пишет письма домой. Не отправляет. Проверял — «здесь всё хорошо, не волнуйся». Одна и та же фраза, двенадцать раз».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_mg",
+    "name": "Пулемётчик",
+    "personalityTag": "pm_mg",
+    "tags": ["perimeter", "guardian"],
+    "cost": 2,
+    "strength": 1,
+    "health": 5,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["guardian"],
+    "title": "Не уходит",
+    "shortDescription": "Держит позицию.",
+    "lore": "Рапорт по инциденту, сектор 1, §3: «Рядовой [вымарано] отказался выполнить приказ об отступлении. Основание отказа: «позиция не сдана». Примечание: к моменту рассмотрения рапорта позиция удержана. Дисциплинарное взыскание: отложено». На полях, карандашом: «Отложено навсегда. Он до сих пор там».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_sapper",
+    "name": "Сапёр",
+    "personalityTag": "pm_sapper",
+    "tags": ["perimeter", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Считает шаги",
+    "shortDescription": "Взрывает при входе.",
+    "lore": "Из рабочего журнала сапёрного расчёта: «Объект: мост, кв. 4-1. Состояние: заминирован (наш, установка — 3 мес. назад). Задача: разминировать для прохода колонны. Время выполнения: 40 мин. Примечание: мины установлены с отклонением от схемы. Сапёр узнал свой почерк. Разминировал по памяти». На полях: «Три года минируем и разминируем одни и те же мосты. В накладных это называется «цикл обслуживания»».",
+    "triggers": [
+      {
+        "id"         : "pm_demo_charge",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Заряд",
+        "description": "Наносит 1 урона случайной карте противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_medic",
+    "name": "Санитар",
+    "personalityTag": "pm_medic",
+    "tags": ["perimeter", "supporter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Если дышит — тащи",
+    "shortDescription": "Лечит фронт.",
+    "lore": "Из расходной ведомости медчасти: «Бинты: 40 шт. (списано). Морфин: 12 амп. (списано). Обоснование перерасхода: [вымарано]». На обороте, другим почерком: «Перерасход — потому что Санитар перевязал троих из сектора 3. Не наших. Формуляр не предусматривает расхода на «не наших». Списал как потери при транспортировке».",
+    "triggers": [
+      {
+        "id"         : "pm_first_aid",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Первая помощь",
+        "description": "Восстанавливает 2 здоровья всем союзникам во Фронте.",
+        "effects"    : [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_scout",
+    "name": "Разведчик",
+    "personalityTag": "pm_scout",
+    "tags": ["perimeter", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "scout"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["tactician"],
+    "title": "Увидел — ушёл",
+    "shortDescription": "Бьёт в резерв с ходу.",
+    "lore": "Из инструкции по разведке, раздел 2, пункт 4: «Разведчик обязан: а) обнаружить противника; б) зафиксировать позицию; в) отойти. Пункт «в» является приоритетным». На полях, карандашом: «Приходит за день до колонны. Уходит за час до того, как начнут стрелять. Каждый раз. Спросил, как он узнаёт. Говорит — ноги сами знают».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_engineer",
+    "name": "Инженер",
+    "personalityTag": "pm_engineer",
+    "tags": ["perimeter", "guardian"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["guardian"],
+    "title": "Дошёл — окопался",
+    "shortDescription": "Крепнет во Фронте.",
+    "lore": "Из акта приёмки полевых укреплений, кв. 1-7: «Материалы: обломки, арматура, мешки с грунтом. Источник: руины жилого дома, ул. Промышленная. Стоимость материалов: 0.00. Качество работ: выше нормы». На полях, карандашом: «Строит из чужих домов. На салфетках чертит свой. Когда-нибудь, говорит».",
+    "triggers": [
+      {
+        "id"         : "pm_dig_in",
+        "trigger"    : "ON_REINFORCE",
+        "name"       : "Окоп",
+        "description": "При переходе во Фронт получает +2 здоровья.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 0, "health": 2, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_informant",
+    "name": "Информатор",
+    "personalityTag": "pm_informant",
+    "tags": ["perimeter", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["tactician"],
+    "title": "Берёт и уходит",
+    "shortDescription": "Тянет карту.",
+    "lore": "Служебная записка, отдел безопасности: «Информатор [позывной не присвоен] работает с источниками в секторе 4. Предположительный контакт — структура Эхо-7. Рекомендация: прекратить сотрудничество. Контррекомендация оперативного отдела: данные достоверны, источник стабилен, альтернатива отсутствует. Решение: продолжить». На полях: «Принципы стоят дорого. Информация — дороже».",
+    "triggers": [
+      {
+        "id"         : "pm_intel",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Сводка",
+        "description": "Берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_sergeant",
+    "name": "Сержант",
+    "personalityTag": "pm_sergeant",
+    "tags": ["perimeter", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Просто идёт",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Из характеристики при повышении: «Сержант [вымарано]. В бою — впереди строя. Приказы отдаёт действием, не голосом. Потери подразделения за период: ниже средних. Рекомендация: присвоить звание ст. сержанта». На полях, другим почерком: «Не говорит «вперёд». Просто идёт. Остальные — за ним. Уже три года. Каждый раз думаю — перестанут. Не перестают».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_marksman",
+    "name": "Меткий",
+    "personalityTag": "pm_marksman",
+    "tags": ["perimeter", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["breakthrough"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Терпение и дыхание",
+    "shortDescription": "Пробивает насквозь. Растёт от урона.",
+    "lore": "Из стрелковой ведомости: «Расход боеприпасов за операцию: 14 патронов. Подтверждённых поражений: 14. Коэффициент: 1.00». На обороте, карандашом: «Спросил, как. Говорит — терпение и правильное дыхание. Ещё говорит — торопливые в основном уже там. Не уточняет, где «там». Все и так знают».",
+    "triggers": [
+      {
+        "id": "pm_focus",
+        "trigger": "ON_DAMAGE_DEALT",
+        "oncePerTurn": true,
+        "name": "Пристрелка",
+        "description": "Раз в ход, когда эта карта наносит урон — получает +1 силы.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "breakthrough": {
+        "name"       : "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
+  },
+  {
+    "id": "pm_grenadier",
+    "name": "Гранатомётчик",
+    "personalityTag": "pm_grenadier",
+    "tags": ["perimeter", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "На расстоянии",
+    "shortDescription": "Бросает гранаты за Влияние.",
+    "lore": "Из рапорта по расходу боеприпасов: «Гранаты осколочные: 8 шт. Гранаты дымовые: 2 шт. Цели: укреплённые позиции, кв. 3-2. Результат: зачищено. Примечание: запрошена дополнительная партия». На обороте, другим почерком: «Играет в шахматы с Сапёром. Молчат оба. Счёт 12:11 в его пользу. Сапёр не комментирует. Гранатомётчик тоже — просто берёт следующую гранату».",
+    "activatedAbilities": [
+      {
+        "id"         : "pm_throw",
+        "cost"       : 1,
+        "name"       : "Бросок",
+        "description": "Наносит 2 урона случайной карте противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_apc",
+    "name": "Коробка",
+    "personalityTag": "pm_apc",
+    "tags": ["perimeter", "guardian"],
+    "cost": 3,
+    "strength": 2,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["guardian"],
+    "title": "Запах солярки",
+    "shortDescription": "Стена на колёсах.",
+    "lore": "Из акта технического осмотра, борт П-09: «Состояние: удовлетворительное. Пробег: [вымарано] км. Пробоины: 4 (заварены). Рекомендация: списать по выработке ресурса. Решение: продлить эксплуатацию (основание: отсутствие замены)». На полях, почерком водителя: «Пахнет соляркой и чужим потом — так меня и узнают. Довожу героев до места, где им положено. Главное — доехать. А если не доехать — то хотя бы не здесь».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_fire_team",
+    "name": "Расчёт",
+    "personalityTag": "pm_fire_team",
+    "tags": ["perimeter", "fighter"],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Квадрат на карте",
+    "shortDescription": "Накрывает фронт залпом.",
+    "lore": "Рапорт по инциденту в секторе 3, §12: «Расчёт произвёл выстрел по координатам, указанным в заявке. Заявка подписана ст. офицером. Отклонение от цели: 0. Потери противника: подтверждены. Потери среди н/с: см. приложение». Приложения в деле нет. Внизу страницы, тем же почерком: «Приложение изъято по распоряжению». Чьему — не указано.",
+    "triggers": [
+      {
+        "id"         : "pm_barrage",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Залп",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_officer",
+    "name": "Офицер",
+    "personalityTag": "pm_officer",
+    "tags": ["perimeter", "supporter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Смотрит на карту",
+    "shortDescription": "Усиливает фронт при входе.",
+    "lore": "Из оперативного приказа №[вымарано]: «Задача: выдвижение в кв. 2-4, закрепление. Командир: офицер [вымарано]. Схема маршрута: см. приложение 1 (составлена командиром вручную на обороте рациона — бумага отсутствовала)». Приложение 1 подшито к делу. Это обёртка от сухпайка с нарисованной схемой. Схема точная. На ней — три варианта маршрута. Использован четвёртый, дорисованный позже, другим карандашом.",
+    "triggers": [
+      {
+        "id"         : "pm_battle_plan",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Приказ",
+        "description": "При входе все союзники во Фронте получают +2 силы.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 2,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_howitzer",
+    "name": "Гаубица",
+    "personalityTag": "pm_howitzer",
+    "tags": ["perimeter", "fighter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Один раз, но точно",
+    "shortDescription": "Накрывает фронт залпом.",
+    "lore": "Из журнала артиллерийского расчёта: «07:40 — получены координаты. 08:12 — наведение завершено. 08:13 — выстрел. 08:14 — подтверждение». На полях, карандашом: «Тридцать две минуты на один выстрел. Командование недовольно — «слишком долго». Расчёт отвечает: «Долго — это когда промазал. А мы не промазали». Второй выстрел не потребовался».",
+    "triggers": [
+      {
+        "id"         : "pm_bombardment",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Обстрел",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_tank",
+    "name": "Танк",
+    "personalityTag": "pm_tank",
+    "tags": ["perimeter", "fighter"],
+    "cost": 5,
+    "strength": 5,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": ["breakthrough"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Создаёт слабое место",
+    "shortDescription": "Растёт от каждого убийства.",
+    "lore": "Из бортового журнала экипажа: «Выход третий за неделю. Маршрут — тот же. Позиции — те же. Каждый раз думаешь: может, не выйдем. Каждый раз выходим». Ниже, другим почерком (наводчик): «Командир говорит, что главное в танке — не броня, а экипаж. Три человека, два года. Понимаем друг друга без слов. Броня — это чтобы доехать до места, где мы нужны. А мы нужны пока что каждый день».",
+    "triggers": [
+      {
+        "id"         : "pm_relentless",
+        "trigger"    : "ON_KILL",
+        "name"       : "Неумолимый",
+        "description": "Когда эта карта убивает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "breakthrough": {
+        "name"       : "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
+  },
+  {
+    "id": "pm_veteran",
+    "name": "Ветеран",
+    "personalityTag": "pm_veteran",
+    "tags": ["perimeter", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Блокнот с именами",
+    "shortDescription": "Растёт от гибели союзников.",
+    "lore": "Из вещей, изъятых при демобилизации (отменена): «1. Блокнот, 48 стр. Содержание: имена, даты, координаты. Характер записей: личный. 2. Фотография, ч/б, повреждена. 3. Гильза, калибр 7.62, без маркировки». Примечание комиссии: «Блокнот возвращён владельцу по запросу. Содержание не копировалось». На полях, карандашом, почерк Ветерана: «Помнить — это единственное, что я умею лучше, чем стрелять».",
+    "triggers": [
+      {
+        "id"         : "pm_no_man_left",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name"       : "Ещё одно имя",
+        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_general",
+    "name": "Генерал",
+    "personalityTag": "pm_general",
+    "tags": ["perimeter", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Обходит строй",
+    "shortDescription": "Каждый ход усиливает фронт.",
+    "lore": "Из рапорта адъютанта: «Генерал [вымарано] перед каждой операцией обходит строй. Продолжительность обхода: 4–7 минут. Действия: смотрит в глаза каждому. Не произносит ни слова. Строевой необходимости в обходе нет. Рекомендация: [пусто]». На полях, почерком генерала: «Не для проверки. Чтобы запомнить. После боя кого-то из них не будет. И я это знаю. И они это знают. И всё равно стоят».",
+    "triggers": [
+      {
+        "id": "pm_command",
+        "trigger": "ON_TURN_START",
+        "name": "Присутствие",
+        "description": "В начале хода все союзники во Фронте получают +1 силы.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_mammoth",
+    "name": "Мамонт",
+    "personalityTag": "pm_mammoth",
+    "tags": ["perimeter", "fighter"],
+    "cost": 7,
+    "strength": 5,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": ["armored", "cleave"],
+    "cleaveDamage": 2,
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Не сворачивает",
+    "shortDescription": "Бронированный, бьёт по площади.",
+    "lore": "Из акта списания техники (отклонён): «Объект: тяжёлый бронетранспортёр, серия «М», борт 003. Год выпуска: [вымарано]. Пробег: [вымарано]. Состояние: предельный износ. Рекомендация: списать. Контррекомендация экипажа: «Едет. Стреляет. Не сворачивает. Что ещё нужно?»». Статус: в эксплуатации. Кличка, присвоенная механиками: «Мамонт» — тяжёлый, старый и прямо.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."},
+      "cleave" : {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 2 урона."
+      }
+    }
+  },
+  {
+    "id": "pm_battle_medic",
+    "name": "Военврач",
+    "personalityTag": "pm_battle_medic",
+    "tags": ["perimeter", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Не горюет",
+    "shortDescription": "Восстанавливает Величие при потерях.",
+    "lore": "Из медицинского журнала: «Принято: 4. Отправлено: 3. Потери: 1 (не транспортабелен, помощь оказана на месте, скончался в 04:17)». На полях, почерком Военврача: «Если буду горевать о каждом — не спасу никого. Четвёртый за эту неделю. Руки не дрожат. Это хорошо. Или плохо. Разберусь потом. Сейчас — пятый».",
+    "triggers": [
+      {
+        "id": "pm_triage",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name": "Триаж",
+        "description": "Раз в ход, когда союзник погибает — восстанавливает 2 Величия гильдии.",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_inspector",
+    "name": "Инспектор",
+    "personalityTag": "pm_inspector",
+    "tags": ["perimeter", "supporter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Слабое звено",
+    "shortDescription": "Массовый бафф за карту.",
+    "lore": "Из протокола инспекции, рота 2-Б: «Проверено: 34 ед. л/с. Отстранено: 3. Основание: несоответствие контрактным требованиям. Рекомендация: заменить. Примечание инспектора: «Слабое звено — не тот, кто слабый. Тот, кто думает, что сильный»». На полях, другим почерком: «После его проверок рота действительно работает лучше. Его за это ненавидят. Он это знает. Продолжает».",
+    "activatedAbilities": [
+      {
+        "id"         : "pm_field_promotion",
+        "name"       : "Полевое повышение",
+        "description": "Все fighter'ы во Фронте получают +1/+1.",
+        "cost"       : 2,
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT",
+            "filter"  : {"tag": "fighter"}
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_politruk",
+    "name": "Политрук",
+    "personalityTag": "pm_politruk",
+    "tags": ["perimeter", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Взятие высоты",
+    "shortDescription": "Усиливает фронт за каждый захват.",
+    "lore": "Приказ по подразделению, без номера: «Каждая занятая высота — новый рубеж. Каждый рубеж — новая строчка в контракте. Отступление от рубежа = расторжение контракта = [см. приложение Д, п. 14]». Приложение Д, п. 14: «Неустойка при расторжении по инициативе исполнителя составляет 300% от суммы контракта». На полях, карандашом: «Вперёд дешевле, чем назад. Политрук это понимает. Остальные — тоже, после первого рубежа».",
+    "triggers": [
+      {
+        "id": "pm_rally",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Рубеж",
+        "description": "Когда вы захватываете нейтрал — все союзники во Фронте получают +1 силы. Раз в ход.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_assault",
+    "name": "Штурмовик",
+    "personalityTag": "pm_assault",
+    "tags": ["perimeter", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["frenzy"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Две очереди",
+    "shortDescription": "Атакует дважды за ход.",
+    "lore": "Из расходной ведомости: «Патроны: 240 шт. Время операции: 7 мин. Расход в минуту: 34.3. Примечание: превышение нормы на 80%». На обороте, карандашом: «Норма — для тех, кто стреляет один раз. Он стреляет два. Патроны дешевле времени. Время дешевле жизни. Арифметика простая».",
+    "abilityInfo": {
+      "frenzy": {
+        "name"       : "Ярость",
+        "description": "Может атаковать дважды за ход."
+      }
+    }
+  },
+  {
+    "id": "pm_observer",
+    "name": "Наблюдатель",
+    "personalityTag": "pm_observer",
+    "tags": ["perimeter", "tactician"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["scout"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["tactician"],
+    "title": "С холма",
+    "shortDescription": "Бьёт в резерв. Крепче разведчика.",
+    "lore": "Из журнала наблюдательного поста, кв. 1-9: «06:00 — смена. 06:04 — движение в кв. 2-1, пехота, до взвода. 06:15 — движение прекратилось. 06:40 — повторное движение, направление юго-запад. 07:12 — конец записи». Последняя строка зачёркнута. Ниже, тем же почерком: «Не конец. Просто устал записывать. Они ходят по кругу. Уже третий день. Или мы ходим. Отсюда не разобрать».",
+    "abilityInfo": {
+      "scout": {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "pm_heavy_infantry",
+    "name": "Тяжёлая пехота",
+    "personalityTag": "pm_heavy_infantry",
+    "tags": ["perimeter", "guardian"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["armored"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["guardian"],
+    "title": "Под бронёй",
+    "shortDescription": "Весь входящий урон −1.",
+    "lore": "Из акта выдачи снаряжения: «Бронекомплект тяжёлый, 1 шт. Вес: 28 кг. Получатель: [вымарано]. Подпись получателя: [неразборчиво]». На полях, карандашом: «Весит больше него самого. Не снимает. Спросили — почему? Говорит: «Снимать — когда не нужен. А я пока нужен». Никто не видел его без брони. Никто не спрашивает».",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
+  },
+  {
+    "id": "pm_company_lead",
+    "name": "Ротный",
+    "personalityTag": "pm_company_lead",
+    "tags": ["perimeter", "supporter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Выходит первым",
+    "shortDescription": "Усиливает фронт при выходе.",
+    "lore": "Из характеристики при аттестации: «Ротный [вымарано]. Стиль командования: личный пример. Отдаёт приказы из передовой линии. Потери роты: ниже средних по подразделению. Рекомендация: повышение (отклонено самим аттестуемым)». На полях, другим почерком: «Спросили, почему отклонил. Говорит — если повысят, придётся командовать из бункера. А из бункера за ним никто не пойдёт».",
+    "triggers": [
+      {
+        "id": "pm_lead_company",
+        "trigger": "ON_REINFORCE",
+        "name": "В строй",
+        "description": "При переходе во Фронт все союзники во Фронте получают +1/+1.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_breach",
+    "name": "Прорыв",
+    "personalityTag": "pm_breach",
+    "tags": ["perimeter", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "В проломе",
+    "shortDescription": "Врывается с ходу.",
+    "lore": "Из оперативной сводки: «04:17 — стена обрушена (сапёрный заряд). 04:17 — Прорыв в проломе. 04:18 — огневой контакт. 04:21 — квадрат зачищен». На полях, карандашом: «Между обрушением стены и его появлением в проломе — ноль секунд. Не «несколько». Ноль. Спросил, как. Говорит — думать надо было раньше, когда стену выбирали».",
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "pm_vanguard",
+    "name": "Авангард",
+    "personalityTag": "pm_vanguard",
+    "tags": ["perimeter", "fighter"],
+    "cost": 2,
+    "strength": 3,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Уже в окопе",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Из формуляра: «Специальность: штурмовая пехота. Примечание: быстрый выход на позицию. Замечания: систематическое опережение графика». На полях, карандашом: «Пока остальные строятся — он уже в окопе. Не ждёт. Не отчитывается. Просто — уже там».",
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "pm_field_scout",
+    "name": "Боевой разведчик",
+    "personalityTag": "pm_field_scout",
+    "tags": ["perimeter", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["scout"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["tactician"],
+    "title": "Фиксирует",
+    "shortDescription": "Разведка. Карта за каждый захват.",
+    "lore": "Из донесения: «Точка кв. 3-1 — занята. Состав: отделение, лёгкое вооружение. Укрепления: нет. Возможность обхода: да (с юга, через развалины). Время наблюдения: 14 мин.» На обороте, тем же почерком: «Вернулся с пустыми руками — потому что вернулся. С полными — это когда уже не ты несёшь донесение».",
+    "triggers": [
+      {
+        "id": "pm_field_report",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Донесение",
+        "description": "Когда вы захватываете нейтрал — берёт 1 карту. Раз в ход.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "pm_corrector",
+    "name": "Корректировщик",
+    "personalityTag": "pm_corrector",
+    "tags": ["perimeter", "controller"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["controller"],
+    "title": "По координатам",
+    "shortDescription": "Бьёт по Величию при входе.",
+    "lore": "Из переговоров, канал 2-Б, 11:04:\n— Корректировщик, координаты?\n— Квадрат 5-3. Готов.\n— Что в квадрате?\n— Координаты переданы. Жду подтверждения.\n— Повторяю: что в квадрате?\n[Пауза, 3 секунды]\n— Контракт не содержит пункта «проверить содержимое квадрата».\n[Конец записи]",
+    "triggers": [
+      {
+        "id"         : "pm_strike",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Налёт",
+        "description": "Наносит 2 урона Величию противника при входе.",
+        "effects"    : [
+          {"kind": "DAMAGE_GLORY", "amount": 2, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_vanguard_force",
+    "name": "Передовой отряд",
+    "personalityTag": "pm_vanguard_force",
+    "tags": ["perimeter", "tactician"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["vanguard"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["tactician"],
+    "title": "Уже на высоте",
+    "shortDescription": "Сразу во Фронт, если есть нейтрал.",
+    "lore": "Из оперативной сводки: «Высота кв. 2-3 занята Передовым отрядом в 05:40, за 20 минут до подхода основных сил. Потери: нет. Боеконтакт: краткий. Примечание: основные силы при подходе обнаружили укреплённую позицию и горячий чай». На полях, карандашом: «Спросили, откуда чай. Командир отряда: «Был в термосе. Мы же не дикари»».",
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "pm_piercer",
+    "name": "Пробивной",
+    "personalityTag": "pm_piercer",
+    "tags": ["perimeter", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["breakthrough"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Не останавливается",
+    "shortDescription": "Излишек урона идёт в Резерв.",
+    "lore": "Из рапорта командира отделения: «Рядовой [вымарано] при штурме кв. 4-2 прошёл через первую линию обороны противника без остановки. Огонь вёлся на ходу. Потери противника в первой линии: 2. Во второй: 1 (поражён сквозь первую). Рекомендация: поощрение». На полях, карандашом: «Не останавливается. Ни на первом, ни на втором. Это не храбрость — он просто не умеет тормозить».",
+    "abilityInfo": {
+      "breakthrough": {
+        "name": "Прорыв",
+        "description": "Избыточный урон идёт карте в Резерве за убитым защитником."
+      }
+    }
+  },
+  {
+    "id": "pm_heavy_mortar",
+    "name": "Тяжёлый миномёт",
+    "personalityTag": "pm_heavy_mortar",
+    "tags": ["perimeter", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Точечный",
+    "shortDescription": "Убирает цель при входе.",
+    "lore": "Из журнала расчёта: «Цель: укреплённая точка, кв. 6-1. Расстояние: 1200 м. Мин: 3 шт. Поражение: подтверждено с первой. Вторая и третья — для надёжности». На полях, карандашом: «Надёжность — это когда цель уже уничтожена, а ты всё равно стреляешь. Потому что «подтверждено» — это слово. А тишина в квадрате — это факт».",
+    "triggers": [
+      {
+        "id"         : "pm_mortar",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Миномётный",
+        "description": "Наносит 3 урона выбранному врагу во Фронте.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 3, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_commando",
+    "name": "Коммандос",
+    "personalityTag": "pm_commando",
+    "tags": ["perimeter", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Зашёл — отработал — ушёл",
+    "shortDescription": "Врывается и бьёт по Величию.",
+    "lore": "Из оперативного отчёта: «Группа «К» — выход в кв. 5-4. Время в зоне: 3 мин. Контакт: минимальный. Результат: объект нейтрализован. Потери: нет. Следы присутствия: нет». На полях, карандашом: «Три минуты. Нет следов. Штаб противника утром обнаружил потерю — не обнаружил, как. Мы тоже не до конца понимаем, как. Но контракт выполнен».",
+    "triggers": [
+      {
+        "id"         : "pm_quick_strike",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Рейд",
+        "description": "Наносит 1 урон Величию противника.",
+        "effects"    : [
+          {"kind": "DAMAGE_GLORY", "amount": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name"       : "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "pm_ghost_lead",
+    "name": "Призрачный Лидер",
+    "personalityTag": "pm_ghost_lead",
+    "tags": ["perimeter", "supporter"],
+    "cost": 7,
+    "strength": 5,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "Ведёт даже мёртвый",
+    "shortDescription": "Массовый бафф при входе и каждый ход.",
+    "lore": "Из рапорта дежурного офицера, дата: третий день после Разлома:\n«06:00 — получен приказ по каналу командования. Содержание: передислокация роты 1-А в сектор 1, закрепление. Подпись: [позывной Лидера]. Примечание: Лидер погиб при обрушении центральных кварталов. Подтверждение гибели: визуальное (двое свидетелей). Тело не найдено».\n06:12 — приказ выполнен.\nНа полях, карандашом, неустановленным почерком: «Приказы поступали ещё три дня. Потом прекратились. Канал не взломан — проверяли. Подпись — его. Почерк — его. Рациональное объяснение: нет».\nНиже, другим карандашом: «Строй идёт без команды. Это — он. Спорить с легендой — плохая примета».",
+    "triggers": [
+      {
+        "id"         : "pm_hold_the_line",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Приказ мёртвого",
+        "description": "Все союзники во Фронте получают +2/+2.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 2,
+            "health"  : 2,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "pm_presence",
+        "trigger": "ON_TURN_START",
+        "name": "Инерция",
+        "description": "В начале хода все союзники во Фронте получают +1 силы.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_cross",
+    "name": "Майор Тайтус Кросс",
+    "personalityTag": "pm_cross",
+    "tags": ["perimeter", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": ["taunt"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["supporter"],
+    "title": "За себя не отвечаю",
+    "shortDescription": "Лечит фронт и тянет карту при уроне.",
+    "lore": "Контракт №[вымарано], страница последняя:\n«Подпись исполнителя: Т. Кросс, майор. Дата: [вымарано]».\nНиже подписи, тем же почерком: «За себя не отвечаю».\nИз личного дела, пометка отдела кадров: «Приписка «за себя не отвечаю» присутствует в каждом контракте, подписанном Кроссом (всего: 214). Юридической силы не имеет. Рекомендация: прекратить практику. Решение: [пусто]».\nНа полях, почерком Кросса: «Во время конверсии был капитаном. Мог не исполнить. Выбрал дисциплину. С тех пор — майор. Те, кто стоял выше, либо ушли, либо перестали. Я остался. Я всегда остаюсь. Это моя главная проблема».",
+    "triggers": [
+      {
+        "id"         : "pm_field_triage",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Формуляр",
+        "description": "Восстанавливает 4 здоровья всем союзникам во Фронте.",
+        "effects"    : [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      },
+      {
+        "id"         : "pm_hardened",
+        "trigger"    : "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name"       : "Закалка",
+        "description": "Раз в ход, когда получает урон — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_polaris",
+    "name": "Полярис",
+    "personalityTag": "pm_polaris",
+    "tags": ["perimeter", "fighter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["fighter"],
+    "title": "Позывной вместо имени",
+    "shortDescription": "Снимает цель и накрывает фронт.",
+    "lore": "Из личного дела, гриф «ограниченный доступ»:\n«Позывной: Полярис. Имя: [вымарано по запросу фигуранта]. Лицо: не показывает с операции №4. Содержание операции №4: [страница отсутствует]. Результат операции №4: «выполнено». Дополнительная информация: отсутствует».\nИз стенограммы кадровой комиссии:\n«— Полярис, вы намерены вернуться к прежней жизни?\n— Пока не собираюсь.\n— Когда собираетесь?\n[Пауза, 7 секунд]\n— Я сказал «пока».\n[Конец стенограммы]»\nПримечание психолога, подшито к делу: «Слово «пока» стоило ему двух бессонных ночей. Он не ожидал, что скажет его».",
+    "triggers": [
+      {
+        "id"         : "pm_precision",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Зачистка",
+        "description": "Наносит 4 урона выбранной карте противника на столе.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id"         : "pm_suppression",
+        "cost"       : 2,
+        "name"       : "Подавление",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "pm_tk_bunker",
+    "name": "Бетон",
+    "personalityTag": "pm_tk_bunker",
+    "tags": ["perimeter", "guardian", "token"],
+    "cost": 0,
+    "strength": 0,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["perimeter"],
+    "factions": ["perimeter"],
+    "roles": ["guardian"],
+    "title": "Пять минут",
+    "shortDescription": "Стоит и держит.",
+    "lore": "Из типовой инструкции: «Укрепление полевое, тип «Б». Время сборки: 5 мин. Время разборки: 1 мин (противником). Назначение: временная защита личного состава. Срок эксплуатации: до разрушения». На полях, карандашом: «Иногда этого достаточно».",
+    "isToken": true,
+    "abilityInfo": {}
+  }
+]

@@ -1,0 +1,800 @@
+[
+  {
+    "id": "sky_contract_soldier",
+    "name": "Контрактник",
+    "personalityTag": "sky_contract_soldier",
+    "tags": ["sky", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Срок — восемнадцать месяцев",
+    "shortDescription": "Дешёвая пехота.",
+    "lore": "Из формуляра при зачислении: «Контракт № 0041-Д. Срок: 18 мес. Оклад: стандарт. Примечание: без опыта». На обороте, карандашом: «Мать — г. Мариновка. Не сообщать».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_courier",
+    "name": "Посыльный",
+    "personalityTag": "sky_courier",
+    "tags": ["sky", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Быстрее эфира",
+    "shortDescription": "Бьёт с ходу.",
+    "lore": "Радио не пользуется — Эхо-7 слушает всё, что говорят в эфире. Приказы носит на ногах. Бортовой журнал диспетчерской, запись 7:04: «Посыльный в секторе. Радиомолчание подтверждено. Время доставки — четыре минуты. Дрон — одиннадцать».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_trenchman",
+    "name": "Окопник",
+    "personalityTag": "sky_trenchman",
+    "tags": ["sky", "guardian"],
+    "cost": 2,
+    "strength": 1,
+    "health": 5,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["guardian"],
+    "title": "Не выходит",
+    "shortDescription": "Крепкий защитник.",
+    "lore": "Внутреннее мемо, отдел кадров: «Рядовой [вымарано] отказался выполнить приказ об отступлении в секторе 4. Дисциплинарное взыскание не применялось: к моменту рассмотрения рапорта сектор 4 был удержан. Рекомендация: перевести на постоянную позицию. Он всё равно не уйдёт».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_field_medic",
+    "name": "Медик",
+    "personalityTag": "sky_field_medic",
+    "tags": ["sky", "supporter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["supporter"],
+    "title": "Графа «потери»",
+    "shortDescription": "Лечит фронт при входе.",
+    "lore": "Из бортового журнала эвакуационного борта: «Трое — наши. Один — из Разлома, подобрали на нейтральной. Медик перевязал всех четверых. Диспетчер запросил обоснование расхода материалов на нечетвёртого. Медик не ответил. Материалы списаны как «потери при транспортировке»».",
+    "triggers": [
+      {
+        "id"         : "sky_triage",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Сортировка",
+        "description": "Восстанавливает 2 здоровья всем союзникам во Фронте.",
+        "effects"    : [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_chaplain",
+    "name": "Капеллан",
+    "personalityTag": "sky_chaplain",
+    "tags": ["sky", "supporter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["supporter"],
+    "title": "Не по контракту",
+    "shortDescription": "Восстанавливает Величие каждый ход.",
+    "lore": "В штатном расписании Стратоса должности «капеллан» нет. Есть «специалист по моральному климату, код 7-Б». Оклад — минимальный. Премии — не предусмотрены. К нему всё равно приходят. Даже те, кто подписывал контракт со строчкой «религиозные убеждения: отсутствуют».",
+    "triggers": [
+      {
+        "id"         : "sky_vigil",
+        "trigger"    : "ON_TURN_END",
+        "name"       : "Бдение",
+        "description": "В конце хода восстанавливает 1 Величие гильдии.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_spotter",
+    "name": "Корректировщик",
+    "personalityTag": "sky_spotter",
+    "tags": ["sky", "tactician"],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["tactician"],
+    "title": "Запоминает",
+    "shortDescription": "Тянет карту при атаке врага.",
+    "lore": "Запись переговоров, канал 3-Ф, 14:27:\n— Борт-12, квадрат подтверждён?\n— Подтверждён. Корректировщик на месте.\n— Что в квадрате?\n— Корректировщик на месте. Подтверждаю координаты.\n— Я спрашиваю, что в квадрате.\n[Пауза, 4 секунды]\n— Цель.",
+    "triggers": [
+      {
+        "id"         : "sky_report",
+        "trigger"    : "ON_ENEMY_ATTACK",
+        "oncePerTurn": true,
+        "name"       : "Засечка",
+        "description": "Раз в ход, когда враг атакует — берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_field_engineer",
+    "name": "Инженер",
+    "personalityTag": "sky_field_engineer",
+    "tags": ["sky", "guardian"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["regenerate"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["guardian"],
+    "title": "Оборудует за минуту",
+    "shortDescription": "Крепнет во Фронте и восстанавливается.",
+    "lore": "Накладная на инженерные работы, сектор 2: «Объект: временное укрепление, кв. 7-3. Материалы: бетонные обломки (списанные), арматура (б/у), мешки с грунтом (без маркировки). Стоимость работ: 0.00. Примечание: рядовой [вымарано] выполнил без запроса. Повторно». Ниже, от руки: «Перестаньте списывать его работу как нулевую. Он лучше подрядчиков».",
+    "triggers": [
+      {
+        "id"         : "sky_dig_in",
+        "trigger"    : "ON_REINFORCE",
+        "name"       : "Укрепление",
+        "description": "При переходе во Фронт получает +2 здоровья.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 0, "health": 2, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "regenerate": {
+        "name"       : "Регенерация",
+        "description": "В конце хода восстанавливает 1 HP."
+      }
+    }
+  },
+  {
+    "id": "sky_battery",
+    "name": "Батарея",
+    "personalityTag": "sky_battery",
+    "tags": ["sky", "fighter"],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Работает по квадрату",
+    "shortDescription": "Накрывает фронт залпом.",
+    "lore": "Из внутреннего мемо, отдел логистики: «В связи с оптимизацией расходов предлагается исключить графу «проверка содержимого квадрата» из предполётного чек-листа. Экономия: 12 минут на вылет, 14% суточной пропускной способности. Риски: репутационные (низкие). Решение: одобрено». Подпись нечитаемая. Дата — за два месяца до инцидента в квадрате 6-14.",
+    "triggers": [
+      {
+        "id"         : "sky_barrage",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Залп",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_pathfinder",
+    "name": "Авангард",
+    "personalityTag": "sky_pathfinder",
+    "tags": ["sky", "tactician"],
+    "cost": 3,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["vanguard"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["tactician"],
+    "title": "До разведки",
+    "shortDescription": "Сразу во Фронт, если есть нейтрал.",
+    "lore": "Бортовой журнал, запись 0903: «Авангард высажен в кв. 5-2 за четырнадцать минут до разведгруппы. Разведгруппа не потребовалась. Статус квадрата при высадке: неизвестен. Статус квадрата после: наш. Расход боеприпасов: значительный. Потери: нет. Примечание: рекомендуется прекратить высаживать людей до подтверждения обстановки. Примечание к примечанию: рекомендация отклонена».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_sniper",
+    "name": "Снайпер",
+    "personalityTag": "sky_sniper",
+    "tags": ["sky", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Сам выбирает",
+    "shortDescription": "Бьёт на 4 по выбранной цели.",
+    "lore": "Единственный в Стратосе, кому разрешено выбирать цель самостоятельно. В контракте это прописано отдельным пунктом — §7, «право оперативного решения». Стоимость пункта — тридцать процентов оклада. Он согласился не торгуясь. Бортовой журнал корректировщика, запись от [вымарано]: «Снайпер отказался работать по квадрату. Запросил визуальное подтверждение цели. Получил. Отработал. Одна цель — один выстрел. В накладной — один патрон». Ниже, другим почерком: «Патрон стоит дешевле, чем залп. Но §7 стоит дороже, чем оба».",
+    "activatedAbilities": [
+      {
+        "id"         : "sky_precision_shot",
+        "cost"       : 2,
+        "name"       : "Точный выстрел",
+        "description": "Наносит 4 урона выбранной карте противника на столе.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_siege_gun",
+    "name": "Тяжёлая артиллерия",
+    "personalityTag": "sky_siege_gun",
+    "tags": ["sky", "fighter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "По средним",
+    "shortDescription": "Бьёт залпом по врагам с силой ≤4.",
+    "lore": "Накладная №Б-1170, расчёт «Тяжёлая-3»: «Расход: 12 снарядов калибра 152. Квадрат: 8-2. Цели: средние укреплённые. Результат: подтверждён корректировщиком. Потери среди н/с: см. приложение». Приложение отсутствует. На полях накладной, карандашом: «Керро опять спросил, что было в квадрате. Ему сказали — укрепления. Он больше не спрашивает».",
+    "triggers": [
+      {
+        "id"         : "sky_bombardment",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Обстрел",
+        "description": "Наносит 3 урона всем врагам во Фронте с силой ≤4.",
+        "effects"    : [
+          {
+            "kind"  : "DEAL_DAMAGE",
+            "amount": 3,
+            "target": "ALL_ENEMY_FRONT",
+            "filter": {"maxStrength": 4}
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_transport",
+    "name": "Транспортник",
+    "personalityTag": "sky_transport",
+    "tags": ["sky", "tactician"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": ["scout"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["tactician"],
+    "title": "Сквозь фронт",
+    "shortDescription": "Бьёт в резерв.",
+    "lore": "Бортовой журнал, запись 1206: «Борт-7, маршрут через кв. 3-5, 3-6, 4-6. Обстрел на подходе — мелкий, не задержал. Высадка в точке — штатная. Возврат пустым. Время в зоне: девять минут». Ниже, тем же почерком, без номера записи: «Девять минут — это много. В прошлый раз было семь. Маршрут кто-то сливает. Или маршрут кто-то знает заранее».",
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_combat_pilot",
+    "name": "Пилот-ас",
+    "personalityTag": "sky_combat_pilot",
+    "tags": ["sky", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["frenzy"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Два захода",
+    "shortDescription": "Атакует дважды за ход.",
+    "lore": "Запись переговоров, канал 1-А, 16:33:\n— Борт-3, второй заход подтверждён?\n— Подтверждён. Иду на разворот.\n— Борт-3, по регламенту второй заход требует повторного согласования с—\n— Уже развернулся.\n[Пауза, 2 секунды]\n— Борт-3, принято. Акт допишем на базе.",
+    "abilityInfo": {
+      "frenzy": {
+        "name"       : "Ярость",
+        "description": "Может атаковать дважды за ход."
+      }
+    }
+  },
+  {
+    "id": "sky_fire_control",
+    "name": "Наводчик",
+    "personalityTag": "sky_fire_control",
+    "tags": ["sky", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Новая точка — новый залп",
+    "shortDescription": "Бьёт по фронту за каждый захват.",
+    "lore": "Из служебной записки, отдел координации: «Наводчик привязан к сетке захвата: каждая подтверждённая точка автоматически транслируется в батарею как новые координаты. Эффективность — высокая. Проблема: наводчик перестал проверять координаты вручную. Говорит — «система не ошибается». Кто обновляет систему — не уточняет».",
+    "triggers": [
+      {
+        "id": "sky_called_strike",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Целеуказание",
+        "description": "Когда вы захватываете нейтрал — наносит 1 урон всем врагам во Фронте. Раз в ход.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_stormtrooper",
+    "name": "Штурмовик",
+    "personalityTag": "sky_stormtrooper",
+    "tags": ["sky", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["cleave"],
+    "cleaveDamage": 1,
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "По полосе",
+    "shortDescription": "Задевает соседей цели.",
+    "lore": "Бортовой журнал, запись 1140: «Квадрат 4-7, заказ #Б-220, акт подписан. Облачность 60%, ветер северо-западный. Отработали чисто. Полоса зачищена — три точки, смежные. На обратном пути Керро спросил, что было в квадрате. Я не ответил. Он больше не спрашивает».",
+    "abilityInfo": {
+      "cleave": {
+        "name"       : "Рассечение",
+        "description": "Атака задевает соседей цели на 1 урона."
+      }
+    }
+  },
+  {
+    "id": "sky_dispatcher",
+    "name": "Диспетчер",
+    "personalityTag": "sky_dispatcher",
+    "tags": ["sky", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["supporter"],
+    "title": "Один сигнал",
+    "shortDescription": "При захвате точки сбрасывает десант.",
+    "lore": "Запись переговоров, канал 5-Д, 09:41:\n— Диспетчер, точка 3-4 подтверждена.\n— Принято. Десант на подходе.\n— Диспетчер, в точке 3-4 ещё не зачищено.\n— Десант на подходе.\n— Повторяю: не зачищено. Там ещё—\n— Я слышал. Десант уже сброшен.\n[Конец записи]\nПометка в бортовом журнале: «Точка 3-4 зачищена. Потери десанта: приемлемые. Определение «приемлемые» — см. контракт, приложение Г».",
+    "triggers": [
+      {
+        "id": "sky_airdrop",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Сброс десанта",
+        "description": "Когда вы захватываете нейтрал — призывает Десантника во Фронт. Раз в ход.",
+        "effects": [
+          {
+            "kind"       : "SUMMON",
+            "defId"      : "sky_tk_paratrooper",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_armored_car",
+    "name": "Броневик",
+    "personalityTag": "sky_armored_car",
+    "tags": ["sky", "guardian"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["armored"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["guardian"],
+    "title": "Не быстрый, но целый",
+    "shortDescription": "Весь входящий урон −1.",
+    "lore": "Из акта технического осмотра, борт Б-14: «Состояние: удовлетворительное. Пробоины: 7 (заварены). Ходовая: исправна. Рекомендация: списать. Контррекомендация водителя: «Списывайте меня вместе с ним»». Статус: в эксплуатации.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
+  },
+  {
+    "id": "sky_accountant",
+    "name": "Логист",
+    "personalityTag": "sky_accountant",
+    "tags": ["sky", "tactician"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["tactician"],
+    "title": "Считает маршруты",
+    "shortDescription": "Приносит Влияние каждый ход.",
+    "lore": "Из квартального отчёта, отдел маршрутизации: «Оптимизация воздушных коридоров за отчётный период: +17%. Источник оптимизации: данные «Хроноса» (контракт №Х-12, бессрочный). Примечание: маршруты, предложенные «Хроносом», совпадают с фактическими перемещениями противника с точностью 94%. Рекомендация: увеличить закупку данных. Вопрос: почему точность растёт каждый квартал?» Вопрос без ответа. Закупка увеличена.",
+    "triggers": [
+      {
+        "id"         : "sky_routing",
+        "trigger"    : "ON_TURN_START",
+        "name"       : "Оптимизация",
+        "description": "В начале хода даёт +1 Влияния.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_ecm",
+    "name": "Глушитель",
+    "personalityTag": "sky_ecm",
+    "tags": ["sky", "controller"],
+    "cost": 5,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["controller"],
+    "title": "Белый шум",
+    "shortDescription": "Снимает способности у карты напротив.",
+    "lore": "Из рапорта оператора РЭБ: «Комплекс «Завеса» активирован в 04:00 по сетке кв. 6-1 — 6-4. Результат: полное подавление связи противника на 11 минут. Побочный эффект: подавление собственной связи на 3 минуты. Причина побочного эффекта: неизвестна. Комплекс работал в штатном режиме. Частоты Стратоса не входят в диапазон подавления». На полях, карандашом: «Так кто нас глушил эти три минуты?»",
+    "triggers": [
+      {
+        "id"         : "sky_jam",
+        "trigger"    : "ON_ENTER",
+        "oncePerTurn": true,
+        "name"       : "Подавление",
+        "description": "При входе снимает способности у карты напротив.",
+        "effects"    : [ {"kind": "SILENCE_TARGET", "target": "OPPOSITE"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_convoy",
+    "name": "Бронеколонна",
+    "personalityTag": "sky_convoy",
+    "tags": ["sky", "guardian"],
+    "cost": 5,
+    "strength": 4,
+    "health": 6,
+    "rarity": "uncommon",
+    "abilities": ["armored", "taunt"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["guardian"],
+    "title": "Ни один не пропал",
+    "shortDescription": "Бронированная стена.",
+    "lore": "Из внутреннего мемо, отдел безопасности: «За отчётный период потеряно 0 (ноль) бронеколонн. Повреждено: 3. Отремонтировано: 3. Среднее время ремонта: 14 часов. Рекомендация: увеличить страховую премию на 20% в связи с ростом стоимости запчастей». На полях, от руки: «Запчасти дорожают. Водители — нет. Где-то в этом есть проблема».",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."},
+      "taunt"  : {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту."
+      }
+    }
+  },
+  {
+    "id": "sky_afterburner",
+    "name": "Сверхзвуковой",
+    "personalityTag": "sky_afterburner",
+    "tags": ["sky", "fighter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": ["frenzy"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Только звуковой удар",
+    "shortDescription": "Две атаки за ход.",
+    "lore": "Из протокола разбора инцидента: «Борт-1 выполнил два захода на цель за 47 секунд. Регламентное время между заходами — 90 секунд. Нарушение: да. Результат: цель уничтожена. Дисциплинарное взыскание: [вымарано]. Рекомендация: пересмотреть регламентное время». Ниже, другим почерком: «Не пересматривать. Просто не наказывать».",
+    "abilityInfo": {
+      "frenzy": {
+        "name"       : "Ярость",
+        "description": "Может атаковать дважды за ход."
+      }
+    }
+  },
+  {
+    "id": "sky_war_dog",
+    "name": "Ветеран",
+    "personalityTag": "sky_war_dog",
+    "tags": ["sky", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Помнит всех",
+    "shortDescription": "Растёт от потерь союзников.",
+    "lore": "Из бортового журнала, без номера записи: «Керро не вернулся. Таль не вернулся. Линда не вернулась. Записываю, потому что в рапорте будут номера, а не имена. А я помню имена. Кто-то должен». Журнал конфискован отделом безопасности. Возвращён через два дня — без объяснений, без вымарок, без пометок. Просто возвращён.",
+    "triggers": [
+      {
+        "id"         : "sky_no_man_left",
+        "trigger"    : "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name"       : "Счёт",
+        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_air_marshal",
+    "name": "Маршал",
+    "personalityTag": "sky_air_marshal",
+    "tags": ["sky", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["supporter"],
+    "title": "Вид сверху",
+    "shortDescription": "Каждый ход усиливает фронт.",
+    "lore": "Из стенограммы совещания, гриф «для внутреннего пользования»:\n«— Потери за квартал?\n— В пределах контрактных норм.\n— Это сколько?\n— В пределах норм, сэр.\n— Мне нужна цифра.\n— Цифра в приложении. Приложение — для вашего уровня доступа.\n— Я маршал.\n— Именно поэтому приложение для вашего уровня доступа, сэр».\nСтенограмма классифицирована. Приложение не найдено.",
+    "triggers": [
+      {
+        "id": "sky_tactical_command",
+        "trigger": "ON_TURN_START",
+        "name": "Воздушный приказ",
+        "description": "В начале хода все союзники во Фронте получают +1 силы.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 0,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_rein",
+    "name": "Лейтенант Энди Рейн",
+    "personalityTag": "sky_rein",
+    "tags": ["sky", "supporter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["supporter"],
+    "title": "Подписывает только заказы",
+    "shortDescription": "Лечит фронт и Величие.",
+    "lore": "Из личного дела, гриф «ограниченный доступ»:\n«Лейтенант Рейн, Энди. Эскадрилья 3-А. Потери личного состава за 36 месяцев: 0. Проверка целей до удара: да (нештатная процедура, личная инициатива). Потеря контрактов вследствие задержки ударов: 2. Замечания от отдела контрактов: 7. Дисциплинарные взыскания: 0 (отклонены командованием)».\nНа полях, от руки, почерк Рейн: «Тридцать семь месяцев. Поправьте».\nНиже, другим почерком: «Тридцать семь месяцев — если не считать Борт-9».\nНиже, почерком Рейн: «Борт-9 получил координаты, которых я не давала».\nБольше записей на полях нет.",
+    "triggers": [
+      {
+        "id": "sky_standing_order",
+        "trigger": "ON_TURN_END",
+        "name": "Стоячий приказ",
+        "description": "В конце хода восстанавливает 2 здоровья всем союзникам во Фронте.",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      },
+      {
+        "id"         : "sky_zero_losses",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Ноль потерь",
+        "description": "Восстанавливает 5 Величия гильдии при входе.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 5, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_field_hospital",
+    "name": "Военный госпиталь",
+    "personalityTag": "sky_field_hospital",
+    "tags": ["sky", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["supporter"],
+    "title": "С того света",
+    "shortDescription": "Массовый хил и восстановление Величия.",
+    "lore": "Накладная на эвакуацию, борт Мед-2:\n«Принято: 14 раненых (8 — категория «тяжёлые»). Отправлено в госпиталь: 14. Выжило: [графа не заполнена]».\nНа обороте накладной, карандашом, почерк неустановлен: «Графу «выжило» перестали заполнять в третьем квартале. Не потому что не выживают — потому что бухгалтерии нужна цифра на момент передачи, а не на момент выписки. Пациент, умерший в госпитале, в накладной числится доставленным. Статистика борта — безупречная. Статистика госпиталя — в другом документе. Документ — в другом отделе. Отдел — в другом здании. Здание — в секторе, который мы же бомбили в прошлом квартале».",
+    "triggers": [
+      {
+        "id": "sky_mass_triage",
+        "trigger": "ON_ENTER",
+        "name": "Развёртывание",
+        "description": "Восстанавливает 4 здоровья всем союзникам во Фронте и 8 Величия гильдии.",
+        "effects": [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"},
+          {"kind": "HEAL_GLORY", "amount": 8, "who": "SELF"}
+        ]
+      },
+      {
+        "id": "sky_steady_hands",
+        "trigger": "ON_TURN_END",
+        "name": "Дежурная смена",
+        "description": "В конце хода восстанавливает 1 здоровья всем союзникам на столе.",
+        "effects": [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_BOARD"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_supercell",
+    "name": "Суперъячейка",
+    "personalityTag": "sky_supercell",
+    "tags": ["sky", "fighter"],
+    "cost": 8,
+    "strength": 7,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["fighter"],
+    "title": "Квадрат целиком",
+    "shortDescription": "Накрывает всех — и чужих, и своих.",
+    "lore": "Из накладной артиллерийского комплекса «Суперъячейка», форма стандартная:\n«Квадрат: [заполняется заказчиком]. Площадь поражения: полная. Выборочное поражение: нет. Графа «потери среди гражданского населения»: [графа отсутствует]».\nИз протокола внутреннего аудита, три года назад: «Рекомендация: добавить графу «гражданские потери» в форму накладной. Решение: отклонено. Основание: «отсутствие методологии подсчёта»».\nГрафу не добавили. Методологию не разработали. «Суперъячейка» работает по расписанию.",
+    "triggers": [
+      {
+        "id"         : "sky_carpet_bombing",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Ковровый",
+        "description": "Наносит 3 урона всем картам противника во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+        ]
+      },
+      {
+        "id": "sky_collateral",
+        "trigger": "ON_TURN_START",
+        "name": "Сопутствующий",
+        "description": "В начале хода наносит 1 урона всем своим картам во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_chronos",
+    "name": "«Хронос»",
+    "personalityTag": "sky_chronos",
+    "tags": ["sky", "tactician"],
+    "cost": 5,
+    "strength": 3,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": ["tactician"],
+    "title": "Двенадцать лет без посадки",
+    "shortDescription": "Генерирует Влияние.",
+    "lore": "Из служебной записки, отдел разведки:\n«Объект: БПЛА «Хронос», серийный номер [вымарано]. Статус: активен. Время непрерывного полёта: 12 лет, 4 месяца, 9 дней. Оператор: не назначен. Управление: автономное (предположительно). Источник команд: неизвестен. Канал передачи данных: зашифрован (протокол не соответствует стандартам Стратоса)».\nНа полях, карандашом: «Мы продаём его данные всем четырём сторонам. Эхо-7 купили трёхлетний архив. Вопрос, который никто не задаёт: если мы не управляем «Хроносом» — чьи данные мы продаём?»\nНиже, другим карандашом: «Не задавай».",
+    "triggers": [
+      {
+        "id"         : "sky_signal_boost",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Канал",
+        "description": "При входе получает +3 Влияния.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 3, "who": "SELF"}
+        ]
+      },
+      {
+        "id"         : "sky_steady_flow",
+        "trigger"    : "ON_TURN_START",
+        "name"       : "Трансляция",
+        "description": "В начале хода получает +2 Влияния.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_tk_airstrike",
+    "name": "Авиаудар",
+    "personalityTag": "sky_tk_airstrike",
+    "tags": ["sky", "fighter", "token"],
+    "cost": 0,
+    "strength": 3,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "temporary", "breakthrough"],
+    "tempDuration": 1,
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": [],
+    "title": "Координаты приняты",
+    "shortDescription": "Одно попадание — и нет.",
+    "lore": "Из акта выполненных работ: «Квадрат: [заполнено]. Время удара: [заполнено]. Результат: подтверждён. Исполнитель: Борт-[заполнено]». Четыре графы. Ни одной — про то, что было внизу.",
+    "isToken": true,
+    "abilityInfo": {}
+  },
+  {
+    "id": "sky_tk_paratrooper",
+    "name": "Десантник",
+    "personalityTag": "sky_tk_paratrooper",
+    "tags": ["sky", "fighter", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["charge", "temporary"],
+    "tempDuration": 1,
+    "series": ["sky"],
+    "factions": ["sky"],
+    "roles": [],
+    "title": "Сброшен",
+    "shortDescription": "Живёт один ход.",
+    "lore": "Из страхового формуляра, типовой: «Застрахованный: [имя]. Вид операции: высотный десант. Страховой случай: гибель при выполнении. Выплата: стандартная. Получатель: [графа не заполнена]». Большинство не заполняют графу получателя. Некоторые — потому что некому. Остальные — потому что не хотят думать об этом перед прыжком.",
+    "isToken": true,
+    "abilityInfo": {}
+  }
+]

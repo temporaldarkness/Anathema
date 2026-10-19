@@ -1,0 +1,1284 @@
+[
+  {
+    "id": "sw_spearman",
+    "name": "Копейщик",
+    "personalityTag": "sw_spearman",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["starter"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Первый ряд",
+    "shortDescription": "Всегда в стартовой руке.",
+    "lore": "Древко почти чёрное от ладоней — его, отцовских, дедовых. Стоит в первом ряду. Там всегда стоял кто-то из семьи.",
+    "abilityInfo": {
+      "starter": {
+        "name": "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
+  },
+  {
+    "id": "sw_gatekeeper",
+    "name": "Привратник",
+    "personalityTag": "sw_gatekeeper",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 4,
+    "rarity": "common",
+    "abilities": ["vanguard"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Западные врата",
+    "shortDescription": "Держит ворота до последнего.",
+    "lore": "Тридцать лет — одни и те же ворота. Знает их вес, знает скрип петель. Приказы приходят реже. Когда приходят — короче. «Держать». И всё.",
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "sw_runner",
+    "name": "Гонец",
+    "personalityTag": "sw_herald",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 1,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Быстрые ноги",
+    "shortDescription": "Приходит первым и сразу в бой.",
+    "lore": "Письма раньше были длинными. Теперь — в два слова. Он бежит быстрее, когда они короткие.",
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "sw_herald",
+    "name": "Вестовой",
+    "personalityTag": "sw_herald",
+    "tags": ["ash_stormwind", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["charge", "scout"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Глаза ставки",
+    "shortDescription": "Знает поле раньше, чем противник.",
+    "lore": "Объехал три холма, вернулся с картой. На ней — пробелы. Разъезды, которые рисовали восточную часть, не вернулись. Пробелы растут.",
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      },
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "sw_battlemage",
+    "name": "Боевой маг",
+    "personalityTag": "sw_mage",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Выпускник Круглой Башни",
+    "shortDescription": "Бьёт точечно во фронт.",
+    "lore": "Парадную мантию он снял на третий день — она пачкается. В поле магия становится работой: точной, грязной, нужной. Огненные шары стали меньше. Он упражняется дольше, чтобы этого никто не заметил.",
+    "activatedAbilities": [
+      {
+        "id": "arcane_bolt",
+        "cost": 1,
+        "name": "Чароплётный залп",
+        "description": "Наносит 2 урона выбранной карте во Фронте противника.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then": [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_archmage",
+    "name": "Магистр",
+    "personalityTag": "sw_mage",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Глава Круглой Башни",
+    "shortDescription": "Огненный шар по любой цели.",
+    "lore": "Помнит имена всех магистров до себя — двенадцать поколений. Не хвастается. Просто больше некому помнить. Учит молодых магов старым заклинаниям, и надеется, что в их руках эти заклинания окажутся сильнее.",
+    "activatedAbilities": [
+      {
+        "id": "fireball",
+        "cost": 2,
+        "name": "Огненный шар",
+        "description": "Наносит 4 урона любой карте противника на столе.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then": [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_knight",
+    "name": "Рыцарь",
+    "personalityTag": "sw_knight",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["charge"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Клинок Престола",
+    "shortDescription": "Один на один — становится сильнее.",
+    "lore": "Шпоры звенят на каждом параде. Молод. Верит в старые истории — про рыцарей, которые не бежали, про Свет, который не подводил. Ему ещё не сказали, что истории кончаются.",
+    "triggers": [
+      {
+        "id": "duel_instinct",
+        "trigger": "ON_ATTACK",
+        "condition": {
+          "kind": "FRONT_COUNT",
+          "who": "OPPONENT",
+          "op": "AT_MOST",
+          "value": 1
+        },
+        "name": "Поединок",
+        "description": "Если у врага во Фронте ≤1 карты — +1 силы до конца боя.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "sw_swordsman",
+    "name": "Мечник",
+    "personalityTag": "sw_swordsman",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 2,
+    "strength": 3,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Ровный строй",
+    "shortDescription": "Крепкий солдат без изюминки.",
+    "lore": "Их десятки, и они похожи, как копья в пирамиде. Тем и страшны.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_templar",
+    "name": "Храмовник",
+    "personalityTag": "sw_templar",
+    "tags": ["ash_stormwind", "guardian"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Облачённый в Свет",
+    "shortDescription": "Приходит и лечит своих.",
+    "lore": "Доспех тяжелее обычного — чтобы не убежать. Свет любит тех, кто остаётся на месте. Так говорят жрецы. С каждым годом доспех всё тяжелее, а Свет — всё легче.",
+    "triggers": [
+      {
+        "id": "blessing",
+        "trigger": "ON_ENTER",
+        "name": "Благословение",
+        "description": "Восстанавливает 2 здоровья всем союзникам во Фронте.",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник обязан атаковать эту карту в колонке."
+      }
+    }
+  },
+  {
+    "id": "sw_chaplain",
+    "name": "Служитель",
+    "personalityTag": "sw_chaplain",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Тихая проповедь",
+    "shortDescription": "Восстанавливает Величие каждый ход.",
+    "lore": "Проповедей с кафедры не читает — ходит между ранеными и говорит каждому своё. Раньше слов хватало. Теперь приходится выбирать, кому говорить.",
+    "triggers": [
+      {
+        "id": "sermon",
+        "trigger": "ON_TURN_END",
+        "name": "Вечерняя проповедь",
+        "description": "Восстанавливает 1 Величие гильдии в конце хода.",
+        "effects": [
+          {"kind": "HEAL_GLORY", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_scout",
+    "name": "Разведчик",
+    "personalityTag": "sw_scout",
+    "tags": ["ash_stormwind", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "scout"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Впереди разъезда",
+    "shortDescription": "Бьёт в резерв через фронт.",
+    "lore": "Уходит за день до битвы. Возвращается на рассвете — если возвращается. В колчане чужая стрела. Темнота за лагерем каждый месяц чуть ближе.",
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      },
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв, игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "sw_archer",
+    "name": "Лучник",
+    "personalityTag": "sw_archer",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["breakthrough"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Со стены",
+    "shortDescription": "Излишек урона переходит дальше.",
+    "lore": "Пятнадцать лет на одной башне. Знает дальность каждой стрелы, вес каждого ветра. Знает, что камни под ногами вздрагивают, когда дует с севера.",
+    "abilityInfo": {
+      "breakthrough": {
+        "name": "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
+  },
+  {
+    "id": "sw_captain",
+    "name": "Капитан",
+    "personalityTag": "sw_captain",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Голос в строю",
+    "shortDescription": "При выходе усиливает fighter'ов.",
+    "lore": "Не кричит. Поднимает руку — и все уже знают, куда идти. Знает каждого солдата по имени. Знает, что некоторые не вернутся. Поднимает руку.",
+    "triggers": [
+      {
+        "id": "rally",
+        "trigger": "ON_REINFORCE",
+        "name": "Сбор",
+        "description": "Все союзники во Фронте получают +1/+1.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_shieldbearer",
+    "name": "Щитоносец",
+    "personalityTag": "sw_shieldbearer",
+    "tags": ["ash_stormwind", "guardian"],
+    "cost": 2,
+    "strength": 2,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["shield", "taunt"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Живая стена",
+    "shortDescription": "Щит поглотит первый удар.",
+    "lore": "На внутренней стороне щита — зарубки: имя, имя, имя. Отец. Дед. Когда-нибудь выцарапают и его. Кто-нибудь другой.",
+    "abilityInfo": {
+      "shield": {
+        "name": "Щит",
+        "description": "Поглощает первый входящий урон целиком."
+      },
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник обязан атаковать эту карту в колонке."
+      }
+    }
+  },
+  {
+    "id": "sw_berserk",
+    "name": "Берсерк",
+    "personalityTag": "sw_berserk",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 3,
+    "strength": 4,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["breakthrough"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Из северных герцогств",
+    "shortDescription": "Урон переходит через цель.",
+    "lore": "С севера, из старых герцогств, где кровь помнит времена до Присяги. Дисциплина — для тех, кто боится умереть. Он рубит, пока строй не треснет. Или он сам.",
+    "abilityInfo": {
+      "breakthrough": {
+        "name": "Прорыв",
+        "description": "Излишек урона идёт карте в Резерве за целью."
+      }
+    }
+  },
+  {
+    "id": "sw_wallguard",
+    "name": "Смотритель стены",
+    "personalityTag": "sw_wallguard",
+    "tags": ["ash_stormwind", "guardian"],
+    "cost": 4,
+    "strength": 2,
+    "health": 7,
+    "rarity": "uncommon",
+    "abilities": ["taunt", "suppress"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Камень и сталь",
+    "shortDescription": "Держит удар и подавляет соседа.",
+    "lore": "Стоит там, где кладка треснула прошлой зимой. За ним — квартал кузнецов, семнадцать семей, колодец. Он знает, какой камень шатается. Знает, какой упадёт первым.",
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "suppress": {
+        "name": "Подавление",
+        "description": "−1/−1 карте напротив."
+      }
+    }
+  },
+  {
+    "id": "sw_lookout",
+    "name": "Дозорный",
+    "personalityTag": "sw_lookout",
+    "tags": ["ash_stormwind", "tactician"],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Между врагов",
+    "shortDescription": "Берёт карту, если враг атакует.",
+    "lore": "Смотрит не на врага, а между врагов — именно там начинается атака. Так учил отец. Отец учил так же, как его отец.",
+    "triggers": [
+      {
+        "id": "alert",
+        "trigger": "ON_ENEMY_ATTACK",
+        "oncePerTurn": true,
+        "name": "Тревога",
+        "description": "Раз в ход, если противник атакует — берёт 1 карту.",
+        "effects": [
+          {"kind": "DRAW", "count": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_champion",
+    "name": "Чемпион",
+    "personalityTag": "sw_champion",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Последний из турнира",
+    "shortDescription": "Растёт, когда гибнут союзники.",
+    "lore": "На последнем турнире погибли двое. С тех пор турниров не было. Он носит их имена на перчатке — и каждый павший союзник добавляет ещё одно. Перчатка тяжелеет, и кулак — тоже.",
+    "triggers": [
+      {
+        "id": "inspire",
+        "trigger": "ON_ALLY_DIED",
+        "oncePerTurn": true,
+        "name": "Ярость утраты",
+        "description": "Раз в ход, когда союзник погибает — получает +1/+1.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_marshall",
+    "name": "Маршал",
+    "personalityTag": "sw_marshall",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Плечо короля",
+    "shortDescription": "Каждый ход усиливает фронт.",
+    "lore": "Сорок лет рядом с Королём. Видели одно и то же — зимы длиннее, гарнизоны тоньше, приказы тяжелее. Не говорят об этом. Знамя обтрёпано. Оба стары. Оба ещё стоят.",
+    "triggers": [
+      {
+        "id": "command",
+        "trigger": "ON_TURN_START",
+        "name": "Приказ",
+        "description": "В начале хода все союзники во Фронте получают +1 силы.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_advisor",
+    "name": "Советник",
+    "personalityTag": "sw_advisor",
+    "tags": ["ash_stormwind", "tactician"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Тень трона",
+    "shortDescription": "Приносит Влияние каждый ход.",
+    "lore": "Напрямую не говорит никогда. Даже когда врёт — произносит правду, только в нужном порядке. Знает о нормировании, о дефиците, о шёпоте на севере. Молчит, потому что если скажет — Роланду придётся что-то делать.",
+    "triggers": [
+      {
+        "id": "counsel",
+        "trigger": "ON_TURN_START",
+        "name": "Совет",
+        "description": "В начале хода даёт +1 Влияния.",
+        "effects": [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_priest",
+    "name": "Жрец",
+    "personalityTag": "sw_priest",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Руки в крови и свете",
+    "shortDescription": "Лечит всех в конце хода.",
+    "lore": "На поле боя различает только одно: дышит — значит, достоин помощи. Раньше хватало на всех. Теперь — нет. Выбирает. И не оглядывается на тех, кого не выбрал.",
+    "triggers": [
+      {
+        "id": "prayer",
+        "trigger": "ON_TURN_END",
+        "name": "Молитва",
+        "description": "В конце хода восстанавливает 1 здоровья всем союзникам во Фронте.",
+        "effects": [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_vanguard",
+    "name": "Латник",
+    "personalityTag": "sw_vanguard",
+    "tags": ["ash_stormwind", "tactician"],
+    "cost": 3,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["vanguard"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Идущий первым",
+    "shortDescription": "Сразу во Фронт, если есть нейтрал.",
+    "lore": "Приказ ему не нужен — важно, кто первый. Первым и умирает. С первого боя это знает. С первого боя — всё равно.",
+    "abilityInfo": {
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "sw_marksman",
+    "name": "Меткий стрелок",
+    "personalityTag": "sw_marksman",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Натянутая тетива",
+    "shortDescription": "Стреляет по случайной цели.",
+    "lore": "Дважды не стреляет. Раньше молился перед каждым выстрелом. Теперь — нет. Стрелы всё ещё летят точно. Молитвы, видимо, были лишними.",
+    "activatedAbilities": [
+      {
+        "id": "aimed_shot",
+        "cost": 1,
+        "name": "Прицельный выстрел",
+        "description": "Наносит 2 урона случайной карте противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "RANDOM_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_mason",
+    "name": "Каменщик",
+    "personalityTag": "sw_mason",
+    "tags": ["ash_stormwind", "guardian"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Латает на ходу",
+    "shortDescription": "Крепнет при переходе во Фронт.",
+    "lore": "Сорок лет чинит одни и те же стены. Стены старше его. Трещины — тоже. Латает, латает снова, латает ещё. Этого мало. Больше ничего нет.",
+    "triggers": [
+      {
+        "id": "fortify",
+        "trigger": "ON_REINFORCE",
+        "name": "Укрепление",
+        "description": "При переходе во Фронт получает +2 здоровья.",
+        "effects": [
+          {"kind": "BUFF", "strength": 0, "health": 2, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_inspector",
+    "name": "Дознаватель",
+    "personalityTag": "sw_inspector",
+    "tags": ["ash_stormwind", "tactician"],
+    "cost": 2,
+    "strength": 3,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Нос по ветру",
+    "shortDescription": "Тянет карту, если у врага пусто.",
+    "lore": "Приходит туда, где ещё тихо. Через час — уже бой, и он уже ушёл. В следующее тихое место. Тихих мест всё меньше.",
+    "triggers": [
+      {
+        "id": "report",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind": "FRONT_COUNT",
+          "who": "OPPONENT",
+          "op": "AT_MOST",
+          "value": 1
+        },
+        "name": "Донесение",
+        "description": "Если у противника ≤1 карты во Фронте — берёт 1 карту.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_commander",
+    "name": "Командир",
+    "personalityTag": "sw_commander",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Один приказ — десять мечей",
+    "shortDescription": "Усиливает fighter'ов при входе.",
+    "lore": "Не командует — объясняет. Солдаты понимают быстрее, чем звучит слово. В последние месяцы объяснения стали короче. Солдат стало меньше. Смысл — тот же.",
+    "triggers": [
+      {
+        "id": "tactics",
+        "trigger": "ON_ENTER",
+        "name": "Тактика",
+        "description": "При входе все fighter'ы во Фронте получают +2 силы.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT",
+            "filter": {"tag": "fighter"}
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_chronicler",
+    "name": "Летописец",
+    "personalityTag": "sw_chronicler",
+    "tags": ["ash_stormwind", "tactician"],
+    "cost": 2,
+    "strength": 1,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["tactician"],
+    "title": "Хранитель хроник",
+    "shortDescription": "Приносит карту при входе.",
+    "lore": "Пишет не о победах — о том, чего не хватило. Чернил. Людей. Времени. Хроники тоньше с каждым годом, но он всё равно пишет.",
+    "triggers": [
+      {
+        "id": "annals",
+        "trigger": "ON_ENTER",
+        "name": "Запись в летопись",
+        "description": "Берёт 1 карту при входе.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_weaponsmith",
+    "name": "Оружейник",
+    "personalityTag": "sw_weaponsmith",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Заточено на совесть",
+    "shortDescription": "Куёт себя между боями.",
+    "lore": "Никогда не проверяет, кто прав. Проверяет, хорошо ли лежит клинок. Сталь тоньше, мечи старше. Точит, чинит, делает что может.",
+    "activatedAbilities": [
+      {
+        "id": "forge",
+        "cost": 1,
+        "name": "Кузнечный удар",
+        "description": "Даёт себе +1/+1.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_bannerman",
+    "name": "Знаменосец",
+    "personalityTag": "sw_bannerman",
+    "tags": ["ash_stormwind", "guardian"],
+    "cost": 3,
+    "strength": 1,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Держит полотнище",
+    "shortDescription": "Усиливает fighter'ов при захватах.",
+    "lore": "Пока знамя стоит — строй держится. Ткань тонкая, видно свет сквозь неё. Знает, что порвётся, но всё держит, потому что пока оно стоит — стоят и остальные.",
+    "triggers": [
+      {
+        "id": "rally_flag",
+        "trigger": "ON_TURN_START",
+        "condition": {
+          "kind": "CELLS",
+          "who": "SELF",
+          "op": "AT_LEAST",
+          "value": 2
+        },
+        "name": "Знамя вверх",
+        "description": "Если контролируешь ≥2 нейтралов — fighter'ы получают +1 силы.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT",
+            "filter": {"tag": "fighter"}
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник обязан атаковать эту карту в колонке."
+      }
+    }
+  },
+  {
+    "id": "sw_field_medic",
+    "name": "Полевой лекарь",
+    "personalityTag": "sw_field_medic",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Первая помощь",
+    "shortDescription": "Лечит фронт при входе.",
+    "lore": "Не спрашивает имени. Только один вопрос: где болит. Раненых больше, рук — столько же.",
+    "triggers": [
+      {
+        "id": "first_aid",
+        "trigger": "ON_ENTER",
+        "name": "Первая помощь",
+        "description": "Восстанавливает 2 здоровья всем союзникам во Фронте при входе.",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_dawn_chorus",
+    "name": "Рассветный хор",
+    "personalityTag": "sw_dawn_chorus",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Первый луч",
+    "shortDescription": "Бьёт залпом по фронту врага.",
+    "lore": "Жрецы поют при первых лучах солнца. Враг слышит песню — и знает, что будет удар. Солнце встаёт позже с каждым месяцем. Песня — всё раньше.",
+    "triggers": [
+      {
+        "id": "nova",
+        "trigger": "ON_ENTER",
+        "name": "Рассветный залп",
+        "description": "Наносит 1 урон всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_retribution",
+    "name": "Кара Света",
+    "personalityTag": "sw_retribution",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Ответ тем, кто поднял меч первым",
+    "shortDescription": "Свет наказывает зачинщиков.",
+    "lore": "Свет не прощает тех, кто первым поднял меч. Так говорят жрецы. Говорят тише, чем раньше.",
+    "triggers": [
+      {
+        "id": "smite",
+        "trigger": "ON_ENTER",
+        "name": "Карающий свет",
+        "description": "Наносит 2 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_shield_smith",
+    "name": "Бронник",
+    "personalityTag": "sw_shield_smith",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Куёт намерение",
+    "shortDescription": "Даёт щит союзнику за 2 Влияния.",
+    "lore": "Сталь не куёт — куёт намерение. Щит держится ровно столько, сколько владелец верит, что выдержит. Вера теперь в дефиците. Солдаты устали. Щиты — тоньше.",
+    "activatedAbilities": [
+      {
+        "id": "forge_shield",
+        "cost": 2,
+        "name": "Выковать щит",
+        "description": "Даёт щит выбранному союзнику. Раз в ход.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_BOARD", "count": 1},
+            "then": [ {"kind": "GRANT_SHIELD", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_honor_guard",
+    "name": "Почётный караул",
+    "personalityTag": "sw_honor_guard",
+    "tags": ["ash_stormwind", "guardian"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "uncommon",
+    "abilities": ["armored", "taunt"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Закалённый в строю",
+    "shortDescription": "Бронированный защитник.",
+    "lore": "Доспех помнит каждый удар, который выдержал. Вмятина от булавы под Грейвольтом. Царапина от арбалетного болта на перевале. Ударов было много. Доспех цел. Пока.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."},
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник обязан атаковать эту карту в колонке."
+      }
+    }
+  },
+  {
+    "id": "sw_lance_knight",
+    "name": "Конный рыцарь",
+    "personalityTag": "sw_lance_knight",
+    "tags": ["ash_stormwind", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["cleave"],
+    "cleaveDamage": 1,
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Прорывает строй",
+    "shortDescription": "Задевает соседей цели.",
+    "lore": "Копьё не выбирает цель — идёт вперёд, и всё, что стоит по бокам, падает. Конь стар, рыцарь - тоже, а копьё — старше обоих. Всё ещё идёт вперёд.",
+    "abilityInfo": {
+      "cleave": {
+        "name": "Рассечение",
+        "description": "Атака задевает соседей цели на 1 урона."
+      }
+    }
+  },
+  {
+    "id": "sw_old_veteran",
+    "name": "Ветеран",
+    "personalityTag": "sw_old_veteran",
+    "tags": ["ash_stormwind", "guardian"],
+    "cost": 5,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": ["armored"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Три похода, один король",
+    "shortDescription": "Крепкий боец с бронёй.",
+    "lore": "Пережил три похода и одного короля. Ничего нового его не пугает, потому что он уже устал бояться. Разница есть, но на поле она незаметна.",
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
+  },
+  {
+    "id": "sw_roland",
+    "name": "Роланд",
+    "personalityTag": "sw_roland",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": ["charge"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Последний король единого Штормграда",
+    "shortDescription": "Собирает армию одним словом.",
+    "lore": "Взошёл на трон в год Пепельной Зимы и с тех пор не покидал стен Круглой Башни. Голос правителя — единственное, что удерживает северные герцогства от раскола. Свет конечен, и он вынужден подписывать приказы, которые не хочет подписывать, каждое утро. Потому что кроме него — некому.",
+    "triggers": [
+      {
+        "id": "for_the_alliance",
+        "trigger": "ON_ENTER",
+        "name": "За короля!",
+        "description": "Все союзники во Фронте получают +2/+2.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "royal_command",
+        "trigger": "ON_TURN_START",
+        "name": "Королевское слово",
+        "description": "В начале хода все союзники во Фронте получают +1 силы.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 0,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "sw_anselm",
+    "name": "Ансельм",
+    "personalityTag": "sw_anselm",
+    "tags": ["ruler", "ash_stormwind", "guardian"],
+    "cost": 5,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": ["taunt", "charge"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Единственный, кто вернулся",
+    "shortDescription": "Свет несёт его, сталь — не берёт.",
+    "lore": "Из Северного Похода вернулся один. Видел, как истончается Свет и то, что его поглощает. Одинокая песня в темноте не дала ему сойти с ума. Чья — не знает. Спит не больше четырёх часов и молота не выпускает. По ночам он снова там.",
+    "triggers": [
+      {
+        "id": "lightbringer",
+        "trigger": "ON_ENTER",
+        "name": "Несущий свет",
+        "description": "Восстанавливает 4 здоровья всем союзникам во Фронте.",
+        "effects": [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      },
+      {
+        "id": "resolve",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name": "Решимость",
+        "description": "Раз в ход, когда получает урон — берёт 1 карту.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "Выходит сразу во Фронт при розыгрыше."
+      }
+    }
+  },
+  {
+    "id": "sw_edwin",
+    "name": "Эдвин",
+    "personalityTag": "sw_edwin",
+    "tags": ["ash_stormwind", "supporter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Наследник, которому рано",
+    "shortDescription": "Лечит своих и восстанавливает Величие.",
+    "lore": "Ему бы ещё учиться. Но корона уже на нём, тяжелее, чем казалась. Верит в Свет — искренне, как верят те, кто ещё не видел, как он гаснет. Отец не говорит ему многого. Или защищает, или не знает, с чего начать.",
+    "triggers": [
+      {
+        "id": "greater_heal",
+        "trigger": "ON_TURN_END",
+        "name": "Забота",
+        "description": "В конце хода восстанавливает 2 здоровья всем союзникам во Фронте.",
+        "effects": [
+          {"kind": "HEAL", "amount": 2, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      },
+      {
+        "id": "renew",
+        "trigger": "ON_ENTER",
+        "name": "Обновление",
+        "description": "Восстанавливает 5 Величия гильдии при входе.",
+        "effects": [ {"kind": "HEAL_GLORY", "amount": 5, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_starweaver",
+    "name": "Прядущий Звёзды",
+    "personalityTag": "sw_starweaver",
+    "tags": ["ruler", "ash_stormwind", "supporter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["supporter"],
+    "title": "Ученик, переживший учителя",
+    "shortDescription": "Каждый ход ткёт отражение.",
+    "lore": "Он научился ткать звёзда сам — из нитей получаются зеркальные копии его воли. Связующая нить между Штормградом и тем, что старше Штормграда. Знает, что под Круглой Башней — не просто камень. Знает, но ждёт правильного момента и правильного человека, а пока - молчит.",
+    "triggers": [
+      {
+        "id": "warped_star",
+        "trigger": "ON_TURN_START",
+        "name": "Плетение",
+        "description": "В начале хода призывает Зеркальное отражение во Фронт.",
+        "effects": [
+          {
+            "kind": "SUMMON",
+            "defId": "sw_tk_mirror_image",
+            "count": 1,
+            "who": "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_tk_mirror_image",
+    "name": "Отражение",
+    "personalityTag": "sw_tk_mirror_image",
+    "tags": ["ash_stormwind", "guardian", "token"],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["taunt", "temporary"],
+    "tempDuration": 2,
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Отпечаток воли",
+    "shortDescription": "Тает через два хода.",
+    "lore": "Своей воли нет. Только отражение чужой. И всё же — держит удар.",
+    "isToken": true,
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_tk_wisp",
+    "name": "Огонёк",
+    "personalityTag": "sw_tk_wisp",
+    "tags": ["ash_stormwind", "fighter", "token"],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["fighter"],
+    "title": "Блуждающий свет",
+    "shortDescription": "Тлеет и гаснет.",
+    "lore": "Рождается из чар, бьёт первым, сгорает. Вся жизнь — один удар.",
+    "isToken": true,
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_tk_treant",
+    "name": "Древень",
+    "personalityTag": "sw_tk_treant",
+    "tags": ["ash_stormwind", "guardian", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Корень, что встал",
+    "shortDescription": "Крепкий и медлительный.",
+    "lore": "Поднимается из земли там, где прошёл друид. Обратно уходит сам — когда позовёт почва.",
+    "isToken": true,
+    "abilityInfo": {}
+  },
+  {
+    "id": "sw_tk_totem",
+    "name": "Тотем",
+    "personalityTag": "sw_tk_totem",
+    "tags": ["ash_stormwind", "guardian", "token"],
+    "cost": 0,
+    "strength": 0,
+    "health": 3,
+    "rarity": "common",
+    "abilities": ["taunt"],
+    "series": ["ash_stormwind"],
+    "factions": ["ash_stormwind"],
+    "roles": ["guardian"],
+    "title": "Столб с рунами",
+    "shortDescription": "Держит, не сражаясь.",
+    "lore": "Не бьёт и не бежит. Держит пространство вокруг себя — и этого достаточно.",
+    "isToken": true,
+    "abilityInfo": {}
+  }
+]

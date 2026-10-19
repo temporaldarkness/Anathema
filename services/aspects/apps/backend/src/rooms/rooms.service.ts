@@ -49,9 +49,7 @@ export class RoomsService {
     private readonly audit: AuditService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly events: EventsService,
-  ) {
-    this.allCards = getCards('stormwind');
-  }
+  ) {}
 
   // ─── Создание ───
 

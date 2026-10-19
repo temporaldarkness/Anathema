@@ -10,8 +10,8 @@ import type { Bot } from '../types';
 // ───────────────────────────── helpers ──────────────────────────────
 
 function newGame(seed: string, useMulligan = false): GameState {
-  const cardDefinitions = cardsForScope('azeroth');
-  const decks = decksForScope('azeroth');
+  const cardDefinitions = cardsForScope('ashenlight');
+  const decks = decksForScope('ashenlight');
   return createGame({
     seed,
     decks: { p1: decks[0].cards, p2: decks[1].cards },

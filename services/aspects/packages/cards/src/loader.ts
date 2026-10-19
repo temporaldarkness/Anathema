@@ -149,7 +149,7 @@ export function getScopeMeta(scopeId: string): ScopeMeta | null {
 
 /**
  * Принимает:
- *   - имя scope («main», «azeroth», «svo»);
+ *   - имя scope («main», «ashenlight», «oskol»);
  *   - явный список серий через запятую («classic,throne»);
  *   - массив серий ([«classic», «throne»]).
  *
@@ -337,13 +337,13 @@ export const CARDS_BY_ID = PACKS.stormwind?.cardsById ?? {};
 export const STORMWIND_ASPECTS = PACKS.stormwind?.cards ?? [];
 export const VOIDFLAME_ASPECTS = PACKS.voidflame?.cards ?? [];
 
-export const LEGENDARY_ASPECTS = mergedCards(SCOPES.azeroth.series).filter(
+export const LEGENDARY_ASPECTS = mergedCards(SCOPES.ashenlight.series).filter(
   (c) => c.rarity === 'legendary',
 );
 
 export const TOKEN_ASPECTS = mergedCards([
-  ...SCOPES.azeroth.series,
-  ...SCOPES.svo.series,
+  ...SCOPES.ashenlight.series,
+  ...SCOPES.oskol.series,
 ]).filter((c) => c.isToken);
 
 export function getPersonalityName(id: string): string {

@@ -1,0 +1,416 @@
+[
+  {
+    "id": "lg_ingrid",
+    "name": "Ингрид",
+    "personalityTag": "lg_ingrid",
+    "tags": ["apocryph", "fighter"],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["fighter"],
+    "title": "Голос Моря",
+    "shortDescription": "Точечный удар при входе, давление по фронту каждый ход.",
+    "lore": "Раз в семь лет прилив поднимается выше обычного. Тогда она выходит на берег и находит одного — того, кто ближе всего к пониманию. Рассказывает ему всё. Большинство тонет в том, что услышало. Прядущий ищет её уже давно. Она знает, и каждый раз уходит обратно в воду — на его глазах.",
+    "triggers": [
+      {
+        "id": "truth_unspoken",
+        "trigger": "ON_ENTER",
+        "name": "Неразбавленная правда",
+        "description": "Наносит 4 урона выбранной карте противника на столе.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then": [
+              {"kind": "DEAL_DAMAGE", "amount": 4, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "activatedAbilities": [
+      {
+        "id": "tidal_erosion",
+        "cost": 2,
+        "name": "Солёная память",
+        "description": "Наносит 1 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "lg_cormac",
+    "name": "Кормак",
+    "personalityTag": "lg_cormac",
+    "tags": ["apocryph", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["supporter"],
+    "title": "Вождь Исхода",
+    "shortDescription": "Укрепляет союзников при выходе во фронт, давит врагов каждый ход.",
+    "lore": "Он увёл свой народ за море, когда земля и соседи стали пеплом. Вернулся один и выдержал испытание Ведьмы Моря. Повелитель в цепях показал остальное, и он выдержал снова. Теперь Кормак знает больше, чем способен вынести любой из живых. Говорить нельзя — правда убьёт того, кто услышит. Молчать нельзя — правда убивает того, кто молчит. Поэтому он преподносит правду. Осторожно. По кусочку. Надеясь, что Прядущий окажется крепче остальных.",
+    "triggers": [
+      {
+        "id": "exile_return",
+        "trigger": "ON_REINFORCE",
+        "name": "Возвращение изгнанника",
+        "description": "При переходе во Фронт все союзники во Фронте получают +2/+2.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 2,
+            "health": 2,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      },
+      {
+        "id": "weight_of_knowing",
+        "trigger": "ON_TURN_START",
+        "name": "Тяжесть знания",
+        "description": "В начале хода наносит 1 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "lg_calamity",
+    "name": "Погибель",
+    "personalityTag": "lg_calamity",
+    "tags": ["apocryph", "fighter"],
+    "cost": 7,
+    "strength": 6,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": ["frenzy"],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["fighter"],
+    "title": "Герольд Голода",
+    "shortDescription": "Дважды атакует, выжигает вражеский фронт при входе, калечит своих каждый ход.",
+    "lore": "Раз в семь лет над пустошью встаёт тень. Её видят все. Описать не может никто. Погибель приходит одна и проверяет, жива ли сделка. У неё нет лица. Нет голоса. Есть только вопрос, который она задаёт миру. И ответ, которого мир боится.",
+    "triggers": [
+      {
+        "id": "reckoning",
+        "trigger": "ON_ENTER",
+        "name": "Дознание",
+        "description": "Наносит 3 урона всем картам противника во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+        ]
+      },
+      {
+        "id": "proximity_of_the_end",
+        "trigger": "ON_TURN_START",
+        "name": "Близость конца",
+        "description": "В начале хода наносит 1 урона всем своим картам во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 1, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "frenzy": {"name": "Ярость", "description": "Может атаковать дважды за ход."}
+    }
+  },
+  {
+    "id": "lg_timeweaver",
+    "name": "Прядущий Время",
+    "personalityTag": "lg_timeweaver",
+    "tags": ["apocryph", "tactician"],
+    "cost": 5,
+    "strength": 3,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["tactician"],
+    "title": "Ткущий нити",
+    "shortDescription": "Наращивает Влияние при входе и каждый ход.",
+    "lore": "В его мастерской нет окон, только нити — тысячи, натянутые между гвоздями. Каждая — чья-то жизнь. Каждый узел — чей-то выбор. Он был при дворе Первого Короля. Искал способ подменить то, что неразрывно. Время, память, имена — он пробовал всё. Ничего не подошло. Вечные могли бы дать ответ. Но нити путаются быстрее, чем он успевает их распутывать.",
+    "triggers": [
+      {
+        "id": "thread_unraveled",
+        "trigger": "ON_ENTER",
+        "name": "Распущенная нить",
+        "description": "Получает +3 Влияния при входе.",
+        "effects": [
+          {"kind": "GAIN_INFLUENCE", "amount": 3, "who": "SELF"}
+        ]
+      },
+      {
+        "id": "patient_weaving",
+        "trigger": "ON_TURN_START",
+        "name": "Терпеливое плетение",
+        "description": "В начале хода получает +2 Влияния.",
+        "effects": [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "lg_lifemother",
+    "name": "Матерь Жизни",
+    "personalityTag": "lg_lifemother",
+    "tags": ["apocryph", "supporter"],
+    "cost": 6,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["supporter"],
+    "title": "Та, что растёт в темноте",
+    "shortDescription": "Исцеляет союзников и Величие при входе, лечит всех на столе каждый ход.",
+    "lore": "Под полями она спала, пока мир горел. Тысячу лет — в полной темноте. Когда проснулась, под её шагами за одну ночь встал лес. Те, кто заходит внутрь, говорят: темнота не пугает. Жизни не нужен свет — жизнь растёт там, где есть корни, даже если корни уходят в темноту.",
+    "triggers": [
+      {
+        "id": "roots_awakened",
+        "trigger": "ON_ENTER",
+        "name": "Пробуждение корней",
+        "description": "Восстанавливает 4 здоровья всем союзникам во Фронте и 8 Величия гильдии.",
+        "effects": [
+          {"kind": "HEAL", "amount": 4, "target": "ALL_FRIENDLY_FRONT"},
+          {"kind": "HEAL_GLORY", "amount": 8, "who": "SELF"}
+        ]
+      },
+      {
+        "id": "bloom",
+        "trigger": "ON_TURN_END",
+        "name": "Цветение",
+        "description": "В конце хода восстанавливает 1 здоровья всем союзникам на столе.",
+        "effects": [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_BOARD"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "lg_spellweaver",
+    "name": "Чароплёт",
+    "personalityTag": "lg_spellweaver",
+    "tags": ["apocryph", "supporter"],
+    "cost": 7,
+    "strength": 4,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["supporter"],
+    "title": "Свидетель прошлого неба",
+    "shortDescription": "Призывает два Осколка Неба при входе.",
+    "lore": "Для него этот мир — не первый. Был другой, до этого. Он помнит, как тот заканчивался, — и это тоже было зрелище. Чароплёт дышит, и с неба срываются куски прежнего мира. Он выбирает зрелище, а не сторону. Но знает: рано или поздно зрелище потребует зрителя.",
+    "triggers": [
+      {
+        "id": "falling_sky",
+        "trigger": "ON_ENTER",
+        "name": "Осколки прежнего неба",
+        "description": "Призывает два Осколка Неба во Фронт.",
+        "effects": [
+          {
+            "kind": "SUMMON",
+            "defId": "lg_tk_skyshard",
+            "count": 1,
+            "who": "SELF",
+            "destination": "FRONT"
+          },
+          {
+            "kind": "SUMMON",
+            "defId": "lg_tk_skyshard",
+            "count": 1,
+            "who": "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "lg_first_king",
+    "name": "Первый Король",
+    "personalityTag": "lg_first_king",
+    "tags": ["apocryph", "supporter"],
+    "cost": 8,
+    "strength": 6,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["armored"],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["supporter"],
+    "title": "Тот, кто всё начал",
+    "shortDescription": "Каждый ход укрепляет всех союзников во фронте.",
+    "lore": "Трон под Круглой Башней сделан из его костей. Он сидит на нём уже тысячу лет — между светом и темнотой, между братом и сделкой. Каждый раз, когда в Штормграде зажигают свечу, — это его боль. Каждый тусклый рассвет — это его плата. Он остался, чтобы держать. Сделка истекает, но он всё равно держит.",
+    "triggers": [
+      {
+        "id": "weight_of_the_pact",
+        "trigger": "ON_TURN_START",
+        "name": "Вечная сделка",
+        "description": "В начале хода все союзники во Фронте получают +1/+1.",
+        "effects": [
+          {
+            "kind": "BUFF",
+            "strength": 1,
+            "health": 1,
+            "target": "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "armored": {"name": "Броня", "description": "Весь входящий урон −1."}
+    }
+  },
+  {
+    "id": "lg_worldbreaker",
+    "name": "Разрушитель",
+    "personalityTag": "lg_worldbreaker",
+    "tags": ["apocryph", "fighter"],
+    "cost": 9,
+    "strength": 7,
+    "health": 9,
+    "rarity": "legendary",
+    "abilities": ["slow", "cleave"],
+    "cleaveDamage": 3,
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["fighter"],
+    "title": "Часовой Конца",
+    "shortDescription": "Сносит вражеский фронт при входе, рассекает соседей при атаке.",
+    "lore": "Он стоял рядом, когда было дано заветное обещание. И теперь, если сделка порвётся, он завершит начатое. Помнит, как заканчивался предыдущий мир. И не хочет повторения. Поэтому ждёт, и надеется, что ждать придётся вечно.",
+    "triggers": [
+      {
+        "id": "fault_line",
+        "trigger": "ON_ENTER",
+        "name": "Линия разлома",
+        "description": "Наносит 4 урона всем врагам во Фронте.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 4, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      },
+      "cleave": {
+        "name": "Рассечение",
+        "description": "Атака задевает соседей цели на 3 урона."
+      }
+    }
+  },
+  {
+    "id": "lg_hunger",
+    "name": "Голод",
+    "personalityTag": "lg_hunger",
+    "tags": ["apocryph", "fighter"],
+    "cost": 6,
+    "strength": 5,
+    "health": 8,
+    "rarity": "legendary",
+    "abilities": ["slow"],
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["fighter"],
+    "title": "То, что ест",
+    "shortDescription": "Берёт карты при входе, пожирает всё на столе каждый ход.",
+    "lore": "Оно было здесь до солнца. Без имени, с одним только прозвищем. Оно не думает. Не говорит. Не ненавидит. Просто ест. Закованный повелитель забирает у него жертвы, и оно слабеет — медленно, век за веком. Но сделка истекает быстрее, чем оно слабеет. И когда истечёт — оно придёт само.",
+    "triggers": [
+      {
+        "id": "all_consuming",
+        "trigger": "ON_ENTER",
+        "name": "Всепоглощение",
+        "description": "Берёт 3 карты при входе.",
+        "effects": [ {"kind": "DRAW", "count": 3, "who": "SELF"} ]
+      },
+      {
+        "id": "creeping_dark",
+        "trigger": "ON_TURN_START",
+        "name": "Ползучая тьма",
+        "description": "В начале хода наносит 2 урона ВСЕМ картам на столе.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_CARDS_ON_BOARD"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "lg_tk_skyshard",
+    "name": "Осколок Неба",
+    "personalityTag": "lg_tk_skyshard",
+    "tags": ["apocryph", "fighter", "token"],
+    "cost": 0,
+    "strength": 3,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge", "temporary", "breakthrough"],
+    "tempDuration": 1,
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": ["fighter"],
+    "title": "Кусок прежнего мира",
+    "shortDescription": "Падает. Один раз.",
+    "lore": "Там, где он касается земли, трава чернеет. Не от жара — от памяти. Это кусок неба, которого больше нет.",
+    "isToken": true,
+    "abilityInfo": {}
+  },
+  {
+    "id": "lg_tk_phantom",
+    "name": "Отголосок",
+    "personalityTag": "lg_tk_phantom",
+    "tags": ["apocryph", "fighter", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["charge", "temporary"],
+    "tempDuration": 1,
+    "series": ["apocryph"],
+    "factions": ["apocryph"],
+    "roles": [],
+    "title": "Тень того, кто был",
+    "shortDescription": "Живёт, пока помнят.",
+    "lore": "Тает, как дым. Как сон. Как всё, что когда-то было.",
+    "isToken": true,
+    "abilityInfo": {}
+  }
+]

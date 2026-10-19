@@ -1,6 +1,14 @@
 {
-  "stormwind":  { "name": "Штормград",  "color": "#fbbf24" },
-  "enterprise": { "name": "Энтерпрайз", "color": "#3b82f6" },
-  "ganimed":    { "name": "Ганимед",    "color": "#a855f7" },
-  "burgundy":   { "name": "Бургундия",  "color": "#22c55e" }
+  "stormwind":       { "name": "Штормград",           "color": "#fbbf24" },
+  "enterprise":      { "name": "Энтерпрайз",          "color": "#3b82f6" },
+  "ganimed":         { "name": "Ганимед",             "color": "#a855f7" },
+  "burgundy":        { "name": "Бургундия",           "color": "#22c55e" },
+  "echo":            { "name": "Эхо-7",               "color": "#475569" },
+  "razlom":          { "name": "Разлом",              "color": "#c2410c" },
+  "sky":             { "name": "Стратос",             "color": "#0ea5e9" },
+  "perimeter":       { "name": "Периметр",            "color": "#4d7c0f" },
+  "ash_stormwind":   { "name": "Штормград",           "color": "#d97706" },
+  "voidflame":       { "name": "Пламя Пустоты",       "color": "#dc2626" },
+  "forsaken":        { "name": "Отрекшиеся",          "color": "#78716c" },
+  "apocryph":        { "name": "Апокриф",             "color": "#0d9488" }
 }

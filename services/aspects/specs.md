@@ -93,7 +93,7 @@ pnpm --filter @aspects/frontend build
 - `meta.json` — `{ id, name, description, version }`
 - `cards.json` — массив `CardDefinition`
 
-⚠️ **Важно:** имя папки **не обязано** совпадать с `meta.id`. Например, `old_stormwind/` содержит `id: "stormwind"`. Папка — путь на диске, `id` — публичный идентификатор.
+⚠️ **Важно:** имя папки **не обязано** совпадать с `meta.id`. Например, `old_stormwind/` содержит `id: "ash_stormwind"`. Папка — путь на диске, `id` — публичный идентификатор.
 
 ### 3.2. Реестры
 
@@ -113,12 +113,12 @@ pnpm --filter @aspects/frontend build
 ```typescript
 SCOPES = {
   main:    { series: ['classic', 'cradle', 'inner', 'throne'], primary: true },
-  azeroth: { series: ['stormwind', 'voidflame', 'apocryph'], primary: false },
-  svo:     { series: ['steel', 'razlom', 'echo', 'sky'], primary: false },
+  ashenlight: { series: ['ash_stormwind', 'voidflame', 'forsaken', 'apocryph'], primary: false },
+  oskol:     { series: ['perimeter', 'razlom', 'echo', 'sky'], primary: false },
 }
 ```
 
-**`main`** — фокус баланса. `azeroth` и `svo` — legacy, не смешиваются.
+**`main`** — фокус баланса. `ashenlight` и `oskol` — legacy, не смешиваются.
 
 Колода целиком должна лежать в одном scope. `resolveScope(arg)` принимает имя scope, `"classic,throne"` или массив.
 
@@ -808,7 +808,6 @@ AttackTarget =
 15. Мобильная адаптация.
 16. Drag-and-drop в UI.
 17. Туториал.
-18. Legacy-миграция данных (azeroth / svo / merged колоды).
 
 ---
 

@@ -1,0 +1,715 @@
+[
+  {
+    "id": "inner_yuoko_commander",
+    "name": "Исполнительный командующий",
+    "personalityTag": "yuoko",
+    "tags": ["inner", "enterprise", "tactician"],
+    "cost": 5,
+    "strength": 5,
+    "health": 5,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["tactician"],
+    "title": "Три хода назад",
+    "shortDescription": "Берёт карты и переходит в Уставшего, когда на грани.",
+    "lore": "Когда Спай объявил переворот, важного в архивах уже не было. Юко вынес всё за неделю до — тихо, по одной папке, не привлекая внимания. Он не дрался за власть, а просто забрал с собой всё, что имело значение — и ушёл туда, где его ждали.",
+    "triggers": [
+      {
+        "id"         : "forethought",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Архивный протокол",
+        "description": "Берёт 2 карты.",
+        "effects"    : [ {"kind": "DRAW", "count": 2, "who": "SELF"} ]
+      },
+      {
+        "id"         : "retreat_to_stormwind",
+        "trigger"    : "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "condition"  : {"kind": "SELF_HEALTH", "op": "AT_MOST", "value": 2},
+        "name"       : "Плановое отступление",
+        "description": "Когда здоровье ≤ 2 — добавляет Юко-Уставшего в руку.",
+        "effects"    : [
+          {
+            "kind"       : "SUMMON",
+            "defId"      : "inner_yuoko_tired",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "HAND"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_crom_warlord",
+    "name": "Вождь набега",
+    "personalityTag": "crom",
+    "tags": ["inner", "burgundy", "supporter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["supporter"],
+    "title": "Орда не спрашивает разрешения",
+    "shortDescription": "При переходе во Фронт приводит с собой орка.",
+    "lore": "Альта выгнали по голосованию. Кром даже не голосовал — зачем? Бургундия и так была его. Он собрал орков не в день переворота, а задолго до. Энтерпрайз увидит их, когда будет поздно.",
+    "triggers": [
+      {
+        "id"         : "raid_call",
+        "trigger"    : "ON_REINFORCE",
+        "name"       : "Передовой отряд",
+        "description": "Призывает Орка-налётчика во Фронт.",
+        "effects"    : [
+          {
+            "kind"       : "SUMMON",
+            "defId"      : "tk_orc_raider",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_alt_chancellor",
+    "name": "Канцлер",
+    "personalityTag": "alt",
+    "tags": ["inner", "enterprise", "supporter"],
+    "cost": 5,
+    "strength": 4,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["supporter"],
+    "title": "Чужой для всех, свой для каждого",
+    "shortDescription": "Когда его бьют — все союзники во Фронте крепчают.",
+    "lore": "Альт строил Энтерпрайз руками, пока Бургундия не назвала его предателем. Его собственный муж промолчал. Но те, кто остался рядом, стоят за него крепче, чем раньше — потому что знают, каково это: быть преданным.",
+    "triggers": [
+      {
+        "id"         : "unite_them",
+        "trigger"    : "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name"       : "Под единым знаменем",
+        "description": "Все союзники во Фронте получают +0/+1. Раз в ход.",
+        "effects"    : [
+          {
+            "kind"    : "BUFF",
+            "strength": 0,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_hyper_commissar",
+    "name": "Комиссар",
+    "personalityTag": "hyper",
+    "tags": ["inner", "enterprise", "controller"],
+    "cost": 3,
+    "strength": 3,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["controller"],
+    "title": "Дело закрыто",
+    "shortDescription": "Устраивает трибунал над врагом при входе.",
+    "lore": "Хайпер не выбирает стороны — он выбирает виновных. Пока Энтерпрайз горит, он ведёт заседания, проводит допросы и выносит приговоры. Война кончится, а папки останутся, в каждой будет чьё-то имя.",
+    "triggers": [
+      {
+        "id"         : "tribunal",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Трибунал",
+        "description": "Противник сбрасывает 1 случайную карту.",
+        "effects"    : [
+          {"kind": "DISCARD_RANDOM", "count": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_spy_rebel",
+    "name": "Мятежник",
+    "personalityTag": "spy",
+    "tags": ["inner", "enterprise", "tactician"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["tactician"],
+    "title": "Переворот на бумаге",
+    "shortDescription": "Берёт карты, но не может ими пользоваться.",
+    "lore": "Спай захватил штаб, поднял флаг и объявил новый порядок. Перед ним — кипы бумаг, пустой архив, и старые ключи доступа. Не хватило и главного: людей, которые стали бы подчиняться.",
+    "triggers": [
+      {
+        "id"         : "seized_archives",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Захват штаба",
+        "description": "Берёт 2 карты.",
+        "effects"    : [ {"kind": "DRAW", "count": 2, "who": "SELF"} ]
+      },
+      {
+        "id"         : "useless_papers",
+        "trigger"    : "ON_TURN_END",
+        "oncePerTurn": true,
+        "condition"  : {
+          "kind" : "HAND_COUNT",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 7
+        },
+        "name"       : "Мёртвый груз",
+        "description": "Если у вас ≥7 карт в конце хода — сбрасываете 1 случайную.",
+        "effects"    : [ {"kind": "DISCARD_RANDOM", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_shlepa_emperor",
+    "name": "Полевой Самодержец",
+    "personalityTag": "shlepa",
+    "tags": ["inner", "enterprise", "supporter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 6,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["supporter"],
+    "title": "Принял, что осталось",
+    "shortDescription": "Восстанавливает Величие при входе.",
+    "lore": "Шлёпа не просил корону — её просто некому было больше надеть. Юко ушёл, Альт изгнан, Хайпер ведёт трибуналы. Остался проект, полный дыр, и человек, готовый их латать. Не император по амбиции — император по необходимости.",
+    "triggers": [
+      {
+        "id"         : "restore_from_ruins",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Из пепла",
+        "description": "Восстанавливает 6 Величия гильдии.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 6, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_tundra_master",
+    "name": "Управляющий",
+    "personalityTag": "tundra",
+    "tags": ["inner", "enterprise", "guardian"],
+    "cost": 4,
+    "strength": 4,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": ["taunt"],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["guardian"],
+    "title": "Пока стою — стоит всё",
+    "shortDescription": "Чем меньше ресурсов — тем сильнее.",
+    "lore": "Шлёпа оставил Тундру замком на воротах. Без приказов, без подкреплений, без обещаний. Тундра не спросил зачем. Он просто встал в проход и перестал отвечать на вопросы, которые не касались обороны.",
+    "triggers": [
+      {
+        "id"         : "last_stand",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition"  : {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 3
+        },
+        "name"       : "Из последних",
+        "description": "Если у вас ≤3 Влияния — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "inner_agzamov_bookburner",
+    "name": "Книгосжигатель",
+    "personalityTag": "agzamov",
+    "tags": ["inner", "enterprise", "tactician"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["tactician"],
+    "title": "Пепел вместо фундамента",
+    "shortDescription": "Достаёт архивы и сжигает их.",
+    "lore": "Агзамов получил архивы Спая и увидел в них план нового проекта. Он чертил, перекраивал, правил — а бумаги тлели в руках. К утру от архива остались угли, а от проекта — только амбиции.",
+    "triggers": [
+      {
+        "id"         : "take_archives",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Из-под завалов",
+        "description": "Возвращает 2 случайные карты из сброса в руку.",
+        "effects"    : [
+          {
+            "kind"       : "RETURN_FROM_DISCARD",
+            "count"      : 2,
+            "who"        : "SELF",
+            "destination": "HAND"
+          }
+        ]
+      },
+      {
+        "id"         : "burn_papers",
+        "trigger"    : "ON_TURN_END",
+        "name"       : "Тлеющий черновик",
+        "description": "Сбрасывает 2 случайные карты из руки.",
+        "effects"    : [ {"kind": "DISCARD_RANDOM", "count": 2, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_sirrun_traitor",
+    "name": "Изменник",
+    "personalityTag": "sirrun",
+    "tags": ["inner", "burgundy", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["fighter"],
+    "title": "Выбрал сторону",
+    "shortDescription": "Бьёт в спину и растёт от атак.",
+    "lore": "Сергей стоял рядом, когда Бургундия голосовала за изгнание Альта. Его собственного мужа. Он не поднял руку ни за, ни против — но промолчать в тот момент значило одно. Теперь он бьёт тех, кого раньше звал друзьями, каждый новый его удар делает возврат невозможным.",
+    "triggers": [
+      {
+        "id"         : "stab_in_the_back",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Удар в спину",
+        "description": "Наносит 2 урона выбранному врагу во Фронте.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      },
+      {
+        "id"         : "always_ready",
+        "trigger"    : "ON_ALLY_ATTACKED",
+        "oncePerTurn": true,
+        "name"       : "Ожесточение",
+        "description": "Получает +1 силы, когда атакуют союзника. Раз в ход.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_gorox_saboteur",
+    "name": "Диверсант",
+    "personalityTag": "gorox",
+    "tags": ["inner", "burgundy", "controller"],
+    "cost": 3,
+    "strength": 3,
+    "health": 2,
+    "rarity": "rare",
+    "abilities": ["scout"],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["controller"],
+    "title": "Один баг — и всё рухнуло",
+    "shortDescription": "Обходит стражу и выводит врага из строя.",
+    "lore": "Горох ищет трещины в стенах — брать штурмом не обязательно. Пока армии сходятся лоб в лоб, он уже внутри: перерезает провода, путает приказы, выводит ключевое звено из строя. Враг даже не понимает, что произошло — просто всё перестаёт работать.",
+    "triggers": [
+      {
+        "id": "exploit_plan",
+        "trigger": "ON_ENTER",
+        "name": "Эксплоит",
+        "description": "Возвращает выбранного вражеского персонажа из Фронта в руку владельца.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_FRONT", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, даже если Фронт перед ним занят. Игнорирует Страж."
+      }
+    }
+  },
+  {
+    "id": "inner_yuoko_tired",
+    "name": "Уставший",
+    "personalityTag": "yuoko",
+    "tags": ["inner", "stormwind", "guardian"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["inner"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Больше не командующий",
+    "shortDescription": "Восстанавливает Величие при входе.",
+    "lore": "Юко снял знаки различия и перестал отвечать на вызовы штаба. Штормград принял его без вопросов — здесь не спрашивают, откуда пришёл. Он больше не отдаёт приказов. Но те, кто оказался рядом, почему-то чувствуют себя увереннее.",
+    "triggers": [
+      {
+        "id"         : "finally_home",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Тихая гавань",
+        "description": "Восстанавливает 3 Величия гильдии.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 3, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+	  "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "inner_temporal_observer",
+    "name": "Созерцатель",
+    "personalityTag": "temporal",
+    "tags": ["inner", "stormwind", "tactician"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["scout"],
+    "series": ["inner"],
+    "factions": ["stormwind"],
+    "roles": ["tactician"],
+    "title": "Записано. Не вмешиваюсь.",
+    "shortDescription": "Медленный, но фиксирует каждое изменение поля.",
+    "lore": "Темпорал наблюдает за войной из Штормграда с профессиональным интересом. Каждый захваченный нейтрал, каждый манёвр — всё ложится в отчёт. Кому? Зачем? Этого он не объясняет. Может, никому. Может, самому себе.",
+    "triggers": [
+      {
+        "id": "observe",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Фиксация",
+        "description": "Раз в ход, когда вы захватываете нейтральную ячейку — берёт 1 карту.",
+        "effects": [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_solongo_inspector",
+    "name": "Инспектор",
+    "personalityTag": "solongo",
+    "tags": ["inner", "enterprise", "controller"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["controller"],
+    "title": "По одному. Без исключений.",
+    "shortDescription": "Проверяет карту напротив и лишает её способностей.",
+    "lore": "Солонго не нужно занимать сторону или поднимать голос. Она просто встаёт напротив и задаёт вопросы — терпеливо и методично, до тех пор, пока отвечать уже нечего. После её инспекции не остаётся привилегий — только факты.",
+    "triggers": [
+      {
+        "id"         : "inspection",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Ревизия",
+        "description": "Лишает карту напротив всех способностей.",
+        "effects"    : [ {"kind": "SILENCE_TARGET", "target": "OPPOSITE"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_zamiatish_peacemaker",
+    "name": "Провокатор",
+    "personalityTag": "zamiatish",
+    "tags": ["inner", "burgundy", "controller"],
+    "cost": 3,
+    "strength": 3,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["controller"],
+    "title": "Слово как оружие",
+    "shortDescription": "Наносит урон Величию врага при входе.",
+    "lore": "Замятыш выходит на площадь, разворачивает свиток и читает обвинения. Его голос несёт не мир — он несёт ультиматум. К тому моменту, как стража добегает до трибуны, его уже нет. А слова — остались.",
+    "triggers": [
+      {
+        "id"         : "proclamation",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Ультиматум",
+        "description": "Наносит 3 урона Величию противника.",
+        "effects"    : [
+          {"kind": "DAMAGE_GLORY", "amount": 3, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_flotten_traitor",
+    "name": "Перебежчик",
+    "personalityTag": "flotten",
+    "tags": ["inner", "burgundy", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["tactician"],
+    "title": "Ушёл — и дверь не закрыл",
+    "shortDescription": "Продаёт своего союзника при входе.",
+    "lore": "Флотик чинил баги, писал код, знал архитектуру изнутри. Когда постучали бургундцы, он не хлопнул дверью — он вышел тихо и забрал с собой того, кто доверял ему больше всех. Не из злости. Просто потому, что мог.",
+    "triggers": [
+      {
+        "id": "sell_out",
+        "trigger": "ON_ENTER",
+        "name": "Дезертирство",
+        "description": "Возвращает выбранного союзника из Фронта в руку.",
+        "effects": [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "FRIENDLY_FRONT", "count": 1},
+            "then"     : [ {"kind": "RETURN_TO_HAND", "target": "CHOSEN"} ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_inki_decipherer",
+    "name": "Шифровальщик",
+    "personalityTag": "inki",
+    "tags": ["inner", "stormwind", "controller"],
+    "cost": 3,
+    "strength": 1,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["stormwind"],
+    "roles": ["controller"],
+    "title": "Знает больше, чем говорит",
+    "shortDescription": "Сбрасывает карты врага за Влияние.",
+    "lore": "Инки не покидает башню и не посещает советы. Он перехватывает донесения, расшифровывает приказы, вычёркивает из них ключевые строки. Враг отдаёт команду — а на передовой получают пустой лист.",
+    "activatedAbilities": [
+      {
+        "id"         : "hack",
+        "cost"       : 1,
+        "name"       : "Перехват",
+        "description": "Платите 1 Влияние: противник сбрасывает 1 случайную карту. Раз в ход.",
+        "effects"    : [
+          {"kind": "DISCARD_RANDOM", "count": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_safno_ruin",
+    "name": "Руина",
+    "personalityTag": "safno",
+    "tags": ["inner", "enterprise", "guardian"],
+    "cost": 2,
+    "strength": 2,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": ["taunt", "starter"],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["guardian"],
+    "title": "Стоит, потому что больше некому",
+    "shortDescription": "Всегда в стартовой руке. Крепнет, когда дела плохи.",
+    "lore": "Его зовут Руиной — сначала за глаза, потом в лицо. Сафно не спорит. Он занимает окоп, про который все забыли, и держит его. Без подкреплений, без благодарности, без шансов. Когда в руке пусто — он стоит крепче всего.",
+    "triggers": [
+      {
+        "id"         : "last_stand",
+        "trigger"    : "ON_ENTER",
+        "condition"  : {
+          "kind" : "HAND_COUNT",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 3
+        },
+        "name"       : "Окоп на одного",
+        "description": "Если в руке ≤3 карт — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt"  : {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      },
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Гарантированно в стартовой руке."
+      }
+    }
+  },
+  {
+    "id": "inner_sega_normal",
+    "name": "Типичный",
+    "personalityTag": "sega",
+    "tags": ["inner", "burgundy", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["fighter"],
+    "title": "Один из",
+    "shortDescription": "Ничего особенного. Просто бургундец.",
+    "lore": "Сега не знает, зачем началась война. Он пошёл, потому что пошли все. Бургундский флаг, бургундский строй, бургундская каша на завтрак. Через неделю он забудет, за что дрался. Через месяц о нём забудут все остальные.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_asuka_trencher",
+    "name": "Окопник",
+    "personalityTag": "asuka",
+    "tags": ["inner", "stormwind", "guardian"],
+    "cost": 2,
+    "strength": 2,
+    "health": 4,
+    "rarity": "uncommon",
+    "abilities": ["taunt"],
+    "series": ["inner"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Ему сказали — он стоит",
+    "shortDescription": "Стоит в окопе, не задаёт вопросов.",
+    "lore": "Аска не спрашивает, кто прав. Он вызвался — получил позицию, встал в окоп и закрыл проход. Штормград не объясняет своим бойцам, за что они стоят. Штормград говорит «здесь» — и этого достаточно.",
+    "abilityInfo": {
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник в этой колонке вынужден атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "inner_miungam_signaller",
+    "name": "Связист",
+    "personalityTag": "miungam",
+    "tags": ["inner", "enterprise", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": [],
+    "series": ["inner"],
+    "factions": ["enterprise"],
+    "roles": ["tactician"],
+    "title": "Вызов принят",
+    "shortDescription": "Берёт карту при входе.",
+    "lore": "Юко назвал его лучшим — и ушёл, не объяснив, что с этим делать. Миун-Гам разбирается сам: принимает донесения, распределяет ресурсы, держит связь с передовой. Он не знает, вернётся ли Юко, но линия не должна молчать.",
+    "triggers": [
+      {
+        "id"         : "report_in",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Входящее донесение",
+        "description": "Берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "inner_austro_hussar",
+    "name": "Гусар",
+    "personalityTag": "austro",
+    "tags": ["inner", "burgundy", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 1,
+    "rarity": "common",
+    "abilities": ["charge"],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["fighter"],
+    "title": "Говорят разное",
+    "shortDescription": "Врывается в бой верхом.",
+    "lore": "Никто не видел, откуда он скачет, и никто не успевает спросить, куда. Австро врывается первым, бьёт — и либо решает бой, либо падает. Бургундцы зовут его гусаром. Он не поправляет.",
+    "abilityInfo": {
+      "charge": {
+        "name": "Рвение",
+        "description": "При розыгрыше карта сразу переходит во Фронт, минуя Резерв."
+      }
+    }
+  },
+  {
+    "id": "tk_orc_raider",
+    "name": "Орк-налётчик",
+    "personalityTag": "tk_orc_raider",
+    "tags": ["inner", "burgundy", "fighter", "token"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": ["slow"],
+    "series": ["inner"],
+    "factions": ["burgundy"],
+    "roles": ["fighter"],
+    "title": "Вождь сказал — идём",
+    "shortDescription": "Медлительный, но придёт не один.",
+    "lore": "Орк не знает, зачем идёт на Энтерпрайз. Вождь указал направление — этого достаточно. Один орк — обуза. Десять — набег. Сотня — новая граница.",
+    "isToken": true,
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Карта пропускает свой первый плановый переход из Резерва во Фронт."
+      }
+    }
+  }
+]
