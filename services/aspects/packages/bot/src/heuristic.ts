@@ -2,6 +2,7 @@ import type {
   GameState,
   Command,
   CardInstanceId,
+  CardInstance,
   ColumnIndex,
   PlayerId,
 } from '@aspects/engine';
@@ -15,7 +16,7 @@ import {
   columnBonuses,
   simulateAttackFully,
 } from '@aspects/engine';
-import type { Effect, TargetSelector, TriggeredAbility, CardFilter } from '@aspects/cards';
+import type { Effect, TargetSelector, TriggeredAbility, CardFilter, CardDefinition } from '@aspects/cards';
 import type { Bot } from './types';
 import { PROFILES, selectOption, type BehaviorProfile } from './profile';
 
@@ -36,6 +37,12 @@ function readTriggers(state: GameState, cardId: CardInstanceId): readonly Trigge
   const def = state.definitions[card.definitionId];
   return def?.triggers ?? [];
 }
+
+const KEYWORD_VALUE: Record<string, number> = {
+  taunt: 60, armored: 40, cleave: 80, frenzy: 80,
+  regenerate: 50, starter: 0, charge: 60, vanguard: 40,
+  scout: 30, shield: 50, suppress: 40, silence: 60,
+};
 
 type PlayCommand = Extract<Command, { type: 'PLAY_CARD' }>;
 type AttackCommand = Extract<Command, { type: 'ATTACK' }>;
@@ -274,8 +281,8 @@ export class HeuristicBot implements Bot {
     );
     if (resolves.length === 0) return null;
 
-    if (choice.kind === 'REPLACE_TARGET_SELECTION') {
-      return this.pickReplaceTarget(state, resolves);
+        if (choice.kind === 'REPLACE_TARGET_SELECTION') {
+      return this.pickReplaceTarget(state, resolves, myPlayerId, choice.newCardId);
     }
 
     if (choice.kind !== 'EFFECT_TARGET_SELECTION') {
@@ -298,9 +305,39 @@ export class HeuristicBot implements Bot {
   private pickReplaceTarget(
     state: GameState,
     resolves: readonly ResolveCommand[],
+    myPlayerId: PlayerId,
+    newCardId: CardInstanceId,
   ): ResolveCommand {
+    const newCard = state.cards[newCardId];
+    const newDef = newCard ? state.definitions[newCard.definitionId] : null;
+
+    // Fallback (context missing — shouldn't happen): pick weakest by stats.
+    if (!newCard || !newDef) {
+      let bestFallback: ResolveCommand | null = null;
+      let bestScoreFallback = Infinity;
+      for (const r of resolves) {
+        if (r.cardIds.length !== 1) continue;
+        const id = r.cardIds[0];
+        const card = state.cards[id];
+        if (!card) continue;
+        const def = state.definitions[card.definitionId];
+        if (!def) continue;
+        const hp = health(card);
+        const silencedBonus = card.silenced ? -1000 : 0;
+        const score = hp * 10 + (def.cost ?? 0) * 5 + silencedBonus;
+        if (score < bestScoreFallback) {
+          bestScoreFallback = score;
+          bestFallback = r;
+        }
+      }
+      return bestFallback ?? resolves[0];
+    }
+
+    // Delta-based victim selection.
+    const newValue = this.estimateCardValue(state, newDef, newCard, false);
+
     let best: ResolveCommand | null = null;
-    let bestScore = Infinity;
+    let bestDelta = -Infinity;
     for (const r of resolves) {
       if (r.cardIds.length !== 1) continue;
       const id = r.cardIds[0];
@@ -308,12 +345,10 @@ export class HeuristicBot implements Bot {
       if (!card) continue;
       const def = state.definitions[card.definitionId];
       if (!def) continue;
-      const hp = health(card);
-      // Silenced card — priority target (nothing to lose).
-      const silencedBonus = card.silenced ? -1000 : 0;
-      const score = hp * 10 + (def.cost ?? 0) * 5 + silencedBonus;
-      if (score < bestScore) {
-        bestScore = score;
+      const oldValue = this.estimateCardValue(state, def, card, true);
+      const delta = newValue - oldValue;
+      if (delta > bestDelta) {
+        bestDelta = delta;
         best = r;
       }
     }
@@ -355,7 +390,49 @@ export class HeuristicBot implements Bot {
       cardIds: ids.slice(0, choice.count),
     };
   }
-
+  
+  /**
+   * Unified card value — used by scoreReplaceCardV2 and pickReplaceTarget
+   * to keep decision and victim-selection in sync.
+   *
+   * Includes stats (scaled by current HP), keywords, triggers, silence.
+   * `useCurrentHp: true` for cards on board; false for hand (enter at max HP).
+   */
+  private estimateCardValue(
+    state: GameState,
+    def: CardDefinition,
+    card: CardInstance,
+    useCurrentHp: boolean,
+  ): number {
+    const maxHp = def.health ?? 1;
+    const currentHp = useCurrentHp ? health(card) : maxHp;
+    const hpFraction = maxHp > 0 ? currentHp / maxHp : 1;
+  
+    let v = (def.cost ?? 0) * 10
+          + (def.strength ?? 0) * 8
+          + (def.health ?? 0) * 4;
+    v *= hpFraction;
+  
+    for (const kw of def.abilities ?? []) {
+      v += KEYWORD_VALUE[kw] ?? 20;
+    }
+  
+    for (const tr of def.triggers ?? []) {
+      const effValue = this.scoreEffects(
+        state, tr.effects, card.ownerId, card.instanceId,
+      );
+      if (tr.trigger === 'ON_REPLACE' || tr.trigger === 'ON_ENTER') {
+        v += effValue;
+      } else {
+        v += effValue * 0.3;
+      }
+    }
+  
+    if (useCurrentHp && card.silenced) v *= 0.3;
+  
+    return v;
+  }
+  
   private cardValue(state: GameState, id: CardInstanceId): number {
     const card = state.cards[id];
     if (!card) return -1;
@@ -533,73 +610,61 @@ export class HeuristicBot implements Bot {
     const newDef = state.definitions[newCard.definitionId];
     if (!newDef) return -Infinity;
   
-    let oldId: CardInstanceId | null = null;
-    let bestCandidateScore = Infinity;
+    // Collect all same-personalityTag candidates. Pick victim by max delta —
+    // same logic pickReplaceTarget uses, so the score reflects what will happen.
+    const newValue = this.estimateCardValue(state, newDef, newCard, false);
+  
+    let bestOldDef: CardDefinition | null = null;
+    let bestOldCard: CardInstance | null = null;
+    let bestDelta = -Infinity;
+    let bestInFront = false;
+  
     for (const col of state.board) {
-      const ids = myPlayerId === 'p1'
-        ? [col.p1Front, col.p1Reserve]
-        : [col.p2Front, col.p2Reserve];
-      for (const id of ids) {
+      const frontId = myPlayerId === 'p1' ? col.p1Front : col.p2Front;
+      const reserveId = myPlayerId === 'p1' ? col.p1Reserve : col.p2Reserve;
+      for (const id of [frontId, reserveId]) {
         if (!id || id === cmd.cardId) continue;
         const card = state.cards[id];
         if (!card) continue;
         const def = state.definitions[card.definitionId];
         if (def?.personalityTag !== newDef.personalityTag) continue;
-        const hp = health(card);
-        const cost = def.cost ?? 0;
-        const s = hp * 10 + cost * 5 + (card.silenced ? -1000 : 0);
-        if (s < bestCandidateScore) {
-          bestCandidateScore = s;
-          oldId = id;
+        const oldValue = this.estimateCardValue(state, def, card, true);
+        const delta = newValue - oldValue;
+        if (delta > bestDelta) {
+          bestDelta = delta;
+          bestOldDef = def;
+          bestOldCard = card;
+          bestInFront = id === frontId;
         }
       }
     }
-    if (!oldId) return -Infinity;
-    const oldCard = state.cards[oldId];
-    if (!oldCard) return -Infinity;
-    const oldDef = state.definitions[oldCard.definitionId];
-    if (!oldDef) return -Infinity;
+    if (!bestOldDef || !bestOldCard) return -Infinity;
   
-    const dStr = (newDef.strength ?? 0) - (oldDef.strength ?? 0);
-    const dHpMax = (newDef.health ?? 0) - (oldDef.health ?? 0);
+    const oldDef = bestOldDef;
+    const oldCard = bestOldCard;
+  
+    const isSameId = oldDef.id === newDef.id;
     const currentHp = health(oldCard);
     const maxHp = oldDef.health ?? 1;
-    const newMaxHp = newDef.health ?? 1;
     const hpMissing = Math.max(0, maxHp - currentHp);
-    const hpFraction = maxHp > 0 ? currentHp / maxHp : 1;
-  
-    const isWounded = hpFraction < 0.85;
+    const isWounded = currentHp / Math.max(1, maxHp) < 0.85;
     const isSilenced = oldCard.silenced;
-  
-    const newKws = new Set(newDef.abilities ?? []);
-    const oldKws = new Set(oldDef.abilities ?? []);
-    const gainedKeywords: string[] = [];
-    for (const kw of newKws) if (!oldKws.has(kw)) gainedKeywords.push(kw);
-    const lostKeywords: string[] = [];
-    for (const kw of oldKws) if (!newKws.has(kw)) lostKeywords.push(kw);
   
     const handSize = state.players[myPlayerId].hand.length;
     const needsRelief = handSize >= 7;
   
-    const isUpgrade = dStr > 0 || dHpMax > 0 || gainedKeywords.length > 0;
-    const isSameId = oldDef.id === newDef.id;
-  
-    // ── A→A compromise: pure repair allowed, but only substantial.
-    // Same-id replacement is useful when it heals a badly wounded card
-    // or restores silenced keywords. It is NOT useful for "1 HP heal" or
-    // "hand-relief spam" — those waste the copy and lose tempo.
-    // Cross-aspect variants (upgrades) are strictly better when available.
+    // A→A gate: same-id repair must be substantial.
     if (isSameId) {
       const substantialRepair = isSilenced || hpMissing >= 2;
       if (!substantialRepair) return -Infinity;
+    } else {
+      // Cross-variant: require positive delta (otherwise it's a downgrade).
+      if (bestDelta <= 0 && !isSilenced) return -Infinity;
     }
   
-    if (!isWounded && !isUpgrade && !isSilenced && !needsRelief) {
+    if (!isWounded && !isSilenced && !needsRelief && bestDelta <= 0) {
       return -Infinity;
     }
-  
-    const oldLoc = this.findLocation(state, oldId);
-    const inFront = oldLoc?.zone === 'FRONT';
   
     const discount = Math.min(
       Math.floor((oldDef.cost ?? 0) / 2),
@@ -608,19 +673,25 @@ export class HeuristicBot implements Bot {
     const effectiveCost = Math.max(0, (newDef.cost ?? 0) - discount);
   
     let score = 450;
-    if (inFront) score += 40;
+    if (bestInFront) score += 40;
+  
+    // Delta from estimateCardValue covers stats+keywords+triggers at once.
+    // Amplify so a clear upgrade reliably beats cost-3 PLAY_CARD.
+    score += bestDelta * 2;
+  
+    // Mode: dStr → aggression, dHpMax → defensiveness.
+    const dStr = (newDef.strength ?? 0) - (oldDef.strength ?? 0);
+    const dHpMax = (newDef.health ?? 0) - (oldDef.health ?? 0);
+    const strWeight = 15 + this.profile.aggression * 40;      // 15..55
+    const hpWeight = 10 + this.profile.defensiveness * 35;    // 10..45
+    if (dStr > 0) score += dStr * strWeight;
+    else if (dStr < 0) score += dStr * hpWeight * 0.7;
+    if (dHpMax > 0) score += dHpMax * hpWeight;
+    else if (dHpMax < 0) score += dHpMax * strWeight * 0.5;
+  
+    // Repair / silenced bonuses (mostly matter for same-id repair).
     if (isWounded) score += 60 + hpMissing * 45;
     if (isSilenced) score += 150;
-    if (dStr > 0) score += dStr * 45;
-    if (dHpMax > 0) score += dHpMax * 25;
-  
-    const KEYWORD_VALUE: Record<string, number> = {
-      taunt: 60, armored: 40, cleave: 80, frenzy: 80,
-      regenerate: 50, starter: 0, charge: 60, vanguard: 40,
-      scout: 30, shield: 50, suppress: 40, silence: 60,
-    };
-    for (const kw of gainedKeywords) score += KEYWORD_VALUE[kw] ?? 20;
-    for (const kw of lostKeywords) score -= KEYWORD_VALUE[kw] ?? 20;
   
     if (handSize >= 6) score += (handSize - 5) * 30;
     if (needsRelief) score += (handSize - 7) * 20;
@@ -628,8 +699,7 @@ export class HeuristicBot implements Bot {
     score -= effectiveCost * 10;
     score += discount * 20;
   
-    // Prefer cross-aspect upgrades when both A→A repair and A→B upgrade
-    // are available in hand. A→A fires when it's the only sensible move.
+    // Prefer cross-variant over same-id when both are available.
     if (isSameId) score -= 100;
   
     return score;
