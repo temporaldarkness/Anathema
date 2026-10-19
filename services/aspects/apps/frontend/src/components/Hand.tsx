@@ -61,20 +61,29 @@ export function Hand({ state, playerId, onPlay, onReplace, selectedCardId, disab
         const card = state.cards[cardId];
         const def = state.definitions[card.definitionId];
 
-        const cost = Math.max(0, def.cost - bonuses.costReduction);
+        const playCost = Math.max(0, def.cost - bonuses.costReduction);
         const hasCopy = personalityOnBoard(state, playerId, def.personalityTag);
-        const canAfford = influence >= cost;
-
-        const canPlay = canPlayPhase && canAfford && !hasCopy;
-        const canReplace = canPlayPhase && hasCopy && canAfford;
+        const canAffordPlay = influence >= playCost;
+        
+        // Считаем минимальную стоимость замены для этой карты
+        let minReplaceCost: number | null = null;
+        if (hasCopy) {
+          const candidates = findReplaceCandidatesFor(state, playerId, def);
+          if (candidates.length > 0) {
+            minReplaceCost = Math.min(...candidates.map((c) => c.cost));
+          }
+        }
+        const canAffordReplace = minReplaceCost !== null && influence >= minReplaceCost;
+        
+        const canPlay = canPlayPhase && canAffordPlay && !hasCopy;
+        const canReplace = canPlayPhase && hasCopy && canAffordReplace;
 		let reason = '';
-		if (!canPlayPhase) {
-		  reason = 'Только в фазу разыгрывания';
-		} else if (!canAfford) {
-		  reason = `Нужно ${cost}💰, есть ${influence}`;
-		} else if (hasCopy) {
-			reason = '';
-		}
+        if (!canPlayPhase) {
+          reason = 'Только в фазу разыгрывания';
+        } else if (!canPlay && !canReplace) {
+          const neededCost = hasCopy && minReplaceCost !== null ? minReplaceCost : playCost;
+          reason = `Нужно ${neededCost}💰, есть ${influence}`;
+        }
 
         const selected = cardId === selectedCardId;
         const hasActivated = (def.activatedAbilities?.length ?? 0) > 0;
@@ -95,20 +104,20 @@ export function Hand({ state, playerId, onPlay, onReplace, selectedCardId, disab
                 <div
                   className="hand-card-replace-badge"
                   title={
-                    minCost !== null
-                      ? `Можно заменить, от ${minCost}💰`
-                      : 'Личность уже на поле — можно заменить'
+                    minReplaceCost !== null
+                      ? `Можно заменить, от ${minReplaceCost}💰`
+                      : 'Личность уже на поле'
                   }
                 >
-                  ↻ {minCost !== null ? `от ${minCost}💰` : 'ЗАМЕНА'}
+                  ↻ {minReplaceCost !== null ? `от ${minReplaceCost}💰` : 'ЗАМЕНА'}
                 </div>
               );
             })()}
             <div className="hand-card-name">{def.name}</div>
             <div className="hand-card-stats">
               <span className="stat stat-cost" title="Стоимость">
-			    💰{cost}
-				{cost !== def.cost && <sup>*</sup>}
+			    💰{playCost}
+				{playCost !== def.cost && <sup>*</sup>}
               </span>
               <span className="stat stat-str" title="Сила">⚔{def.strength}</span>
               <span className="stat stat-hp" title="Здоровье">❤{def.health}</span>
@@ -127,7 +136,7 @@ export function Hand({ state, playerId, onPlay, onReplace, selectedCardId, disab
                 {canPlay && (
                   <button
                     onClick={() => onPlay(cardId)}
-                    title={`Разыграть за ${cost}💰`}
+                    title={`Разыграть за ${playCost}💰`}
                   >
                     Разыграть
                   </button>
