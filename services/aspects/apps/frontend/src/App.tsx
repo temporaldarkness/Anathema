@@ -83,7 +83,7 @@ function findMatchingPersonalityOnBoard(
 }
 
 function defaultResetParams(): ResetParams {
-  const decks = getDecks();
+  const decks = listActiveDecks();
   const p1Cards = decks[0]?.cards ?? [];
   const p2Cards = decks[1]?.cards ?? decks[0]?.cards ?? [];
   const p1Series = seriesOfDeck(p1Cards);
@@ -752,6 +752,11 @@ function AppMain({
   }
 
   const bothBots = p1IsBot && p2IsBot;
+  
+  if (screen.kind === 'playing' && !resetParams.deckP1Id) {
+	setScreen({ kind: 'setup' });
+	return null;
+  }
 
   return (
     <div className="app">
