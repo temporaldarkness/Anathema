@@ -26,14 +26,20 @@ export type RelationStatus =
 const API_BASE = '/games/aspects/api';
 
 async function request<T>(path: string, opts: RequestInit = {}): Promise<T> {
+  const headers: Record<string, string> = {
+    ...((opts.headers as Record<string, string>) ?? {}),
+  };
+
+  if (opts.body !== undefined && opts.body !== null) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(opts.headers ?? {}),
-    },
     ...opts,
+    credentials: 'include',
+    headers,
   });
+
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(text || `HTTP ${res.status}`);

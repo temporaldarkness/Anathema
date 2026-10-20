@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useGame, type ResetParams } from './game/useGame';
-import { listPacks, getDecks, seriesOfDeck, mergedCardsById } from '@aspects/cards';
+import { listActiveDecks, getDecks, seriesOfDeck, mergedCardsById } from '@aspects/cards';
 import { Board } from './components/Board';
 import { Hand } from './components/Hand';
 import { PlayerPanel } from './components/PlayerPanel';
