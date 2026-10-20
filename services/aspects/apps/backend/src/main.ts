@@ -15,6 +15,28 @@ async function bootstrap() {
     new FastifyAdapter({ logger: false }),
   );
 
+  // Получаем инстанс Fastify до listen, чтобы настроить парсер
+  const fastify = app.getHttpAdapter().getInstance();
+
+  // Учим Fastify принимать пустые тела с Content-Type: application/json
+  fastify.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    function (req: any, body: string, done: any) {
+      if (!body || body === '') {
+        done(null, {});
+        return;
+      }
+      try {
+        const json = JSON.parse(body);
+        done(null, json);
+      } catch (err: any) {
+        err.statusCode = 400;
+        done(err, undefined);
+      }
+    },
+  );
+
   await app.register(fastifyCookie as any, {
     secret: process.env.COOKIE_SECRET ?? 'aspects-internal',
   });
@@ -26,7 +48,6 @@ async function bootstrap() {
 
   await app.listen(config.port, '0.0.0.0');
 
-  const fastify = app.getHttpAdapter().getInstance();
   const httpServer = (fastify as any).server;
   attachSocketIo(httpServer, app);
 
