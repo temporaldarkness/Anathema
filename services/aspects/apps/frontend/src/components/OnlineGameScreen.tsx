@@ -230,6 +230,30 @@ function OnlineGameInner({
     const t = setTimeout(dismissRematchNotice, 5000);
     return () => clearTimeout(t);
   }, [rematchNotice, dismissRematchNotice]);
+  
+  
+  
+  useEffect(() => {
+    if (!state) return;
+    if (!state.pendingChoice) return;
+    if (state.pendingChoice.kind !== 'REPLACE_TARGET_SELECTION') return;
+  
+    const intent = replaceIntentRef.current;
+    replaceIntentRef.current = null;
+  
+    const eligible = state.pendingChoice.eligibleCardIds;
+    const target = intent && eligible.includes(intent)
+      ? intent
+      : eligible[0];
+  
+    if (target) {
+      dispatch({
+        type: 'RESOLVE_CHOICE',
+        playerId: state.pendingChoice.playerId,
+        cardIds: [target],
+      });
+    }
+  }, [state?.pendingChoice, dispatch]);
 
   // ─── РАННИЕ RETURN'Ы — ПОСЛЕ ВСЕХ ХУКОВ ───
 
@@ -399,28 +423,6 @@ function OnlineGameInner({
     setAttackMode(null);
     setReplaceMode(cardId);
   };
-  
-  useEffect(() => {
-    if (!state) return;
-    if (!state.pendingChoice) return;
-    if (state.pendingChoice.kind !== 'REPLACE_TARGET_SELECTION') return;
-  
-    const intent = replaceIntentRef.current;
-    replaceIntentRef.current = null;
-  
-    const eligible = state.pendingChoice.eligibleCardIds;
-    const target = intent && eligible.includes(intent)
-      ? intent
-      : eligible[0];
-  
-    if (target) {
-      dispatch({
-        type: 'RESOLVE_CHOICE',
-        playerId: state.pendingChoice.playerId,
-        cardIds: [target],
-      });
-    }
-  }, [state?.pendingChoice, dispatch]);
 
   const handleAbilityClick = (cardId: CardInstanceId) => {
     if (isSpectator || !mySide || !canAct) return;
