@@ -10,19 +10,15 @@ import { attachSocketIo } from './rooms/socket-io';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
-  const adapter = new FastifyAdapter({ logger: false });
-  // Отключаем встроенный парсер NestJS, чтобы избежать конфликта
-  adapter.bodyParser = false;
-
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    adapter,
+    new FastifyAdapter({ logger: false }),
+    { bodyParser: false }, // <--- Отключаем встроенный парсер NestJS
   );
 
-  // Получаем инстанс Fastify до listen, чтобы настроить парсер
   const fastify = app.getHttpAdapter().getInstance();
 
-  // Наш кастомный парсер: пропускает пустые тела с Content-Type: application/json
+  // Регистрируем кастомный парсер, который разрешает пустые тела
   fastify.addContentTypeParser(
     'application/json',
     { parseAs: 'string' },
