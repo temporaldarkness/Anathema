@@ -26,7 +26,8 @@
 	"replacement-analysis": "tsx scripts/replacement-analysis.ts",
     "board-state-timeline": "tsx scripts/board-state-timeline.ts",
     "attack-efficiency": "tsx scripts/attack-efficiency.ts",
-	"find-long-games": "tsx scripts/find-long-games.ts"
+	"find-long-games": "tsx scripts/find-long-games.ts",
+	"card-overlap": "tsx scripts/card-overlap.ts"
   },
   "dependencies": {
     "@aspects/engine": "workspace:*",
