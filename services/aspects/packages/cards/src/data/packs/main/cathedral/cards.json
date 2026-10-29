@@ -318,7 +318,7 @@
     "cost": 5,
     "strength": 3,
     "health": 5,
-    "rarity": "epic",
+    "rarity": "rare",
     "abilities": ["taunt"],
     "series": ["cathedral"],
     "factions": ["stormwind"],
@@ -616,9 +616,9 @@
         "id"         : "collapse_tithe",
         "trigger"    : "ON_ENTER",
         "name"       : "Коллапс десятины",
-        "description": "Наносит 3 урона всем вражеским картам во Фронте.",
+        "description": "Наносит 2 урона всем вражеским картам на столе (Фронт и Резерв).",
         "effects"    : [
-          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_BOARD"}
         ]
       }
     ],
@@ -703,7 +703,7 @@
     "cost": 5,
     "strength": 3,
     "health": 4,
-    "rarity": "epic",
+    "rarity": "rare",
     "abilities": [],
     "series": ["cathedral"],
     "factions": ["stormwind"],
