@@ -294,5 +294,31 @@
       "inner_yuoko_tired", "inner_yuoko_tired",
       "throne_just_treasurer"
     ]
+  },
+  {
+    "id": "cathedral_midrange",
+    "name": "Собор Утонувшего Солнца",
+    "description": "Темпо-мидрейндж: ранний стол + рампа Собора для быстрого выхода Колесницы и Императора.",
+    "archetype": "midrange",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "cathedral_gorox_fool",
+      "classic_asuka", "classic_asuka",
+      "throne_just_treasurer", "throne_just_treasurer",
+      "cathedral_inki_hermit", "cathedral_inki_hermit",
+      "classic_hacker", "classic_hacker",
+      "throne_asuka_knight", "throne_asuka_knight",
+      "cathedral_temporal_magician", "cathedral_temporal_magician",
+      "cathedral_chris_hangedman", "cathedral_chris_hangedman",
+      "cathedral_yuoko_emperor", "cathedral_yuoko_emperor",
+      "cathedral_kiss_highpriestess", "cathedral_kiss_highpriestess",
+      "cathedral_alt_wheel", "cathedral_alt_wheel",
+      "cathedral_bezdna_sun", "cathedral_bezdna_sun",
+      "cathedral_temporal_chariot", "cathedral_temporal_chariot",
+      "cathedral_just_death", "cathedral_just_death",
+      "cathedral_spy_hierophant",
+      "cathedral_alt_star",
+      "cathedral_proklyatie_judgement"
+    ]
   }
 ]

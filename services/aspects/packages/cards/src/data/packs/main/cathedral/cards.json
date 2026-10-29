@@ -1,0 +1,803 @@
+[
+  {
+    "id": "cathedral_gorox_fool",
+    "name": "Шут",
+    "personalityTag": "gorox",
+    "tags": ["cathedral", "burgundy", "stormwind", "tactician"],
+    "cost": 1,
+    "strength": 1,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["starter"],
+    "series": ["cathedral"],
+    "factions": ["burgundy", "stormwind"],
+    "roles": ["tactician"],
+    "title": "Шаг в пропасть",
+    "shortDescription": "Даёт Влияние при входе.",
+    "lore": "Путник шагает за край моста, не зная, есть ли внизу ступень. Фонарь тянет его за рукав, но он уже улыбается. В его котомке — чужая жемчужина. Это неважно. Важно, что он идёт первым.",
+    "triggers": [
+      {
+        "id"         : "reckless_step",
+        "trigger"    : "ON_REINFORCE",
+        "name"       : "Безрассудный шаг",
+        "description": "При переходе во Фронт даёт +1 Влияние.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "starter": {
+        "name"       : "Стартер",
+        "description": "Одна копия гарантированно в стартовой руке."
+      }
+    }
+  },
+  {
+    "id": "cathedral_temporal_magician",
+    "name": "Маг",
+    "personalityTag": "temporal",
+    "tags": ["cathedral", "stormwind", "controller"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["controller"],
+    "title": "Луч в ладонях",
+    "shortDescription": "Наносит 2 урона при входе.",
+    "lore": "На алтаре перед волшебником лежат жезл, клинок, чаша и диск. Он не выбирает один. Он берёт солнечный луч и пропускает сквозь все четыре сразу. Свет выходит другим — узким, точным, как дорога. Куда он ведёт, решает только он сам.",
+    "triggers": [
+      {
+        "id"         : "refraction_rite",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Ритуал преломления",
+        "description": "Наносит 2 урона выбранной цели.",
+        "effects"    : [
+          {
+            "kind"     : "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then"     : [
+              {"kind": "DEAL_DAMAGE", "amount": 2, "target": "CHOSEN"}
+            ]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_kiss_highpriestess",
+    "name": "Верховная Жрица",
+    "personalityTag": "kiss",
+    "tags": ["cathedral", "ganimed", "guardian"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "epic",
+    "abilities": ["taunt", "shield"],
+    "series": ["cathedral"],
+    "factions": ["ganimed"],
+    "roles": ["guardian"],
+    "title": "За занавесом медуз",
+    "shortDescription": "Страж со щитом. Лечит всех при входе.",
+    "lore": "Послушница сидит между двумя колоннами. За её спиной — занавес, скрывающий яркий свет. Она знает, какой. Но предпочтёт молчание. Если ты ранен — подойди, она не спросит, откуда рана.",
+    "triggers": [
+      {
+        "id"         : "listener_behind_veil",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Слушательница за вуалью",
+        "description": "Лечит всех союзников во Фронте на 1.",
+        "effects"    : [
+          {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt" : {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту, если может."
+      },
+      "shield": {
+        "name"       : "Щит",
+        "description": "Поглощает первый входящий урон полностью."
+      }
+    }
+  },
+  {
+    "id": "cathedral_rori_empress",
+    "name": "Императрица",
+    "personalityTag": "rori",
+    "tags": ["cathedral", "ganimed", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["ganimed"],
+    "roles": ["supporter"],
+    "title": "Мать пустых колыбелей",
+    "shortDescription": "Усиливает всех, если дела плохи.",
+    "lore": " Её сад давно затоплен, колыбели пусты, солнце в них погасло. Но она не плачет. Она находит искру, сбегающую из треснувшей люльки, и прячет под плащ.. «Моя», — говорит она. И этого достаточно, чтобы сад не умер окончательно.",
+    "triggers": [
+      {
+        "id": "broken_nursery",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind" : "GLORY",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 10
+        },
+        "name": "Разрушенный питомник",
+        "description": "Если ваше Величие ≤10 — даёт +1/+1 всем союзникам во Фронте.",
+        "effects": [
+          {
+            "kind"    : "BUFF",
+            "strength": 1,
+            "health"  : 1,
+            "target"  : "ALL_FRIENDLY_FRONT"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_yuoko_emperor",
+    "name": "Император",
+    "personalityTag": "yuoko",
+    "tags": ["cathedral", "stormwind", "guardian"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": ["armored", "vanguard"],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Тот, кто держит врата",
+    "shortDescription": "Бронированный. Даёт Влияние за захват клетки.",
+    "lore": "Юко стоит под аркой, которая трещит. За ним — покинутый трон. Ему не суждено взойти на него. Посох вбит в камень, и пока посох там — врата закрыты. Снаружи рвутся знамёна. Внутри лампы не качаются.",
+    "triggers": [
+      {
+        "id"         : "last_open_gate",
+        "trigger"    : "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name"       : "Последние открытые врата",
+        "description": "При захвате нейтральной клетки даёт +1 Влияние.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "armored": {
+        "name"       : "Броня",
+        "description": "Весь входящий урон уменьшен на 1."
+      },
+	  "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "cathedral_spy_hierophant",
+    "name": "Иерофант",
+    "personalityTag": "spy",
+    "tags": ["cathedral", "enterprise", "ganimed", "guardian"],
+    "cost": 3,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": ["taunt"],
+    "series": ["cathedral"],
+    "factions": ["enterprise", "ganimed"],
+    "roles": ["guardian"],
+    "title": "Обряд посвящения",
+    "shortDescription": "Страж. Берёт карту при входе.",
+    "lore": "Понтифик не спрашивает, готов ли ты. Он надевает шлем и затягивает ремни. За его спиной — ниши с десятками таких же как ты. Вы все - как один.",
+    "triggers": [
+      {
+        "id"         : "consecration",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Посвящение",
+        "description": "Берёт 1 карту.",
+        "effects"    : [ {"kind": "DRAW", "count": 1, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "cathedral_tundra_lovers",
+    "name": "Любовники",
+    "personalityTag": "tundra",
+    "tags": ["cathedral", "enterprise", "supporter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 3,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["enterprise"],
+    "roles": ["supporter"],
+    "title": "Двое против двух тронов",
+    "shortDescription": "Призывает Возлюбленную 2/2.",
+    "lore": "Им предложили по короне. Тундра посмотрела на Шлёпу. Они одновременно отвернулись от тронов и бросили свет в один сосуд на двоих. Маски упали к ногам, но никто их не поднял.",
+    "triggers": [
+      {
+        "id"         : "upside_down_choice",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Перевёрнутый выбор",
+        "description": "Призывает токен Возлюбленная 2/2 в Резерв.",
+        "effects"    : [
+          {
+            "kind"       : "SUMMON",
+            "defId"      : "cathedral_tk_shlepa_lover",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "RESERVE"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_tk_shlepa_lover",
+    "name": "Возлюбленная",
+    "personalityTag": "shlepa",
+    "tags": ["cathedral", "enterprise", "fighter"],
+    "cost": 0,
+    "strength": 2,
+    "health": 2,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["enterprise"],
+    "roles": ["fighter"],
+    "isToken": true,
+    "title": "Двое против двух тронов",
+    "shortDescription": "Вторая половина.",
+    "lore": "Им предложили по короне. Шлёпа посмотрела на Тундру. Они одновременно отвернулись от тронов и бросили свет в один сосуд на двоих. Маски упали к ногам, но никто их не поднял.",
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_temporal_chariot",
+    "name": "Колесница",
+    "personalityTag": "temporal",
+    "tags": ["cathedral", "stormwind", "guardian"],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "epic",
+    "abilities": ["armored", "vanguard"],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Собор идёт",
+    "shortDescription": "Бронированный страж. Растёт при захвате.",
+    "lore": "Весь собор снялся с фундамента и пошёл. Два понтифика держат одну молитву на двоих. Течения рвут стены, но собор не останавливается. Он идёт туда, где ещё горит маяк. Общими молитвами, он никогда не встанет.",
+    "triggers": [
+      {
+        "id"         : "crossing_trench",
+        "trigger"    : "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name"       : "Пересечение траншеи",
+        "description": "При захвате нейтральной клетки получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "armored": {
+        "name"       : "Броня",
+        "description": "Весь входящий урон уменьшен на 1."
+      },
+      "vanguard": {
+        "name": "Авангард",
+        "description": "Можно разыграть сразу во Фронт, если ты контролируешь нейтрал в этой колонке."
+      }
+    }
+  },
+  {
+    "id": "cathedral_oddi_strength",
+    "name": "Сила",
+    "personalityTag": "oddi",
+    "tags": ["cathedral", "stormwind", "guardian"],
+    "cost": 5,
+    "strength": 3,
+    "health": 5,
+    "rarity": "epic",
+    "abilities": ["taunt"],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Лоб ко лбу",
+    "shortDescription": "Страж. Становится огромной при низком Величии.",
+    "lore": "Страж трещит по каменным швам, его корона давно съехала, а глаза потускнели. Хранительница подходит, прижимается лбом к его лбу и шепчет что-то, чего никто не слышит. Трещины останавливаются. Страж опускается на колени, словно маленькая испуганная рыбка.",
+    "triggers": [
+      {
+        "id"         : "calming_guardian",
+        "trigger"    : "ON_ENTER",
+        "condition"  : {
+          "kind" : "GLORY",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 10
+        },
+        "name"       : "Усмирение стража",
+        "description": "Если ваше Величие ≤10 — получает +2/+2.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 2, "health": 2, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "cathedral_inki_hermit",
+    "name": "Отшельник",
+    "personalityTag": "inki",
+    "tags": ["cathedral", "stormwind", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["scout", "starter"],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["tactician"],
+    "title": "Луч в темноту",
+    "shortDescription": "Видит за Фронт. Крепнет, оставшись один.",
+    "lore": "Один, он сидит в фонарном зале маяка и крутит раковину. Он не вернётся. Но луч из его фонаря всё ещё находит дорогу тем, кто внизу, этого ему достаточно.",
+    "triggers": [
+      {
+        "id"         : "solitude_wisdom",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition"  : {
+          "kind" : "FRONT_COUNT",
+          "who"  : "SELF",
+          "op"   : "AT_MOST",
+          "value": 1
+        },
+        "name"       : "Мудрость одиночества",
+        "description": "Если у вас только 1 карта во Фронте — получает +1/+1.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв противника, игнорируя Страж."
+      },
+	  "starter": {
+        "name"       : "Стартер",
+        "description": "Одна копия гарантированно в стартовой руке."
+      }
+    }
+  },
+  {
+    "id": "cathedral_alt_wheel",
+    "name": "Колесо Фортуны",
+    "personalityTag": "alt",
+    "tags": ["cathedral", "enterprise", "controller"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["enterprise"],
+    "roles": ["controller"],
+    "title": "Колесо последовательных тронов",
+    "shortDescription": "Даёт много Влияния при избытке.",
+    "lore": "Альт не крутит колесо. Он знает всех, кого оно поднимает и опускает. Троны сменяются, маски меняются, ключи ломаются. Он записывает и не может забыть. Колесо не знает, есть ли кто-то над ним. Может, поэтому оно и крутится.",
+    "triggers": [
+      {
+        "id"         : "wheel_of_thrones",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition"  : {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 6
+        },
+        "name"       : "Колесо тронов",
+        "description": "Если у вас ≥6 Влияния — даёт +2 Влияния.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_hyper_justice",
+    "name": "Справедливость",
+    "personalityTag": "hyper",
+    "tags": ["cathedral", "enterprise", "burgundy", "fighter"],
+    "cost": 4,
+    "strength": 4,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["enterprise", "burgundy"],
+    "roles": ["fighter"],
+    "title": "Один разрез",
+    "shortDescription": "Бьёт сильнее при численном превосходстве врага.",
+    "lore": "Свет из общественного фонтана увели в частный дворец. Судья подходит и одним ударом перерубает золотую цепь. Потоки выравниваются. Весы в другой руке не качнулись ни на грамм.",
+    "triggers": [
+      {
+        "id": "severed_claim",
+        "trigger": "ON_ATTACK",
+        "oncePerTurn": true,
+        "condition": {
+          "kind" : "FRONT_COUNT",
+          "who"  : "OPPONENT",
+          "op"   : "AT_LEAST",
+          "value": 3
+        },
+        "name": "Разорванное притязание",
+        "description": "Если у противника ≥3 карт во Фронте — наносит 2 урона цели атаки.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "OPPOSITE"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_chris_hangedman",
+    "name": "Повешенный",
+    "personalityTag": "chris",
+    "tags": ["cathedral", "ganimed", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["ganimed"],
+    "roles": ["supporter"],
+    "title": "Добровольное нисхождение",
+    "shortDescription": "Уходя — возвращает карту из сброса.",
+    "lore": "Нож в ножнах. Он не станет срезать верёвку. Так, перевёрнутый мир складывается в знаки. Рядом, на расстоянии вытянутой руки, лежит золотая реликвия. Он разжимает пальцы и роняет инструмент. Незачем её брать.",
+    "triggers": [
+      {
+        "id": "voluntary_descent",
+        "trigger": "ON_EXIT",
+        "name": "Добровольное нисхождение",
+        "description": "При уходе в сброс возвращает 1 случайную карту из вашего сброса в руку.",
+        "effects": [
+          {
+            "kind"       : "RETURN_FROM_DISCARD",
+            "count"      : 1,
+            "who"        : "SELF",
+            "destination": "HAND"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_just_death",
+    "name": "Смерть",
+    "personalityTag": "just",
+    "tags": ["cathedral", "stormwind", "tactician"],
+    "cost": 6,
+    "strength": 4,
+    "health": 5,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["tactician"],
+    "title": "Лодка без пассажиров",
+    "shortDescription": "Убивает — и получает Влияние.",
+    "lore": "Джаст правит лодкой сквозь затопленные двери. Внутри нет тел — только пустые мундиры, сброшенные погоны, сломанные значки. Двери закрываются за кормой. Впереди риф начинает цвести вокруг нового света.",
+    "triggers": [
+      {
+        "id"         : "ferry_toll",
+        "trigger"    : "ON_KILL",
+        "name"       : "Плата за переправу",
+        "description": "Когда убивает карту — даёт +2 Влияния.",
+        "effects"    : [
+          {"kind": "GAIN_INFLUENCE", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_hacker_temperance",
+    "name": "Умеренность",
+    "personalityTag": "hacker",
+    "tags": ["cathedral", "stormwind", "supporter"],
+    "cost": 4,
+    "strength": 2,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["supporter"],
+    "title": "Ни капли мимо",
+    "shortDescription": "Забирает Влияние у врага. Лечит себя.",
+    "lore": "Хакер льёт тёплое пиво из одного сосуда и ледяную воду из другого. Потоки встречаются посередине и становятся чем-то новым.",
+    "activatedAbilities": [
+      {
+        "id": "two_waters_balance",
+        "cost": 2,
+        "name": "Баланс двух вод",
+        "description": "Противник теряет 1 Влияние. Вы лечите эту карту на 2. Раз в ход.",
+        "effects": [
+          {"kind": "SPEND_INFLUENCE", "amount": 1, "who": "OPPONENT"},
+          {"kind": "HEAL", "amount": 2, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_agzamov_devil",
+    "name": "Дьявол",
+    "personalityTag": "agzamov",
+    "tags": ["cathedral", "enterprise", "controller"],
+    "cost": 6,
+    "strength": 3,
+    "health": 6,
+    "rarity": "epic",
+    "abilities": ["taunt"],
+    "series": ["cathedral"],
+    "factions": ["enterprise"],
+    "roles": ["controller"],
+    "title": "Цепи не заперты",
+    "shortDescription": "Страж. Забирает Влияние. Стоит Величия.",
+    "lore": "Его послушники в золотых цепях. Выход из зала виден, они свободны. Никто не смотрит в ту сторону.",
+    "triggers": [
+      {
+        "id"         : "sanctuary_easy_wishes",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Святилище лёгких желаний",
+        "description": "Противник теряет 3 Влияния. Вы теряете 3 Величия.",
+        "effects"    : [
+          {"kind": "SPEND_INFLUENCE", "amount": 3, "who": "OPPONENT"},
+          {"kind": "DAMAGE_GLORY",    "amount": 3, "who": "SELF"    }
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "cathedral_yuoko_tower",
+    "name": "Башня",
+    "personalityTag": "yuoko",
+    "tags": ["cathedral", "stormwind", "controller"],
+    "cost": 7,
+    "strength": 6,
+    "health": 6,
+    "rarity": "epic",
+    "abilities": ["slow"],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["controller"],
+    "title": "Коллапс",
+    "shortDescription": "Массовый урон при входе.",
+    "lore": "Сокровищница копила слишком долго. Реликвии грелись, грелись, грелись — и фундамент не выдержал. Стены лопаются, свет хлещет наружу, вниз, к тем, кому он не доставался годами. Два силуэта в коронах летят с балкона. Бедняк стоит внизу и не поднимает рук. Он это видел. Он это ждал.",
+    "triggers": [
+      {
+        "id"         : "collapse_tithe",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Коллапс десятины",
+        "description": "Наносит 3 урона всем вражеским картам во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name"       : "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      }
+    }
+  },
+  {
+    "id": "cathedral_alt_star",
+    "name": "Звезда",
+    "personalityTag": "alt",
+    "tags": ["cathedral", "burgundy", "enterprise", "supporter"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["burgundy", "enterprise"],
+    "roles": ["supporter"],
+    "title": "Фонарь вместо знамени",
+    "shortDescription": "Восстанавливает Величие при входе.",
+    "lore": "Знамя свёрнуто и брошено на камень. В руках — фонарь. Он разворачивает карту, и под светом звезды на ней проступают маршруты, которых там не было. Вдалеке, в других районах, загораются маленькие огоньки. Ответ.",
+    "triggers": [
+      {
+        "id"         : "beacon_without_army",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Маяк без армии",
+        "description": "Восстанавливает 3 Величия.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 3, "who": "SELF"} ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_safno_moon",
+    "name": "Луна",
+    "personalityTag": "safno",
+    "tags": ["cathedral", "stormwind", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["scout"],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["tactician"],
+    "title": "Кто там в отражении",
+    "shortDescription": "Видит за Фронт. Крадёт карту при избытке Влияния.",
+    "lore": "Окно между двумя башнями. Ключ только у отражения, в реальности — лишь блокнот. За плечами пустая дорога. Среди неподвижных фигур струится свет, который показывает не то, что есть. Но и не то, чего нет.",
+    "triggers": [
+      {
+        "id": "deceptive_light",
+        "trigger": "ON_TURN_END",
+        "oncePerTurn": true,
+        "condition": {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 5
+        },
+        "name": "Обманчивый свет",
+        "description": "Если у вас ≥5 Влияния — противник сбрасывает 1 случайную карту.",
+        "effects": [ {"kind": "DISCARD_RANDOM", "count": 1, "who": "OPPONENT"} ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name"       : "Разведка",
+        "description": "Может атаковать Резерв противника, игнорируя Страж."
+      }
+    }
+  },
+  {
+    "id": "cathedral_bezdna_sun",
+    "name": "Солнце",
+    "personalityTag": "bezdna",
+    "tags": ["cathedral", "stormwind", "controller"],
+    "cost": 5,
+    "strength": 3,
+    "health": 4,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["controller"],
+    "title": "Последний мазок",
+    "shortDescription": "Наносит урон всем врагам при входе.",
+    "lore": "Художница стоит на лесах под самым сводом. Кисть размером с неё саму. Она рисует солнце там, где его не было сто лет. Последний штрих замыкает круг — и нарисованное становится окном. Внизу люди снимают маски и смотрят друг на друга. Впервые без них.",
+    "triggers": [
+      {
+        "id"         : "painted_dawn",
+        "trigger"    : "ON_ENTER",
+        "name"       : "Нарисованный рассвет",
+        "description": "Наносит 2 урона всем вражеским картам во Фронте.",
+        "effects"    : [
+          {"kind": "DEAL_DAMAGE", "amount": 2, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_proklyatie_judgement",
+    "name": "Суд",
+    "personalityTag": "proklyatie",
+    "tags": ["cathedral", "stormwind", "controller"],
+    "cost": 7,
+    "strength": 5,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": [],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["controller"],
+    "title": "Колокол помнит всех",
+    "shortDescription": "Массовая зачистка при большой руке.",
+    "lore": "Под самым большим колоколом собора лишь пустой экран и разбитое зеркало высоко в воздухе. И каждый видит в осколках себя прежнего. Проходы, запертые годами, открываются за спиной. Не для побега, но для выбора.",
+    "triggers": [
+      {
+        "id": "return_of_names",
+        "trigger": "ON_ENTER",
+        "condition": {
+          "kind" : "HAND_COUNT",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 4
+        },
+        "name": "Возвращение имён",
+        "description": "Если у вас ≥4 карт в руке — наносит 4 урона всем вражеским картам.",
+        "effects": [
+          {"kind": "DEAL_DAMAGE", "amount": 4, "target": "ALL_ENEMY_FRONT"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "cathedral_ultrarolevik_world",
+    "name": "Мир",
+    "personalityTag": "ultrarolevik",
+    "tags": ["cathedral", "stormwind", "guardian"],
+    "cost": 8,
+    "strength": 6,
+    "health": 7,
+    "rarity": "legendary",
+    "abilities": ["taunt"],
+    "series": ["cathedral"],
+    "factions": ["stormwind"],
+    "roles": ["guardian"],
+    "title": "Стол, за которым всё началось",
+    "shortDescription": "Огромный. Растёт каждый ход при избытке Влияния.",
+    "lore": "Ультраролевик был обрезком кода. Временным. Одноразовым. Теперь он — венец творения. И внутри и собор, и риф, и небо существуют одновременно. В центре — круглый стол, за которым сидят все. За ним — весь мир. Целый.",
+    "triggers": [
+      {
+        "id"         : "completed_journey",
+        "trigger"    : "ON_TURN_START",
+        "oncePerTurn": true,
+        "condition"  : {
+          "kind" : "INFLUENCE",
+          "who"  : "SELF",
+          "op"   : "AT_LEAST",
+          "value": 10
+        },
+        "name"       : "Завершённое путешествие",
+        "description": "Если у вас ≥10 Влияния — получает +2/+2.",
+        "effects"    : [
+          {"kind": "BUFF", "strength": 2, "health": 2, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {
+        "name"       : "Страж",
+        "description": "Противник обязан атаковать эту карту, если может."
+      }
+    }
+  }
+]

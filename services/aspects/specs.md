@@ -112,7 +112,7 @@ pnpm --filter @aspects/frontend build
 
 ```typescript
 SCOPES = {
-  main:    { series: ['classic', 'cradle', 'inner', 'throne'], primary: true },
+  main:    { series: ['classic', 'cradle', 'inner', 'throne', 'integration', 'cathedral'], primary: true },
   ashenlight: { series: ['ash_stormwind', 'voidflame', 'forsaken', 'apocryph'], primary: false },
   oskol:     { series: ['perimeter', 'razlom', 'echo', 'sky'], primary: false },
 }

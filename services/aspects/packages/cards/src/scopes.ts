@@ -18,7 +18,7 @@ export const SCOPES: Record<string, ScopeMeta> = {
     id: 'main',
     name: 'Основная игра',
     description: 'Текущий активный пул серий',
-    series: ['classic', 'cradle', 'inner', 'throne', 'integration'],
+    series: ['classic', 'cradle', 'inner', 'throne', 'integration', 'cathedral'],
     primary: true,
   },
   ashenlight: {
