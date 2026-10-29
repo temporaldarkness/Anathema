@@ -35,8 +35,8 @@
     }
   },
   {
-    "id": "integration_inki_witness",
-    "name": "Свидетель",
+    "id": "integration_inki_watcher",
+    "name": "Наблюдатель",
     "personalityTag": "inki",
     "tags": ["integration", "enterprise", "guardian"],
     "cost": 2,
