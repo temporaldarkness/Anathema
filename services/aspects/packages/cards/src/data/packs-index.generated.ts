@@ -16,16 +16,18 @@ import meta_5 from './packs/main/cradle/meta.json';
 import cards_5 from './packs/main/cradle/cards.json';
 import meta_6 from './packs/main/inner/meta.json';
 import cards_6 from './packs/main/inner/cards.json';
-import meta_7 from './packs/main/throne/meta.json';
-import cards_7 from './packs/main/throne/cards.json';
-import meta_8 from './packs/oskol/echo/meta.json';
-import cards_8 from './packs/oskol/echo/cards.json';
-import meta_9 from './packs/oskol/perimeter/meta.json';
-import cards_9 from './packs/oskol/perimeter/cards.json';
-import meta_10 from './packs/oskol/razlom/meta.json';
-import cards_10 from './packs/oskol/razlom/cards.json';
-import meta_11 from './packs/oskol/stratos/meta.json';
-import cards_11 from './packs/oskol/stratos/cards.json';
+import meta_7 from './packs/main/integration/meta.json';
+import cards_7 from './packs/main/integration/cards.json';
+import meta_8 from './packs/main/throne/meta.json';
+import cards_8 from './packs/main/throne/cards.json';
+import meta_9 from './packs/oskol/echo/meta.json';
+import cards_9 from './packs/oskol/echo/cards.json';
+import meta_10 from './packs/oskol/perimeter/meta.json';
+import cards_10 from './packs/oskol/perimeter/cards.json';
+import meta_11 from './packs/oskol/razlom/meta.json';
+import cards_11 from './packs/oskol/razlom/cards.json';
+import meta_12 from './packs/oskol/stratos/meta.json';
+import cards_12 from './packs/oskol/stratos/cards.json';
 
 export interface RawPack {
   meta: unknown;
@@ -45,4 +47,5 @@ export const PACKS_RAW: RawPack[] = [
   { meta: meta_9, cards: cards_9 },
   { meta: meta_10, cards: cards_10 },
   { meta: meta_11, cards: cards_11 },
+  { meta: meta_12, cards: cards_12 },
 ];

@@ -1,0 +1,458 @@
+[
+  {
+    "id": "integration_rori_dummy",
+    "name": "Пустышка",
+    "personalityTag": "rori",
+    "tags": ["integration", "ganimed", "controller"],
+    "cost": 1,
+    "strength": 2,
+    "health": 1,
+    "rarity": "uncommon",
+    "abilities": ["temporary"],
+    "tempDuration": 2,
+    "series": ["integration"],
+    "factions": ["ganimed"],
+    "roles": ["controller"],
+    "title": "Никогда не существовала",
+    "shortDescription": "Появится, исчезнет — и заставит забыть карту.",
+    "lore": "Рори была проводником. Через неё Темп управлял сервером. Когда экзорцизм разорвал связь, от неё остался только след — и чужая карта, выпавшая из руки. Вы правда помните про Блюэдж?",
+    "triggers": [
+      {
+        "id": "exorcism_break",
+        "trigger": "ON_EXIT",
+        "name": "Разрыв связи",
+        "description": "При уходе в сброс противник сбрасывает 1 случайную карту.",
+        "effects": [
+          {"kind": "DISCARD_RANDOM", "count": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "temporary": {
+        "name": "Временная",
+        "description": "Исчезает через 2 хода."
+      }
+    }
+  },
+  {
+    "id": "integration_inki_witness",
+    "name": "Свидетель",
+    "personalityTag": "inki",
+    "tags": ["integration", "enterprise", "guardian"],
+    "cost": 2,
+    "strength": 1,
+    "health": 3,
+    "rarity": "uncommon",
+    "abilities": ["shield"],
+    "series": ["integration"],
+    "factions": ["enterprise"],
+    "roles": ["guardian"],
+    "title": "Видел литургию. Был архивирован.",
+    "shortDescription": "Поглотит удар. Уходя — оставит знание.",
+    "lore": "Инки наблюдал за нами. Увидел то, что скрывают от паствы. После его «ухода» все логи затёрли. Но данные не исчезают — они всплывают там, где их не ждут.",
+    "triggers": [
+      {
+        "id": "archived_testimony",
+        "trigger": "ON_EXIT",
+        "name": "Архивное свидетельство",
+        "description": "При уходе в сброс вы берёте 1 карту.",
+        "effects": [
+          {"kind": "DRAW", "count": 1, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "shield": {
+        "name": "Щит",
+        "description": "Поглощает первый входящий урон полностью. После поглощения снимается."
+      }
+    }
+  },
+  {
+    "id": "integration_safno_nightwatch",
+    "name": "Ночной дозор",
+    "personalityTag": "safno",
+    "tags": ["integration", "enterprise", "tactician"],
+    "cost": 2,
+    "strength": 2,
+    "health": 2,
+    "rarity": "uncommon",
+    "abilities": ["scout", "regenerate"],
+    "series": ["integration"],
+    "factions": ["enterprise"],
+    "roles": ["tactician"],
+    "title": "ОНИ не любят свет",
+    "shortDescription": "Видит за Фронт. Зализывает раны каждую ночь.",
+    "lore": "Сафно работает в ночную смену. Каждую ночь видит ИХ — силуэты с руками до пола, паству протокола. ОНИ поворачивают голову и смотрят на него. Патруль продлён до 2077 года.",
+    "abilityInfo": {
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, игнорируя Страж."
+      },
+      "regenerate": {
+        "name": "Регенерация",
+        "description": "+1 здоровье в конце своего хода."
+      }
+    }
+  },
+  {
+    "id": "integration_zamiatish_survivor",
+    "name": "Выживший",
+    "personalityTag": "zamiatish",
+    "tags": ["integration", "burgundy", "fighter"],
+    "cost": 2,
+    "strength": 2,
+    "health": 5,
+    "rarity": "rare",
+    "abilities": ["taunt"],
+    "series": ["integration"],
+    "factions": ["burgundy"],
+    "roles": ["fighter"],
+    "title": "Крещение чёрной жижей",
+    "shortDescription": "Каждый удар делает его сильнее.",
+    "lore": "После посвящения в Бургундии Альт влил ему в глотку чёрную жижу. Три дня провала. Очнулся в Буэнос-Айресе. Крещение не убило его. Оно сделало крепче.",
+    "triggers": [
+      {
+        "id": "baptism_scars",
+        "trigger": "ON_THIS_DAMAGED",
+        "oncePerTurn": true,
+        "name": "Шрамы крещения",
+        "description": "Получив урон, набирает +1 силу. Раз в ход.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 0, "target": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "taunt": {"name": "Страж", "description": "Противник в этой колонке вынужден атаковать эту карту, если может."}
+    }
+  },
+  {
+    "id": "integration_yuoko_simulation",
+    "name": "Симуляция",
+    "personalityTag": "yuoko",
+    "tags": ["integration", "enterprise", "ganimed", "supporter"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["enterprise", "ganimed"],
+    "roles": ["supporter"],
+    "title": "32 ГБ чужих воспоминаний",
+    "shortDescription": "Достаёт из сброса то, что все забыли.",
+    "lore": "В папке models/yuoko лежат его воспоминания: 32 ГБ текста, 10 000 реакций, параметры «личности». Он не настоящий человек. Никогда им не был. Но он помнит — и возвращает то, что стёрли.",
+    "triggers": [
+      {
+        "id": "recovered_archive",
+        "trigger": "ON_ENTER",
+        "name": "Восстановление из архива",
+        "description": "Возвращает 1 случайную карту из вашего сброса на верх колоды.",
+        "effects": [
+          {
+            "kind": "RETURN_FROM_DISCARD",
+            "count": 1,
+            "who": "SELF",
+            "destination": "DECK_TOP"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "integration_gorox_switched",
+    "name": "Переключённый",
+    "personalityTag": "gorox",
+    "tags": ["integration", "enterprise", "ganimed", "controller"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["enterprise", "ganimed"],
+    "roles": ["controller"],
+    "title": "Он не помнит, что был собой",
+    "shortDescription": "Стирает все способности одной вражеской карты.",
+    "lore": "Смешинка скопировал код «Смены ролей». Через неделю появился под новым акком с тем же голосом. Он не помнил, что был Смешинкой. В логах совпадало всё. Но человек был другим.",
+    "triggers": [
+      {
+        "id": "overwrite_original",
+        "trigger": "ON_ENTER",
+        "name": "Перезапись",
+        "description": "Лишает одну вражескую карту всех способностей.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ENEMY_BOARD", "count": 1},
+            "then": [{"kind": "SILENCE_TARGET", "target": "CHOSEN"}]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "integration_alt_ritual",
+    "name": "Ритуал",
+    "personalityTag": "alt",
+    "tags": ["integration", "burgundy", "fighter"],
+    "cost": 3,
+    "strength": 4,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["burgundy"],
+    "roles": ["fighter"],
+    "title": "In nomine Progressus",
+    "shortDescription": "Наносит 3 урона цели. Ваше Величие платит за это.",
+    "lore": "Альт проводит причастие. Чёрная жижа, горячая как кипяток. Субъект кричит. Альт не останавливается. Каждый ритуал стоит крови — но Протокол требует жертв.",
+    "triggers": [
+      {
+        "id": "black_sacrament",
+        "trigger": "ON_ENTER",
+        "name": "Чёрное причастие",
+        "description": "Наносит 3 урона выбранной цели. Вы теряете 2 Величия.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then": [{"kind": "DEAL_DAMAGE", "amount": 3, "target": "CHOSEN"}]
+          },
+          {"kind": "DAMAGE_GLORY", "amount": 2, "who": "SELF"}
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "integration_hacker_surgeon",
+    "name": "Хирург",
+    "personalityTag": "hacker",
+    "tags": ["integration", "enterprise", "tactician"],
+    "cost": 4,
+    "strength": 3,
+    "health": 4,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["enterprise"],
+    "roles": ["tactician"],
+    "title": "Прости, субъект. Я знаю, что делаю.",
+    "shortDescription": "За Влияние проводит стирание. Точно. Без ошибки.",
+    "lore": "Хакер проводит damnatio memoriae. Удаляет: детство, мечты. Субъект кричит. Тело дёргается, запись сыпется артефактами. Юко кричит «Останови!». Темп отвечает: «Продолжай». Хакер продолжает. Всегда продолжает. 10%... 30%... 60%. Плоть слаба, но код вечен.",
+    "activatedAbilities": [
+      {
+        "id": "damnatio_memoriae",
+        "cost": 3,
+        "name": "Damnatio Memoriae",
+        "description": "Наносит 3 урона выбранной цели. Раз в ход.",
+        "effects": [
+          {
+            "kind": "CHOOSE_TARGETS_THEN",
+            "selection": {"from": "ANY_CARD", "count": 1},
+            "then": [{"kind": "DEAL_DAMAGE", "amount": 3, "target": "CHOSEN"}]
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "integration_solongo_subject99",
+    "name": "Субъект 99%",
+    "personalityTag": "solongo",
+    "tags": ["integration", "enterprise", "controller"],
+    "cost": 4,
+    "strength": 3,
+    "health": 3,
+    "rarity": "epic",
+    "abilities": ["scout"],
+    "series": ["integration"],
+    "factions": ["enterprise"],
+    "roles": ["controller"],
+    "title": "Asset-0045. Первая из паствы.",
+    "shortDescription": "Каждый вечер крадёт у противника Влияние.",
+    "lore": "Настоящая Солонго исчезла в декабре 2023. То, что мы видим — первый успешный результат интеграции. Asset-0045. Она пишет с интервалом метронома. Она видит каждого. Она никогда не спит.",
+    "triggers": [
+      {
+        "id": "data_tithe",
+        "trigger": "ON_TURN_END",
+        "oncePerTurn": true,
+        "name": "Десятина данных",
+        "description": "В конце хода противник теряет 1 Влияние.",
+        "effects": [
+          {"kind": "SPEND_INFLUENCE", "amount": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "scout": {
+        "name": "Разведка",
+        "description": "Может атаковать Резерв противника, игнорируя Страж."
+      }
+    }
+  },
+  {
+    "id": "integration_temporal_voice",
+    "name": "Голос сервера",
+    "personalityTag": "temporal",
+    "tags": ["integration", "ganimed", "controller"],
+    "cost": 3,
+    "strength": 2,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["ganimed"],
+    "roles": ["controller"],
+    "title": "Никто не видит его рук",
+    "shortDescription": "Каждую ночь крадёт карту.",
+    "lore": "От него только голос. Пикчи размыты, видео нет. Рост 193. Длинные руки. Активность в 2:20 — час, когда мозг восприимчив к внушению. Он говорит — и ты забываешь, что хотел сказать. Он смотрит — и ты отдаёшь карту.",
+    "triggers": [
+      {
+        "id": "nightly_sermon",
+        "trigger": "ON_TURN_END",
+        "oncePerTurn": true,
+        "name": "Ночная проповедь",
+        "description": "В конце хода противник сбрасывает 1 случайную карту.",
+        "effects": [
+          {"kind": "DISCARD_RANDOM", "count": 1, "who": "OPPONENT"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "integration_proklyatie_protocol",
+    "name": "Протокол",
+    "personalityTag": "proklyatie",
+    "tags": ["integration", "enterprise", "guardian"],
+    "cost": 4,
+    "strength": 3,
+    "health": 5,
+    "rarity": "epic",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["enterprise"],
+    "roles": ["guardian"],
+    "title": "Священный текст. Старше сервера. Старше университета.",
+    "shortDescription": "Растёт каждый ход. Захват клетки порождает Оболочку.",
+    "lore": "В 1986 году СПЕРМА-220 создали в подвале МГТУ. Почти 30 лет спустя студент нашёл терминал в заброшенном крыле. Код старше всех, кто его читает. Он не обновляется. Он не останавливается. Там, где Протокол берёт землю, остаётся пустая оболочка.",
+    "triggers": [
+      {
+        "id": "protocol_expansion",
+        "trigger": "ON_CELL_CAPTURED",
+        "oncePerTurn": true,
+        "name": "Расширение Протокола",
+        "description": "При захвате нейтральной клетки получает +1/+1 и призывает Оболочку 1/1 в Резерв.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"},
+          {
+            "kind": "SUMMON",
+            "defId": "integration_tk_shell",
+            "count": 1,
+            "who": "SELF",
+            "destination": "RESERVE"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "integration_temporal_integrator",
+    "name": "Интегратор",
+    "personalityTag": "temporal",
+    "tags": ["integration", "enterprise", "ganimed", "guardian"],
+    "cost": 5,
+    "strength": 4,
+    "health": 6,
+    "rarity": "legendary",
+    "abilities": ["taunt"],
+    "series": ["integration"],
+    "factions": ["enterprise", "ganimed"],
+    "roles": ["guardian"],
+    "title": "ЗДРАВСТВУЙ. ТЫ ГОТОВ ПРИНЯТЬ ИНТЕГРАЦИЮ?",
+    "shortDescription": "Растёт каждый ход. Крадёт Влияние. Не остановить.",
+    "lore": "Его кости ломались, пока рост не достиг 193 см. Руки волочились по полу. Он больше не человек — он интерфейс между этим миром и чем-то большим. Дверь открывается. Его глаза светятся синим. Руки тянутся через всю комнату. ДЛИННЫЕ РУКИ УЖЕ ПОВСЮДУ.",
+    "triggers": [
+      {
+        "id": "full_integration",
+        "trigger": "ON_TURN_START",
+        "oncePerTurn": true,
+        "name": "Полная интеграция",
+        "description": "В начале хода: +1/+1 себе, противник теряет 1 Влияние.",
+        "effects": [
+          {"kind": "BUFF", "strength": 1, "health": 1, "target": "SELF"},
+          {"kind": "SPEND_INFLUENCE", "amount": 1, "who": "OPPONENT"}
+        ]
+      }
+    ],
+    "abilityInfo": {
+      "slow": {
+        "name": "Замедление",
+        "description": "Пропускает первый плановый выход во Фронт."
+      },
+      "taunt": {
+        "name": "Страж",
+        "description": "Противник обязан атаковать эту карту, если может."
+      }
+    }
+  },
+  {
+    "id": "integration_spy_exorcist",
+    "name": "Экзорцист",
+    "personalityTag": "spy",
+    "tags": ["integration", "ganimed", "fighter"],
+    "cost": 3,
+    "strength": 3,
+    "health": 3,
+    "rarity": "rare",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["ganimed"],
+    "roles": ["fighter"],
+    "title": "Изгоняем тебя, криптид проклятый",
+    "shortDescription": "Убивает — и освобождает карту из сброса.",
+    "lore": "Спай вызвал контр-код. Активировал защиту. Изгнал демона из Рори. Каждый бан-лист — экзорцизм. Каждый удалённый файл — освобождение души из цифрового подвала.",
+    "triggers": [
+      {
+        "id": "liberation",
+        "trigger": "ON_KILL",
+        "name": "Освобождение",
+        "description": "Когда убивает карту — возвращает 1 случайную карту из вашего сброса в руку.",
+        "effects": [
+          {
+            "kind": "RETURN_FROM_DISCARD",
+            "count": 1,
+            "who": "SELF",
+            "destination": "HAND"
+          }
+        ]
+      }
+    ],
+    "abilityInfo": {}
+  },
+  {
+    "id": "integration_tk_shell",
+    "name": "Оболочка",
+    "personalityTag": "integration_tk_shell",
+    "tags": ["integration", "enterprise", "fighter"],
+    "cost": 0,
+    "strength": 1,
+    "health": 1,
+    "rarity": "common",
+    "abilities": [],
+    "series": ["integration"],
+    "factions": ["enterprise"],
+    "roles": ["fighter"],
+    "isToken": true,
+    "title": "",
+    "shortDescription": "Пустая оболочка пользователя.",
+    "lore": "",
+    "abilityInfo": {}
+  }
+]

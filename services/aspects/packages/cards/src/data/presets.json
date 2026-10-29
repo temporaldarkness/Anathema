@@ -269,5 +269,30 @@
       "throne_alt_warlord",
       "throne_proklyatie_chronicler"
     ]
+  },
+  {
+    "id": "protocol_control",
+    "name": "Протокол",
+    "description": "Контроль на базе Интеграции и Внутреннего фронта. Истощаем врага, крадём ресурсы, добиваем Протоколом.",
+    "archetype": "control",
+    "expectedWinrate": 0.5,
+    "cards": [
+      "integration_rori_dummy", "integration_rori_dummy",
+      "integration_inki_witness", "integration_inki_witness",
+      "integration_safno_nightwatch", "integration_safno_nightwatch",
+      "integration_zamiatish_survivor", "integration_zamiatish_survivor",
+      "integration_yuoko_simulation", "integration_yuoko_simulation",
+      "integration_gorox_switched", "integration_gorox_switched",
+      "integration_alt_ritual", "integration_alt_ritual",
+      "integration_hacker_surgeon", "integration_hacker_surgeon",
+      "integration_solongo_subject99", "integration_solongo_subject99",
+      "integration_temporal_voice", "integration_temporal_voice",
+      "integration_spy_exorcist", "integration_spy_exorcist",
+      "integration_proklyatie_protocol", "integration_proklyatie_protocol",
+      "integration_temporal_integrator",
+      "inner_solongo_inspector", "inner_solongo_inspector",
+      "inner_yuoko_tired", "inner_yuoko_tired",
+      "throne_just_treasurer"
+    ]
   }
 ]
