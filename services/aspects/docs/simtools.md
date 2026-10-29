@@ -1,6 +1,6 @@
-# `@aspects/simtools` — справочник по мета-инструментам (v0.3.1)
+# `@aspects/simtools` — справочник по мета-инструментам (v0.4)
 
-Монолитный документ, описывающий всю систему симуляций и анализа игры «Аспекты Штормграда». Обновлён под baseline v0.3 (glory 25, Despair off, мгновенная alt-victory, замена со скидкой). **Изменения v0.3.1:** расширен `card-stats` (флаги `--all`, `--card`, `--sort`, `--min-samples`), починен `shield_blocked` в `attack-efficiency`.
+Монолитный документ, описывающий всю систему симуляций и анализа игры «Аспекты Штормграда». **Обновлено под baseline v0.4** (glory 25, Despair off, мгновенная alt-victory, замена со скидкой, v5AltVictory включён для master/grandmaster).
 
 ---
 
@@ -38,19 +38,36 @@
 - Не играют «по-честному» в реальном времени (только симуляция).
 - Не заменяют playtest с живыми людьми. Это инструменты **диагностики**, не **балансировки**.
 
-### Baseline v0.3 (на момент обновления)
+## Baseline v0.4 (финальный, после прогона 2500 партий)
 
 | Метрика | Значение |
 |---|---|
-| Mean turns | 24.3 |
-| Median turns | 22 |
-| Хвост 45+ | 2.7% |
-| Hand bloat (late) | 7.37 |
-| Alt-victory | 12.5% |
+| Mean turns | 26.2 |
+| Median turns | 24 |
+| Хвост 45+ | 3.9% |
+| Hand bloat (late) | 7.92 |
+| Alt-victory | 21.6% |
 | Suicide | 0% |
-| Died 1-turn | 19.6% |
+| Died 1-turn | 20.0% |
+| Idle-ходы | 3.3% |
+| Underdog-influence | 38.2% |
 
-**Правила:** glory 25, Despair off, alt-victory мгновенная, underdog-draw off, замена со скидкой.
+**Состав scope `main`:** 5 пресетов — `lion_midrange`, `coup_disruption`, `royal_control`, `protocol_control`, `cathedral_midrange`.
+
+**Старые пресеты** `strazha`, `divan`, `partizany` **больше не существуют**. Не использовать в примерах и ТЗ.
+
+### Контент
+- Всего карт: **355** (включая 21 токен).
+- Уникальных личностей: **270**.
+- Паков (серий): **14**.
+- Пресетов: **13**.
+- Кривая маны: Cost 1 = 24 карты (мало!), Cost 2-4 = 244 карты (ядро), Cost 5+ = 66 карт.
+
+### Боты (актуально)
+- 36 комбинаций (6 профилей × 6 уровней).
+- **`v5AltVictory: true` для `master` и `grandmaster`** — боты топ-уровня умеют видеть угрозу alt-victory. Это фича, не баг.
+- **`v5Lookahead: false` везде** — эксперимент, ухудшал игру.
+- На rookie-veteran `v5AltVictory` выключен.
 
 ---
 
@@ -60,7 +77,7 @@
 
 ### 2.1. Series (серия)
 
-**Серия** — единица релиза контента. Идентификатор — `meta.id` в `data/packs/<dir>/meta.json`. Примеры: `classic`, `stormwind`, `throne`.
+**Серия** — единица релиза контента. Идентификатор — `meta.id` в `data/packs/<dir>/meta.json`. Примеры: `classic`, `cradle`, `throne`.
 
 Карта принадлежит **одной или нескольким сериям** (при рестайле).
 
@@ -73,7 +90,7 @@
 | Scope | Серии | Назначение |
 |---|---|---|
 | `main` ★ | `classic`, `cradle`, `inner`, `throne`, `integration`, `cathedral` | Основная игра, фокус баланса |
-| `ashenlight` | `stormwind`, `voidflame`, `forsaken`, `apocryph` | Legacy-пак 1 |
+| `ashenlight` | `ash_stormwind`, `voidflame`, `forsaken`, `apocryph` | Legacy-пак 1 |
 | `oskol` | `perimeter`, `echo`, `razlom`, `sky` | Legacy-пак 2 |
 
 Колода должна целиком лежать в одном scope. Кросс-scope колоды — **ошибка**.
@@ -82,9 +99,11 @@
 
 ### 2.3. Preset (пресет)
 
-**Пресет** — готовая колода (30 карт), лежит в `data/presets.json`. Идентификатор — `preset.id` (например, `strazha`).
+**Пресет** — готовая колода (30 карт), лежит в `data/presets.json`. Идентификатор — `preset.id` (например, `lion_midrange`).
 
 Пресет **может** быть в нескольких scope'ах, если его карты подходят.
+
+**Актуальные пресеты scope `main`:** `lion_midrange`, `coup_disruption`, `royal_control`, `protocol_control`, `cathedral_midrange`.
 
 ### 2.4. Bot (бот)
 
@@ -96,7 +115,9 @@
 
 Профиль — это веса оценки. Уровень — вероятность ошибки (`mistakeRate`).
 
-**Важно (v0.3):** `v5Lookahead` и `v5AltVictory` в HeuristicBot **выключены** — тесты показали ухудшение.
+**Важно (v0.4):** `v5Lookahead` выключен везде (ухудшал игру). `v5AltVictory` **включён** для уровней `master` и `grandmaster` — боты топ-уровня умеют видеть угрозу alt-victory и защищаться от неё. На rookie-veteran флаг выключен.
+
+v5AltVictory включён для уровней master и grandmaster (дефолтные боты всех мета-инструментов). Выключен для rookie-veteran. Это напрямую влияет на baseline: alt-victory 21.6% вместо старых 12.5%.
 
 ---
 
@@ -135,7 +156,7 @@ pnpm run --filter @aspects/simtools <команда> [args]
 
 **Тонкость:** `pnpm run --filter X list` работает, но `pnpm --filter X list` — нет (встроенная `list` перехватывает). Всегда `pnpm run` для наших скриптов.
 
-### 3.5. Список инструментов (21)
+### 3.5. Список инструментов (22)
 
 | Скрипт | Группа | Приоритет |
 |---|---|---|
@@ -150,6 +171,7 @@ pnpm run --filter @aspects/simtools <команда> [args]
 | `card-stats` | Карты | 🔴 |
 | `deck-diff` | Карты | 🟢 |
 | `keyword-stats` | Карты | 🟢 |
+| `card-overlap` | Карты | 🟢 |
 | `meta-report` | Мета | 🟡 |
 | `turn-outcome` | Мета | 🟡 |
 | `pace-report` | Pace | 🔴 |
@@ -172,7 +194,7 @@ pnpm run --filter @aspects/simtools <команда> [args]
 Находит пресет по id в рамках scope. Бросает ошибку, если пресета нет.
 
 ```ts
-const deck = resolveDeck(['classic', 'throne'], 'strazha');
+const deck = resolveDeck(['classic', 'throne'], 'lion_midrange');
 // → DeckPreset { id, name, cards: string[] }
 ```
 
@@ -196,7 +218,7 @@ interface RunOptions {
   onAfterCommand?: (state: GameState, cmd: Command, events: GameEvent[]) => void;
 }
 
-const r = runOneGame(['classic'], 'strazha', 'divan', 'seed-1', {
+const r = runOneGame(['classic'], 'lion_midrange', 'coup_disruption', 'seed-1', {
   bots: { p1: makeBot('heuristic-v5-balanced-master'),
           p2: makeBot('heuristic-v5-aggro-master') },
   useMulligan: true,
@@ -230,8 +252,8 @@ interface RunSeriesOptions {
 
 const r = runSeries({
   series: ['classic'],
-  p1DeckId: 'strazha',
-  p2DeckId: 'divan',
+  p1DeckId: 'lion_midrange',
+  p2DeckId: 'coup_disruption',
   games: 100,
   botFactories: { p1: () => makeBot('...'), p2: () => makeBot('...') },
 });
@@ -253,7 +275,7 @@ const r = runSeries({
 ```bash
 pnpm run --filter @aspects/simtools list                # все scope + пресеты + боты
 pnpm run --filter @aspects/simtools list main           # детали по scope
-pnpm run --filter @aspects/simtools list main strazha   # карты колоды
+pnpm run --filter @aspects/simtools list main lion_midrange   # карты колоды
 ```
 
 **Что показывает:**
@@ -267,7 +289,7 @@ pnpm run --filter @aspects/simtools list main strazha   # карты колод�
 ### 5.2. `trace` — пошаговая трассировка
 
 ```bash
-pnpm run --filter @aspects/simtools trace main strazha divan test-seed-1 heuristic-v5-balanced-master
+pnpm run --filter @aspects/simtools trace main lion_midrange coup_disruption test-seed-1 heuristic-v5-balanced-master
 ```
 
 **Что делает:** играет одну партию и выводит **каждую команду** с состоянием до/после. Указывает `✗REJECTED`, если команда отклонена.
@@ -293,10 +315,12 @@ pnpm run --filter @aspects/simtools trace main strazha divan test-seed-1 heurist
 pnpm run --filter @aspects/simtools trace ... > trace.log
 ```
 
+**Ограничение:** `trace` не поддерживает муллиган (`useMulligan: false` захардкожен). Флаг `--mulligan` отсутствует. Для трассировки муллиган-багов используйте `dump-state` с ручным применением команд.
+
 ### 5.3. `dump-state` — дамп JSON
 
 ```bash
-pnpm run --filter @aspects/simtools dump-state main strazha divan 50 heuristic-v5-balanced-master state.json
+pnpm run --filter @aspects/simtools dump-state main lion_midrange coup_disruption 50 heuristic-v5-balanced-master state.json
 ```
 
 **Что делает:** играет N команд и сохраняет `GameState` в JSON.
@@ -306,6 +330,8 @@ pnpm run --filter @aspects/simtools dump-state main strazha divan 50 heuristic-v
 - Сравнить два прогона на бинарном уровне
 - Понять «что за состояние на ходу 50»
 
+**Ограничение:** `dump-state` не поддерживает муллиган (`useMulligan: false` захардкожен). Флаг `--mulligan` отсутствует.
+
 ---
 
 ## 6. Группа 2: Базовые симуляции
@@ -313,7 +339,7 @@ pnpm run --filter @aspects/simtools dump-state main strazha divan 50 heuristic-v
 ### 6.1. `simulate` — серия между двумя колодами
 
 ```bash
-pnpm run --filter @aspects/simtools simulate main strazha divan 100
+pnpm run --filter @aspects/simtools simulate main lion_midrange coup_disruption 100
 ```
 
 **Параметры:**
@@ -330,7 +356,7 @@ pnpm run --filter @aspects/simtools simulate main strazha divan 100
 
 ```bash
 pnpm run --filter @aspects/simtools matrix main 50
-pnpm run --filter @aspects/simtools matrix main 50 heuristic-v5-balanced-master strazha,divan
+pnpm run --filter @aspects/simtools matrix main 50 heuristic-v5-balanced-master lion_midrange,coup_disruption
 ```
 
 **Параметры:**
@@ -345,11 +371,11 @@ pnpm run --filter @aspects/simtools matrix main 50 heuristic-v5-balanced-master 
 **Плюс проверка симметрии:**
 ```
 Симметрия пар (ожидание ≈100%):
-  strazha vs divan          102%
-  strazha vs partizany       88%  ⚠
+  lion_midrange vs coup_disruption          102%
+  lion_midrange vs royal_control            88%  ⚠
 ```
 
-`88%` означает, что strazha выигрывает у partizany 46%, а partizany у strazha 42% — асимметрия. Может быть шум (при N=50 SE≈7%), может быть реальная.
+`88%` означает, что lion_midrange выигрывает у royal_control 46%, а royal_control у lion_midrange 42% — асимметрия. Может быть шум (при N=50 SE≈7%), может быть реальная.
 
 **Когда использовать:**
 - Оценить баланс пресетов
@@ -359,7 +385,7 @@ pnpm run --filter @aspects/simtools matrix main 50 heuristic-v5-balanced-master 
 ### 6.3. `duel` — A/B-тест двух ботов
 
 ```bash
-pnpm run --filter @aspects/simtools duel main 20 heuristic-v5-balanced-master heuristic-v5-aggro-master strazha,divan
+pnpm run --filter @aspects/simtools duel main 20 heuristic-v5-balanced-master heuristic-v5-aggro-master lion_midrange,coup_disruption
 ```
 
 **Параметры:** `<scope>`, `<N>`, `<botA>`, `<botB>`, `[deck1,deck2,...]`, `--mulligan`.
@@ -377,9 +403,16 @@ pnpm run --filter @aspects/simtools duel main 20 heuristic-v5-balanced-master he
 
 ```bash
 pnpm run --filter @aspects/simtools first-player main 200
+pnpm run --filter @aspects/simtools first-player main 200 heuristic-v5-balanced-master lion_midrange,coup_disruption
 ```
 
+**Параметры:** `<scope>`, `<N>`, `[botName]`, `[deck1,deck2,...]`.
+
 **Что делает:** для каждой колоды играет `N` mirror-партий. Считает **чистое преимущество первого хода**.
+
+**Методология:** для каждой колоды играет `N` партий, где обе стороны играют **одной колодой** (mirror). Swap sides не выполняется — движок сам определяет first player по seed. Статистика считается по полю `finalState.firstPlayer`.
+
+**Ограничение:** `useMulligan: false` захардкожен, флаг `--mulligan` отсутствует.
 
 **Что выводит:** winrate по сторонам, advantage в пп, z-статистику.
 
@@ -421,7 +454,7 @@ pnpm run --filter @aspects/simtools card-stats main 50
 
 Это устраняет базовый winrate колоды и отвечает: **«играть карту — лучше, чем не играть?»**
 
-#### Флаги (v0.3.1)
+#### Флаги
 
 ```bash
 pnpm run --filter @aspects/simtools card-stats main 100 [flags]
@@ -452,6 +485,8 @@ pnpm run --filter @aspects/simtools card-stats main 100 --all > card-stats-all.t
 pnpm run --filter @aspects/simtools card-stats main 100 --card classic_hacker
 pnpm run --filter @aspects/simtools card-stats main 100 --card "Ростовчанин"
 ```
+
+**Примечание:** поиск по имени **строгий** (case-sensitive, точное совпадение). Для кириллических имён используйте кавычки: `--card "Ростовчанин"`. Нечёткий поиск не поддерживается.
 
 Если карта набрала сэмплов — выводит полную статистику:
 
@@ -551,7 +586,7 @@ card                       cost  drawn played  pRate  medT  wr_play  wr_no      
 ### 7.2. `deck-diff` — сравнение двух колод
 
 ```bash
-pnpm run --filter @aspects/simtools deck-diff main strazha divan
+pnpm run --filter @aspects/simtools deck-diff main lion_midrange coup_disruption
 ```
 
 **Что выводит:**
@@ -577,7 +612,27 @@ pnpm run --filter @aspects/simtools keyword-stats main 50
 
 **Осторожно:** если все колоды с keyword'ом сильно похожи, Δ показывает не «сила keyword», а «сила колоды с ним».
 
-**Когда использовать:** когда есть **разные** колоды с разными keywords. На текущих 3 колодах сигнала нет.
+**Когда использовать:** когда есть **разные** колоды с разными keywords. На текущих 5 колодах сигнала нет.
+
+### 7.4. `card-overlap` — поиск механических дублей
+
+```bash
+pnpm run --filter @aspects/simtools card-overlap main
+pnpm run --filter @aspects/simtools card-overlap main --max-diff 2 --ignore-stats
+```
+
+**Что делает:** Строит механическую «сигнатуру» каждой карты (cost, STR/HP, keywords, triggers с условиями, effects с параметрами amount/target/destination, активные способности) и сравнивает все пары через set-difference. Пары карт из разных серий с расстоянием ≤ `--max-diff` (default 1) выводятся как потенциальные механические дубли.
+
+**Флаги:**
+- `--max-diff N` — порог расстояния (default 1)
+- `--ignore-stats` — исключить STR/HP из сигнатуры (сравнивать только механики)
+
+**Когда использовать:**
+- Ревизия контента — найти «одинаковые карты в разных сериях»
+- Перед созданием нового аспекта — убедиться, что не изобретаем велосипед
+- Баланс-сессия — детектор случайных дублей
+
+**Важно:** инструмент чисто статический, партии не играются.
 
 ---
 
@@ -595,7 +650,7 @@ pnpm run --filter @aspects/simtools meta-report main 50
 ```
 ─── Winrate по колодам ────────────────────────
 deck          games  wins   wr      avgT  series
-strazha       300    161    53.7%   27.6  [classic]
+lion_midrange 300    161    53.7%   27.6  [classic]
 ...
 ─── Winrate серий ─────────────────────────────
   classic        900     50.0%
@@ -665,9 +720,9 @@ pnpm run --filter @aspects/simtools pace-report main 100
 
 Если 0-1 — влияние тратится полностью. Если 4-6 — не может потратить, что копит.
 
-**6. Underdog триггеры** (новое в v0.3) — сколько раз сработал underdog-draw и underdog-influence.
+**6. Underdog триггеры** — сколько раз сработал underdog-draw и underdog-influence.
 
-`Underdog-draw triggers: 0%` — отключён (v0.3). `Underdog-influence triggers: 33%` — работает.
+`Underdog-draw triggers: 0%` — отключён (v0.3). `Underdog-influence triggers: 38.2%` — работает.
 
 **7. Idle-ходы** — сколько ходов без PLAY_CARD / ATTACK / USE_ABILITY.
 
@@ -677,11 +732,11 @@ pnpm run --filter @aspects/simtools pace-report main 100
 
 **10. Причины завершения и нейтралы к концу.**
 
-**Что реально показали текущие данные (v0.3):**
-- Mean turns **24.3**, median **22**
-- Рука к концу **7.37** (было 10.19 до v0.3)
+**Что реально показали текущие данные (v0.4):**
+- Mean turns **26.2**, median **24**
+- Рука к концу **7.92**
 - Cost по ходам 1.50 → 2.44
-- Первая смерть на ходу 5.4, glory <20 на 11.6, glory <10 на 20.0
+- Первая смерть на ходу 5.6, glory <20 на 13.7, glory <10 на 22.3
 
 ### 9.2. `attack-efficiency` — куда уходят атаки
 
@@ -721,16 +776,6 @@ pnpm run --filter @aspects/simtools attack-efficiency main 100
 - **`neutral > 30%`** — бот переоценивает клетки.
 - **`shield_blocked > 5%`** — щиты реально поглощают атаки. Проверить, что `scoreAttackHeur` бота их обходит (`preview.shieldBlocks`).
 
-**Примечание v0.3.1:** `shield_blocked` теперь **работает** — раньше он всегда был 0% из-за бага в классификаторе (щит-атаки попадали в `chip`/`suicide`). Теперь через `events.some(e => e.type === 'SHIELD_ABSORBED')`. Если `shield_blocked = 0%` — значит щиты в текущих пресетах либо не атакуются (бот обходит), либо вообще отсутствуют в колодах.
-
-**Как проверить, есть ли щиты в колодах:**
-
-```bash
-pnpm run --filter @aspects/simtools deck-diff main strazha divan
-```
-
-В разделе `─── Keywords ──────` увидишь, какие keywords есть в колодах.
-
 **Примечание про `guild_intercepted`:** с v0.3 механика откачена. Поле осталось для совместимости, всегда 0. Не пугайся.
 
 ### 9.3. `combat-efficiency` — эффективность боя
@@ -766,7 +811,7 @@ pnpm run --filter @aspects/simtools combat-efficiency main 100
 - `face_share < 30%` — не понимают, когда закрывать
 - `phase_with_attack < 50%` — половина COMBAT-фаз пустые
 
-**Что реально показали данные (v0.3):**
+**Что реально показали данные (v0.4):**
 - 25k карт сыграно за 900 партий
 - 26.5% умирают без атак
 - 1.42 атаки на карту
@@ -849,6 +894,8 @@ pnpm run --filter @aspects/simtools deck-optimizer main --out best-decks.json
 
 5. **Финальная проверка.** Топ-5 переоцениваются на **100 партиях** против **всех** базовых пресетов.
 
+**Co-evolution:** топ-2 колоды прошлой генерации (по `fitness`) добавляются к базовым пресетам scope'а для оценки. Параметр `--elite N` (default 2) задаёт размер элиты, но co-evo пул всегда top-2 (захардкожен в `coevoCount`).
+
 **Что выводит:**
 ```
 Gen  1/12: best=70.0% avg=36.7% worst=20.0% (27s)
@@ -886,7 +933,7 @@ pnpm run --filter @aspects/simtools replacement-analysis main 100
 - Была ли замена **совершена**
 - Что именно менялось
 
-**Важно (v0.3):** ищет `CARD_REPLACED` в событиях **любой** команды, не только `REPLACE_CARD`. В новой архитектуре замена идёт в **две** команды: `REPLACE_CARD` ставит `pendingChoice`, `RESOLVE_CHOICE` применяет `CARD_REPLACED`.
+**Важно:** ищет `CARD_REPLACED` в событиях **любой** команды, не только `REPLACE_CARD`. В новой архитектуре замена идёт в **две** команды: `REPLACE_CARD` ставит `pendingChoice`, `RESOLVE_CHOICE` применяет `CARD_REPLACED`.
 
 **Что выводит:**
 ```
@@ -906,7 +953,7 @@ pnpm run --filter @aspects/simtools replacement-analysis main 100
 - **`Utilization`** — доля замен от доступных ситуаций. `<10%` — мёртвая, `10-15%` — ситуативная, `>20%` — нормальная.
 - **`Wins by replacer`** — winrate стороны, сделавшей замену. `>45%` — замена полезна.
 
-**Ограничение v0.3:** в текущих пресетах у каждого `personalityTag` **один вариант карты**. Cross-aspect upgrade невозможен. Потолок utilization ≈ 12.5% без cross-variant контента.
+**Ограничение:** в текущих пресетах у каждого `personalityTag` **один вариант карты**. Cross-aspect upgrade невозможен. Потолок utilization ≈ 12.5% без cross-variant контента.
 
 ---
 
@@ -935,7 +982,7 @@ pnpm run --filter @aspects/simtools find-long-games main 100 heuristic-v5-balanc
   Loser glory:    mean=0.2
 ─── Топ-10 самых длинных (для trace) ─────────
 turns stuck glory       winner  decks                           seed
-62    0     0/3         p2      strazha vs strazha              flg-strazha-strazha-42
+62    0     0/3         p2      lion_midrange vs lion_midrange  flg-lion-lion-42
 ...
 ```
 
@@ -1199,8 +1246,8 @@ pnpm --filter @aspects/simtools build
 **Было актуально до v0.3.1.** Пофикшено — теперь щит-блоки считаются через `SHIELD_ABSORBED` событие.
 
 Если всё ещё 0%:
-- **Проверь, есть ли щиты в пресетах:** `deck-diff main strazha divan` → раздел `Keywords`. Если `shield` нет ни в одной колоде — 0% правда.
-- **Проверь, обходит ли бот щиты:** `scoreAttackHeur` имеет `if (preview.shieldBlocks && !preview.defenderDies) score -= 250` — бот **избегает** атак в щит. Поэтому 0% может быть **правильным** поведением.
+- **Проверь, есть ли щиты в пресетах:** `deck-diff main lion_midrange coup_disruption` → раздел `Keywords`. Если `shield` нет ни в одной колоде — 0% правда.
+- **Проверь, обходит ли бот щиты:** `scoreAttackHeur` имеет `if (preview.shieldBlocks && !preview.defenderDies) score -= 250` — бот **избегает** атак в щит, только если защитник **не умирает**. Поэтому 0% может быть **правильным** поведением, если бот обходит все «бесполезные» щит-атаки.
 
 ### 15.13. `card-stats --card <id>` — «недостаточно сэмплов»
 
@@ -1244,6 +1291,6 @@ pnpm run --filter @aspects/simtools card-stats main 100 --card <id> --min-sample
 
 ---
 
-**Конец документа.** Обновлено под baseline v0.3.1 (glory 25, Despair off, мгновенная alt-victory, underdog-draw off, замена со скидкой, бот v6.1, pace 24.3).
+**Конец документа.** Обновлено под baseline v0.4 (glory 25, Despair off, мгновенная alt-victory, underdog-draw off, замена со скидкой, бот v6.1, v5AltVictory включён для master/grandmaster, pace 26.2, alt-victory 21.6%).
 
 Если что-то устарело — править при первом столкновении. Если появился новый инструмент — добавить раздел. Если изменилось правило — отметить в «Baseline».
