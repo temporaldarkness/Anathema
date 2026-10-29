@@ -278,7 +278,7 @@
     "expectedWinrate": 0.5,
     "cards": [
       "integration_rori_dummy", "integration_rori_dummy",
-      "integration_inki_witness", "integration_inki_witness",
+      "integration_inki_watcher", "integration_inki_watcher",
       "integration_safno_nightwatch", "integration_safno_nightwatch",
       "integration_zamiatish_survivor", "integration_zamiatish_survivor",
       "integration_yuoko_simulation", "integration_yuoko_simulation",
