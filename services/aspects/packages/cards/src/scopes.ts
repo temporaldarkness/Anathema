@@ -30,7 +30,7 @@ export const SCOPES: Record<string, ScopeMeta> = {
   },
   oskol: {
     id: 'oskol',
-    name: 'Современность (legacy)',
+    name: 'Оскол (legacy)',
     description: 'Периметр · Разлом · Эхо-7 · Стратос',
     series: ['perimeter', 'razlom', 'echo', 'sky'],
     primary: false,
