@@ -583,7 +583,7 @@
     "personalityTag": "just",
     "tags": ["throne", "stormwind", "tactician"],
     "cost": 2,
-    "strength": 2,
+    "strength": 1,
     "health": 3,
     "rarity": "uncommon",
     "abilities": ["starter"],

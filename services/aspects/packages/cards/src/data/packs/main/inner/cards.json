@@ -68,7 +68,7 @@
         "effects"    : [
           {
             "kind"       : "SUMMON",
-            "defId"      : "tk_orc_raider",
+            "defId"      : "inner_tk_orc_raider",
             "count"      : 1,
             "who"        : "SELF",
             "destination": "FRONT"
@@ -120,7 +120,7 @@
     "tags": ["inner", "enterprise", "controller"],
     "cost": 3,
     "strength": 3,
-    "health": 4,
+    "health": 3,
     "rarity": "epic",
     "abilities": [],
     "series": ["inner"],
@@ -190,8 +190,8 @@
     "tags": ["inner", "enterprise", "supporter"],
     "cost": 4,
     "strength": 3,
-    "health": 6,
-    "rarity": "epic",
+    "health": 4,
+    "rarity": "rare",
     "abilities": [],
     "series": ["inner"],
     "factions": ["enterprise"],
@@ -204,8 +204,8 @@
         "id"         : "restore_from_ruins",
         "trigger"    : "ON_ENTER",
         "name"       : "Из пепла",
-        "description": "Восстанавливает 6 Величия гильдии.",
-        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 6, "who": "SELF"} ]
+        "description": "Восстанавливает 2 Величия гильдии.",
+        "effects"    : [ {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"} ]
       }
     ],
     "abilityInfo": {}
@@ -216,7 +216,7 @@
     "personalityTag": "tundra",
     "tags": ["inner", "enterprise", "guardian"],
     "cost": 4,
-    "strength": 4,
+    "strength": 3,
     "health": 5,
     "rarity": "rare",
     "abilities": ["taunt"],
@@ -257,7 +257,7 @@
     "personalityTag": "agzamov",
     "tags": ["inner", "enterprise", "tactician"],
     "cost": 3,
-    "strength": 3,
+    "strength": 2,
     "health": 3,
     "rarity": "rare",
     "abilities": [],
@@ -381,7 +381,7 @@
     "personalityTag": "yuoko",
     "tags": ["inner", "stormwind", "guardian"],
     "cost": 3,
-    "strength": 2,
+    "strength": 3,
     "health": 4,
     "rarity": "uncommon",
     "abilities": ["taunt"],
@@ -603,7 +603,7 @@
     "personalityTag": "sega",
     "tags": ["inner", "burgundy", "fighter"],
     "cost": 2,
-    "strength": 2,
+    "strength": 3,
     "health": 2,
     "rarity": "common",
     "abilities": [],
@@ -671,7 +671,7 @@
     "personalityTag": "austro",
     "tags": ["inner", "burgundy", "fighter"],
     "cost": 2,
-    "strength": 2,
+    "strength": 3,
     "health": 1,
     "rarity": "common",
     "abilities": ["charge"],
@@ -689,9 +689,9 @@
     }
   },
   {
-    "id": "tk_orc_raider",
+    "id": "inner_tk_orc_raider",
     "name": "Орк-налётчик",
-    "personalityTag": "tk_orc_raider",
+    "personalityTag": "inner_tk_orc_raider",
     "tags": ["inner", "burgundy", "fighter", "token"],
     "cost": 0,
     "strength": 2,

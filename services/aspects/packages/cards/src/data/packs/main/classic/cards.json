@@ -241,8 +241,8 @@
     "personalityTag": "kingston",
     "tags": ["classic", "stormwind", "tactician"],
     "cost": 2,
-    "strength": 2,
-    "health": 2,
+    "strength": 1,
+    "health": 3,
     "rarity": "uncommon",
     "abilities": ["vanguard"],
     "series": ["classic"],
@@ -623,7 +623,7 @@
     "tags": ["classic", "ganimed", "supporter"],
     "cost": 4,
     "strength": 3,
-    "health": 4,
+    "health": 3,
     "rarity": "rare",
     "abilities": [],
     "series": ["classic"],
@@ -637,10 +637,10 @@
         "id": "matriarch_blessing",
         "trigger": "ON_ENTER",
         "name": "Возвращение матери",
-        "description": "Лечит всех союзников во Фронте на 1 и восстанавливает 3 Величия.",
+        "description": "Лечит всех союзников во Фронте на 1 и восстанавливает 2 Величия.",
         "effects": [
           {"kind": "HEAL", "amount": 1, "target": "ALL_FRIENDLY_FRONT"},
-          {"kind": "HEAL_GLORY", "amount": 3, "who": "SELF"}
+          {"kind": "HEAL_GLORY", "amount": 2, "who": "SELF"}
         ]
       }
     ],
