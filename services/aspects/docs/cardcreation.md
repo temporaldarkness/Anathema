@@ -88,6 +88,18 @@
 
 ## 4. Триггеры (`triggers[]`)
 
+Все триггеры имеют структуру:
+
+```json
+{
+  "id": "unique_id",
+  "trigger": "ON_ENTER",
+  "oncePerTurn": true,
+  "condition": { "kind": "...", "op": "...", "value": 0 },
+  "effects": [ { "kind": "..." } ]
+}
+```
+
 ### Полный список поддерживаемых триггеров движком:
 
 | Триггер | Когда срабатывает |
@@ -180,8 +192,25 @@
 `RANDOM_FRIENDLY_FRONT`, `RANDOM_ENEMY_FRONT`.
 
 ### Фильтр
-Добавляется к **списковым** селекторам (`ALL_*`, `RANDOM_*`).
-Поля: `tag`, `keyword`, `minStrength`, `maxStrength`, `minCost`, `maxCost`, `withoutShield: true`.
+Добавляется к любому **списковому** селектору (`ALL_*`, `RANDOM_*`) или к условиям `FRONT_COUNT` / `HAND_COUNT` / `TOTAL_*`.
+
+**Поля:**
+- `tag` — тег карты (`"fighter"`, `"bot"`, `"ruler"`)
+- `keyword` — ключевое слово (`"taunt"`, `"charge"`, `"armored"`)
+- `minStrength` / `maxStrength` — по силе
+- `minCost` / `maxCost` — по стоимости
+- `withoutShield: true` — только без активного щита
+
+**Пример:**
+```json
+{
+  "kind": "BUFF", "strength": 1, "health": 1,
+  "target": "ALL_FRIENDLY_FRONT",
+  "filter": { "tag": "fighter" }
+}
+```
+
+**Не работает** на `SELF`, `CHOSEN`, `ATTACKER`, `*_HERO`.
 
 ---
 
@@ -197,14 +226,40 @@
 | `SELF_HEALTH` / `SELF_STRENGTH` | Свой стат |
 | `TOTAL_STRENGTH` / `TOTAL_HEALTH` | Сумма по Фронту |
 | `TURN_NUMBER` | Номер хода |
-| `IN_RESERVE` / `IN_FRONT` | Зона карты |
+| `IN_RESERVE` / `IN_FRONT` | Зона карты-источника |
 | `IS_FIRST_PLAYER` | Играет ли первым |
 
-Композиция: `AND`, `OR`, `NOT`. Рекурсивно, любой глубины.
+Все, кроме `SELF_*`, `IN_*`, `IS_FIRST_PLAYER`, `TURN_NUMBER`, имеют поля `who: "SELF" | "OPPONENT"`, `op: "AT_LEAST" | "AT_MOST" | "EQUAL"`, `value: number`.
+
+### Композитные
+
+```json
+{
+  "kind": "AND",
+  "conditions": [
+    {"kind": "GLORY", "who": "SELF", "op": "AT_MOST", "value": 10},
+    {"kind": "HAND_COUNT", "who": "SELF", "op": "AT_MOST", "value": 3}
+  ]
+}
+```
+
+Также `OR { conditions }`, `NOT { condition }`. Рекурсивно, любой глубины.
 
 ---
 
-## 8. Активируемые способности
+## 8.0 Свойства карты
+
+| Свойство | Что делает |
+|---|---|
+| `entersExhausted: true` | Карта входит истощённой (не может атаковать в первый ход) |
+| `cantBeReplaced: true` | Нельзя заменить другой картой той же Личности |
+| `cleaveDamage: N` | Урон от cleave (по умолчанию 1) |
+| `tempDuration: N` | Длительность `temporary` |
+| `isToken: true` | Токен (не идёт в колоду) |
+
+---
+
+## 8.1 Активируемые способности
 
 ```json
 "activatedAbilities": [
@@ -490,7 +545,9 @@ pnpm run --filter @aspects/simtools card-stats main 100 --all --sort playRate
 
 **Не бойтесь простых карт.** 2/2 без эффектов — это **хорошо**. Кривая должна быть плотной, не каждый слот — «интересная карта».
 
-**Учитывайте мету.** Если вы делаете пак — думайте, какие **архетипы** он поддерживает. Aggro, Midrange, Control, Tribal, Alt-Victory. Пак на 20 карт должен закрывать **2–3 архетипа**.
+**Flavour — на первом месте.** Имя, title, shortDescription, lore — всё должно складываться в **живого персонажа**, а не в «Fighter 3/3». Лор читается легко, шутит, намекает.
+
+**Учитывайте мету.** Если вы делаете пак — думайте, какие **архетипы** он поддерживает. Aggro, Midrange, Control, Tribal, Alt-Victory. Пак на 20 карт должен закрывать **2–3 архетипа**, а не «всех по чуть-чуть».
 
 **Проверяйте запрещённое.** Правила — не рекомендации, а жёсткие ограничения. Такие карты ломают игру.
 ```
