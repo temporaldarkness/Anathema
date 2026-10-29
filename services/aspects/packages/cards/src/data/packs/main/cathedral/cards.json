@@ -738,22 +738,22 @@
     "factions": ["stormwind"],
     "roles": ["controller"],
     "title": "Колокол помнит всех",
-    "shortDescription": "Массовая зачистка при большой руке.",
+    "shortDescription": "Очищает Фронт и возвращает карту из сброса.",
     "lore": "Под самым большим колоколом собора лишь пустой экран и разбитое зеркало высоко в воздухе. И каждый видит в осколках себя прежнего. Проходы, запертые годами, открываются за спиной. Не для побега, но для выбора.",
     "triggers": [
       {
         "id": "return_of_names",
         "trigger": "ON_ENTER",
-        "condition": {
-          "kind" : "HAND_COUNT",
-          "who"  : "SELF",
-          "op"   : "AT_LEAST",
-          "value": 4
-        },
         "name": "Возвращение имён",
-        "description": "Если у вас ≥4 карт в руке — наносит 4 урона всем вражеским картам.",
+        "description": "Наносит 3 урона всем врагам во Фронте. Возвращает 1 случайную карту из сброса в руку.",
         "effects": [
-          {"kind": "DEAL_DAMAGE", "amount": 4, "target": "ALL_ENEMY_FRONT"}
+          {"kind": "DEAL_DAMAGE", "amount": 3, "target": "ALL_ENEMY_FRONT"},
+          {
+            "kind": "RETURN_FROM_DISCARD",
+            "count": 1,
+            "who": "SELF",
+            "destination": "HAND"
+          }
         ]
       }
     ],
