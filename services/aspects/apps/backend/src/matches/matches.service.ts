@@ -131,6 +131,7 @@ export class MatchesService {
       seed: m.seed,
       deckP1,
       deckP2,
+	  cardSnapshot: m.cardSnapshot,
       commands: m.commands.map((c: any): CommandRecord => ({
         sequence: c.sequence,
         playerId: c.playerId,
