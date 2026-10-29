@@ -159,6 +159,7 @@ export function resolveChoiceInternal(
             sourceId: cont.sourceId,
             ownerId: cont.ownerId,
             attackerId: cont.attackerId,
+            defenderId: cont.defenderId,
           },
           ctx,
           params.cardIds,

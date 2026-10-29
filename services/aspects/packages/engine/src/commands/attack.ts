@@ -87,7 +87,7 @@ function attackCard(
     }
   }
 
-  enqueueTrigger(draft, attackerId, 'ON_ATTACK');
+  enqueueTrigger(draft, attackerId, 'ON_ATTACK', undefined, targetId);
   drainTriggerQueue(draft, ctx);
 
   const liveAttacker = draft.cards[attackerId];

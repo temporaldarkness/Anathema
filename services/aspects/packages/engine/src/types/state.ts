@@ -75,6 +75,7 @@ export interface PendingTrigger {
   cardId: CardInstanceId;
   triggerType: TriggerType;
   attackerId?: CardInstanceId;
+  defenderId?: CardInstanceId;
 }
 
 export interface PendingEffectContinuation {
@@ -82,6 +83,7 @@ export interface PendingEffectContinuation {
   ownerId: PlayerId;
   then: Effect[];
   attackerId?: CardInstanceId;
+  defenderId?: CardInstanceId;
   paidAbility?: {
     cardId: CardInstanceId;
     abilityIndex: number;

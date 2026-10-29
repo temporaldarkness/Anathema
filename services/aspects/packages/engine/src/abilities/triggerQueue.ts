@@ -78,6 +78,7 @@ export function drainTriggerQueue(
             sourceId: trigger.cardId,
             ownerId: card.ownerId,
             attackerId: trigger.attackerId,
+			defenderId: trigger.defenderId,
           },
           ctx,
         );

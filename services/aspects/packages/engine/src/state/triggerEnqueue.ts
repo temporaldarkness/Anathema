@@ -8,6 +8,7 @@ export function enqueueTrigger(
   cardId: CardInstanceId,
   triggerType: TriggerType,
   attackerId?: CardInstanceId,
+  defenderId?: CardInstanceId,
 ): void {
-  draft.pendingTriggers.push({ cardId, triggerType, attackerId });
+  draft.pendingTriggers.push({ cardId, triggerType, attackerId, defenderId });
 }

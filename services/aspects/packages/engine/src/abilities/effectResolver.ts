@@ -22,6 +22,7 @@ export interface EffectContext {
   sourceId: CardInstanceId;
   ownerId: PlayerId;
   attackerId?: CardInstanceId;
+  defenderId?: CardInstanceId;
 }
 
 export function resolveEffect(
@@ -172,6 +173,7 @@ export function resolveEffect(
           ownerId: ec.ownerId,
           then: effect.then,
           attackerId: ec.attackerId,
+		  defenderId: ec.defenderId,
         },
       };
       ctx.events.push({
@@ -509,6 +511,9 @@ function resolveTargets(
     }
     case 'ATTACKER': {
       return ec.attackerId ? [ec.attackerId] : [];
+    }
+    case 'DEFENDER': {
+      return ec.defenderId ? [ec.defenderId] : [];
     }
   }
 }
