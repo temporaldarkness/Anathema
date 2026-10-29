@@ -54,6 +54,7 @@ export const TARGET_SELECTORS = [
   'CHOSEN',
   'ATTACKER',
   'OPPOSITE',
+  'DEFENDER'
 ] as const;
 
 export type TargetSelector = (typeof TARGET_SELECTORS)[number];
