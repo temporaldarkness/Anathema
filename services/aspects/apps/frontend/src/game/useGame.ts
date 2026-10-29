@@ -51,17 +51,6 @@ interface PositionSnapshot {
   zone: 'FRONT' | 'RESERVE' | 'HAND' | 'DECK' | 'DISCARD';
 }
 
-function resolveDeckCards(
-  deckId: string,
-  explicitCards: string[] | null,
-): string[] {
-  if (explicitCards && explicitCards.length > 0) return explicitCards;
-  const all = getDecks();
-  const d = all.find((x) => x.id === deckId);
-  if (!d) throw new Error(`Deck ${deckId} not found`);
-  return d.cards;
-}
-
 function makeBots(params: {
   p1BotName: string | null;
   p2BotName: string | null;
@@ -75,10 +64,45 @@ function makeBots(params: {
 const BASE_BOT_DELAY_MS = 600;
 const OBSERVE_BOT_DELAY_MS = 1200;
 
+function resolveDeckCards(
+  deckId: string,
+  explicitCards: string[] | null,
+): string[] {
+  if (explicitCards && explicitCards.length > 0) return explicitCards;
+  const all = getDecks();
+  const d = all.find((x) => x.id === deckId);
+  if (!d) throw new Error(`Deck ${deckId} not found`);
+  return d.cards;
+}
+
+function sanitizeDeck(cards: string[], validDefs: Record<string, any>): string[] {
+  let hadInvalid = false;
+  
+  const sanitized = cards.map((cardId) => {
+    if (validDefs[cardId]) return cardId;
+    
+    hadInvalid = true;
+    const fallbackCard = Object.values(validDefs)
+      .find((d) => !d.isToken && !d.isClassic);
+      
+    return fallbackCard ? fallbackCard.id : cardId;
+  });
+
+  if (hadInvalid) {
+    console.warn('[DeckSanitizer] В колоде найдены неизвестные карты. Они были заменены.');
+  }
+
+  return sanitized;
+}
+
 function buildInitialState(params: ResetParams): GameState {
   const cardDefs = mergedCardsById(params.series);
-  const p1Cards = resolveDeckCards(params.deckP1Id, params.deckP1Cards);
-  const p2Cards = resolveDeckCards(params.deckP2Id, params.deckP2Cards);
+  const p1Raw = resolveDeckCards(params.deckP1Id, params.deckP1Cards);
+  const p2Raw = resolveDeckCards(params.deckP2Id, params.deckP2Cards);
+  
+  const p1Cards = sanitizeDeck(p1Raw, cardDefs);
+  const p2Cards = sanitizeDeck(p2Raw, cardDefs);
+
   return createGame({
     seed: params.seed,
     decks: { p1: p1Cards, p2: p2Cards },
