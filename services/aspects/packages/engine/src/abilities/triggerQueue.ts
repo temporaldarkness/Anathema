@@ -35,6 +35,7 @@ export function drainTriggerQueue(
     if (
       trigger.triggerType !== 'ON_EXIT' &&
       trigger.triggerType !== 'ON_KILL' &&
+      trigger.triggerType !== 'ON_THIS_DAMAGED' &&
       !onBoard
     ) {
       continue;
