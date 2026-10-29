@@ -153,7 +153,7 @@ export function CardTooltipDef({ def }: Props) {
             return (
               <div key={a.id} className="tooltip-trigger">
                 <div className="tooltip-trigger-label">
-                  ⚡ {name} <span className="tooltip-tag">{a.cost}💰</span>
+                  ⚡ {name} <span className="tooltip-tag">{a.cost}💧</span>
                   {a.discardCost ? (
                     <span className="tooltip-tag">🗑 {a.discardCost}</span>
                   ) : null}

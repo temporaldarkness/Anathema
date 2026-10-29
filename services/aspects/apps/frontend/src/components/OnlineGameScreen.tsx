@@ -601,7 +601,7 @@ function OnlineGameInner({
         const canAfford = state.players[mySide].influence >= a.cost;
         if (!used && canAfford) {
           cardMenuOptions.push({
-            label: `⚡ ${a.name ?? a.id} (${a.cost}💰)`,
+            label: `⚡ ${a.name ?? a.id} (${a.cost}💧)`,
             onSelect: () => {
               dispatch({ type: 'USE_ABILITY', playerId: mySide, cardId: cardMenu, abilityIndex: idx });
               setCardMenu(null);

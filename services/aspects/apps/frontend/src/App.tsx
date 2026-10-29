@@ -538,7 +538,7 @@ function AppMain({
         const canAfford = state.players[activePlayer].influence >= a.cost;
         if (!used && canAfford) {
           cardMenuOptions.push({
-            label: `⚡ ${a.name ?? a.id} (${a.cost}💰)`,
+            label: `⚡ ${a.name ?? a.id} (${a.cost}💧)`,
             onSelect: () => {
               dispatch({ type: 'USE_ABILITY', playerId: activePlayer, cardId: cardMenu.cardId, abilityIndex: idx });
               setCardMenu(null);

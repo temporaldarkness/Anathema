@@ -82,7 +82,7 @@ export function Hand({ state, playerId, onPlay, onReplace, selectedCardId, disab
           reason = 'Только в фазу разыгрывания';
         } else if (!canPlay && !canReplace) {
           const neededCost = hasCopy && minReplaceCost !== null ? minReplaceCost : playCost;
-          reason = `Нужно ${neededCost}💰, есть ${influence}`;
+          reason = `Нужно ${neededCost}💧, есть ${influence}`;
         }
 
         const selected = cardId === selectedCardId;
