@@ -72,7 +72,7 @@
 
 | Scope | Серии | Назначение |
 |---|---|---|
-| `main` ★ | `classic`, `cradle`, `inner`, `throne` | Основная игра, фокус баланса |
+| `main` ★ | `classic`, `cradle`, `inner`, `throne`, `integration`, `cathedral` | Основная игра, фокус баланса |
 | `ashenlight` | `stormwind`, `voidflame`, `forsaken`, `apocryph` | Legacy-пак 1 |
 | `oskol` | `perimeter`, `echo`, `razlom`, `sky` | Legacy-пак 2 |
 

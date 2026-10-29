@@ -4,7 +4,9 @@
     "classic",
     "cradle",
     "inner",
-    "throne"
+    "throne",
+	"integration",
+	"cathedral"
   ],
   "bot": "heuristic-v5-balanced-master",
   "seed": "optimizer-default",
