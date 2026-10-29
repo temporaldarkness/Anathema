@@ -5,6 +5,7 @@ import { generateRandomDeck } from '@aspects/shared';
 import type { AuthState } from '../game/useAuth';
 import { CostCurve } from './CostCurve';
 import { BOT_PROFILES, BOT_LEVELS, botName } from '@aspects/bot';
+import { isDeckBroken } from '../game/deckUtils';
 
 export interface StartParams {
   series: string[];
@@ -170,13 +171,23 @@ function DeckChooser({
           {savedDecks.map((d) => {
             const key = `saved:${d.id}`;
             const isSelected = currentKey === key;
+            const broken = isDeckBroken(d);
             return (
               <div
                 key={d.id}
                 className={`deck-option deck-option-custom ${isSelected ? `deck-option-${side}-selected` : ''}`}
-                onClick={() => onChange({ kind: 'saved', id: d.id })}
+                onClick={() => {
+                  if (broken) {
+                    alert('Эта колода содержит удалённые карты и не может быть выбрана для игры. Исправьте её в редакторе.');
+                    return;
+                  }
+                  onChange({ kind: 'saved', id: d.id });
+                }}
+                style={broken ? { border: '1px solid #ef4444', opacity: 0.6, cursor: 'not-allowed' } : {}}
               >
-                <div className="deck-option-name">{d.name}</div>
+                <div className="deck-option-name" style={broken ? { color: '#ef4444' } : {}}>
+                  {d.name} {broken && '⚠️ (Сломана)'}
+                </div>
                 <div className="deck-option-desc">
                   {d.cardIds.length} карт · сохранённая
                 </div>

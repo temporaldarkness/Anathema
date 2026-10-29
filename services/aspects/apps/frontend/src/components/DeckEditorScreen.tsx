@@ -186,11 +186,14 @@ export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
     setDeck({ ...deck, cardIds: [...deck.cardIds, card.id] });
   };
 
-  const handleRemoveCard = (cardId: string) => {
-    const idx = deck.cardIds.lastIndexOf(cardId);
-    if (idx < 0) return;
-    const next = [...deck.cardIds];
-    next.splice(idx, 1);
+  const handleRemoveCard = (cardId: string, removeAll = false) => {
+    let next = [...deck.cardIds];
+    if (removeAll) {
+      next = next.filter((id) => id !== cardId);
+    } else {
+      const idx = next.lastIndexOf(cardId);
+      if (idx >= 0) next.splice(idx, 1);
+    }
     setDeck({ ...deck, cardIds: next });
   };
 
@@ -222,6 +225,12 @@ export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
     }
     if (deck.series.length === 0) {
       pushToast('error', 'Выберите хотя бы одну серию');
+      return;
+    }
+	const validIds = new Set(allCards.map(c => c.id));
+    const hasGhosts = deck.cardIds.some(id => !validIds.has(id));
+    if (hasGhosts) {
+      pushToast('error', 'В колоде есть удалённые карты. Пожалуйста, уберите их (красные плашки).');
       return;
     }
     if (!validation.valid) {
@@ -856,7 +865,7 @@ function CardPool({
 interface DeckContentProps {
   deck: DeckState;
   allCards: CardDefinition[];
-  onRemove: (cardId: string) => void;
+  onRemove: (id: string) => void;
 }
 
 function DeckContent({ deck, allCards, onRemove }: DeckContentProps) {
@@ -867,13 +876,13 @@ function DeckContent({ deck, allCards, onRemove }: DeckContentProps) {
     }
     const byId = new Map(allCards.map((c) => [c.id, c]));
     return [...m.entries()]
-      .map(([id, count]) => ({ card: byId.get(id), count }))
-      .filter((x) => x.card)
-      .sort(
-        (a, b) =>
-          a.card!.cost - b.card!.cost ||
-          a.card!.name.localeCompare(b.card!.name),
-      );
+      .map(([id, count]) => ({ card: byId.get(id), id, count }))
+      .sort((a, b) => {
+        if (!a.card && !b.card) return a.id.localeCompare(b.id);
+        if (!a.card) return 1;
+        if (!b.card) return -1;
+        return a.card.cost - b.card.cost || a.card.name.localeCompare(b.card.name);
+      });
   }, [deck.cardIds, allCards]);
 
   const manaCurve = useMemo(() => {
@@ -917,24 +926,33 @@ function DeckContent({ deck, allCards, onRemove }: DeckContentProps) {
             Кликните по карте слева, чтобы добавить её в колоду
           </div>
         )}
-        {grouped.map(({ card, count }) => (
-          <div
-            key={card!.id}
-            className={`deck-item deck-item-rarity-${card!.rarity}`}
-          >
-            <div className="deck-item-cost">{card!.cost}</div>
-            <div className="deck-item-name">{card!.name}</div>
-            <div className="deck-item-count">×{count}</div>
-            <div className="deck-item-actions">
-              <button
-                className="deck-item-btn"
-                onClick={() => onRemove(card!.id)}
-              >
-                −
-              </button>
+        {grouped.map(({ card, id, count }) => {
+          if (!card) {
+            return (
+              <div key={id} className="deck-item" style={{ borderColor: '#ef4444', background: 'rgba(239, 68, 68, 0.1)' }}>
+                <div className="deck-item-cost" style={{ color: '#ef4444' }}>?</div>
+                <div className="deck-item-name" style={{ color: '#ef4444', textDecoration: 'line-through', fontSize: '11px' }}>
+                  Удалённая карта ({id})
+                </div>
+                <div className="deck-item-count">×{count}</div>
+                <div className="deck-item-actions">
+                  <button className="deck-item-btn" onClick={() => onRemove(id)}>−</button>
+                </div>
+              </div>
+            );
+          }
+      
+          return (
+            <div key={card.id} className={`deck-item deck-item-rarity-${card.rarity}`}>
+              <div className="deck-item-cost">{card.cost}</div>
+              <div className="deck-item-name">{card.name}</div>
+              <div className="deck-item-count">×{count}</div>
+              <div className="deck-item-actions">
+                <button className="deck-item-btn" onClick={() => onRemove(card.id)}>−</button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

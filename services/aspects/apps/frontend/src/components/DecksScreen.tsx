@@ -7,6 +7,7 @@ import { AuthBadge } from './AuthBadge';
 import { CostCurve } from './CostCurve';
 import { useConfirm } from '../game/confirmContext';
 import { ErrorToast } from './ErrorToast';
+import { isDeckBroken } from '../game/deckUtils';
 
 interface Props {
   auth: AuthState;
@@ -153,11 +154,19 @@ function DeckCard({
     month: '2-digit',
     year: '2-digit',
   });
+  
+    const broken = isDeckBroken(deck);
 
   return (
-    <div className="deck-card" onClick={onEdit}>
+    <div 
+      className="deck-card" 
+      onClick={onEdit}
+      style={broken ? { border: '2px solid #ef4444', background: 'rgba(239, 68, 68, 0.05)' } : {}}
+    >
       <div className="deck-card-header">
-        <div className="deck-card-name">{deck.name}</div>
+        <div className="deck-card-name" style={broken ? { color: '#ef4444' } : {}}>
+          {deck.name} {broken && '⚠️'}
+        </div>
         <button
           className="deck-card-delete"
           title="Удалить"
@@ -169,6 +178,21 @@ function DeckCard({
           🗑
         </button>
       </div>
+
+      {broken && (
+        <div style={{ 
+          color: '#ef4444', 
+          fontSize: '11px', 
+          background: 'rgba(239,68,68,0.1)', 
+          padding: '6px 8px', 
+          borderRadius: '4px',
+          marginBottom: '8px',
+          textAlign: 'center',
+          fontWeight: 600
+        }}>
+          Требует исправления (есть удалённые карты)
+        </div>
+      )}
 
       <div className="deck-card-stats">
         <div className="deck-stat-cell">
