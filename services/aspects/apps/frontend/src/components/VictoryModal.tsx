@@ -14,7 +14,7 @@ interface Props {
   newGameDisabled?: boolean;
   /** Заголовок заблокированной кнопки. */
   newGameDisabledLabel?: string;
-  /** Заголовок кнопки выхода. По умолчанию — «Изменить настройки». */
+  /** Заголовок кнопки выхода. По умолчанию — «Назад». */
   exitLabel?: string;
   /** Дополнительная подпись под кнопками (для «Ожидание ответа соперника…»). */
   extraHint?: string | null;
@@ -45,7 +45,7 @@ export function VictoryModal({
   newGameLabel = 'Реванш',
   newGameDisabled = false,
   newGameDisabledLabel = 'Ожидание соперника…',
-  exitLabel = 'Изменить настройки',
+  exitLabel = 'Назад',
   extraHint = null,
   ratingUpdate = null,
   opponentIsBot = false,
