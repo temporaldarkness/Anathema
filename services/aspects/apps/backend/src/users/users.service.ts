@@ -23,10 +23,6 @@ export class UsersService {
   ) {}
 
   
-  /**
-   * Поиск по username. Минимальная длина запроса — 2 символа.
-   * Возвращает до `limit` результатов (по умолчанию 20).
-   */
   async search(query: string, limit = 20) {
     const q = query.trim();
     if (q.length < 2) return [];
@@ -79,10 +75,6 @@ export class UsersService {
     });
   }
   
-  /**
-   * Топ игроков по рейтингу. Учитываем только тех, у кого
-   * matchesPlayed > 0 — иначе таблица будет забита «1500 из 0 игр».
-   */
   async getLeaderboard(limit = 100) {
     const take = Math.max(1, Math.min(200, limit));
   
@@ -131,27 +123,32 @@ export class UsersService {
       };
     });
   }
-  /**
-   * Кэширует данные из сессии Webway. Вызывается при каждом
-   * обращении к /api/session (единственный источник имени/аватара).
-   */
   async upsertFromSession(
     userId: string,
     username: string,
-    avatarUrl: string | null,
-    isAdmin: boolean,
   ): Promise<void> {
     if (!userId || userId.startsWith('anon:')) return;
     if (!username) return;
     try {
       await this.prisma.userProfile.upsert({
         where: { userId },
-        create: { userId, username, avatarUrl, isAdmin },
-        update: { username, avatarUrl, isAdmin },
+        create: { userId, username },
+        update: { username },
       });
-    } catch {
-      // Не валим сессию из-за проблем с кэшем профиля.
+    } catch (e) {
+      console.warn(`[users] profile cache upsert failed for ${userId}:`, e);
     }
+  }
+  
+  async getProfileSnapshot(userId: string): Promise<{
+    isAdmin: boolean;
+	avatarUrl: string | null;
+  } | null> {
+	const profile = await this.prisma.userProfile.findUnique({
+	  where: { userId },
+	  select: { isAdmin: true, avatarUrl: true },
+	});
+	return profile;
   }
 
   async getPublic(userId: string): Promise<PublicUserDto | null> {
@@ -160,8 +157,6 @@ export class UsersService {
     });
     const rating = await this.rating.getPublic(userId);
 
-    // Профиль есть не всегда (например, пользователь ещё не открывал
-    // сессию под нашим бэкендом). Рейтинг всё равно отдаём — он есть.
     return {
       id: userId,
       username: profile?.username ?? 'Игрок',

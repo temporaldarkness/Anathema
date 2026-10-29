@@ -26,6 +26,9 @@ importers:
       '@aspects/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@aspects/simtools':
+        specifier: workspace:*
+        version: link:../../packages/simtools
       '@fastify/cookie':
         specifier: ^9.4.0
         version: 9.4.0

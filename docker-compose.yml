@@ -534,6 +534,9 @@ services:
       WEBWAY_API_KEY: ${WEBWAY_ASPECTS_CLIENT_KEY}
       PUBLIC_URL: /games/aspects
       PORT: 8010
+      ANON_COOKIE_SECRET: ${ASPECTS_ANON_COOKIE_SECRET}
+      INTERNAL_API_TOKEN: ${ASPECTS_INTERNAL_API_TOKEN}
+    
     depends_on:
       postgres:
         condition: service_started

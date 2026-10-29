@@ -7,24 +7,15 @@ import {
   ANON_NAME_COOKIE,
   anonCookieOptions,
   generateAnonId,
+  makeAnonCookieValue,
   readAnonFromCookie,
 } from '../common/anon-cookie';
+import { validateWebwaySession } from '../common/webway-session';
 import { UsersService } from '../users/users.service';
 
 const SetNameSchema = z.object({
   name: z.string().trim().min(1).max(32),
 });
-
-/** Discord CDN URL — ASCII, проблем с кодировкой не будет. */
-function readAvatarHeader(req: FastifyRequest): string | null {
-  const raw = req.headers['x-user-avatar-url'];
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  if (!value || typeof value !== 'string') return null;
-  // Отсекаем возможный data: / javascript: / и мусор, если прокси вдруг
-  // отдаст странное. Оставляем только http(s).
-  if (!/^https?:\/\//i.test(value)) return null;
-  return value.slice(0, 512);
-}
 
 @Controller('session')
 export class SessionController {
@@ -32,24 +23,26 @@ export class SessionController {
 
   @Public()
   @Get()
-  getSession(
+  async getSession(
     @Req() req: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    const userId = req.headers['x-user-id'] as string | undefined;
-    if (userId) {
-      const username = String(req.headers['x-user-name'] ?? '');
-      const isAdmin = req.headers['x-user-is-admin'] === '1';
-      const avatarUrl = readAvatarHeader(req);
-    
-      // Кэшируем профиль в нашей БД, чтобы потом отдавать его по id.
+    const session = await validateWebwaySession(req.headers.cookie);
+    if (session) {
       this.users
-        .upsertFromSession(String(userId), username, avatarUrl, isAdmin)
+        .upsertFromSession(session.userId, session.username)
         .catch(() => {});
-    
+
+      const profile = await this.users.getProfileSnapshot(session.userId);
+
       return {
         kind: 'authenticated',
-        user: { id: String(userId), username, isAdmin, avatarUrl },
+        user: {
+          id: session.userId,
+          username: session.username,
+          isAdmin: profile?.isAdmin ?? false,
+          avatarUrl: profile?.avatarUrl ?? null,
+        },
       };
     }
 
@@ -66,7 +59,7 @@ export class SessionController {
     const newId = generateAnonId();
     const newName = 'Аноним';
 
-    reply.setCookie(ANON_ID_COOKIE, newId, anonCookieOptions() as any);
+    reply.setCookie(ANON_ID_COOKIE, makeAnonCookieValue(newId), anonCookieOptions() as any);
     reply.setCookie(
       ANON_NAME_COOKIE,
       encodeURIComponent(newName),

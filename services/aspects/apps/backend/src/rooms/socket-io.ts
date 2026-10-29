@@ -11,7 +11,7 @@ import { MatchmakingModule } from '../matchmaking/matchmaking.module';
 import { RatingService, tierFor } from '../rating/rating.service';
 import { RatingModule } from '../rating/rating.module';
 import { makeBot, botDisplayName } from '@aspects/bot';
-import { MatchesService } from '../matches/matches.service';
+import { MatchesService, INTERNAL_CALLER_PREFIX } from '../matches/matches.service';
 import { MatchesModule } from '../matches/matches.module';
 import type { CommandRecord } from '@aspects/shared';
 import { EventsService } from '../common/events.service';
@@ -127,11 +127,7 @@ export function attachSocketIo(
   const rating = app.select(RatingModule).get(RatingService);
   const events = app.select(EventsModule).get(EventsService);
   events.attach(io);
-  
-  /**
-   * Считает и сохраняет рейтинг. Возвращает дельты (или null если
-   * рейтинг не применим — анонимы/боты/уже применён).
-   */
+
   async function tryApplyRating(
     roomCode: string,
   ): Promise<{
@@ -143,18 +139,18 @@ export function attachSocketIo(
     const room = await rooms.get(roomCode);
     if (!room) return null;
     if (room.ratingApplied) return null;
-  
+
     const state = room.gameState as GameState;
     if (!state.winner) return null;
-  
+
     const winnerIsP1 = state.winner === 'p1';
     const winnerId = winnerIsP1 ? room.ownerId : room.guestId;
     const loserId = winnerIsP1 ? room.guestId : room.ownerId;
     const winnerName = winnerIsP1 ? room.ownerName : room.guestName;
     const loserName = winnerIsP1 ? room.guestName : room.ownerName;
-  
+
     if (!winnerId || !loserId || !winnerName || !loserName) return null;
-  
+
     let deltas: Awaited<ReturnType<typeof rating.applyMatch>> = null;
     try {
       deltas = await rating.applyMatch(
@@ -164,30 +160,30 @@ export function attachSocketIo(
     } catch (e) {
       console.error('[rating] applyMatch failed:', e);
     }
-  
-    room.ratingApplied = true;
-    await rooms.save(room);
+
+    const applied = await rooms.saveLocked(roomCode, (r) => {
+      if (r.ratingApplied) return null;
+      r.ratingApplied = true;
+      return r;
+    });
+    if (!applied) return null;
     return deltas;
   }
-  
-  /**
-   * Считает рейтинг и эмитит `rating_updated` каждому игроку.
-   * Это то, что должны вызывать обработчики game_over.
-   */
+
   async function applyRatingAndNotify(roomCode: string): Promise<void> {
     const room = await rooms.get(roomCode);
     if (!room) return;
-  
+
     const state = room.gameState as GameState;
     if (!state.winner) return;
-  
+
     const deltas = await tryApplyRating(roomCode);
     if (!deltas) return;
-  
+
     const winnerIsP1 = state.winner === 'p1';
     const winnerId = winnerIsP1 ? room.ownerId : room.guestId;
     const loserId = winnerIsP1 ? room.guestId : room.ownerId;
-  
+
     if (winnerId && !winnerId.startsWith('anon:')) {
       io.to(`user:${winnerId}`).emit('rating_updated', {
         side: 'winner',
@@ -205,45 +201,47 @@ export function attachSocketIo(
       });
     }
   }
-  
-  /**
-   * Сохраняет онлайн-матч в БД. Идемпотентно через room.matchSaved.
-   * Сохраняется, если хотя бы один из игроков — Webway.
-   */
+
   async function saveMatchOnce(roomCode: string): Promise<void> {
-    const room = await rooms.get(roomCode);
-    if (!room) return;
-    if (room.matchSaved) return;
-  
-    const state = room.gameState as GameState;
+    const room0 = await rooms.get(roomCode);
+    if (!room0) return;
+    if (room0.matchSaved) return;
+
+    const state = room0.gameState as GameState;
     if (!state.winner) return;
-    if (!room.seed || !room.commands) {
+
+    const commands = await rooms.getCommands(roomCode);
+    if (!room0.seed || commands.length === 0) {
       console.warn(`[matches] ${roomCode}: no seed or commands, skipping`);
-      room.matchSaved = true;
-      await rooms.save(room);
+      await rooms.saveLocked(roomCode, (r) => {
+        if (r.matchSaved) return null;
+        r.matchSaved = true;
+        return r;
+      });
       return;
     }
-  
+
+    const room = room0;
+
     const isBotRoom = room.guestId?.startsWith('anon:bot:') ?? false;
-  
+
     const ownerIdForDb = room.ownerId.startsWith('anon:') ? null : room.ownerId;
     const guestIdForDb =
       room.guestId && !room.guestId.startsWith('anon:') ? room.guestId : null;
-  
-    // Правило: сохраняем, если ХОТЯ БЫ ОДИН из игроков — Webway.
+
     if (!ownerIdForDb && !guestIdForDb) {
       room.matchSaved = true;
       await rooms.save(room);
       return;
     }
-  
+
     const p2BotName = isBotRoom && room.guestId
       ? room.guestId.slice('anon:bot:'.length)
       : null;
-  
+
     const dto = {
-	  series: room.series ?? [],
-      seed: room.seed,
+          series: room.series ?? [],
+      seed: room.seed ?? '',
       player1Name: room.ownerName,
       player2Name: room.guestName ?? 'Соперник',
       winnerId: state.winner,
@@ -252,22 +250,29 @@ export function attachSocketIo(
       durationMs: Date.now() - room.createdAt,
       p1BotName: null,
       p2BotName,
-	  cardSnapshot: mergedCardsById(room.series ?? []),
+          cardSnapshot: mergedCardsById(room.series ?? []),
       deckP1: room.deckP1,
       deckP2: room.deckP2 ?? [],
-      commands: room.commands,
+      commands,
       player1Id: ownerIdForDb,
       player2Id: guestIdForDb,
     };
-  
+
     try {
       const attribution = ownerIdForDb ?? guestIdForDb!;
       const attributionName = ownerIdForDb
         ? room.ownerName
         : (room.guestName ?? 'Гость');
-      await matches.save(attribution, attributionName, dto);
-      room.matchSaved = true;
-      await rooms.save(room);
+      await matches.saveFromServer(
+        `${INTERNAL_CALLER_PREFIX}socket-io`,
+        attributionName,
+        dto,
+      );
+      await rooms.saveLocked(roomCode, (r) => {
+        r.matchSaved = true;
+        return r;
+      });
+      cmdSeq.delete(roomCode);
       console.log(
         `[matches] saved ${roomCode} (winner=${state.winner}, ` +
         `p1=${ownerIdForDb ?? 'anon'}, p2=${guestIdForDb ?? 'anon'})`,
@@ -276,19 +281,22 @@ export function attachSocketIo(
       console.error(`[matches] save failed for ${roomCode}:`, e);
     }
   }
-  
-  /** Записывает команду в историю партии. */
-  function recordCommand(
-    room: { commands?: CommandRecord[] },
+
+  const cmdSeq = new Map<string, number>();
+
+  async function recordCommand(
+    roomCode: string,
     playerId: 'p1' | 'p2',
     command: Command,
-  ): void {
-    if (!room.commands) room.commands = [];
-    room.commands.push({
-      sequence: room.commands.length,
-      playerId,
-      command,
-    } as CommandRecord);
+  ): Promise<void> {
+    let seq = cmdSeq.get(roomCode);
+    if (seq === undefined) {
+      seq = await getRedis().llen(`aspects:room_commands:${roomCode}`);
+      if (!Number.isFinite(seq) || seq < 0) seq = 0;
+    }
+    const record = { sequence: seq, playerId, command } as CommandRecord;
+    await rooms.appendCommand(roomCode, record);
+    cmdSeq.set(roomCode, seq + 1);
   }
 
   async function emitPersonalized(
@@ -298,26 +306,25 @@ export function attachSocketIo(
   ): Promise<void> {
     const fullRoom = await rooms.get(roomCode);
     if (!fullRoom) return;
-  
+
     const gameState = fullRoom.gameState as GameState;
     const sockets = await io.in(`room:${roomCode}`).fetchSockets();
     const spectatorIds = fullRoom.spectatorIds ?? [];
-  
+
     for (const s of sockets) {
       const sid = (s.data as { userId?: string }).userId;
       if (!sid) continue;
-  
+
       const isOwner = fullRoom.ownerId === sid;
       const isGuest = fullRoom.guestId === sid;
       const isSpectator = spectatorIds.includes(sid);
       if (!isOwner && !isGuest && !isSpectator) continue;
-  
+
       let myPid: 'p1' | 'p2' | null = null;
       let visibleState: GameState;
       let opponentHandCount: number | null = null;
-  
+
       if (isSpectator) {
-        // Обе руки скрыты — spectator видит только доску и счётчики.
         visibleState = {
           ...gameState,
           players: {
@@ -337,7 +344,7 @@ export function attachSocketIo(
           },
         };
       }
-  
+
       const payload = {
         state: visibleState,
         version: fullRoom.version,
@@ -350,7 +357,7 @@ export function attachSocketIo(
         rematchProposedBy: fullRoom.rematchProposedBy ?? null,
         role: isSpectator ? 'spectator' : 'player',
       };
-  
+
       if (mode === 'sync') s.emit('state_sync', payload);
       else s.emit('state_update', payload);
     }
@@ -400,7 +407,7 @@ export function attachSocketIo(
     }
 
     (socket.data as { userId?: string }).userId = userId;
-	socket.join(`user:${userId}`);
+        socket.join(`user:${userId}`);
     let roomCode: string | null = null;
 
     console.log(`[ws] connected ${socket.id} (user=${userId})`);
@@ -413,14 +420,13 @@ export function attachSocketIo(
           const code = payload.roomCode.toUpperCase();
           const role: 'player' | 'spectator' =
             payload.role === 'spectator' ? 'spectator' : 'player';
-    
+
           const room = await rooms.get(code);
           if (!room) {
             socket.emit('command_error', { reason: 'room_not_found', expectedVersion: 0 });
             return;
           }
-    
-          // ─── Spectator branch ───
+
           if (role === 'spectator') {
             if (!room.allowSpectators) {
               socket.emit('command_error', {
@@ -429,33 +435,30 @@ export function attachSocketIo(
               });
               return;
             }
-    
-            // Spectator не обязан быть owner/guest — только не участником.
+
             if (room.ownerId === userId || room.guestId === userId) {
-              // Участник не может «наблюдать за собой» — оставляем его игроком.
             } else {
               await rooms.addSpectator(code, userId!);
             }
-    
+
             if (roomCode) socket.leave(`room:${roomCode}`);
             roomCode = code;
             socket.join(`room:${code}`);
             await emitPersonalized(code, [], 'sync');
             return;
           }
-    
-          // ─── Player branch ───
+
           const isOwner = room.ownerId === userId;
           const isGuest = room.guestId === userId;
           if (!isOwner && !isGuest) {
             socket.emit('command_error', { reason: 'not_in_room', expectedVersion: 0 });
             return;
           }
-    
+
           if (roomCode) socket.leave(`room:${roomCode}`);
           roomCode = code;
           socket.join(`room:${code}`);
-    
+
           if (isGuest) {
             await markGuestPresence(code, userId!);
             const hb = setInterval(() => {
@@ -463,18 +466,16 @@ export function attachSocketIo(
             }, GUEST_HEARTBEAT_MS);
             (socket.data as { heartbeat?: NodeJS.Timeout }).heartbeat = hb;
           }
-          
-          // Возврат на своё место — снимаем «disconnected».
+
           if (isOwner) await rooms.markReconnected(code, 'p1');
           if (isGuest) await rooms.markReconnected(code, 'p2');
-          
-          // Пересчитываем таймер (может быть на паузе — теперь запускаем заново).
+
           const freshRoom = await rooms.get(code);
           if (freshRoom) {
             rooms.updateTurnDeadline(freshRoom);
             await rooms.save(freshRoom);
           }
-    
+
           if (room.rematchProposedBy) {
             if (rooms.isRematchExpired(room)) {
               await rooms.clearRematchProposal(code);
@@ -487,16 +488,15 @@ export function attachSocketIo(
           } else {
             socket.emit('rematch_update', { proposedBy: null, event: 'sync' });
           }
-    
-          // Уведомляем остальных в комнате, что мы вернулись.
+
           const myPid: PlayerId = isOwner ? 'p1' : 'p2';
           socket.to(`room:${code}`).emit('opponent_joined', {
             side: myPid,
             name: username,
           });
-    
+
           await emitPersonalized(code, [], 'sync');
-    
+
           if (isGuest) {
             socket.to(`room:${code}`).emit('guest_joined', {
               guestName: username,
@@ -546,11 +546,23 @@ export function attachSocketIo(
             socket.emit('command_error', { reason: 'command_rejected', expectedVersion: payload.expectedVersion });
             return;
           }
-		  recordCommand(room, playerId, payload.command);
-          room.gameState = result.state;
-          room.version += 1;
-          rooms.updateTurnDeadline(room);
-          await rooms.save(room);
+          const saved = await rooms.withRoomLock(roomCode, async () => {
+            const code = roomCode!;
+            const fresh = await rooms.get(code);
+            if (!fresh || fresh.version !== payload.expectedVersion) {
+              return null;
+            }
+            await recordCommand(code, playerId, payload.command);
+            fresh.gameState = result.state;
+            fresh.version += 1;
+            rooms.updateTurnDeadline(fresh);
+            await rooms.save(fresh);
+            return fresh;
+          });
+          if (!saved) {
+            await emitPersonalized(roomCode, [], 'sync');
+            return;
+          }
 
           await emitPersonalized(roomCode, result.events, 'update');
 
@@ -559,19 +571,17 @@ export function attachSocketIo(
               winner: result.state.winner,
               reason: result.state.winnerReason ?? '',
             });
-			
-			applyRatingAndNotify(roomCode).catch((e) =>
+
+                        applyRatingAndNotify(roomCode).catch((e) =>
               console.error('[rating] apply+notify failed:', e),
             );
-			saveMatchOnce(roomCode).catch((e) =>
+                        saveMatchOnce(roomCode).catch((e) =>
               console.error('[matches] save failed (auto):', e),
             );
           }
         },
       ),
     );
-
-    // ─── Revenge: предложение реванша ───
 
     socket.on(
       'rematch_propose',
@@ -602,7 +612,6 @@ export function attachSocketIo(
           return;
         }
         if (room.rematchProposedBy && !rooms.isRematchExpired(room)) {
-          // Уже есть активное предложение — просто синхронизируем статус.
           socket.emit('rematch_update', {
             proposedBy: room.rematchProposedBy,
             event: 'sync',
@@ -620,8 +629,6 @@ export function attachSocketIo(
         await emitRematchUpdate(roomCode, 'proposed', username);
       }),
     );
-
-    // ─── Revenge: ответ на предложение ───
 
     socket.on(
       'rematch_respond',
@@ -697,15 +704,28 @@ export function attachSocketIo(
         const myPid: 'p1' | 'p2' = isOwner ? 'p1' : 'p2';
         const oppPid: 'p1' | 'p2' = myPid === 'p1' ? 'p2' : 'p1';
 
-        room.gameState = {
-          ...state,
-          winner: oppPid,
-          winnerReason: 'concede',
-        };
-        room.version += 1;
-        room.turnDeadlineAt = null;
-        room.turnOwner = null;
-        await rooms.save(room);
+        const expectedVersion = room.version;
+        const conceded = await rooms.withRoomLock(roomCode!, async () => {
+          const fresh = await rooms.get(roomCode!);
+          if (!fresh) return null;
+          if (fresh.version !== expectedVersion) return null;
+          const fstate = fresh.gameState as GameState;
+          if (fstate.winner) return null;
+          fresh.gameState = {
+            ...fstate,
+            winner: oppPid,
+            winnerReason: 'concede',
+          };
+          fresh.version += 1;
+          fresh.turnDeadlineAt = null;
+          fresh.turnOwner = null;
+          await rooms.save(fresh);
+          return fresh;
+        });
+        if (!conceded) {
+          await emitPersonalized(roomCode, [], 'sync');
+          return;
+        }
 
         await emitPersonalized(roomCode, [], 'update');
 
@@ -713,7 +733,7 @@ export function attachSocketIo(
           winner: oppPid,
           reason: 'concede',
         });
-        
+
         applyRatingAndNotify(roomCode).catch((e) =>
           console.error('[rating] apply+notify failed:', e),
         );
@@ -730,8 +750,8 @@ export function attachSocketIo(
         if (hb) clearInterval(hb);
 
         await matchmaking.dequeue(userId).catch(() => {});
-		
-		if (roomCode) {
+
+                if (roomCode) {
           const room = await rooms.get(roomCode);
           if (room) {
             if (room.guestId === userId) {
@@ -746,18 +766,14 @@ export function attachSocketIo(
             if (room.spectatorIds?.includes(userId)) {
               await rooms.removeSpectator(roomCode, userId);
             }
-        
-            // Игрок вышел со своего места → помечаем «offline» и ставим таймер на паузу.
+
             if (myPid && !(room.guestId?.startsWith('anon:bot:'))) {
-              // Проверяем, есть ли ЕЩЁ активные сокеты того же userId в комнате.
-              // Это защищает от race: старый сокет умирает уже ПОСЛЕ того,
-              // как новый сокет того же игрока сделал subscribe.
               const peers = await io.in(`room:${roomCode}`).fetchSockets();
               const stillConnected = peers.some((s) => {
                 if (s.id === socket.id) return false;
                 return (s.data as { userId?: string }).userId === userId;
               });
-            
+
               if (stillConnected) {
                 console.log(
                   `[ws] ${userId} still has another live socket in ${roomCode}, skip markDisconnected`,
@@ -782,7 +798,6 @@ export function attachSocketIo(
 
   setInterval(async () => {
   try {
-    // ─── Авто-очистка мёртвых комнат (раз в ~15 минут неактивности) ───
     const stale = await rooms.findStaleRooms();
     for (const code of stale) {
       io.to(`room:${code}`).emit('room_expired', {
@@ -804,19 +819,19 @@ export function attachSocketIo(
         }
         const room = await rooms.get(code);
         if (!room) continue;
-  
+
         if (room.rematchProposedBy && rooms.isRematchExpired(room)) {
           await rooms.clearRematchProposal(code);
           await emitRematchUpdate(code, 'expired');
         }
-  
+
         if (!room.turnDeadlineAt) continue;
         if (room.turnDeadlineAt > Date.now()) continue;
         if (!room.guestId) continue;
-  
+
         const state = room.gameState as GameState;
         if (state.winner) continue;
-  
+
         let cmd: Command;
         if (state.phase === 'MULLIGAN') {
           const picker: 'p1' | 'p2' = !state.mulliganDone.p1 ? 'p1' : 'p2';
@@ -824,23 +839,33 @@ export function attachSocketIo(
         } else {
           cmd = { type: 'END_TURN', playerId: state.activePlayer };
         }
-  
+
         const result = applyCommand(state, cmd);
         if (result.events.some((e) => e.type === 'COMMAND_REJECTED')) {
-	      console.warn(`[ws] auto-action rejected on ${code}: ${cmd.type} in ${state.phase}`);
+              console.warn(`[ws] auto-action rejected on ${code}: ${cmd.type} in ${state.phase}`);
           continue;
         }
-  
-        recordCommand(room, state.activePlayer, cmd);
-		room.gameState = result.state;
-        room.version += 1;
-        rooms.updateTurnDeadline(room);
-        await rooms.save(room);
-  
+
+        const vBefore = room.version;
+        const savedAuto = await rooms.withRoomLock(code, async () => {
+          const fresh = await rooms.get(code);
+          if (!fresh) return null;
+          const fstate = fresh.gameState as GameState;
+          if (fstate.winner) return null;
+          await recordCommand(code, fstate.activePlayer, cmd);
+          fresh.gameState = result.state;
+          fresh.version += 1;
+          rooms.updateTurnDeadline(fresh);
+          await rooms.save(fresh);
+          return fresh;
+        });
+        if (!savedAuto) continue;
+        void vBefore;
+
         console.log(`[ws] auto-action on ${code}: ${cmd.type}`);
-  
+
         await emitPersonalized(code, result.events, 'update');
-  
+
         if (result.state.winner) {
           io.to(`room:${room.code}`).emit('game_over', {
             winner: result.state.winner,
@@ -849,7 +874,7 @@ export function attachSocketIo(
           applyRatingAndNotify(room.code).catch((e) =>
             console.error('[rating] apply+notify failed:', e),
           );
-	      saveMatchOnce(code).catch((e) =>
+              saveMatchOnce(code).catch((e) =>
             console.error('[matches] save failed (auto):', e),
           );
         }
@@ -858,11 +883,9 @@ export function attachSocketIo(
       console.error('[ws] timer check failed', e);
     }
   }, 5000);
-  
-  // ─── Матчмейкинг: тик раз в секунду ───
+
   setInterval(async () => {
     try {
-      // 1. Обычный матчинг (двое живых игроков)
       const matches = await matchmaking.tryMatch();
       for (const m of matches) {
         io.to(`user:${m.user1Id}`).emit('matchmaking_found', {
@@ -874,8 +897,7 @@ export function attachSocketIo(
           opponentName: m.user1Name,
         });
       }
-  
-      // 2. Fallback на бота для тех, кто долго ждёт
+
       const botMatches = await matchmaking.tryFallbackToBot();
       for (const m of botMatches) {
         io.to(`user:${m.userId}`).emit('matchmaking_found', {
@@ -888,8 +910,7 @@ export function attachSocketIo(
       console.error('[mm] tick failed', e);
     }
   }, 1000);
-  
-  // ─── Bot-loop: один ход бота каждые 500ms ───
+
   setInterval(async () => {
     try {
       const keys = await getRedis().keys('aspects:room:*');
@@ -901,10 +922,10 @@ export function attachSocketIo(
         const room = await rooms.get(code);
         if (!room) continue;
         if (!room.guestId?.startsWith('anon:bot:')) continue;
-  
+
         const state = room.gameState as GameState;
         if (state.winner) continue;
-  
+
         // Кто действует сейчас?
         let actor: 'p1' | 'p2' | null = null;
         if (state.phase === 'MULLIGAN') {
@@ -915,7 +936,7 @@ export function attachSocketIo(
           actor = state.activePlayer;
         }
         if (actor !== 'p2') continue;
-  
+
         const botId = room.guestId.slice('anon:bot:'.length);
         let cmd: Command | null = null;
         try {
@@ -926,51 +947,53 @@ export function attachSocketIo(
           continue;
         }
         if (!cmd) continue;
-  
-        const result = applyCommand(state, cmd);
-        if (result.events.some((e) => e.type === 'COMMAND_REJECTED')) {
-          // Иногда бот даёт невалидную команду — пропускаем без зависания.
-          // Просто завершаем ход форс-мажором, чтобы партия не застыла.
-          const fallback: Command =
-            state.phase === 'PLAY' || state.phase === 'COMBAT'
-              ? { type: 'END_TURN', playerId: 'p2' }
-              : { type: 'ADVANCE_PHASE', playerId: 'p2' };
-          const r2 = applyCommand(state, fallback);
-          if (r2.events.some((e) => e.type === 'COMMAND_REJECTED')) continue;
-          room.gameState = r2.state;
-          room.version += 1;
-          rooms.updateTurnDeadline(room);
-          await rooms.save(room);
-          await emitPersonalized(code, r2.events, 'update');
-          if (r2.state.winner) {
-            io.to(`room:${code}`).emit('game_over', {
-              winner: r2.state.winner,
-              reason: r2.state.winnerReason ?? '',
-            });
-            applyRatingAndNotify(code).catch((err) =>
-              console.error('[rating] apply+notify failed (bot fallback):', err),
-            );
+
+        const expectedVersion = room.version;
+        const chosen = cmd;
+        const saved = await rooms.withRoomLock(code, async () => {
+          const fresh = await rooms.get(code);
+          if (!fresh) return null;
+          if (fresh.version !== expectedVersion) return null;
+          const fstate = fresh.gameState as GameState;
+          if (fstate.winner) return null;
+
+          const result = applyCommand(fstate, chosen);
+          let finalEvents: unknown[];
+          if (result.events.some((e) => e.type === 'COMMAND_REJECTED')) {
+            const fallback: Command =
+              fstate.phase === 'PLAY' || fstate.phase === 'COMBAT'
+                ? { type: 'END_TURN', playerId: 'p2' }
+                : { type: 'ADVANCE_PHASE', playerId: 'p2' };
+            const r2 = applyCommand(fstate, fallback);
+            if (r2.events.some((e) => e.type === 'COMMAND_REJECTED')) {
+              return null;
+            }
+            await recordCommand(code, 'p2', fallback);
+            fresh.gameState = r2.state;
+            finalEvents = r2.events;
+          } else {
+            await recordCommand(code, 'p2', chosen);
+            fresh.gameState = result.state;
+            finalEvents = result.events;
           }
-          continue;
-        }
-		
-		recordCommand(room, 'p2', cmd);
-        room.gameState = result.state;
-        room.version += 1;
-        rooms.updateTurnDeadline(room);
-        await rooms.save(room);
-  
-        await emitPersonalized(code, result.events, 'update');
-  
-        if (result.state.winner) {
-          io.to(`room:${room.code}`).emit('game_over', {
-            winner: result.state.winner,
-            reason: result.state.winnerReason ?? '',
+          fresh.version += 1;
+          rooms.updateTurnDeadline(fresh);
+          await rooms.save(fresh);
+          return { state: fresh.gameState as GameState, events: finalEvents };
+        });
+        if (!saved) continue;
+
+        await emitPersonalized(code, saved.events, 'update');
+
+        if (saved.state.winner) {
+          io.to(`room:${code}`).emit('game_over', {
+            winner: saved.state.winner,
+            reason: saved.state.winnerReason ?? '',
           });
-          applyRatingAndNotify(room.code).catch((e) =>
+          applyRatingAndNotify(code).catch((e) =>
             console.error('[rating] apply+notify failed:', e),
           );
-          saveMatchOnce(room.code).catch((e) =>
+          saveMatchOnce(code).catch((e) =>
             console.error('[matches] save failed:', e),
           );
         }

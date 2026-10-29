@@ -22,6 +22,7 @@ import {
   type RoomPublicInfo,
   type CreateRoomDto,
   type JoinRoomDto,
+  type CommandRecord,
 } from '@aspects/shared';
 import { REDIS_CLIENT } from './redis.provider';
 import type { GameState, PlayerId } from '@aspects/engine';
@@ -50,8 +51,6 @@ export class RoomsService {
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly events: EventsService,
   ) {}
-
-  // ─── Создание ───
 
   async create(
     userId: string,
@@ -138,8 +137,6 @@ export class RoomsService {
     return room;
   }
 
-  // ─── Присоединение ───
-
   async join(
     userId: string,
     username: string,
@@ -204,7 +201,7 @@ export class RoomsService {
     room.gameState = initial.state;
     room.deckP2 = p2Cards;
     room.seed = seed;
-    room.commands = [];
+    await this.clearCommands(code);
     room.matchSaved = false;
     room.ratingApplied = false;
     room.lastActivityAt = Date.now();
@@ -230,24 +227,101 @@ export class RoomsService {
     return room;
   }
 
-  // ─── Чтение / запись ───
-
   async get(code: string): Promise<RoomState | null> {
     const raw = await this.redis.get(`aspects:room:${code}`);
     if (!raw) return null;
     return JSON.parse(raw) as RoomState;
   }
 
+  private commandsKey(code: string): string {
+    return `aspects:room_commands:${code}`;
+  }
+
+  async appendCommand(
+    code: string,
+    record: CommandRecord,
+  ): Promise<void> {
+    const key = this.commandsKey(code);
+    await this.redis.rpush(key, JSON.stringify(record));
+    // TTL списка синхронизируем с TTL состояния комнаты.
+    await this.redis.expire(key, ROOM_TTL_SECONDS);
+  }
+
+  async getCommands(code: string): Promise<CommandRecord[]> {
+    const raw = await this.redis.lrange(this.commandsKey(code), 0, -1);
+    return raw.map((s) => JSON.parse(s) as CommandRecord);
+  }
+
+  async clearCommands(code: string): Promise<void> {
+    await this.redis.del(this.commandsKey(code));
+  }
+
+  private lockKey(code: string): string {
+    return `aspects:room_lock:${code}`;
+  }
+
+  async withRoomLock<T>(
+    code: string,
+    fn: () => Promise<T>,
+    opts?: { retries?: number; retryDelayMs?: number },
+  ): Promise<T> {
+    const retries = opts?.retries ?? 20;
+    const delay = opts?.retryDelayMs ?? 25;
+    const lockToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    let lastErr: unknown;
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const gotLock = await this.redis.set(
+        this.lockKey(code),
+        lockToken,
+        'PX',
+        3000,
+        'NX',
+      );
+      if (gotLock === 'OK') {
+        try {
+          return await fn();
+        } finally {
+          // Освобождаем lock только если он всё ещё наш (не протух и не
+          // перехвачен другим держателем) — сравнение + DEL атомарно.
+          await this.redis.eval(
+            `if redis.call('GET', KEYS[1]) == ARGV[1] then ` +
+              `return redis.call('DEL', KEYS[1]) else return 0 end`,
+            1,
+            this.lockKey(code),
+            lockToken,
+          );
+        }
+      }
+      lastErr = new Error(`Room lock busy: ${code}`);
+      await new Promise((r) => setTimeout(r, delay + Math.floor(Math.random() * 10)));
+    }
+    throw lastErr instanceof Error ? lastErr : new Error(`Room lock busy: ${code}`);
+  }
+
   async save(room: RoomState): Promise<void> {
     room.lastActivityAt = Date.now();
+    const { commands: _cmds, ...persisted } = room;
     await this.redis.setex(
       `aspects:room:${room.code}`,
       ROOM_TTL_SECONDS,
-      JSON.stringify(room),
+      JSON.stringify(persisted),
     );
   }
 
-  // ─── Выход ───
+  async saveLocked(
+    code: string,
+    mutate: (room: RoomState) => RoomState | null | Promise<RoomState | null>,
+  ): Promise<RoomState | null> {
+    return this.withRoomLock(code, async () => {
+      const fresh = await this.get(code);
+      if (!fresh) return null;
+      const next = await mutate(fresh);
+      if (!next) return null;
+      await this.save(next);
+      return next;
+    });
+  }
 
   async leave(userId: string, code: string): Promise<void> {
     const room = await this.get(code);
@@ -284,8 +358,6 @@ export class RoomsService {
     await this.redis.srem(`aspects:user_rooms:${userId}`, code);
   }
 
-  // ─── Мои комнаты ───
-
   async listMine(userId: string): Promise<RoomPublicInfo[]> {
     const codes = await this.redis.smembers(`aspects:user_rooms:${userId}`);
     const result: RoomPublicInfo[] = [];
@@ -309,8 +381,6 @@ export class RoomsService {
     }
     return result;
   }
-
-  // ─── Реванш ───
 
   async rematch(code: string, actorUserId: string): Promise<RoomState> {
     const room = await this.get(code);
@@ -354,7 +424,7 @@ export class RoomsService {
     room.rematchProposedBy = null;
     room.rematchProposedAt = null;
     room.seed = seed;
-    room.commands = [];
+    await this.clearCommands(room.code);
     room.matchSaved = false;
     room.ratingApplied = false;
 
@@ -371,8 +441,6 @@ export class RoomsService {
 
     return room;
   }
-
-  // ─── Приглашения ───
 
   async inviteToRoom(
     code: string,
@@ -420,8 +488,6 @@ export class RoomsService {
     return { invited, skipped };
   }
 
-  // ─── Revenge proposal ───
-
   async proposeRematch(code: string, playerId: PlayerId): Promise<RoomState | null> {
     const room = await this.get(code);
     if (!room) return null;
@@ -440,8 +506,6 @@ export class RoomsService {
     await this.save(room);
     return room;
   }
-
-  // ─── Takeover ───
 
   async markDisconnected(code: string, seat: 'p1' | 'p2'): Promise<void> {
     const room = await this.get(code);
@@ -544,8 +608,6 @@ export class RoomsService {
     return Date.now() - at > REMATCH_TTL_MS;
   }
 
-  // ─── Публичный вид комнаты ───
-
   toPublic(room: RoomState): RoomPublicInfo {
     const state = room.gameState as { winner?: string | null } | null;
     let status: RoomPublicInfo['status'] = 'waiting';
@@ -573,8 +635,6 @@ export class RoomsService {
       takeoverOpenFor: room.takeoverOpenFor ?? null,
     };
   }
-
-  // ─── Таймеры ───
 
   private static readonly MULLIGAN_MS = 45_000;
   private static readonly TURN_MS = 90_000;
@@ -620,8 +680,6 @@ export class RoomsService {
     }
   }
 
-  // ─── Сталость / очистка ───
-
   private static readonly STALE_MS = 15 * 60 * 1000;
 
   async findStaleRooms(): Promise<string[]> {
@@ -661,8 +719,6 @@ export class RoomsService {
     }
   }
 
-  // ─── Spectators ───
-
   async addSpectator(code: string, userId: string): Promise<RoomState | null> {
     const room = await this.get(code);
     if (!room) return null;
@@ -683,8 +739,6 @@ export class RoomsService {
     await this.save(room);
   }
 
-  // ─── Бот-комната ───
-
   async createWithBot(
     userId: string,
     username: string,
@@ -696,21 +750,21 @@ export class RoomsService {
     if (series.length === 0 || series.length > 4) {
       throw new BadRequestException('series must have 1..4 entries');
     }
-  
+
     const cardDefs = mergedCardsById(series);
     if (Object.keys(cardDefs).length === 0) {
       throw new BadRequestException('No cards found for the given series');
     }
-  
+
     const botDeck = this.buildBotDeck(cardDefs);
     if (!botDeck) {
       throw new BadRequestException(
         'Cannot build bot deck: not enough cards in the selected series',
       );
     }
-  
+
     const room = await this.create(userId, username, dto);
-  
+
     const seed = `bot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const initial = createGame({
       seed,
@@ -718,33 +772,25 @@ export class RoomsService {
       cardDefinitions: cardDefs,
       useMulligan: true,
     });
-  
+
     room.guestId = `anon:bot:${botId}`;
     room.guestName = botName;
     room.deckP2 = botDeck;
     room.gameState = initial.state;
     room.seed = seed;
-    room.commands = [];
+    await this.clearCommands(room.code);
     room.matchSaved = false;
     room.version += 1;
-  
+
     this.updateTurnDeadline(room);
     await this.save(room);
-  
+
     return room;
   }
-  
-  /**
-   * Собирает 30-картовую колоду для бота из пула комнаты.
-   *
-   * Сначала пытается найти готовый пресет, все карты которого доступны
-   * в пуле. Если такого нет — генерирует случайную колоду из пула.
-   * Возвращает null, если собрать 30 карт невозможно.
-   */
+
   private buildBotDeck(
     cardDefs: Record<string, unknown>,
   ): string[] | null {
-    // 1) Пресет, полностью совместимый с пулом комнаты.
     const compatible = decksForSeries(Object.keys(cardDefs).length > 0
       ? this.seriesOfPool(cardDefs)
       : []);
@@ -752,7 +798,7 @@ export class RoomsService {
       const pick = compatible[Math.floor(Math.random() * compatible.length)];
       if (pick.cards.length === 30) return pick.cards;
     }
-  
+
     const pool = Object.values(cardDefs) as Array<{
       id: string;
       personalityTag: string;
@@ -763,11 +809,7 @@ export class RoomsService {
     const generated = generateRandomDeck(pool, { size: 30 });
     return generated;
   }
-  
-  /**
-   * Достаёт список серий, к которым относятся карты пула.
-   * Нужен, чтобы отфильтровать пресеты на шаге 1.
-   */
+
   private seriesOfPool(cardDefs: Record<string, unknown>): string[] {
     const set = new Set<string>();
     for (const c of Object.values(cardDefs) as Array<{ series?: string[] }>) {

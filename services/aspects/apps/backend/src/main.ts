@@ -13,12 +13,11 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: false }),
-    { bodyParser: false }, // <--- Отключаем встроенный парсер NestJS
+    { bodyParser: false },
   );
 
   const fastify = app.getHttpAdapter().getInstance();
 
-  // Регистрируем кастомный парсер, который разрешает пустые тела
   fastify.addContentTypeParser(
     'application/json',
     { parseAs: 'string' },
@@ -40,6 +39,17 @@ async function bootstrap() {
   await app.register(fastifyCookie as any, {
     secret: process.env.COOKIE_SECRET ?? 'aspects-internal',
   });
+
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.ANON_COOKIE_SECRET) {
+      throw new Error('ANON_COOKIE_SECRET must be set in production');
+    }
+    if (!process.env.INTERNAL_API_TOKEN) {
+      logger.warn(
+        'INTERNAL_API_TOKEN is not set — x-internal-token path is disabled',
+      );
+    }
+  }
 
   app.enableCors({ origin: true, credentials: true });
 
