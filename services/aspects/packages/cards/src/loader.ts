@@ -72,18 +72,11 @@ function buildPack(meta: PackMeta, cardsRaw: unknown): Pack {
   return { meta, cards, cardsById };
 }
 
-// ─── PACKS: реальные серии ───
-// Ключ — meta.id серии. Никаких виртуальных паков.
-
 const PACKS: Record<string, Pack> = {};
 for (const raw of PACKS_RAW) {
   const meta = raw.meta as PackMeta;
   PACKS[meta.id] = buildPack(meta, raw.cards);
 }
-
-// ─── Активные серии (UI) ───
-// active-series.json управляет тем, что показывается в декбилдере.
-// Если файла нет / пусто — считаем активными все серии.
 
 interface ActiveSeriesFile {
   active?: string[];
@@ -147,14 +140,6 @@ export function getScopeMeta(scopeId: string): ScopeMeta | null {
   return SCOPES[scopeId] ?? null;
 }
 
-/**
- * Принимает:
- *   - имя scope («main», «ashenlight», «oskol»);
- *   - явный список серий через запятую («classic,throne»);
- *   - массив серий ([«classic», «throne»]).
- *
- * Возвращает массив серий. Несуществующие серии отфильтровываются.
- */
 export function resolveScope(scope: string | string[]): string[] {
   if (Array.isArray(scope)) return scope.filter((s) => !!PACKS[s]);
   if (SCOPES[scope]) return [...SCOPES[scope].series];
@@ -168,10 +153,6 @@ export function resolveScope(scope: string | string[]): string[] {
   return [];
 }
 
-/**
- * Возвращает имя scope, к которому относится серия.
- * null — если серия не входит ни в один известный scope.
- */
 export function scopeOfSeries(seriesId: string): string | null {
   for (const scope of Object.values(SCOPES)) {
     if (scope.series.includes(seriesId)) return scope.id;
@@ -179,13 +160,6 @@ export function scopeOfSeries(seriesId: string): string | null {
   return null;
 }
 
-/**
- * Определяет scope колоды. Возвращает имя, если все серии колоды
- * принадлежат одному scope. null — если:
- *   - колода смешивает серии разных scope'ов;
- *   - содержит серию без scope'а;
- *   - пустая.
- */
 export function scopeOfDeck(cardIds: string[]): string | null {
   const series = seriesOfDeck(cardIds);
   if (series.length === 0) return null;
@@ -199,14 +173,12 @@ export function scopeOfDeck(cardIds: string[]): string | null {
   return found;
 }
 
-/** Объединяет cardsById всех серий scope'а. */
 export function cardsForScope(
   scope: string | string[],
 ): Record<string, CardDefinition> {
   return mergedCardsById(resolveScope(scope));
 }
 
-/** Пресеты, чьи карты целиком лежат в сериях scope'а. */
 export function decksForScope(scope: string | string[]): DeckPreset[] {
   return decksForSeries(resolveScope(scope));
 }
@@ -233,7 +205,6 @@ export function decksForSeries(series: string[]): DeckPreset[] {
   return PRESETS.filter((d) => d.cards.every((cid) => cardIds.has(cid)));
 }
 
-/** Все пресеты, чьи серии активны в UI. */
 export function listActiveDecks(): DeckPreset[] {
   return PRESETS.filter((d) => {
     const series = seriesOfDeck(d.cards);
@@ -320,31 +291,6 @@ export function allCardsById(): Record<string, CardDefinition> {
   }
   return merged;
 }
-
-// ═══════════════════════════════════════════════════════
-//   LEGACY-КОНСТАНТЫ
-// ═══════════════════════════════════════════════════════
-//
-// Оставлены для совместимости. Собраны через scope'ы — так честнее,
-// чем через захардкоженные списки.
-
-export const ALL_CARDS = PACKS.stormwind
-  ? PACKS.stormwind.cards.filter((c) => !c.isToken)
-  : [];
-export const ALL_CARDS_WITH_TOKENS = PACKS.stormwind?.cards ?? [];
-export const CARDS_BY_ID = PACKS.stormwind?.cardsById ?? {};
-
-export const STORMWIND_ASPECTS = PACKS.stormwind?.cards ?? [];
-export const VOIDFLAME_ASPECTS = PACKS.voidflame?.cards ?? [];
-
-export const LEGENDARY_ASPECTS = mergedCards(SCOPES.ashenlight.series).filter(
-  (c) => c.rarity === 'legendary',
-);
-
-export const TOKEN_ASPECTS = mergedCards([
-  ...SCOPES.ashenlight.series,
-  ...SCOPES.oskol.series,
-]).filter((c) => c.isToken);
 
 export function getPersonalityName(id: string): string {
   return PERSONALITIES[id] ?? id;

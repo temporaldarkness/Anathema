@@ -31,8 +31,6 @@ export function resolveChoiceInternal(
     choice.kind === 'EFFECT_TARGET_SELECTION' &&
     params.cardIds.length === 0
   ) {
-    // Пустой выбор = отмена эффекта. Если эффект от оплаченной способности —
-    // возвращаем влияние и разблокируем способность.
     if (choice.continuation.paidAbility) {
       const { cardId, abilityIndex, influenceSpent } = choice.continuation.paidAbility;
       if (influenceSpent > 0) {
@@ -142,6 +140,7 @@ export function resolveChoiceInternal(
 
     case 'EFFECT_TARGET_SELECTION': {
       const cont = choice.continuation;
+      const startIndex = cont.startIndex ?? 0;
       draft.pendingChoice = null;
       ctx.events.push({
         type: 'CHOICE_RESOLVED',
@@ -149,7 +148,7 @@ export function resolveChoiceInternal(
         kind: 'EFFECT_TARGET_SELECTION',
       });
 
-      for (const effect of cont.then) {
+      for (const effect of cont.then.slice(startIndex)) {
         if (!draft.cards[cont.sourceId] && effect.kind !== 'DAMAGE_GLORY' && effect.kind !== 'HEAL_GLORY') {
         }
         resolveEffect(

@@ -1,10 +1,9 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { gzipSync, gunzipSync } from 'node:zlib';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import type {
@@ -15,12 +14,45 @@ import type {
 } from '@aspects/shared';
 import { Prisma } from '../generated/prisma/client';
 
-export const INTERNAL_CALLER_PREFIX = 'internal:';
+const GZ_PREFIX = '__gz:';
+
+function compressCardSnapshot(
+  snapshot: Record<string, unknown> | null | undefined,
+): Prisma.InputJsonValue | typeof Prisma.JsonNull {
+  if (!snapshot) return Prisma.JsonNull;
+  const json = JSON.stringify(snapshot);
+  const gz = gzipSync(Buffer.from(json, 'utf8'), { level: 9 }).toString(
+    'base64',
+  );
+  return { [GZ_PREFIX.slice(1, -1) + '_v1']: gz } as Prisma.InputJsonValue;
+}
+
+function decompressCardSnapshot(raw: unknown): Record<string, unknown> | null {
+  if (raw == null) return null;
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(gunzipSync(Buffer.from(raw, 'base64')).toString('utf8'));
+    } catch {
+      return null;
+    }
+  }
+  if (typeof raw !== 'object') return null;
+  const obj = raw as Record<string, unknown>;
+  const key = Object.keys(obj).find((k) => k.startsWith('__gz'));
+  if (key && typeof obj[key] === 'string') {
+    try {
+      return JSON.parse(
+        gunzipSync(Buffer.from(obj[key] as string, 'base64')).toString('utf8'),
+      );
+    } catch {
+      return null;
+    }
+  }
+  return obj;
+}
 
 @Injectable()
 export class MatchesService {
-  private readonly logger = new Logger(MatchesService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
@@ -31,72 +63,16 @@ export class MatchesService {
     username: string,
     dto: SaveMatchDto,
   ): Promise<MatchSummaryDto> {
-    if (userId.startsWith(INTERNAL_CALLER_PREFIX)) {
-      throw new ForbiddenException('Reserved caller id');
-    }
-    return this.saveInternal(userId, username, dto, false);
-  }
-
-  async saveFromServer(
-    authorUserId: string,
-    authorUsername: string,
-    dto: SaveMatchDto,
-  ): Promise<MatchSummaryDto> {
-    if (!authorUserId.startsWith(INTERNAL_CALLER_PREFIX)) {
-      throw new ForbiddenException('saveFromServer is server-only');
-    }
-    return this.saveInternal(authorUserId, authorUsername, dto, true);
-  }
-
-  private async saveInternal(
-    userId: string,
-    username: string,
-    dto: SaveMatchDto,
-    isInternal: boolean,
-  ): Promise<MatchSummaryDto> {
-    const player1Id = isInternal ? (dto.player1Id ?? userId) : userId;
-    const player2Id = isInternal
-      ? (dto.player2Id ?? null)
-      : dto.player2Id && dto.player2Id !== userId
-        ? dto.player2Id
-        : null;
-
-    const p1ForDb = player1Id && !player1Id.startsWith('anon:') ? player1Id : null;
-    const p2ForDb = player2Id && !player2Id.startsWith('anon:') ? player2Id : null;
-
-    if (isInternal && p1ForDb !== userId && p2ForDb !== userId) {
-      throw new ForbiddenException(
-        'Server match author must be one of the players',
-      );
-    }
-
-    if (dto.winnerId !== null && dto.winnerId !== 'p1' && dto.winnerId !== 'p2') {
-      throw new BadRequestException('winnerId must be "p1", "p2" or null');
-    }
-    if (dto.winnerId === 'p2' && !isInternal && !p2ForDb) {
-      throw new BadRequestException(
-        'winnerId "p2" requires a second identified player',
-      );
-    }
-    const commands = dto.commands
-      .filter((c) => c.playerId === 'p1' || c.playerId === 'p2')
-      .map((c, i) => ({
-        sequence: i,
-        playerId: c.playerId,
-        command: c.command as Prisma.InputJsonValue,
-      }));
     const match = await this.prisma.match.create({
-      data: {
-        player1Id: p1ForDb,
-        player2Id: p2ForDb,
+       data: {
+        player1Id: dto.player1Id ?? userId,
+        player2Id: dto.player2Id ?? null,
         player1Name: dto.player1Name,
         player2Name: dto.player2Name,
         winnerId: dto.winnerId,
         winnerReason: dto.winnerReason,
         series: dto.series,
-        cardSnapshot: dto.cardSnapshot
-          ? (dto.cardSnapshot as Prisma.InputJsonValue)
-          : Prisma.JsonNull,
+        cardSnapshot: compressCardSnapshot(dto.cardSnapshot),
         seed: dto.seed,
         turnNumber: dto.turnNumber,
         durationMs: dto.durationMs,
@@ -109,16 +85,15 @@ export class MatchesService {
             { player: 2, cardIds: dto.deckP2 },
           ],
         },
+        commands: {
+          create: dto.commands.map((c) => ({
+            sequence: c.sequence,
+            playerId: c.playerId,
+            command: c.command as any,
+          })),
+        },
       },
     });
-
-    const BATCH_SIZE = 500;
-    for (let i = 0; i < commands.length; i += BATCH_SIZE) {
-      const batch = commands.slice(i, i + BATCH_SIZE);
-      await this.prisma.matchCommand.createMany({
-        data: batch.map((c) => ({ ...c, matchId: match.id })),
-      });
-    }
 
     await this.audit.log({
       user_id: userId,
@@ -129,7 +104,6 @@ export class MatchesService {
       details: {
         winnerId: dto.winnerId,
         turnNumber: dto.turnNumber,
-        commandsCount: commands.length,
       },
     });
 
@@ -193,7 +167,7 @@ export class MatchesService {
       seed: m.seed,
       deckP1,
       deckP2,
-          cardSnapshot: m.cardSnapshot,
+      cardSnapshot: decompressCardSnapshot(m.cardSnapshot),
       commands: m.commands.map((c: any): CommandRecord => ({
         sequence: c.sequence,
         playerId: c.playerId,

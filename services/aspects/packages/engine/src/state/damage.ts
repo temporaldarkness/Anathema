@@ -12,12 +12,18 @@ export interface DamageResult {
   killed: boolean;
 }
 
+export interface DamageTriggerOptions {
+  attackerId?: CardInstanceId;
+  defenderId?: CardInstanceId;
+}
+
 export function damageCard(
   draft: WritableDraft<GameState>,
   targetId: CardInstanceId,
   amount: number,
   source: string,
   ctx: ResolutionContext,
+  triggerOpts?: DamageTriggerOptions,
 ): DamageResult {
   const target = draft.cards[targetId];
   if (!target) {
@@ -58,17 +64,26 @@ export function damageCard(
   ctx.events.push({ type: 'DAMAGE_DEALT', targetId, amount: actual, source });
 
   if (target.zone === 'FRONT') {
-    enqueueTrigger(draft, targetId, 'ON_THIS_DAMAGED');
+    const fromSelfOnThisDamaged =
+      ctx.resolvingTrigger?.cardId === targetId &&
+      ctx.resolvingTrigger?.triggerType === 'ON_THIS_DAMAGED';
+  
+    if (!fromSelfOnThisDamaged) {
+      enqueueTrigger(
+        draft,
+        targetId,
+        'ON_THIS_DAMAGED',
+        triggerOpts?.attackerId ?? (source.startsWith('ability:') ? undefined : (source as CardInstanceId)),
+        triggerOpts?.defenderId ?? targetId,
+      );
+    }
   }
 
-  // ON_DAMAGE_DEALT — энкьюим на всех союзников-фронт источника
-  // (карт, которые наносят урон) — по аналогии с ON_CARD_DRAWN.
-  // Источник может быть «ability:<cardId>» или plain cardId.
   if (source && !source.startsWith('ability:')) {
     const sourceId = source as CardInstanceId;
     const srcCard = draft.cards[sourceId];
     if (srcCard && (srcCard.zone === 'FRONT' || srcCard.zone === 'RESERVE')) {
-      enqueueTrigger(draft, sourceId, 'ON_DAMAGE_DEALT');
+      enqueueTrigger(draft, sourceId, 'ON_DAMAGE_DEALT', sourceId, triggerOpts?.defenderId ?? targetId);
     }
   }
 

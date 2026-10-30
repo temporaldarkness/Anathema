@@ -1,4 +1,7 @@
 import Redis from 'ioredis';
+import { Logger } from '@nestjs/common';
+
+const logger = new Logger('Heartbeat');
 
 let client: Redis | null = null;
 
@@ -18,7 +21,7 @@ export function startHeartbeat(
     try {
       await r.setex(`heartbeat:${serviceName}`, ttlSec, new Date().toISOString());
     } catch (e) {
-      console.warn(`heartbeat failed for ${serviceName}:`, e);
+      logger.warn(`heartbeat failed for ${serviceName}: ${String(e)}`);
     }
   };
   tick();

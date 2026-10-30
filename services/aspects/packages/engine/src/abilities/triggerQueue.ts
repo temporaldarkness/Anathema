@@ -31,11 +31,15 @@ export function drainTriggerQueue(
     if (!card) continue;
 
     const onBoard = card.zone === 'FRONT' || card.zone === 'RESERVE';
+	
+	
+    if (trigger.triggerType === 'ON_THIS_DAMAGED' && card.zone === 'DISCARD') {
+      continue;
+    }
 
     if (
       trigger.triggerType !== 'ON_EXIT' &&
       trigger.triggerType !== 'ON_KILL' &&
-      trigger.triggerType !== 'ON_THIS_DAMAGED' &&
       !onBoard
     ) {
       continue;
@@ -46,6 +50,10 @@ export function drainTriggerQueue(
     if (triggers.length === 0) continue;
 
     const matching = triggers.filter((t) => t.trigger === trigger.triggerType);
+
+    if (card.silenced) {
+      continue;
+    }
 
     for (const ability of matching) {
       const liveCard = draft.cards[trigger.cardId];
@@ -72,17 +80,24 @@ export function drainTriggerQueue(
 
       for (const effect of ability.effects) {
         if (!draft.cards[trigger.cardId]) break;
-        resolveEffect(
-          draft,
-          effect,
-          {
-            sourceId: trigger.cardId,
-            ownerId: card.ownerId,
-            attackerId: trigger.attackerId,
-			defenderId: trigger.defenderId,
-          },
-          ctx,
-        );
+      
+        const prev = ctx.resolvingTrigger;
+        ctx.resolvingTrigger = { cardId: trigger.cardId, triggerType: trigger.triggerType };
+        try {
+          resolveEffect(
+            draft,
+            effect,
+            {
+              sourceId: trigger.cardId,
+              ownerId: card.ownerId,
+              attackerId: trigger.attackerId,
+              defenderId: trigger.defenderId,
+            },
+            ctx,
+          );
+        } finally {
+          ctx.resolvingTrigger = prev;
+        }
         if (draft.pendingChoice) return;
       }
     }

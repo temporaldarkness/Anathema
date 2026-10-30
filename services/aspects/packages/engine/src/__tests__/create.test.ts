@@ -2,7 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { createGame } from '../state/create';
 import { health, strength, controlledCells, frontCount, findCardLocation } from '../state/helpers';
 import type { CardDefinition } from '@aspects/cards';
-import { CardDefinitionSchema, ALL_CARDS, STORMWIND_ASPECTS, VOIDFLAME_ASPECTS, LEGENDARY_ASPECTS } from '@aspects/cards';
+import {
+  CardDefinitionSchema,
+  getCards,
+  mergedCards,
+  allCardsById,
+} from '@aspects/cards';
+
+const STORMWIND_CARDS = getCards('ash_stormwind');
+const VOIDFLAME_CARDS = getCards('voidflame');
+const LEGENDARY_CARDS = mergedCards(['ash_stormwind', 'voidflame']).filter(
+  (c) => c.rarity === 'legendary',
+);
 
 const defs: Record<string, CardDefinition> = {
   guard: {
@@ -123,7 +134,7 @@ describe('createGame', () => {
 
 describe('Пакеты карт', () => {
   it('Stormwind проходит zod', () => {
-    for (const def of STORMWIND_ASPECTS) {
+    for (const def of STORMWIND_CARDS) {
       const r = CardDefinitionSchema.safeParse(def);
       if (!r.success) {
         throw new Error(`Stormwind ${def.id}: ${JSON.stringify(r.error.format())}`);
@@ -132,7 +143,7 @@ describe('Пакеты карт', () => {
   });
 
   it('Voidflame проходит zod', () => {
-    for (const def of VOIDFLAME_ASPECTS) {
+    for (const def of VOIDFLAME_CARDS) {
       const r = CardDefinitionSchema.safeParse(def);
       if (!r.success) {
         throw new Error(`Voidflame ${def.id}: ${JSON.stringify(r.error.format())}`);
@@ -141,47 +152,47 @@ describe('Пакеты карт', () => {
   });
 
   it('id уникальны во всех пакетах', () => {
-    const all = [...STORMWIND_ASPECTS, ...VOIDFLAME_ASPECTS];
+    const all = [...STORMWIND_CARDS, ...VOIDFLAME_CARDS];
     const ids = new Set(all.map((c) => c.id));
     expect(ids.size).toBe(all.length);
   });
 
   it('в каждом пакете ≥30 карт', () => {
-    expect(STORMWIND_ASPECTS.length).toBeGreaterThanOrEqual(30);
-    expect(VOIDFLAME_ASPECTS.length).toBeGreaterThanOrEqual(30);
+    expect(STORMWIND_CARDS.length).toBeGreaterThanOrEqual(30);
+    expect(VOIDFLAME_CARDS.length).toBeGreaterThanOrEqual(30);
   });
 
   it.skip('есть пары с одинаковой personalityTag для теста замены', () => {
-    function hasPair(defs: typeof STORMWIND_ASPECTS): boolean {
+    function hasPair(defs: typeof STORMWIND_CARDS): boolean {
       const byTag = new Map<string, number>();
       for (const d of defs) {
         byTag.set(d.personalityTag, (byTag.get(d.personalityTag) ?? 0) + 1);
       }
       return [...byTag.values()].some((n) => n >= 2);
     }
-    expect(hasPair(STORMWIND_ASPECTS)).toBe(true);
-    expect(hasPair(VOIDFLAME_ASPECTS)).toBe(true);
+    expect(hasPair(STORMWIND_CARDS)).toBe(true);
+    expect(hasPair(VOIDFLAME_CARDS)).toBe(true);
   });
 });
 
 describe('Легендарные карты', () => {
   it('все легендарки уникальны и валидны', () => {
-    const ids = new Set(LEGENDARY_ASPECTS.map((c) => c.id));
-    expect(ids.size).toBe(LEGENDARY_ASPECTS.length); // нет дубликатов
-    expect(LEGENDARY_ASPECTS.length).toBeGreaterThan(0);
-    for (const c of LEGENDARY_ASPECTS) {
+    const ids = new Set(LEGENDARY_CARDS.map((c) => c.id));
+    expect(ids.size).toBe(LEGENDARY_CARDS.length); // нет дубликатов
+    expect(LEGENDARY_CARDS.length).toBeGreaterThan(0);
+    for (const c of LEGENDARY_CARDS) {
       expect(c.rarity).toBe('legendary');
     }
   });
 
   it('createGame запрещает >1 копии легендарки', () => {
-    const legendId = LEGENDARY_ASPECTS[0].id;
+    const legendId = LEGENDARY_CARDS[0].id;
     const deck = Array(30).fill(legendId);
     expect(() =>
       createGame({
         seed: 'legend-test',
         decks: { p1: deck, p2: deck },
-        cardDefinitions: Object.fromEntries(ALL_CARDS.map((c) => [c.id, c])),
+        cardDefinitions: allCardsById(),
       }),
     ).toThrow(/legendary/);
   });

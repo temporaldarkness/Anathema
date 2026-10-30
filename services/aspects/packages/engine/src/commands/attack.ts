@@ -120,10 +120,6 @@ function consumeAttack(
   }
 }
 
-/**
- * Собирает соседей цели по колонкам (column ± 1) в той же зоне.
- * Возвращает только тех, кто на момент вызова жив и на доске.
- */
 function collectCleaveTargets(
   draft: WritableDraft<GameState>,
   targetLoc: { column: ColumnIndex; zone: 'FRONT' | 'RESERVE'; ownerId: PlayerId },
@@ -167,13 +163,15 @@ function resolveCombat(
   const attackerHasBreakthrough = hasAbility(draft as GameState, attackerId, 'breakthrough');
   const targetLoc = findCardLocation(draft as GameState, targetId);
 
-  // Соседей собираем ДО основного урона: target может умереть, слот опустеет.
   const cleaveTargets =
     hasCleave && cleaveDamage > 0 && targetLoc
       ? collectCleaveTargets(draft, targetLoc)
       : [];
 
-  const targetResult = damageCard(draft, targetId, attStrength, attackerId, ctx);
+  const targetResult = damageCard(draft, targetId, attStrength, attackerId, ctx, {
+    attackerId,
+    defenderId: targetId,
+  });
 
   if (targetResult.killed && attackerHasBreakthrough && targetLoc?.zone === 'FRONT') {
     const col = getColumn(draft as GameState, targetLoc.column);
@@ -193,8 +191,6 @@ function resolveCombat(
     killCard(draft, targetId, ctx);
   }
 
-  // Cleave-урон по соседям. Не активирует breakthrough, соседи
-  // не отвечают ответным ударом.
   for (const sid of cleaveTargets) {
     const sc = draft.cards[sid];
     if (!sc || sc.zone === 'DISCARD') continue;
@@ -205,7 +201,10 @@ function resolveCombat(
     }
   }
 
-  const attackerResult = damageCard(draft, attackerId, defStrength, targetId, ctx);
+  const attackerResult = damageCard(draft, attackerId, defStrength, targetId, ctx, {
+    attackerId: targetId,
+    defenderId: attackerId,
+  });
   if (attackerResult.killed) killCard(draft, attackerId, ctx);
 
   const liveTarget = draft.cards[targetId];
@@ -254,13 +253,19 @@ function attackNeutral(
       const attStr = strengthInBattle(draft as GameState, attackerId);
       const defStr = strengthInBattle(draft as GameState, defFrontId);
 
-      const targetResult = damageCard(draft, defFrontId, attStr, attackerId, ctx);
+      const targetResult = damageCard(draft, defFrontId, attStr, attackerId, ctx, {
+        attackerId,
+        defenderId: defFrontId,
+      });
       if (targetResult.killed) {
         enqueueTrigger(draft, attackerId, 'ON_KILL');
         killCard(draft, defFrontId, ctx);
       }
 
-      const attResult = damageCard(draft, attackerId, defStr, defFrontId, ctx);
+      const attResult = damageCard(draft, attackerId, defStr, defFrontId, ctx, {
+        attackerId: defFrontId,
+        defenderId: attackerId,
+      });
       if (attResult.killed) killCard(draft, attackerId, ctx);
 
       const defAlive = draft.cards[defFrontId]?.zone !== 'DISCARD';
@@ -306,14 +311,10 @@ function captureNeutral(
   }
   ctx.events.push({ type: 'NEUTRAL_CAPTURED', column, playerId: newOwner });
   notifyCellCaptured(draft, column, newOwner);
-  
+
   checkInstantAltVictory(draft, newOwner, ctx);
 }
 
-/**
- * Мгновенная проверка alt-victory: если игрок контролирует все 5 клеток
- * прямо сейчас — победа. Вызывается из всех путей захвата клетки.
- */
 export function checkInstantAltVictory(
   draft: WritableDraft<GameState>,
   playerId: PlayerId,

@@ -84,6 +84,7 @@ export interface PendingEffectContinuation {
   then: Effect[];
   attackerId?: CardInstanceId;
   defenderId?: CardInstanceId;
+  startIndex?: number;
   paidAbility?: {
     cardId: CardInstanceId;
     abilityIndex: number;

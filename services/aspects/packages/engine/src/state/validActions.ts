@@ -114,7 +114,6 @@ export function getValidActions(
         const def = state.definitions[card.definitionId];
         if (!def) continue;
 
-        // Собираем всех кандидатов той же Личности.
         const candidates: CardInstanceId[] = [];
         for (const col of state.board) {
           const ids =
@@ -134,8 +133,6 @@ export function getValidActions(
         }
         if (candidates.length === 0) continue;
 
-        // Минимальная стоимость замены с учётом скидки
-        // (выбираем лучшего кандидата — если хоть на одного хватает — команда валидна).
         let minCost = Infinity;
         for (const cid of candidates) {
           const c = state.cards[cid];
@@ -162,6 +159,7 @@ export function getValidActions(
       if (!frontId) continue;
       const card = state.cards[frontId];
       if (!card) continue;
+      if (card.silenced) continue;
       const def = state.definitions[card.definitionId];
       if (!def) continue;
       const abilities = def.activatedAbilities ?? [];

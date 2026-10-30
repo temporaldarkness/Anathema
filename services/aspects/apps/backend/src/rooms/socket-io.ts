@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import type { Server as HttpServer } from 'node:http';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { Logger } from '@nestjs/common';
 import Redis from 'ioredis';
 import { applyCommand, type Command, type GameState, type PlayerId } from '@aspects/engine';
 import { RoomsService } from './rooms.service';
@@ -11,12 +12,14 @@ import { MatchmakingModule } from '../matchmaking/matchmaking.module';
 import { RatingService, tierFor } from '../rating/rating.service';
 import { RatingModule } from '../rating/rating.module';
 import { makeBot, botDisplayName } from '@aspects/bot';
-import { MatchesService, INTERNAL_CALLER_PREFIX } from '../matches/matches.service';
+import { MatchesService } from '../matches/matches.service';
 import { MatchesModule } from '../matches/matches.module';
 import type { CommandRecord } from '@aspects/shared';
 import { EventsService } from '../common/events.service';
 import { EventsModule } from '../common/events.module';
 import { mergedCardsById } from '@aspects/cards';
+
+const logger = new Logger('SocketIo');
 
 let redisClient: Redis | null = null;
 function getRedis(): Redis {
@@ -62,11 +65,11 @@ function safeHandler<Args extends unknown[]>(
       const r = fn(...args);
       if (r && typeof (r as Promise<void>).catch === 'function') {
         (r as Promise<void>).catch((e) => {
-          console.error(`[ws] handler '${name}' failed:`, e);
+          logger.error(`[ws] handler '${name}' failed: ` + String(e));
         });
       }
     } catch (e) {
-      console.error(`[ws] handler '${name}' threw:`, e);
+      logger.error(`[ws] handler '${name}' threw: ` + String(e));
     }
   };
 }
@@ -158,15 +161,11 @@ export function attachSocketIo(
         { id: loserId, name: loserName },
       );
     } catch (e) {
-      console.error('[rating] applyMatch failed:', e);
+      logger.error('[rating] applyMatch failed:: ' + String(e));
     }
 
-    const applied = await rooms.saveLocked(roomCode, (r) => {
-      if (r.ratingApplied) return null;
-      r.ratingApplied = true;
-      return r;
-    });
-    if (!applied) return null;
+    room.ratingApplied = true;
+    await rooms.save(room);
     return deltas;
   }
 
@@ -203,25 +202,18 @@ export function attachSocketIo(
   }
 
   async function saveMatchOnce(roomCode: string): Promise<void> {
-    const room0 = await rooms.get(roomCode);
-    if (!room0) return;
-    if (room0.matchSaved) return;
+    const room = await rooms.get(roomCode);
+    if (!room) return;
+    if (room.matchSaved) return;
 
-    const state = room0.gameState as GameState;
+    const state = room.gameState as GameState;
     if (!state.winner) return;
-
-    const commands = await rooms.getCommands(roomCode);
-    if (!room0.seed || commands.length === 0) {
-      console.warn(`[matches] ${roomCode}: no seed or commands, skipping`);
-      await rooms.saveLocked(roomCode, (r) => {
-        if (r.matchSaved) return null;
-        r.matchSaved = true;
-        return r;
-      });
+    if (!room.seed || !room.commands) {
+      logger.warn(`[matches] ${roomCode}: no seed or commands, skipping`);
+      room.matchSaved = true;
+      await rooms.save(room);
       return;
     }
-
-    const room = room0;
 
     const isBotRoom = room.guestId?.startsWith('anon:bot:') ?? false;
 
@@ -229,6 +221,7 @@ export function attachSocketIo(
     const guestIdForDb =
       room.guestId && !room.guestId.startsWith('anon:') ? room.guestId : null;
 
+    // Правило: сохраняем, если ХОТЯ БЫ ОДИН из игроков — Webway.
     if (!ownerIdForDb && !guestIdForDb) {
       room.matchSaved = true;
       await rooms.save(room);
@@ -241,7 +234,7 @@ export function attachSocketIo(
 
     const dto = {
           series: room.series ?? [],
-      seed: room.seed ?? '',
+      seed: room.seed,
       player1Name: room.ownerName,
       player2Name: room.guestName ?? 'Соперник',
       winnerId: state.winner,
@@ -253,7 +246,7 @@ export function attachSocketIo(
           cardSnapshot: mergedCardsById(room.series ?? []),
       deckP1: room.deckP1,
       deckP2: room.deckP2 ?? [],
-      commands,
+      commands: room.commands,
       player1Id: ownerIdForDb,
       player2Id: guestIdForDb,
     };
@@ -263,40 +256,29 @@ export function attachSocketIo(
       const attributionName = ownerIdForDb
         ? room.ownerName
         : (room.guestName ?? 'Гость');
-      await matches.saveFromServer(
-        `${INTERNAL_CALLER_PREFIX}socket-io`,
-        attributionName,
-        dto,
-      );
-      await rooms.saveLocked(roomCode, (r) => {
-        r.matchSaved = true;
-        return r;
-      });
-      cmdSeq.delete(roomCode);
-      console.log(
+      await matches.save(attribution, attributionName, dto);
+      room.matchSaved = true;
+      await rooms.save(room);
+      logger.log(
         `[matches] saved ${roomCode} (winner=${state.winner}, ` +
         `p1=${ownerIdForDb ?? 'anon'}, p2=${guestIdForDb ?? 'anon'})`,
       );
     } catch (e) {
-      console.error(`[matches] save failed for ${roomCode}:`, e);
+      logger.error(`[matches] save failed for ${roomCode}: ` + String(e));
     }
   }
 
-  const cmdSeq = new Map<string, number>();
-
-  async function recordCommand(
-    roomCode: string,
+  function recordCommand(
+    room: { commands?: CommandRecord[] },
     playerId: 'p1' | 'p2',
     command: Command,
-  ): Promise<void> {
-    let seq = cmdSeq.get(roomCode);
-    if (seq === undefined) {
-      seq = await getRedis().llen(`aspects:room_commands:${roomCode}`);
-      if (!Number.isFinite(seq) || seq < 0) seq = 0;
-    }
-    const record = { sequence: seq, playerId, command } as CommandRecord;
-    await rooms.appendCommand(roomCode, record);
-    cmdSeq.set(roomCode, seq + 1);
+  ): void {
+    if (!room.commands) room.commands = [];
+    room.commands.push({
+      sequence: room.commands.length,
+      playerId,
+      command,
+    } as CommandRecord);
   }
 
   async function emitPersonalized(
@@ -410,7 +392,7 @@ export function attachSocketIo(
         socket.join(`user:${userId}`);
     let roomCode: string | null = null;
 
-    console.log(`[ws] connected ${socket.id} (user=${userId})`);
+    logger.log(`[ws] connected ${socket.id} (user=${userId})`);
 
     socket.on(
       'subscribe',
@@ -462,7 +444,9 @@ export function attachSocketIo(
           if (isGuest) {
             await markGuestPresence(code, userId!);
             const hb = setInterval(() => {
-              markGuestPresence(code, userId!).catch(() => {});
+              markGuestPresence(code, userId!).catch((e) =>
+                logger.debug(`guest presence heartbeat failed: ${String(e)}`),
+              );
             }, GUEST_HEARTBEAT_MS);
             (socket.data as { heartbeat?: NodeJS.Timeout }).heartbeat = hb;
           }
@@ -546,23 +530,11 @@ export function attachSocketIo(
             socket.emit('command_error', { reason: 'command_rejected', expectedVersion: payload.expectedVersion });
             return;
           }
-          const saved = await rooms.withRoomLock(roomCode, async () => {
-            const code = roomCode!;
-            const fresh = await rooms.get(code);
-            if (!fresh || fresh.version !== payload.expectedVersion) {
-              return null;
-            }
-            await recordCommand(code, playerId, payload.command);
-            fresh.gameState = result.state;
-            fresh.version += 1;
-            rooms.updateTurnDeadline(fresh);
-            await rooms.save(fresh);
-            return fresh;
-          });
-          if (!saved) {
-            await emitPersonalized(roomCode, [], 'sync');
-            return;
-          }
+                  recordCommand(room, playerId, payload.command);
+          room.gameState = result.state;
+          room.version += 1;
+          rooms.updateTurnDeadline(room);
+          await rooms.save(room);
 
           await emitPersonalized(roomCode, result.events, 'update');
 
@@ -573,10 +545,10 @@ export function attachSocketIo(
             });
 
                         applyRatingAndNotify(roomCode).catch((e) =>
-              console.error('[rating] apply+notify failed:', e),
+              logger.error('[rating] apply+notify failed:: ' + String(e)),
             );
                         saveMatchOnce(roomCode).catch((e) =>
-              console.error('[matches] save failed (auto):', e),
+              logger.error('[matches] save failed (auto):: ' + String(e)),
             );
           }
         },
@@ -630,6 +602,8 @@ export function attachSocketIo(
       }),
     );
 
+    // ─── Revenge: ответ на предложение ───
+
     socket.on(
       'rematch_respond',
       safeHandler(
@@ -676,7 +650,7 @@ export function attachSocketIo(
           try {
             await rooms.rematch(roomCode, userId!);
           } catch (e) {
-            console.error('[ws] rematch failed:', e);
+            logger.error('[ws] rematch failed:: ' + String(e));
             await rooms.clearRematchProposal(roomCode);
             socket.emit('command_error', { reason: 'rematch_failed', expectedVersion: room.version });
             await emitRematchUpdate(roomCode, 'expired');
@@ -704,28 +678,15 @@ export function attachSocketIo(
         const myPid: 'p1' | 'p2' = isOwner ? 'p1' : 'p2';
         const oppPid: 'p1' | 'p2' = myPid === 'p1' ? 'p2' : 'p1';
 
-        const expectedVersion = room.version;
-        const conceded = await rooms.withRoomLock(roomCode!, async () => {
-          const fresh = await rooms.get(roomCode!);
-          if (!fresh) return null;
-          if (fresh.version !== expectedVersion) return null;
-          const fstate = fresh.gameState as GameState;
-          if (fstate.winner) return null;
-          fresh.gameState = {
-            ...fstate,
-            winner: oppPid,
-            winnerReason: 'concede',
-          };
-          fresh.version += 1;
-          fresh.turnDeadlineAt = null;
-          fresh.turnOwner = null;
-          await rooms.save(fresh);
-          return fresh;
-        });
-        if (!conceded) {
-          await emitPersonalized(roomCode, [], 'sync');
-          return;
-        }
+        room.gameState = {
+          ...state,
+          winner: oppPid,
+          winnerReason: 'concede',
+        };
+        room.version += 1;
+        room.turnDeadlineAt = null;
+        room.turnOwner = null;
+        await rooms.save(room);
 
         await emitPersonalized(roomCode, [], 'update');
 
@@ -735,10 +696,10 @@ export function attachSocketIo(
         });
 
         applyRatingAndNotify(roomCode).catch((e) =>
-          console.error('[rating] apply+notify failed:', e),
+          logger.error('[rating] apply+notify failed:: ' + String(e)),
         );
         saveMatchOnce(roomCode).catch((e) =>
-          console.error('[matches] save failed (concede):', e),
+          logger.error('[matches] save failed (concede):: ' + String(e)),
         );
       }),
     );
@@ -749,7 +710,9 @@ export function attachSocketIo(
         const hb = (socket.data as { heartbeat?: NodeJS.Timeout }).heartbeat;
         if (hb) clearInterval(hb);
 
-        await matchmaking.dequeue(userId).catch(() => {});
+        await matchmaking.dequeue(userId).catch((e) =>
+          logger.debug(`dequeue on disconnect failed: ${String(e)}`),
+        );
 
                 if (roomCode) {
           const room = await rooms.get(roomCode);
@@ -775,7 +738,7 @@ export function attachSocketIo(
               });
 
               if (stillConnected) {
-                console.log(
+                logger.log(
                   `[ws] ${userId} still has another live socket in ${roomCode}, skip markDisconnected`,
                 );
               } else {
@@ -791,7 +754,7 @@ export function attachSocketIo(
           }
           socket.to(`room:${roomCode}`).emit('guest_left', { guestName: username });
         }
-        console.log(`[ws] disconnected ${socket.id}`);
+        logger.log(`[ws] disconnected ${socket.id}`);
       }),
     );
   });
@@ -804,7 +767,7 @@ export function attachSocketIo(
         reason: 'inactivity',
       });
       await rooms.forceDelete(code);
-      console.log(`[ws] expired stale room ${code}`);
+      logger.log(`[ws] expired stale room ${code}`);
     }
 
     const keys = await getRedis().keys('aspects:room:*');
@@ -842,27 +805,17 @@ export function attachSocketIo(
 
         const result = applyCommand(state, cmd);
         if (result.events.some((e) => e.type === 'COMMAND_REJECTED')) {
-              console.warn(`[ws] auto-action rejected on ${code}: ${cmd.type} in ${state.phase}`);
+              logger.warn(`[ws] auto-action rejected on ${code}: ${cmd.type} in ${state.phase}`);
           continue;
         }
 
-        const vBefore = room.version;
-        const savedAuto = await rooms.withRoomLock(code, async () => {
-          const fresh = await rooms.get(code);
-          if (!fresh) return null;
-          const fstate = fresh.gameState as GameState;
-          if (fstate.winner) return null;
-          await recordCommand(code, fstate.activePlayer, cmd);
-          fresh.gameState = result.state;
-          fresh.version += 1;
-          rooms.updateTurnDeadline(fresh);
-          await rooms.save(fresh);
-          return fresh;
-        });
-        if (!savedAuto) continue;
-        void vBefore;
+        recordCommand(room, state.activePlayer, cmd);
+                room.gameState = result.state;
+        room.version += 1;
+        rooms.updateTurnDeadline(room);
+        await rooms.save(room);
 
-        console.log(`[ws] auto-action on ${code}: ${cmd.type}`);
+        logger.log(`[ws] auto-action on ${code}: ${cmd.type}`);
 
         await emitPersonalized(code, result.events, 'update');
 
@@ -872,15 +825,15 @@ export function attachSocketIo(
             reason: result.state.winnerReason ?? '',
           });
           applyRatingAndNotify(room.code).catch((e) =>
-            console.error('[rating] apply+notify failed:', e),
+            logger.error('[rating] apply+notify failed:: ' + String(e)),
           );
               saveMatchOnce(code).catch((e) =>
-            console.error('[matches] save failed (auto):', e),
+            logger.error('[matches] save failed (auto):: ' + String(e)),
           );
         }
       }
     } catch (e) {
-      console.error('[ws] timer check failed', e);
+      logger.error('[ws] timer check failed: ' + String(e));
     }
   }, 5000);
 
@@ -907,7 +860,7 @@ export function attachSocketIo(
         });
       }
     } catch (e) {
-      console.error('[mm] tick failed', e);
+      logger.error('[mm] tick failed: ' + String(e));
     }
   }, 1000);
 
@@ -926,7 +879,6 @@ export function attachSocketIo(
         const state = room.gameState as GameState;
         if (state.winner) continue;
 
-        // Кто действует сейчас?
         let actor: 'p1' | 'p2' | null = null;
         if (state.phase === 'MULLIGAN') {
           actor = !state.mulliganDone.p1 ? 'p1' : 'p2';
@@ -943,65 +895,61 @@ export function attachSocketIo(
           const bot = makeBot(botId);
           cmd = bot.chooseCommand(state, 'p2');
         } catch (e) {
-          console.error(`[bot] chooseCommand failed on ${code}:`, e);
+          logger.error(`[bot] chooseCommand failed on ${code}: ` + String(e));
           continue;
         }
         if (!cmd) continue;
 
-        const expectedVersion = room.version;
-        const chosen = cmd;
-        const saved = await rooms.withRoomLock(code, async () => {
-          const fresh = await rooms.get(code);
-          if (!fresh) return null;
-          if (fresh.version !== expectedVersion) return null;
-          const fstate = fresh.gameState as GameState;
-          if (fstate.winner) return null;
-
-          const result = applyCommand(fstate, chosen);
-          let finalEvents: unknown[];
-          if (result.events.some((e) => e.type === 'COMMAND_REJECTED')) {
-            const fallback: Command =
-              fstate.phase === 'PLAY' || fstate.phase === 'COMBAT'
-                ? { type: 'END_TURN', playerId: 'p2' }
-                : { type: 'ADVANCE_PHASE', playerId: 'p2' };
-            const r2 = applyCommand(fstate, fallback);
-            if (r2.events.some((e) => e.type === 'COMMAND_REJECTED')) {
-              return null;
-            }
-            await recordCommand(code, 'p2', fallback);
-            fresh.gameState = r2.state;
-            finalEvents = r2.events;
-          } else {
-            await recordCommand(code, 'p2', chosen);
-            fresh.gameState = result.state;
-            finalEvents = result.events;
+        const result = applyCommand(state, cmd);
+        if (result.events.some((e) => e.type === 'COMMAND_REJECTED')) {
+          const fallback: Command =
+            state.phase === 'PLAY' || state.phase === 'COMBAT'
+              ? { type: 'END_TURN', playerId: 'p2' }
+              : { type: 'ADVANCE_PHASE', playerId: 'p2' };
+          const r2 = applyCommand(state, fallback);
+          if (r2.events.some((e) => e.type === 'COMMAND_REJECTED')) continue;
+          room.gameState = r2.state;
+          room.version += 1;
+          rooms.updateTurnDeadline(room);
+          await rooms.save(room);
+          await emitPersonalized(code, r2.events, 'update');
+          if (r2.state.winner) {
+            io.to(`room:${code}`).emit('game_over', {
+              winner: r2.state.winner,
+              reason: r2.state.winnerReason ?? '',
+            });
+            applyRatingAndNotify(code).catch((err) =>
+              logger.error('[rating] apply+notify failed (bot fallback):: ' + String(err)),
+            );
           }
-          fresh.version += 1;
-          rooms.updateTurnDeadline(fresh);
-          await rooms.save(fresh);
-          return { state: fresh.gameState as GameState, events: finalEvents };
-        });
-        if (!saved) continue;
+          continue;
+        }
 
-        await emitPersonalized(code, saved.events, 'update');
+                recordCommand(room, 'p2', cmd);
+        room.gameState = result.state;
+        room.version += 1;
+        rooms.updateTurnDeadline(room);
+        await rooms.save(room);
 
-        if (saved.state.winner) {
-          io.to(`room:${code}`).emit('game_over', {
-            winner: saved.state.winner,
-            reason: saved.state.winnerReason ?? '',
+        await emitPersonalized(code, result.events, 'update');
+
+        if (result.state.winner) {
+          io.to(`room:${room.code}`).emit('game_over', {
+            winner: result.state.winner,
+            reason: result.state.winnerReason ?? '',
           });
-          applyRatingAndNotify(code).catch((e) =>
-            console.error('[rating] apply+notify failed:', e),
+          applyRatingAndNotify(room.code).catch((e) =>
+            logger.error('[rating] apply+notify failed:: ' + String(e)),
           );
-          saveMatchOnce(code).catch((e) =>
-            console.error('[matches] save failed:', e),
+          saveMatchOnce(room.code).catch((e) =>
+            logger.error('[matches] save failed:: ' + String(e)),
           );
         }
       }
     } catch (e) {
-      console.error('[bot-loop] failed', e);
+      logger.error('[bot-loop] failed: ' + String(e));
     }
   }, 500);
 
-  console.log('[socket.io] attached to http server, path=/socket.io');
+  logger.log('[socket.io] attached to http server, path=/socket.io');
 }

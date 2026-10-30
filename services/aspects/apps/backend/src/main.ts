@@ -1,11 +1,30 @@
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { Logger } from '@nestjs/common';
+import { Logger, LogLevel } from '@nestjs/common';
 import fastifyCookie from '@fastify/cookie';
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
 import { startHeartbeat } from './heartbeat/heartbeat';
 import { attachSocketIo } from './rooms/socket-io';
+
+function applyLogLevel(): LogLevel {
+  const raw = (process.env.LOG_LEVEL ?? 'log').toLowerCase();
+  const map: Record<string, LogLevel> = {
+    error: 'error',
+    warn: 'warn',
+    log: 'log',
+    debug: 'debug',
+    verbose: 'verbose',
+  };
+  return map[raw] ?? 'log';
+}
+
+const LEVEL_ORDER: LogLevel[] = ['error', 'warn', 'log', 'debug', 'verbose'];
+
+function logLevelsUpTo(level: LogLevel): LogLevel[] {
+  const idx = LEVEL_ORDER.indexOf(level);
+  return LEVEL_ORDER.slice(0, idx < 0 ? 2 : idx + 1);
+}
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -40,16 +59,7 @@ async function bootstrap() {
     secret: process.env.COOKIE_SECRET ?? 'aspects-internal',
   });
 
-  if (process.env.NODE_ENV === 'production') {
-    if (!process.env.ANON_COOKIE_SECRET) {
-      throw new Error('ANON_COOKIE_SECRET must be set in production');
-    }
-    if (!process.env.INTERNAL_API_TOKEN) {
-      logger.warn(
-        'INTERNAL_API_TOKEN is not set — x-internal-token path is disabled',
-      );
-    }
-  }
+  Logger.overrideLogger(logLevelsUpTo(applyLogLevel()));
 
   app.enableCors({ origin: true, credentials: true });
 
@@ -66,6 +76,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((e) => {
-  console.error('Bootstrap failed:', e);
+  new Logger('Bootstrap').error('Bootstrap failed: ' + String(e?.stack ?? e));
   process.exit(1);
 });

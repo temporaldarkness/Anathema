@@ -23,6 +23,7 @@ export interface EffectContext {
   ownerId: PlayerId;
   attackerId?: CardInstanceId;
   defenderId?: CardInstanceId;
+  promptForChosen?: boolean;
 }
 
 export function resolveEffect(
@@ -107,6 +108,32 @@ export function resolveEffect(
       break;
     }
     case 'SILENCE_TARGET': {
+      if (effect.target === 'CHOSEN' && !explicitTargets && ec.promptForChosen) {
+        const eligible = silentChosenEligible(draft, effect.filter, ec);
+        if (eligible.length > 0) {
+          draft.pendingChoice = {
+            kind: 'EFFECT_TARGET_SELECTION',
+            playerId: ec.ownerId,
+            count: 1,
+            eligibleCardIds: eligible,
+            continuation: {
+              sourceId: ec.sourceId,
+              ownerId: ec.ownerId,
+              then: [effect],
+              attackerId: ec.attackerId,
+              defenderId: ec.defenderId,
+            },
+          };
+          ctx.events.push({
+            type: 'CHOICE_REQUESTED',
+            playerId: ec.ownerId,
+            kind: 'EFFECT_TARGET_SELECTION',
+            count: 1,
+          });
+          return;
+        }
+        return;
+      }
       const targets = resolveTargets(draft, effect.target, effect.filter, ec, explicitTargets);
       for (const id of targets) {
         const card = draft.cards[id];
@@ -158,6 +185,7 @@ export function resolveEffect(
       break;
     }
     case 'CHOOSE_TARGETS_THEN': {
+      const then = Array.isArray(effect.then) ? effect.then : [effect.then];
       const eligible = eligibleForSelection(draft, effect.selection, ec);
       if (eligible.length === 0) {
         return;
@@ -171,9 +199,10 @@ export function resolveEffect(
         continuation: {
           sourceId: ec.sourceId,
           ownerId: ec.ownerId,
-          then: effect.then,
+          then,
+          startIndex: then.indexOf(effect) + 1,
           attackerId: ec.attackerId,
-		  defenderId: ec.defenderId,
+          defenderId: ec.defenderId,
         },
       };
       ctx.events.push({
@@ -385,6 +414,26 @@ export function resolveEffect(
       break;
     }
   }
+}
+
+function silentChosenEligible(
+  draft: WritableDraft<GameState>,
+  filter: CardFilter | undefined,
+  ec: EffectContext,
+): CardInstanceId[] {
+  const state = draft as GameState;
+  const enemy = opponentOf(ec.ownerId);
+  const all = [
+    ...cardsInZone(state, ec.ownerId, 'FRONT'),
+    ...cardsInZone(state, ec.ownerId, 'RESERVE'),
+    ...cardsInZone(state, enemy, 'FRONT'),
+    ...cardsInZone(state, enemy, 'RESERVE'),
+  ].map((c) => c.instanceId);
+  return all.filter((id) => {
+    const card = state.cards[id];
+    if (!card || card.silenced) return false;
+    return !filter || matchesFilter(state, id, filter);
+  });
 }
 
 function eligibleForSelection(

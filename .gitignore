@@ -75,3 +75,8 @@ logs/
 
 # ===== Local radio cache (docker volume mount, если вдруг) =====
 radio_cache/
+
+# ===== Local backup artifacts =====
+*.save
+*.bak
+*.swp

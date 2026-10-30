@@ -10,4 +10,5 @@ export interface PendingNeutralCapture {
 export interface ResolutionContext {
   events: GameEvent[];
   pendingNeutralCaptures: PendingNeutralCapture[];
+  resolvingTrigger?: { cardId: CardInstanceId; triggerType: string };
 }

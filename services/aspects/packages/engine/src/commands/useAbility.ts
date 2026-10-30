@@ -26,6 +26,8 @@ export function useAbilityInternal(
   if (card.controllerId !== playerId) return { ok: false, reason: 'not_your_card' };
   if (card.zone !== 'FRONT') return { ok: false, reason: 'card_not_in_front' };
 
+  if (card.silenced) return { ok: false, reason: 'card_silenced' };
+
   const def = draft.definitions[card.definitionId];
   if (!def) return { ok: false, reason: 'unknown_definition' };
 
@@ -45,8 +47,6 @@ export function useAbilityInternal(
 
   const discardCost = (ability as { discardCost?: number }).discardCost ?? 0;
 
-  // Есть discardCost — ставим выбор карт для сброса.
-  // Инфлуенс и карты спишутся на RESOLVE_CHOICE.
   if (discardCost > 0) {
     const hand = draft.players[playerId].hand;
     if (hand.length < discardCost) {
@@ -69,7 +69,6 @@ export function useAbilityInternal(
     return { ok: true };
   }
 
-  // Без discardCost — мгновенное применение.
   if (ability.cost > 0) changeInfluence(draft, playerId, -ability.cost, ctx);
 
   card.usedAbilitiesThisTurn.push(abilityIndex);
@@ -84,7 +83,7 @@ export function useAbilityInternal(
     resolveEffect(
       draft,
       effect,
-      { sourceId: cardId, ownerId: playerId },
+      { sourceId: cardId, ownerId: playerId, promptForChosen: true },
       ctx,
     );
     if (draft.pendingChoice) {
@@ -102,10 +101,6 @@ export function useAbilityInternal(
   return { ok: true };
 }
 
-/**
- * Применяет активацию с discardCost. Вызывается из resolveChoice,
- * когда игрок выбрал карты на сброс.
- */
 export function applyActivationDiscard(
   draft: WritableDraft<GameState>,
   params: {
@@ -123,6 +118,8 @@ export function applyActivationDiscard(
   if (card.controllerId !== playerId) return { ok: false, reason: 'not_your_card' };
   if (card.zone !== 'FRONT') return { ok: false, reason: 'card_not_in_front' };
 
+  if (card.silenced) return { ok: false, reason: 'card_silenced' };
+
   const def = draft.definitions[card.definitionId];
   if (!def) return { ok: false, reason: 'unknown_definition' };
   const abilities = def.activatedAbilities ?? [];
@@ -138,7 +135,6 @@ export function applyActivationDiscard(
     return { ok: false, reason: 'not_enough_influence' };
   }
 
-  // Сбрасываем карты.
   for (const id of discardCardIds) {
     const hand = draft.players[playerId].hand;
     const idx = hand.indexOf(id);
@@ -167,7 +163,7 @@ export function applyActivationDiscard(
     resolveEffect(
       draft,
       effect,
-      { sourceId: sourceCardId, ownerId: playerId },
+      { sourceId: sourceCardId, ownerId: playerId, promptForChosen: true },
       ctx,
     );
     if (draft.pendingChoice) {
