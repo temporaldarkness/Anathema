@@ -208,7 +208,10 @@ export function attachSocketIo(
 
     const state = room.gameState as GameState;
     if (!state.winner) return;
-    if (!room.seed || !room.commands) {
+	
+	const commands = await rooms.getCommands(roomCode);
+	
+    if (!room.seed || !commands) {
       logger.warn(`[matches] ${roomCode}: no seed or commands, skipping`);
       room.matchSaved = true;
       await rooms.save(room);
@@ -243,10 +246,10 @@ export function attachSocketIo(
       durationMs: Date.now() - room.createdAt,
       p1BotName: null,
       p2BotName,
-          cardSnapshot: mergedCardsById(room.series ?? []),
+      cardSnapshot: mergedCardsById(room.series ?? []),
       deckP1: room.deckP1,
       deckP2: room.deckP2 ?? [],
-      commands: room.commands,
+      commands: commands,
       player1Id: ownerIdForDb,
       player2Id: guestIdForDb,
     };
@@ -268,17 +271,17 @@ export function attachSocketIo(
     }
   }
 
-  function recordCommand(
-    room: { commands?: CommandRecord[] },
+  async function recordCommand(
+    roomCode: string,
+    sequence: number,
     playerId: 'p1' | 'p2',
     command: Command,
-  ): void {
-    if (!room.commands) room.commands = [];
-    room.commands.push({
-      sequence: room.commands.length,
+  ): Promise<void> {
+    await rooms.appendCommand(roomCode, {
+      sequence,
       playerId,
       command,
-    } as CommandRecord);
+    });
   }
 
   async function emitPersonalized(
@@ -530,7 +533,7 @@ export function attachSocketIo(
             socket.emit('command_error', { reason: 'command_rejected', expectedVersion: payload.expectedVersion });
             return;
           }
-                  recordCommand(room, playerId, payload.command);
+          await recordCommand(roomCode, room.version, playerId, payload.command);
           room.gameState = result.state;
           room.version += 1;
           rooms.updateTurnDeadline(room);
@@ -809,8 +812,8 @@ export function attachSocketIo(
           continue;
         }
 
-        recordCommand(room, state.activePlayer, cmd);
-                room.gameState = result.state;
+        await recordCommand(code, room.version, state.activePlayer, cmd);
+        room.gameState = result.state;
         room.version += 1;
         rooms.updateTurnDeadline(room);
         await rooms.save(room);
@@ -925,7 +928,7 @@ export function attachSocketIo(
           continue;
         }
 
-                recordCommand(room, 'p2', cmd);
+        await recordCommand(code, room.version, 'p2', cmd);
         room.gameState = result.state;
         room.version += 1;
         rooms.updateTurnDeadline(room);

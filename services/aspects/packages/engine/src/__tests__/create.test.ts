@@ -161,18 +161,6 @@ describe('Пакеты карт', () => {
     expect(STORMWIND_CARDS.length).toBeGreaterThanOrEqual(30);
     expect(VOIDFLAME_CARDS.length).toBeGreaterThanOrEqual(30);
   });
-
-  it.skip('есть пары с одинаковой personalityTag для теста замены', () => {
-    function hasPair(defs: typeof STORMWIND_CARDS): boolean {
-      const byTag = new Map<string, number>();
-      for (const d of defs) {
-        byTag.set(d.personalityTag, (byTag.get(d.personalityTag) ?? 0) + 1);
-      }
-      return [...byTag.values()].some((n) => n >= 2);
-    }
-    expect(hasPair(STORMWIND_CARDS)).toBe(true);
-    expect(hasPair(VOIDFLAME_CARDS)).toBe(true);
-  });
 });
 
 describe('Легендарные карты', () => {

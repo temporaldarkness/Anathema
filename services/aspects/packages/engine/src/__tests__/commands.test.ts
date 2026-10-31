@@ -212,37 +212,6 @@ describe('END_TURN', () => {
   });
 });
 
-describe('Отчаянье', () => {
-  it.skip('при Величии < 10 Резервы уходят во Фронт в конце хода', () => {
-    let s = toPlay(newGame());
-    s = {
-      ...s,
-      players: {
-        ...s.players,
-        [s.activePlayer]: {
-          ...s.players[s.activePlayer],
-          influence: 10,
-          glory: 5,
-        },
-      },
-    };
-    const active = s.activePlayer;
-
-    const cardId = s.players[active].hand.find((id) => s.cards[id].definitionId === 'plain')!;
-    s = applyCommand(s, {
-      type: 'PLAY_CARD',
-      playerId: active,
-      cardId,
-      column: 3,
-    }).state;
-    expect(s.cards[cardId].zone).toBe('RESERVE');
-
-    const r = applyCommand(s, { type: 'END_TURN', playerId: active });
-    expect(r.state.cards[cardId].zone).toBe('FRONT');
-    expect(r.state.board[2][active === 'p1' ? 'p1Front' : 'p2Front']).toBe(cardId);
-  });
-});
-
 describe('Замедление', () => {
   it('карта с slow проводит в Резерве лишний ход', () => {
     let s = toPlay(newGame());

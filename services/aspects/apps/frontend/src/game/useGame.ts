@@ -126,7 +126,10 @@ export function useGame(initial: ResetParams): UseGameResult {
 
   const commandsRef = useRef<CommandRecord[]>([]);
   const startTimeRef = useRef<number>(Date.now());
-  const initialDecksRef = useRef<{ p1: string[]; p2: string[] }>({ p1: [], p2: [] });
+  const initialDecksRef = useRef<{ p1: string[]; p2: string[] }>({
+    p1: resolveDeckCards(initial.deckP1Id, initial.deckP1Cards),
+    p2: resolveDeckCards(initial.deckP2Id, initial.deckP2Cards),
+  });
   const resetParamsRef = useRef<ResetParams>(initial);
 
   const p1IsBot = bots.p1 !== null;
@@ -339,9 +342,9 @@ export function useGame(initial: ResetParams): UseGameResult {
   }, [botToAct, state, applyWithLogAndFloating, observe, speed, bots]);
 
   const reset = useCallback((params: ResetParams) => {
-    const p1Cards = resolveDeckCards(params.deckP1Id, params.deckP1Cards);
-    const p2Cards = resolveDeckCards(params.deckP2Id, params.deckP2Cards);
     const cardDefs = mergedCardsById(params.series);
+	const p1Cards = sanitizeDeck(resolveDeckCards(params.deckP1Id, params.deckP1Cards), cardDefs);
+    const p2Cards = sanitizeDeck(resolveDeckCards(params.deckP2Id, params.deckP2Cards), cardDefs);
   
     commandsRef.current = [];
     startTimeRef.current = Date.now();
@@ -394,6 +397,15 @@ export function useGame(initial: ResetParams): UseGameResult {
   const getMatchPayload = useCallback(
     (names: { p1: string; p2: string }): SaveMatchDto => {
       const params = resetParamsRef.current;
+	  
+	  const deckP1 = initialDecksRef.current.p1.length > 0 
+        ? initialDecksRef.current.p1 
+        : resolveDeckCards(params.deckP1Id, params.deckP1Cards);
+      
+      const deckP2 = initialDecksRef.current.p2.length > 0 
+        ? initialDecksRef.current.p2 
+        : resolveDeckCards(params.deckP2Id, params.deckP2Cards);
+      
       return {
 		series: params.series,
         seed: params.seed,
@@ -406,8 +418,8 @@ export function useGame(initial: ResetParams): UseGameResult {
         p1BotName: params.p1BotName,
         p2BotName: params.p2BotName,
 		cardSnapshot: mergedCardsById(params.series),
-        deckP1: initialDecksRef.current.p1,
-        deckP2: initialDecksRef.current.p2,
+        deckP1,
+        deckP2,
         commands: [...commandsRef.current],
       };
     },

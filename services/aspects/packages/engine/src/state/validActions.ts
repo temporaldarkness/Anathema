@@ -158,8 +158,7 @@ export function getValidActions(
       const frontId = playerId === 'p1' ? col.p1Front : col.p2Front;
       if (!frontId) continue;
       const card = state.cards[frontId];
-      if (!card) continue;
-      if (card.silenced) continue;
+      if (!card || card.silenced) continue;
       const def = state.definitions[card.definitionId];
       if (!def) continue;
       const abilities = def.activatedAbilities ?? [];

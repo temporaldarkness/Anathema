@@ -29,11 +29,6 @@ export function removeFromHand(
   hand.splice(idx, 1);
 }
 
-/**
- * Добавляет карту в руку и энкьюит ON_CARD_DRAWN на всех карт
- * игрока во Фронте. Триггерится на любой источник добора
- * (фаза DRAW, эффект DRAW, RETURN_TO_HAND, RETURN_FROM_DISCARD и т.д.).
- */
 export function addToHand(
   draft: WritableDraft<GameState>,
   playerId: PlayerId,
@@ -166,6 +161,8 @@ export function killCard(
 ): void {
   const card = draft.cards[cardId];
   if (!card) return;
+  if (!ctx.killedThisResolution) ctx.killedThisResolution = new Set();
+  ctx.killedThisResolution.add(cardId);
   ctx.events.push({ type: 'CARD_DIED', cardId, zone: card.zone });
 
   notifyAllyDied(draft, cardId);

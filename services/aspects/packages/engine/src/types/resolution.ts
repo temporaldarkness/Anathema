@@ -1,5 +1,6 @@
 import type { GameEvent } from './events';
 import type { CardInstanceId, ColumnIndex, PlayerId } from './ids';
+import type { TriggerType } from '@aspects/cards';
 
 export interface PendingNeutralCapture {
   column: ColumnIndex;
@@ -10,5 +11,6 @@ export interface PendingNeutralCapture {
 export interface ResolutionContext {
   events: GameEvent[];
   pendingNeutralCaptures: PendingNeutralCapture[];
-  resolvingTrigger?: { cardId: CardInstanceId; triggerType: string };
+  killedThisResolution?: Set<string>;
+  resolvingTrigger?: { cardId: CardInstanceId; triggerType: TriggerType };
 }

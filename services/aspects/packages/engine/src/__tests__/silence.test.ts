@@ -232,24 +232,39 @@ describe('silence (доп. покрытие, итерация 4.2)', () => {
     const v = r.state.cards[victim.cardId];
     expect(v.damageTaken).toBe(before + 1);
   });
-
+  
   it('незаглушённая карта с тем же триггером реагирует (контроль)', () => {
-    let s = setup();
-    const active = s.activePlayer;
-    const opp = opponentOf(active);
-
-    const attacker = placeCard(s, active, 'dummy', 3);
-    s = attacker.state;
-    const victim = placeCard(s, opp, 'victim', 5);
-    s = victim.state;
-
-    s = { ...s, phase: 'COMBAT' };
-    const r = applyCommand(s, {
-      type: 'ATTACK', playerId: active,
-      attackerId: attacker.cardId,
-      target: { kind: 'CARD', cardId: victim.cardId },
-    });
-    expect(r.state.cards[victim.cardId].damageTaken).toBe(2);
-    expect(r.state.cards[victim.cardId].zone).toBe('FRONT');
+      let s = setup();
+      const active = s.activePlayer;
+      const opp = opponentOf(active);
+  
+      const attacker = placeCard(s, active, 'dummy', 3);
+      s = attacker.state;
+      
+      const victim = placeCard(s, opp, 'victim', 5);
+      s = victim.state;
+  
+      s = {
+        ...s,
+        cards: {
+          ...s.cards,
+          [attacker.cardId]: {
+            ...s.cards[attacker.cardId],
+            exhausted: false,
+            hasAttackedThisTurn: false,
+          },
+        },
+      };
+  
+      s = { ...s, phase: 'COMBAT' };
+  
+      const r = applyCommand(s, {
+        type: 'ATTACK', 
+        playerId: active,
+        attackerId: attacker.cardId,
+        target: { kind: 'CARD', cardId: victim.cardId },
+      });
+      expect(r.state.cards[victim.cardId].damageTaken).toBe(2);
+      expect(r.state.cards[victim.cardId].zone).toBe('FRONT');
   });
 });

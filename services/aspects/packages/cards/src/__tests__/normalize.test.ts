@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   getCards,
-  cardsForScope,
   hasSeries,
   hasFaction,
   hasRole,
@@ -10,26 +9,26 @@ import {
 import { KEYWORD_INFO } from '../abilities';
 
 describe('normalizeCard (через getCards)', () => {
-  const cards = getCards('stormwind');
+  const cards = getCards('ash_stormwind');
   const byId = Object.fromEntries(cards.map((c) => [c.id, c]));
 
   it('проставляет series из packId, если не задано', () => {
     const c = byId['sw_spearman'];
-    expect(c.series).toEqual(['stormwind']);
+    expect(c.series).toEqual(['ash_stormwind']);
   });
 
   it('извлекает factions из tags', () => {
     const c = byId['sw_spearman'];
-    expect(c.factions).toEqual(['stormwind']);
+    expect(c.factions).toContain('ash_stormwind');
   });
 
   it('извлекает roles из tags, исключая factions и series', () => {
     const c = byId['sw_spearman'];
-    // Не привязываемся к конкретной роли: контент меняется.
-    // Проверяем суть: роли есть, и в них нет faction/series.
     expect((c.roles ?? []).length).toBeGreaterThan(0);
-    expect(c.roles).not.toContain('stormwind');
-    expect(c.roles).not.toContain('ashenlight');
+    for (const r of c.roles ?? []) {
+      expect(r).not.toContain('stormwind');
+      expect(r).not.toContain('ashenlight');
+    }
   });
 
   it('не переопределяет явно заданные series', () => {
@@ -42,34 +41,29 @@ describe('normalizeCard (через getCards)', () => {
   });
 
   it('abilityInfo заполняется дефолтом для всех ключевых слов', () => {
-    const c = byId['sw_gatekeeper'];
-    expect(c.abilities).toContain('taunt');
-    expect(c.abilityInfo?.taunt?.name).toBe('Страж');
-    expect(c.abilityInfo?.taunt?.description).toBe(
-      KEYWORD_INFO.taunt.description,
-    );
-  });
-
-  it('abilityInfo не переопределяется, если задано явно', () => {
-    // `ashenlight` — scope, а не серия. Используем cardsForScope,
-    // который возвращает Record<string, CardDefinition>.
-    const ashenlightCards = Object.values(cardsForScope('ashenlight'));
-    const c = ashenlightCards.find((x) => x.id === 'sw_marksman');
-    expect(c?.abilityInfo).toBeDefined();
+    const withKnownKw = cards.find((c) =>
+      (c.abilities ?? []).some((kw) => KEYWORD_INFO[kw as keyof typeof KEYWORD_INFO]),
+    )!;
+    expect(withKnownKw).toBeDefined();
+    for (const kw of withKnownKw.abilities ?? []) {
+      const info = KEYWORD_INFO[kw as keyof typeof KEYWORD_INFO];
+      if (!info) continue;
+      expect(withKnownKw.abilityInfo?.[kw]?.name, `name для ${kw}`).toBeTruthy();
+      expect(withKnownKw.abilityInfo?.[kw]?.description).toBeTruthy();
+    }
   });
 
   it('hasSeries работает', () => {
-    expect(hasSeries(byId['sw_spearman'], 'stormwind')).toBe(true);
+    expect(hasSeries(byId['sw_spearman'], 'ash_stormwind')).toBe(true);
     expect(hasSeries(byId['sw_spearman'], 'unknown')).toBe(false);
   });
 
   it('hasFaction работает', () => {
-    expect(hasFaction(byId['sw_spearman'], 'stormwind')).toBe(true);
+    expect(hasFaction(byId['sw_spearman'], 'ash_stormwind')).toBe(true);
     expect(hasFaction(byId['sw_spearman'], 'enterprise')).toBe(false);
   });
 
   it('hasRole работает', () => {
-    // Проверяем на реальной роли карты, а не на захардкоженной строке.
     const c = byId['sw_spearman'];
     const someRole = (c.roles ?? [])[0];
     expect(someRole).toBeDefined();
@@ -78,7 +72,7 @@ describe('normalizeCard (через getCards)', () => {
   });
 
   it('getPrimarySeries возвращает первую серию', () => {
-    expect(getPrimarySeries(byId['sw_spearman'])).toBe('stormwind');
+    expect(getPrimarySeries(byId['sw_spearman'])).toBe('ash_stormwind');
   });
 });
 

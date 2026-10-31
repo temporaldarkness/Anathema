@@ -25,7 +25,6 @@ export function useAbilityInternal(
   if (!card) return { ok: false, reason: 'card_not_found' };
   if (card.controllerId !== playerId) return { ok: false, reason: 'not_your_card' };
   if (card.zone !== 'FRONT') return { ok: false, reason: 'card_not_in_front' };
-
   if (card.silenced) return { ok: false, reason: 'card_silenced' };
 
   const def = draft.definitions[card.definitionId];
@@ -117,7 +116,6 @@ export function applyActivationDiscard(
   if (!card) return { ok: false, reason: 'card_not_found' };
   if (card.controllerId !== playerId) return { ok: false, reason: 'not_your_card' };
   if (card.zone !== 'FRONT') return { ok: false, reason: 'card_not_in_front' };
-
   if (card.silenced) return { ok: false, reason: 'card_silenced' };
 
   const def = draft.definitions[card.definitionId];

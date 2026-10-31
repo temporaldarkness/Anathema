@@ -30,16 +30,19 @@ export function drainTriggerQueue(
     const card = draft.cards[trigger.cardId];
     if (!card) continue;
 
-    const onBoard = card.zone === 'FRONT' || card.zone === 'RESERVE';
-	
-	
-    if (trigger.triggerType === 'ON_THIS_DAMAGED' && card.zone === 'DISCARD') {
+    if (
+      trigger.triggerType !== 'ON_EXIT' &&
+      ctx.killedThisResolution?.has(trigger.cardId)
+    ) {
       continue;
     }
+
+    const onBoard = card.zone === 'FRONT' || card.zone === 'RESERVE';
 
     if (
       trigger.triggerType !== 'ON_EXIT' &&
       trigger.triggerType !== 'ON_KILL' &&
+      trigger.triggerType !== 'ON_THIS_DAMAGED' &&
       !onBoard
     ) {
       continue;

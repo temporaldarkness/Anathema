@@ -110,28 +110,26 @@ export function resolveEffect(
     case 'SILENCE_TARGET': {
       if (effect.target === 'CHOSEN' && !explicitTargets && ec.promptForChosen) {
         const eligible = silentChosenEligible(draft, effect.filter, ec);
-        if (eligible.length > 0) {
-          draft.pendingChoice = {
-            kind: 'EFFECT_TARGET_SELECTION',
-            playerId: ec.ownerId,
-            count: 1,
-            eligibleCardIds: eligible,
-            continuation: {
-              sourceId: ec.sourceId,
-              ownerId: ec.ownerId,
-              then: [effect],
-              attackerId: ec.attackerId,
-              defenderId: ec.defenderId,
-            },
-          };
-          ctx.events.push({
-            type: 'CHOICE_REQUESTED',
-            playerId: ec.ownerId,
-            kind: 'EFFECT_TARGET_SELECTION',
-            count: 1,
-          });
-          return;
-        }
+        if (eligible.length === 0) return;
+        draft.pendingChoice = {
+          kind: 'EFFECT_TARGET_SELECTION',
+          playerId: ec.ownerId,
+          count: 1,
+          eligibleCardIds: eligible,
+          continuation: {
+            sourceId: ec.sourceId,
+            ownerId: ec.ownerId,
+            then: [effect],
+            attackerId: ec.attackerId,
+            defenderId: ec.defenderId,
+          },
+        };
+        ctx.events.push({
+          type: 'CHOICE_REQUESTED',
+          playerId: ec.ownerId,
+          kind: 'EFFECT_TARGET_SELECTION',
+          count: 1,
+        });
         return;
       }
       const targets = resolveTargets(draft, effect.target, effect.filter, ec, explicitTargets);
@@ -200,7 +198,6 @@ export function resolveEffect(
           sourceId: ec.sourceId,
           ownerId: ec.ownerId,
           then,
-          startIndex: then.indexOf(effect) + 1,
           attackerId: ec.attackerId,
           defenderId: ec.defenderId,
         },
