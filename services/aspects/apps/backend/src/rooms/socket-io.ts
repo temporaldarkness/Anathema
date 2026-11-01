@@ -18,6 +18,8 @@ import type { CommandRecord } from '@aspects/shared';
 import { EventsService } from '../common/events.service';
 import { EventsModule } from '../common/events.module';
 import { mergedCardsById } from '@aspects/cards';
+import { EconomyModule } from '../economy/economy.module';
+import { RewardsService } from '../economy/rewards.service';
 
 const logger = new Logger('SocketIo');
 
@@ -129,6 +131,7 @@ export function attachSocketIo(
   const matchmaking = app.select(MatchmakingModule).get(MatchmakingService);
   const rating = app.select(RatingModule).get(RatingService);
   const events = app.select(EventsModule).get(EventsService);
+  const rewards = app.select(EconomyModule).get(RewardsService);
   events.attach(io);
 
   async function tryApplyRating(
@@ -202,72 +205,108 @@ export function attachSocketIo(
   }
 
   async function saveMatchOnce(roomCode: string): Promise<void> {
-    const room = await rooms.get(roomCode);
-    if (!room) return;
-    if (room.matchSaved) return;
-
-    const state = room.gameState as GameState;
-    if (!state.winner) return;
-	
-	const commands = await rooms.getCommands(roomCode);
-	
-    if (!room.seed || !commands) {
-      logger.warn(`[matches] ${roomCode}: no seed or commands, skipping`);
-      room.matchSaved = true;
-      await rooms.save(room);
-      return;
-    }
-
-    const isBotRoom = room.guestId?.startsWith('anon:bot:') ?? false;
-
-    const ownerIdForDb = room.ownerId.startsWith('anon:') ? null : room.ownerId;
-    const guestIdForDb =
-      room.guestId && !room.guestId.startsWith('anon:') ? room.guestId : null;
-
-    // Правило: сохраняем, если ХОТЯ БЫ ОДИН из игроков — Webway.
-    if (!ownerIdForDb && !guestIdForDb) {
-      room.matchSaved = true;
-      await rooms.save(room);
-      return;
-    }
-
-    const p2BotName = isBotRoom && room.guestId
-      ? room.guestId.slice('anon:bot:'.length)
-      : null;
-
-    const dto = {
-          series: room.series ?? [],
-      seed: room.seed,
-      player1Name: room.ownerName,
-      player2Name: room.guestName ?? 'Соперник',
-      winnerId: state.winner,
-      winnerReason: state.winnerReason ?? null,
-      turnNumber: state.turnNumber,
-      durationMs: Date.now() - room.createdAt,
-      p1BotName: null,
-      p2BotName,
-      cardSnapshot: mergedCardsById(room.series ?? []),
-      deckP1: room.deckP1,
-      deckP2: room.deckP2 ?? [],
-      commands: commands,
-      player1Id: ownerIdForDb,
-      player2Id: guestIdForDb,
-    };
-
     try {
-      const attribution = ownerIdForDb ?? guestIdForDb!;
-      const attributionName = ownerIdForDb
-        ? room.ownerName
-        : (room.guestName ?? 'Гость');
-      await matches.save(attribution, attributionName, dto);
-      room.matchSaved = true;
-      await rooms.save(room);
-      logger.log(
-        `[matches] saved ${roomCode} (winner=${state.winner}, ` +
-        `p1=${ownerIdForDb ?? 'anon'}, p2=${guestIdForDb ?? 'anon'})`,
-      );
+      await rooms.withRoomLock(roomCode, async () => {
+        const room = await rooms.get(roomCode);
+        if (!room) return;
+        if (room.matchSaved) return;
+
+        const state = room.gameState as GameState;
+        if (!state.winner) return;
+
+        const commands = await rooms.getCommands(roomCode);
+        if (!room.seed || !commands) {
+          logger.warn(`[matches] ${roomCode}: no seed or commands, skipping`);
+          room.matchSaved = true;
+          await rooms.save(room);
+          return;
+        }
+
+        const isBotRoom = room.guestId?.startsWith('anon:bot:') ?? false;
+        const ownerIdForDb = room.ownerId.startsWith('anon:') ? null : room.ownerId;
+        const guestIdForDb =
+          room.guestId && !room.guestId.startsWith('anon:') ? room.guestId : null;
+
+        if (!ownerIdForDb && !guestIdForDb) {
+          room.matchSaved = true;
+          await rooms.save(room);
+          return;
+        }
+
+        const p2BotName = isBotRoom && room.guestId
+          ? room.guestId.slice('anon:bot:'.length)
+          : null;
+
+        const dto = {
+          series: room.series ?? [],
+          seed: room.seed,
+          player1Name: room.ownerName,
+          player2Name: room.guestName ?? 'Соперник',
+          winnerId: state.winner,
+          winnerReason: state.winnerReason ?? null,
+          turnNumber: state.turnNumber,
+          durationMs: Date.now() - room.createdAt,
+          p1BotName: null,
+          p2BotName,
+          cardSnapshot: mergedCardsById(room.series ?? []),
+          deckP1: room.deckP1,
+          deckP2: room.deckP2 ?? [],
+          commands,
+          player1Id: ownerIdForDb,
+          player2Id: guestIdForDb,
+        };
+
+        try {
+          const attribution = ownerIdForDb ?? guestIdForDb!;
+          const attributionName = ownerIdForDb
+            ? room.ownerName
+            : (room.guestName ?? 'Гость');
+          await matches.save(attribution, attributionName, dto);
+          room.matchSaved = true;
+          await rooms.save(room);
+          logger.log(
+            `[matches] saved ${roomCode} (winner=${state.winner}, ` +
+              `p1=${ownerIdForDb ?? 'anon'}, p2=${guestIdForDb ?? 'anon'})`,
+          );
+        } catch (e) {
+          logger.error(`[matches] save failed for ${roomCode}: ` + String(e));
+          return;
+        }
+
+        // ── Награды ──
+        const turns = state.turnNumber ?? 0;
+        const p1Won = state.winner === 'p1';
+
+        if (ownerIdForDb) {
+          try {
+            await rewards.grantMatchReward(ownerIdForDb, {
+              winner: p1Won,
+              turns,
+              isPve: isBotRoom,
+            });
+          } catch (e) {
+            logger.error(
+              `[rewards] p1 grant failed for ${roomCode}: ` + String(e),
+            );
+          }
+        }
+
+        if (guestIdForDb) {
+          try {
+            await rewards.grantMatchReward(guestIdForDb, {
+              winner: !p1Won,
+              turns,
+              isPve: false,
+            });
+          } catch (e) {
+            logger.error(
+              `[rewards] p2 grant failed for ${roomCode}: ` + String(e),
+            );
+          }
+        }
+      });
     } catch (e) {
-      logger.error(`[matches] save failed for ${roomCode}: ` + String(e));
+      logger.error(`[matches] saveMatchOnce failed for ${roomCode}: ` + String(e));
     }
   }
 

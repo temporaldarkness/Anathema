@@ -13,6 +13,7 @@ import { makeBot, type Bot } from '@aspects/bot';
 import type { CommandRecord, SaveMatchDto } from '@aspects/shared';
 import { makeLogEntry, resetLogIdCounter, type LogEntry } from './logEntry';
 import { positionKey, guildKey, type Floating } from './floatings';
+import { botDisplayName } from '@aspects/bot';
 
 export interface ResetParams {
   seed: string;
@@ -415,8 +416,8 @@ export function useGame(initial: ResetParams): UseGameResult {
         winnerReason: state.winnerReason,
         turnNumber: state.turnNumber,
         durationMs: Date.now() - startTimeRef.current,
-        p1BotName: params.p1BotName,
-        p2BotName: params.p2BotName,
+        p1BotName: params.p1BotName ? botDisplayName(params.p1BotName) : null,
+        p2BotName: params.p2BotName ? botDisplayName(params.p2BotName) : null,
 		cardSnapshot: mergedCardsById(params.series),
         deckP1,
         deckP2,

@@ -1,4 +1,8 @@
 {
-  "deck-optimizer-main": ["run","--filter","@aspects/simtools","deck-optimizer","main","--pop","12","--gen","10","--eval","30"],
-  "card-stats-main":     ["run","--filter","@aspects/simtools","card-stats","main","50","--all","--min-samples","5"]
+  "matrix-main": ["run","--filter","@aspects/simtools","matrix","main","50"],
+  "overlap-main": ["run","--filter","@aspects/simtools","card-overlap","main","--max-diff","2"],
+  "card-stats-main": ["run","--filter","@aspects/simtools","card-stats","main","100","--all","--min-samples","5"],
+  "meta-main": ["run","--filter","@aspects/simtools","meta-report","main","100"],
+  "pace-main": ["run","--filter","@aspects/simtools","pace-report","main","100"],
+  "deck-optimizer-main": ["run","--filter","@aspects/simtools","deck-optimizer","main","--pop","12","--gen","10","--eval","30"]
 }

@@ -12,5 +12,6 @@
     "noImplicitAny": false,
     "declaration": false
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["**/*spec.ts"]
 }

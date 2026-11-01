@@ -27,6 +27,7 @@ import {
 import { REDIS_CLIENT } from './redis.provider';
 import type { GameState, PlayerId } from '@aspects/engine';
 import { EventsService } from '../common/events.service';
+import { CollectionService } from '../economy/collection.service';
 
 const ROOM_TTL_SECONDS = 60 * 60;
 const REMATCH_TTL_MS = 30_000;
@@ -50,9 +51,10 @@ export class RoomsService {
     private readonly audit: AuditService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly events: EventsService,
+	private readonly collection: CollectionService,
   ) {}
-
-  async create(
+  
+    async create(
     userId: string,
     username: string,
     dto: CreateRoomDto,
@@ -73,8 +75,18 @@ export class RoomsService {
       dto.deckP1Cards && dto.deckP1Cards.length > 0
         ? dto.deckP1Cards
         : firstPackDecks.find((d) => d.id === dto.deckP1Id)?.cards ?? [];
+        
     if (p1Cards.length !== 30) {
       throw new BadRequestException('Deck P1 must have exactly 30 cards');
+    }
+
+    // Жесткая проверка владения
+    const ownership = await this.collection.validateDeckOwnership(userId, p1Cards, false);
+    if (!ownership.valid) {
+      throw new BadRequestException({
+        message: 'Deck P1 contains cards not in your collection',
+        missingCards: ownership.missingCards,
+      });
     }
 
     const placeholderP2 =
@@ -137,7 +149,7 @@ export class RoomsService {
     return room;
   }
 
-  async join(
+    async join(
     userId: string,
     username: string,
     code: string,
@@ -179,8 +191,18 @@ export class RoomsService {
       dto.deckP2Cards && dto.deckP2Cards.length > 0
         ? dto.deckP2Cards
         : firstPackDecks.find((d) => d.id === dto.deckP2Id)?.cards ?? [];
+        
     if (p2Cards.length !== 30) {
       throw new BadRequestException('Deck P2 must have exactly 30 cards');
+    }
+
+    // Жесткая проверка владения
+    const ownership = await this.collection.validateDeckOwnership(userId, p2Cards, false);
+    if (!ownership.valid) {
+      throw new BadRequestException({
+        message: 'Deck P2 contains cards not in your collection',
+        missingCards: ownership.missingCards,
+      });
     }
 
     const p1Cards = room.deckP1;

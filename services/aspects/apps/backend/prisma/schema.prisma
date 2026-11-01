@@ -167,3 +167,49 @@ model Friendship {
   @@index([userBId])
   @@map("friendships")
 }
+
+model ShardBalance {
+  userId    String
+  shardType String // 'SERIES' | 'UNIVERSAL'
+  seriesId  String @default("") // '' = UNIVERSAL, иначе id серии
+  rarity    String // 'COMMON' | ...
+  amount    Int    @default(0)
+
+  @@id([userId, shardType, seriesId, rarity])
+  @@index([userId])
+}
+
+model UserCollection {
+  userId       String
+  cardDefId    String
+  count        Int     @default(0)
+  hasBlueprint Boolean @default(false)
+  upgradeLevel Int     @default(0)
+
+  @@id([userId, cardDefId])
+  @@index([userId])
+}
+
+model BoosterRecipe {
+  id             String    @id
+  name           String
+  description    String?
+  requiredShards Json
+  dropWeights    Json
+  poolSeries     String[]
+  cardsPerPack   Int       @default(5)
+  activeFrom     DateTime
+  activeUntil    DateTime?
+
+  @@index([activeFrom, activeUntil])
+}
+
+model EconomyTransaction {
+  id        BigInt   @id @default(autoincrement())
+  userId    String
+  type      String   // 'CRAFT_BOOSTER' | 'CRAFT_CARD' | 'DISENCHANT' | 'UPGRADE' | 'REWARD_MATCH' | 'CONVERT_SHARD'
+  details   Json
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+}

@@ -14,6 +14,7 @@ import { MatchmakingModule } from './matchmaking/matchmaking.module';
 import { RatingModule } from './rating/rating.module';
 import { UsersModule } from './users/users.module';
 import { FriendsModule } from './friends/friends.module';
+import { EconomyModule } from './economy/economy.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { FriendsModule } from './friends/friends.module';
 	RatingModule,
 	UsersModule,
 	FriendsModule,
+    EconomyModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: UserGuard },

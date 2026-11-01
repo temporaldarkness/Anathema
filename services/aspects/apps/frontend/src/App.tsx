@@ -35,6 +35,7 @@ import { FriendsScreen } from './components/FriendsScreen';
 import { FriendToasts } from './game/friendToasts';
 import { RoomInviteToasts } from './game/roomInviteToasts';
 import { useScreenRouting } from './game/useScreenRouting';
+import { botDisplayName } from '@aspects/bot'; 
 
 type ActionMode =
   | { kind: 'idle' }
@@ -189,10 +190,10 @@ function AppMain({
     if (savedMatchRef.current === gameId + ':' + state.turnNumber) return;
 
     const player1Name = p1IsBot
-      ? resetParams.p1BotName ?? 'Бот'
+      ? resetParams.p1BotName ? botDisplayName(resetParams.p1BotName) : 'Бот'
       : auth.user.username;
     const player2Name = p2IsBot
-      ? resetParams.p2BotName ?? 'Бот'
+      ? resetParams.p2BotName ? botDisplayName(resetParams.p2BotName) : 'Бот'
       : auth.user.username;
 
     const payload = getMatchPayload({ p1: player1Name, p2: player2Name });
