@@ -21,6 +21,7 @@ import {
 export interface CraftBoosterResult {
   cards: EconomyCardDefinition[];
   newBlueprints: string[];
+  duplicates: string[];
 }
 
 @Injectable()
@@ -103,6 +104,7 @@ export class CraftingService {
     );
 
     const newBlueprints = new Set<string>();
+	const duplicates = new Set<string>();
 
     await this.prisma.$transaction(async (tx) => {
       for (const card of cards) {
@@ -128,12 +130,20 @@ export class CraftingService {
               ...(existing.hasBlueprint ? {} : { hasBlueprint: true }),
             },
           });
-          if (!existing.hasBlueprint) newBlueprints.add(card.id);
+          if (!existing.hasBlueprint) {
+            newBlueprints.add(card.id);
+          } else {
+            duplicates.add(card.id);
+          }
         }
       }
     });
 
-    return { cards, newBlueprints: [...newBlueprints] };
+    return { 
+      cards, 
+      newBlueprints: [...newBlueprints], 
+      duplicates: [...duplicates] 
+    };
   }
 
   async craftCard(userId: string, cardDefId: string): Promise<void> {
