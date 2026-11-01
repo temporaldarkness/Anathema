@@ -3,6 +3,7 @@ import type { DeckDto, CreateDeckDto } from '@aspects/shared';
 import { validateDeck, errorText, generateRandomDeck } from '@aspects/shared';
 import { getCards, listPacks, type CardDefinition } from '@aspects/cards';
 import type { UseDecksResult } from '../game/useDecks';
+import type { useEconomy } from '../game/useEconomy';
 import { HoverTooltip } from './HoverTooltip';
 import { CardTooltipDef } from './CardTooltipDef';
 import { useConfirm } from '../game/confirmContext';
@@ -23,6 +24,7 @@ import { getPersonalityName, getRoleInfo, getFactionInfo, getSeriesName } from '
 interface Props {
   deckId: string | null;
   deckStore: UseDecksResult;
+  economyStore: ReturnType<typeof useEconomy>;
   onBack: () => void;
 }
 
@@ -72,7 +74,7 @@ function buildPool(series: string[]): CardDefinition[] {
   return [...merged.values()];
 }
 
-export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
+export function DeckEditorScreen({ deckId, deckStore, economyStore, onBack }: Props) {
   const confirm = useConfirm();
   const [deck, setDeck] = useState<DeckState>(() => {
     if (deckId) {
@@ -169,12 +171,22 @@ export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
       pushToast('warn', `${card.name} не из выбранных серий`);
       return;
     }
-    const already = personalityCounts.get(card.personalityTag) ?? 0;
-    if (already >= 5) {
-      pushToast('warn', `Уже 5 копий личности: ${card.name}`);
+    
+    // Проверка коллекции
+    const ownedCount = economyStore.getOwnedCard(card.id)?.count ?? 0;
+    const aspectCount = deck.cardIds.filter((id) => id === card.id).length;
+
+    if (aspectCount >= ownedCount) {
+      pushToast('warn', `У вас только ${ownedCount} шт. карты ${card.name}`);
       return;
     }
-    const aspectCount = deck.cardIds.filter((id) => id === card.id).length;
+
+    const already = personalityCounts.get(card.personalityTag) ?? 0;
+    if (already >= 5) {
+      pushToast('warn', `Уже 5 копий личности: ${getPersonalityName(card.personalityTag)}`);
+      return;
+    }
+    
     if (aspectCount >= 2) {
       pushToast('warn', `Уже 2 копии аспекта: ${card.name}`);
       return;
@@ -183,6 +195,7 @@ export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
       pushToast('warn', `Легендарка уже добавлена: ${card.name}`);
       return;
     }
+    
     setDeck({ ...deck, cardIds: [...deck.cardIds, card.id] });
   };
 
@@ -209,9 +222,16 @@ export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
       });
       if (!ok) return;
     }
-    const ids = generateRandomDeck(allCards, { size: 30 });
+
+    // Фильтруем пул: только те карты, которыми владеет игрок
+    const ownedPool = allCards.filter(c => {
+      const owned = economyStore.getOwnedCard(c.id)?.count ?? 0;
+      return owned > 0;
+    });
+
+    const ids = generateRandomDeck(ownedPool, { size: 30 });
     if (!ids) {
-      pushToast('error', 'Не удалось сгенерировать колоду');
+      pushToast('error', 'Не удалось сгенерировать колоду (мало карт в коллекции)');
       return;
     }
     setDeck({ ...deck, cardIds: ids });
@@ -284,7 +304,7 @@ export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
         <button
           className="btn-header"
           onClick={handleRandom}
-          title="Случайная колода"
+          title="Случайная колода (только из коллекции)"
         >
           🎲
         </button>
@@ -327,6 +347,7 @@ export function DeckEditorScreen({ deckId, deckStore, onBack }: Props) {
           deck={deck}
           allCards={allCards}
           personalityCounts={personalityCounts}
+          economyStore={economyStore}
           onAdd={handleAddCard}
           onShowDetail={setDetailCard}
         />
@@ -622,6 +643,7 @@ interface CardPoolProps {
   deck: DeckState;
   allCards: CardDefinition[];
   personalityCounts: Map<string, number>;
+  economyStore: ReturnType<typeof useEconomy>; // <--- Добавили
   onAdd: (card: CardDefinition) => void;
   onShowDetail: (card: CardDefinition) => void;
 }
@@ -630,6 +652,7 @@ function CardPool({
   deck,
   allCards,
   personalityCounts,
+  economyStore,
   onAdd,
   onShowDetail,
 }: CardPoolProps) {
@@ -694,7 +717,12 @@ function CardPool({
         return false;
       }
       if (search && !matchesSearch(c, search)) return false;
+      
+      // Скрываем "недоступные" (те, которых нет в коллекции)
       if (hideUsed) {
+        const ownedCount = economyStore.getOwnedCard(c.id)?.count ?? 0;
+        if (ownedCount === 0) return false;
+
         const cnt = personalityCounts.get(c.personalityTag) ?? 0;
         if (cnt >= 5) return false;
         if (c.rarity === 'legendary' && deck.cardIds.includes(c.id)) return false;
@@ -714,6 +742,7 @@ function CardPool({
     personalityCounts,
     deck.cardIds,
     allCards,
+    economyStore // Добавили зависимость
   ]);
 
   if (deck.series.length === 0) {
@@ -802,7 +831,12 @@ function CardPool({
           const legendaryUsed =
             c.rarity === 'legendary' && aspectCount >= 1;
           const deckFull = deck.cardIds.length >= 30;
-          const blocked = atLimit || aspectAtLimit || legendaryUsed || deckFull;
+          
+          // Данные о коллекции
+          const ownedCount = economyStore.getOwnedCard(c.id)?.count ?? 0;
+          const outOfStock = aspectCount >= ownedCount;
+
+          const blocked = atLimit || aspectAtLimit || legendaryUsed || deckFull || outOfStock;
           const keywords = c.abilities ?? [];
           const isHovered = hoverPersonality === c.personalityTag;
 
@@ -817,6 +851,11 @@ function CardPool({
               onMouseEnter={() => setHoverPersonality(c.personalityTag)}
               onMouseLeave={() => setHoverPersonality(null)}
             >
+              {/* Бейдж с количеством в коллекции */}
+              <div style={{ position: 'absolute', top: 4, left: 4, fontSize: '10px', background: 'rgba(0,0,0,0.6)', padding: '2px 4px', borderRadius: 4 }}>
+                В колл.: {ownedCount}
+              </div>
+
               {count > 0 && (
                 <div className="card-pool-card-count">×{count}</div>
               )}
@@ -830,7 +869,7 @@ function CardPool({
               >
                 ⓘ
               </div>
-              <div className="card-pool-card-name">{c.name}</div>
+              <div className="card-pool-card-name" style={{ opacity: ownedCount === 0 ? 0.5 : 1 }}>{c.name}</div>
               <div className="card-pool-card-personality">
                 {getPersonalityName(c.personalityTag)}
               </div>
@@ -859,7 +898,6 @@ function CardPool({
     </div>
   );
 }
-
 // ─── Содержимое колоды ───
 
 interface DeckContentProps {

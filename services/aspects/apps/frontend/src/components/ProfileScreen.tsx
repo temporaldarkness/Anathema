@@ -34,7 +34,8 @@ interface Props {
       | 'history'
       | 'users-search'
       | 'leaderboard'
-	  | 'friends',
+	  | 'friends'
+	  | 'collection',
   ) => void;
 }
 
@@ -346,6 +347,16 @@ export function ProfileScreen({
               {isAuth ? 'Список друзей и заявок' : 'Только для аккаунтов'}
             </div>
           </button>
+		  <button
+            className="profile-action"
+            onClick={() => onNavigate('collection')}
+          >
+            <div className="profile-action-icon">🪎</div>
+            <div className="profile-action-title">Коллекция</div>
+            <div className="profile-action-desc">
+              {isAuth ? 'Карты в вашем владении' : 'Только для аккаунтов'}
+            </div>
+          </button>
           <button
             className="profile-action"
             onClick={() => setThemeModalOpen(true)}
@@ -356,20 +367,6 @@ export function ProfileScreen({
               Оформление интерфейса
             </div>
           </button>
-        </div>
-
-        <div className="profile-coming-soon">
-          <div className="profile-coming-soon-title">Скоро</div>
-          <div className="profile-coming-soon-grid">
-            <div className="profile-coming-soon-item">
-              <span className="profile-coming-soon-icon">🎒</span>
-              Коллекция
-            </div>
-            <div className="profile-coming-soon-item">
-              <span className="profile-coming-soon-icon">🎁</span>
-              Бустеры
-            </div>
-          </div>
         </div>
       </div>
     </div>

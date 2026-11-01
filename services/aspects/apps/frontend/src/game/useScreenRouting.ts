@@ -54,6 +54,12 @@ function pathToScreen(path: string, search: string): Screen {
       return { kind: 'leaderboard' };
     case 'friends':
       return { kind: 'friends' };
+    case 'collection':
+      return { kind: 'collection' };
+    case 'booster-shop':
+      return { kind: 'booster-shop' };
+    case 'craft-card':
+      return { kind: 'craft-card', cardDefId: second };
     default:
       return { kind: 'profile' };
   }
@@ -65,6 +71,9 @@ function screenToPath(s: Screen): string {
     case 'setup': return '/setup';
     case 'playing': return '/playing';
     case 'decks': return '/decks';
+    case 'collection': return '/collection';
+    case 'booster-shop': return '/booster-shop';
+    case 'craft-card': return s.cardDefId ? `/craft-card/${s.cardDefId}` : '/craft-card';
     case 'deck-editor':
       return s.deckId ? `/decks/${s.deckId}` : '/decks/new';
     case 'history': return '/history';

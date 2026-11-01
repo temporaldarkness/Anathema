@@ -36,6 +36,10 @@ import { FriendToasts } from './game/friendToasts';
 import { RoomInviteToasts } from './game/roomInviteToasts';
 import { useScreenRouting } from './game/useScreenRouting';
 import { botDisplayName } from '@aspects/bot'; 
+import { useEconomy } from './game/useEconomy';
+import { CollectionScreen } from './components/economy/CollectionScreen';
+import { BoosterShopScreen } from './components/economy/BoosterShopScreen';
+import { CraftCardScreen } from './components/economy/CraftCardScreen';
 
 type ActionMode =
   | { kind: 'idle' }
@@ -52,6 +56,7 @@ export type Screen =
   | { kind: 'setup' }
   | { kind: 'playing' }
   | { kind: 'decks' }
+  | { kind: 'collection' }
   | { kind: 'deck-editor'; deckId: string | null }
   | { kind: 'history' }
   | { kind: 'replay'; matchId: string }
@@ -61,7 +66,9 @@ export type Screen =
   | { kind: 'users-search' }
   | { kind: 'leaderboard' }
   | { kind: 'user-profile'; userId: string }
-  | { kind: 'friends' };
+  | { kind: 'friends' }
+  | { kind: 'booster-shop' }
+  | { kind: 'craft-card'; cardDefId?: string };
 
 function findMatchingPersonalityOnBoard(
   state: GameState,
@@ -105,6 +112,7 @@ function defaultResetParams(): ResetParams {
 export default function App() {
   const auth = useAuth();
   const [screen, setScreen] = useScreenRouting();
+  const economyStore = useEconomy();
 
   const navigateByInvite = useCallback(
     (roomCode: string) => {
@@ -133,6 +141,7 @@ function AppMain({
 }) {
   const deckStore = useDecks(auth);
   const matchStore = useMatches(auth);
+  const economyStore = useEconomy();
 
   const [resetParams, setResetParams] = useState<ResetParams>(() =>
     defaultResetParams(),
@@ -576,6 +585,7 @@ function AppMain({
 		  else if (target === 'users-search') setScreen({ kind: 'users-search' });
 		  else if (target === 'leaderboard') setScreen({ kind: 'leaderboard' });
 		  else if (target === 'friends') setScreen({ kind: 'friends' });
+		  else if (target === 'collection') setScreen({ kind: 'collection' });
         }}
       />
     );
@@ -652,6 +662,7 @@ function AppMain({
       <DeckEditorScreen
         deckId={screen.deckId}
         deckStore={deckStore}
+		economyStore={economyStore}
         onBack={() => setScreen({ kind: 'decks' })}
       />
     );
@@ -718,6 +729,36 @@ function AppMain({
         roomCode={screen.roomCode}
 		role={screen.role}
         onExit={() => setScreen({ kind: 'online-lobby' })}
+      />
+    );
+  }
+  
+  if (screen.kind === 'collection') {
+    return (
+      <CollectionScreen
+        economyStore={economyStore}
+        onBack={() => setScreen({ kind: 'profile' })}
+        onOpenCraft={(cardDefId) => setScreen({ kind: 'craft-card', cardDefId })}
+        onOpenShop={() => setScreen({ kind: 'booster-shop' })}
+      />
+    );
+  }
+
+  if (screen.kind === 'booster-shop') {
+    return (
+      <BoosterShopScreen
+        economyStore={economyStore}
+        onBack={() => setScreen({ kind: 'collection' })}
+      />
+    );
+  }
+
+  if (screen.kind === 'craft-card') {
+    return (
+      <CraftCardScreen
+        economyStore={economyStore}
+        initialCardId={screen.cardDefId}
+        onBack={() => setScreen({ kind: 'collection' })}
       />
     );
   }
