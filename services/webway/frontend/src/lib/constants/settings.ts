@@ -27,6 +27,13 @@ export const SETTINGS_SCHEMA: SettingGroup[] = [
 		title: 'AI',
 		description: 'Модель и режим мышления',
 		items: [
+        {
+				key: 'ai_enabled',
+				type: 'boolean',
+				label: 'Разрешить ИИ-функции (Главный рубильник)',
+				description: 'Если выключить, бот перестанет отвечать на упоминания, нейросетевые команды и делать картинки.',
+				dangerous: true
+			},
 			{
 				key: 'model',
 				type: 'select',
@@ -140,6 +147,7 @@ export const SETTINGS_SCHEMA: SettingGroup[] = [
 
 // Значения по умолчанию (для кнопки сброса и индикации «изменено»)
 export const SETTINGS_DEFAULTS: Record<string, string> = {
+	ai_enabled: 'true',
 	thinking: 'false',
 	puppeteer: 'true',
 	awareness: 'true',

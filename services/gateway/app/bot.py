@@ -170,6 +170,9 @@ class DiscordBot(commands.Bot):
             await self.process_commands(message)
     
     async def _process_mention(self, message: discord.Message):
+        if not await self._is_ai_enabled():
+            await message.reply("Братан, мои мозги сегодня не работают. (ИИ временно отключён)")
+            return
         async with message.channel.typing():
             user_data = await self.memory.get_user_by_discord_id(message.author.id)
             channel_data = await self.memory.get_channel_by_discord_id(message.channel.id)
@@ -206,6 +209,9 @@ class DiscordBot(commands.Bot):
     async def _ball(self, interaction: discord.Interaction, вопрос: str):
         await interaction.response.defer()
         followup = interaction.followup
+        if not await self._is_ai_enabled():
+            await followup.send("Без шансов. (ИИ временно отключён)")")
+            return
         
         correlation_id = f"ball_{interaction.id}"
         settings = await self.memory.get_settings()
@@ -230,6 +236,9 @@ class DiscordBot(commands.Bot):
     async def _revelation(self, interaction: discord.Interaction, вопрос: str):
         await interaction.response.defer()
         followup = interaction.followup
+        if not await self._is_ai_enabled():
+            await followup.send("Без шансов. (ИИ временно отключён)")
+            return
         
         correlation_id = f"rev_{interaction.id}"
         settings = await self.memory.get_settings()
@@ -260,8 +269,13 @@ class DiscordBot(commands.Bot):
         await interaction.response.defer()
         followup = interaction.followup
         correlation_id = f"img_{interaction.id}"
+        if not await self._is_ai_enabled():
+            await followup.send("Без шансов. (ИИ временно отключён)")")
+            return
         
         await self.redis.setex(f"{REDIS_PENDING_IMAGE_PREFIX}{correlation_id}", PENDING_TTL_SECONDS, f"{followup.id}:{followup.token}")
+        
+        settings = await self.memory.get_settings()
         
         await self.producer.send_image_request(
             correlation_id,
@@ -272,6 +286,7 @@ class DiscordBot(commands.Bot):
             quality=качество,
             size=разрешение,
             user_id=interaction.user.id,
+            settings=settings
         )
     
     async def _edit_image(
@@ -288,6 +303,9 @@ class DiscordBot(commands.Bot):
         await interaction.response.defer()
         followup = interaction.followup
         correlation_id = f"edit_{interaction.id}"
+        if not await self._is_ai_enabled():
+            await followup.send("Без шансов. (ИИ временно отключён)")")
+            return
 
         file_ids = []
         for img in [изображение1, изображение2, изображение3]:
@@ -313,6 +331,8 @@ class DiscordBot(commands.Bot):
             PENDING_TTL_SECONDS,
             f"{followup.id}:{followup.token}",
         )
+        
+        settings = await self.memory.get_settings()
 
         await self.producer.send_image_request(
             correlation_id,
@@ -323,6 +343,7 @@ class DiscordBot(commands.Bot):
             quality=качество,
             size=разрешение,
             user_id=interaction.user.id,
+            settings=settings
         )
     
     async def _maintenance(self, interaction: discord.Interaction, параметр: str, значение: bool):
@@ -357,7 +378,7 @@ class DiscordBot(commands.Bot):
             channel_id=interaction.channel.id
         )
     
-    async def on_ai_response(self, correlation_id, response_text, mode):
+    async def on_ai_response(self, correlation_id, response_text, mode="chat"):
         key = f"{REDIS_PENDING_AI_PREFIX}{correlation_id}"
         pending = await self.redis.get(key)
         if not pending:
@@ -441,6 +462,18 @@ class DiscordBot(commands.Bot):
                 await message.add_reaction(emoji)
             except Exception as e:
                 logger.warning(f"Failed to add reaction: {e}")
+    
+    async def _is_ai_enabled(self) -> bool:
+        try:
+            settings_raw = await self.memory.get_settings()
+            if isinstance(settings_raw, list):
+                settings = {s["key"]: s["value"] for s in settings_raw}
+            else:
+                settings = settings_raw
+            return str(settings.get("ai_enabled", "true")).lower() == "true"
+        except Exception as e:
+            logger.error(f"Failed to check killswitch: {e}")
+            return True
     
     async def close(self):
         self._shutting_down = True

@@ -19,6 +19,7 @@ MEMORY_CACHE_TTL_SECONDS = os.getenv("MEMORY_CACHE_TTL_SECONDS")
 REDIS_URL = os.getenv("REDIS_URL")
 
 DEFAULT_SETTINGS = {
+    "ai_enabled": "true",
     "model": "Gemini",
     "puppeteer": "true",
     "thinking": "true",

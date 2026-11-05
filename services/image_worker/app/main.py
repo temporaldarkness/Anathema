@@ -28,6 +28,17 @@ async def process_request(data):
     n = data.get("n", 2)
     quality = data.get("quality", "low")
     size = data.get("size", "auto")
+    
+    raw_settings = data.get("settings", {})
+    if isinstance(raw_settings, list):
+        settings_dict = {s["key"]: s["value"] for s in raw_settings}
+    else:
+        settings_dict = raw_settings
+        
+    if str(settings_dict.get("ai_enabled", "true")).lower() != "true":
+        logger.info(f"AI disabled by killswitch, rejecting image request {corr_id}")
+        await producer.send_response(corr_id, [], error="Генерация изображений отключена администратором.")
+        return
 
     logger.info(f"Processing request {corr_id} for command {command}")
 

@@ -25,7 +25,7 @@
 		values = { ...data.values };
 	});
 
-	const isBool = (v: string) => v === 'true';
+	const isBool = (v: any) => String(v).toLowerCase() === 'true';
 
 	function isModified(key: string) {
 		return data.values[key] !== SETTINGS_DEFAULTS[key];
@@ -72,7 +72,9 @@
 		try {
 			const resp = await fetch(`/api/settings/${key}/reset`, { method: 'POST' });
 			if (!resp.ok) throw new Error(await resp.text());
-			values[key] = SETTINGS_DEFAULTS[key] ?? values[key];
+			const result = await resp.json();
+			
+			values[key] = result.value;
 			notify.success(`Сброшено: ${key}`);
 			resetTarget = null;
 			await invalidateAll();
