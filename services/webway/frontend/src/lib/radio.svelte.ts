@@ -3,7 +3,7 @@ const STREAM_URL = '/radio/stream';
 
 class RadioStore {
 	private _el = $state<HTMLAudioElement | null>(null);
-	private _userStopped = false;
+	private _userStopped = true;
 
 	playing = $state(false);
 	reconnecting = $state(false);
