@@ -346,6 +346,23 @@ async def main():
             request = msg.value
             correlation_id = request.get('correlation_id')
             mode = request.get('mode')
+            
+            raw_settings = request.get("settings", {})
+            if isinstance(raw_settings, list):
+                settings_dict = {s["key"]: s["value"] for s in raw_settings}
+            else:
+                settings_dict = raw_settings
+                
+            if str(settings_dict.get("ai_enabled", "true")).lower() != "true":
+                logger.info(f"AI disabled by killswitch, skipping {correlation_id}")
+                response = {
+                    "response": "Текстовые ответы отключены администратором.",
+                    "correlation_id": correlation_id,
+                    "mode": mode
+                }
+                await producer.send(KAFKA_TOPIC_AI_RESPONSES, response)
+                continue
+                
             logger.debug(f"Received request {correlation_id} for mode {mode}")
             
             if mode == "chat":

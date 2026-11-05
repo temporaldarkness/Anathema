@@ -38,6 +38,10 @@ async def get_setting(key: str):
     return setting
 
 async def upsert_setting(setting: Setting):
+    safe_value = str(setting.value)
+    if safe_value.lower() in ("true", "false"):
+        safe_value = safe_value.lower()
+    
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute("""
@@ -45,7 +49,7 @@ async def upsert_setting(setting: Setting):
             VALUES ($1, $2)
             ON CONFLICT (key) DO UPDATE SET
                 value = EXCLUDED.value
-        """, setting.key, setting.value)
+        """, setting.key, safe_value)
     
     redis_client = await get_redis()
     await redis_client.delete("settings:all")
